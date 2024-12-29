@@ -18,3 +18,11 @@ pom.xml.asc
 
 .hgignore
 .hg/
+
+# Visual Studio Code + Calva
+.calva/
+.clj-kondo/
+.lsp/
+
+# Output
+out/
