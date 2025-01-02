@@ -1,11 +1,16 @@
 ;; shadow-cljs configuration
 {:source-paths
- ["src/dev"
-  "src/main"
+ ["src/main"
   "src/test"]
 
  :dependencies
- []
+ [[org.clojure/spec.alpha "0.5.238"]]
 
  :builds
- {}}
+ {:app {:target :node-script
+        :main blue.lions.clono.core/-main
+        :output-to "out/clono.js"
+        :build-hooks [(blue.lions.clono.etc.hook/copy-resources)]}
+  :test {:target :node-test
+         :output-to "out/test.js"
+         :build-hooks [(blue.lions.clono.etc.hook/copy-resources)]}}}
