@@ -1,0 +1,22 @@
+{
+  "name": "clono",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "compile": "npx shadow-cljs compile app",
+    "release": "npx shadow-cljs release app",
+    "repl": "npx shadow-cljs watch app",
+    "test": "npx shadow-cljs compile test && node out/test.js"
+  },
+  "devDependencies": {
+    "fix-esm": "1.0.1",
+    "github-slugger": "2.0.0",
+    "mdast-util-directive": "3.0.0",
+    "mdast-util-from-markdown": "2.0.2",
+    "mdast-util-gfm-footnote": "2.0.0",
+    "mdast-util-to-markdown": "2.1.2",
+    "micromark-extension-directive": "3.0.2",
+    "micromark-extension-gfm-footnote": "2.1.0",
+    "shadow-cljs": "2.28.20"
+  }
+}
