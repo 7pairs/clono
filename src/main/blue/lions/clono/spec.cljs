@@ -20,9 +20,16 @@
   (s/and string?
          #(not (str/blank? %))))
 
+(s/def :blue.lions.clono.spec.common/non-nil-string
+  (s/and string?
+         (complement nil?)))
+
 (defn- valid-string?
   [invalid-chars target]
   (not-any? invalid-chars (seq target)))
+
+(s/def ::file-content
+  :blue.lions.clono.spec.common/non-nil-string)
 
 (def valid-file-path? (partial valid-string? #{"*" "?" "\"" ">" "<" "|"}))
 

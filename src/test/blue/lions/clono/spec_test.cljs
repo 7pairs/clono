@@ -29,6 +29,29 @@
       :not-string
       nil)))
 
+(deftest common_non-nil-string-test
+  (testing "Succeeds to verify."
+    (are [target] (s/valid? :blue.lions.clono.spec.common/non-nil-string target)
+      "non-nil-string"
+      ""))
+
+  (testing "Fails to verify."
+    (are [target] (not (s/valid? :blue.lions.clono.spec.common/non-nil-string
+                                 target))
+      :not-string
+      nil)))
+
+(deftest file-content-test
+  (testing "Succeeds to verify."
+    (are [target] (s/valid? ::spec/file-content target)
+      "file-content"
+      ""))
+
+  (testing "Fails to verify."
+    (are [target] (not (s/valid? ::spec/file-content target))
+      :not-string
+      nil)))
+
 (deftest file-path-test
   (testing "Succeeds to verify."
     (are [target] (s/valid? ::spec/file-path target)

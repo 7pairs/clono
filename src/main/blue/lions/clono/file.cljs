@@ -25,3 +25,15 @@
    :post [(s/valid? ::spec/id %)]}
   (let [ext (path/extname file-path)]
     (path/basename file-path ext)))
+
+(defn read-file
+  [file-path]
+  {:pre [(s/valid? ::spec/file-path file-path)]
+   :post [(s/valid? ::spec/file-content %)]}
+  (try
+    (when-not (fs/existsSync file-path)
+      (throw (ex-info "File does not exist." {:file-path file-path})))
+    (fs/readFileSync file-path "utf8")
+    (catch js/Error e
+      (throw (ex-info "Failed to read file."
+                      {:file-path file-path :cause e})))))

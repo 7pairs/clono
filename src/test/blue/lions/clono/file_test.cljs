@@ -20,6 +20,21 @@
             ["path" :as path]
             [blue.lions.clono.file :as file]))
 
+(defn- setup-tmp-dir
+  []
+  (let [tmp-dir (path/join (os/tmpdir) "file-test")]
+    (when (not (fs/existsSync tmp-dir))
+      (fs/mkdirSync tmp-dir))
+    tmp-dir))
+
+(defn- teardown-tmp-dir
+  [tmp-dir]
+  (fs/rmdirSync tmp-dir #js {:recursive true}))
+
+(use-fixtures :once
+  {:before #(def tmp-dir (setup-tmp-dir))
+   :after #(teardown-tmp-dir tmp-dir)})
+
 (deftest extract-base-name-test
   (testing "Target file path has directories."
     (is (= "markdown01" (file/extract-base-name "/dir/markdown01.md")))
@@ -44,3 +59,29 @@
       "invalid*file-path"
       ""
       nil)))
+
+(deftest read-file-test
+  (testing "Target file exists."
+    (let [file-path (path/join tmp-dir "exists.txt")
+          file-content "I am a text file."]
+      (fs/writeFileSync file-path file-content)
+      (is (= file-content (file/read-file file-path)))))
+
+  (testing "Target file is empty."
+    (let [file-path (path/join tmp-dir "empty.txt")]
+      (fs/writeFileSync file-path "")
+      (is (= "" (file/read-file file-path)))))
+
+  (testing "Target file does not exist."
+    (let [file-path (path/join tmp-dir "not-exists.txt")]
+      (is (thrown-with-msg? js/Error
+                            #"Failed to read file\."
+                            (file/read-file file-path)))
+      (try
+        (file/read-file file-path)
+        (catch js/Error e
+          (let [data (ex-data e)
+                cause (:cause data)]
+            (is (= file-path (:file-path data)))
+            (is (= "File does not exist." (ex-message cause)))
+            (is (= file-path (:file-path (ex-data cause))))))))))
