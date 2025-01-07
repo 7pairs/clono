@@ -85,3 +85,55 @@
             (is (= file-path (:file-path data)))
             (is (= "File does not exist." (ex-message cause)))
             (is (= file-path (:file-path (ex-data cause))))))))))
+
+(deftest read-edn-file-test
+  (testing "Target file is valid as EDN."
+    (let [file-path (path/join tmp-dir "valid.edn")]
+      (fs/writeFileSync file-path "{:key \"value\"}")
+      (is (= {:key "value"} (file/read-edn-file file-path)))))
+
+  (testing "Target file is empty."
+    (let [file-path (path/join tmp-dir "empty.edn")]
+      (fs/writeFileSync file-path "")
+      (is (thrown-with-msg? js/Error
+                            #"Failed to read or parse EDN file\."
+                            (file/read-edn-file file-path)))
+      (try
+        (file/read-edn-file file-path)
+        (catch js/Error e
+          (let [data (ex-data e)
+                cause (:cause data)
+                innder-data (ex-data cause)]
+            (is (= file-path (:file-path data)))
+            (is (= "EDN is empty or invalid." (ex-message cause)))
+            (is (= file-path (:file-path innder-data)))
+            (is (= "" (:content innder-data))))))))
+
+  (testing "Target file does not exist."
+    (let [file-path (path/join tmp-dir "not-exists.edn")]
+      (is (thrown-with-msg? js/Error
+                            #"Failed to read or parse EDN file\."
+                            (file/read-edn-file file-path)))
+      (try
+        (file/read-edn-file file-path)
+        (catch js/Error e
+          (let [data (ex-data e)
+                cause (:cause data)]
+            (is (= file-path (:file-path data)))
+            (is (= "Failed to read file." (ex-message cause)))
+            (is (= file-path (:file-path (ex-data cause)))))))))
+
+  (testing "Target file is invalid as EDN."
+    (let [file-path (path/join tmp-dir "invalid.edn")]
+      (fs/writeFileSync file-path "{\"key\": \"value\"}")
+      (is (thrown-with-msg? js/Error
+                            #"Failed to read or parse EDN file\."
+                            (file/read-edn-file file-path)))
+      (try
+        (file/read-edn-file file-path)
+        (catch js/Error e
+          (let [data (ex-data e)]
+            (is (= file-path (:file-path data)))
+            (is (str/starts-with?
+                 (ex-message (:cause data))
+                 "A single colon is not a valid keyword."))))))))

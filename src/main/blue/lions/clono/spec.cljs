@@ -28,6 +28,11 @@
   [invalid-chars target]
   (not-any? invalid-chars (seq target)))
 
+(s/def ::edn
+  (s/and map?
+         (complement nil?)
+         (s/every-kv keyword? any?)))
+
 (s/def ::file-content
   :blue.lions.clono.spec.common/non-nil-string)
 
