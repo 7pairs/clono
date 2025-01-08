@@ -28,6 +28,8 @@
   [invalid-chars target]
   (not-any? invalid-chars (seq target)))
 
+(def delayed-config ::edn)
+
 (s/def ::edn
   (s/and map?
          (complement nil?)
@@ -45,3 +47,6 @@
 (s/def ::id
   (s/and :blue.lions.clono.spec.common/non-blank-string
          valid-id?))
+(s/def ::config
+  delayed-config)
+
