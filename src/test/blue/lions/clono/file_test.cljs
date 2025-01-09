@@ -187,3 +187,55 @@
             (is (= file-path (:file-path data)))
             (is (= "Failed to read or parse EDN file." (ex-message cause)))
             (is (= file-path (:file-path (ex-data cause))))))))))
+
+(deftest read-catalog-file-test
+  (testing "Target file is valid as catalog file."
+    (let [file-path (path/join tmp-dir "catalog.edn")]
+      (fs/writeFileSync file-path
+                        "{:chapters [\"chapter1.md\" \"chapter2.md\"]}")
+      (is (= {:chapters ["chapter1.md" "chapter2.md"]}
+             (file/read-catalog-file file-path)))))
+
+  (testing "Target file is empty."
+    (let [file-path (path/join tmp-dir "empty.edn")]
+      (fs/writeFileSync file-path "")
+      (is (thrown-with-msg? js/Error
+                            #"Failed to read catalog file\."
+                            (file/read-catalog-file file-path)))
+      (try
+        (file/read-catalog-file file-path)
+        (catch js/Error e
+          (let [data (ex-data e)
+                cause (:cause data)]
+            (is (= file-path (:file-path data)))
+            (is (= "Failed to read or parse EDN file." (ex-message cause)))
+            (is (= file-path (:file-path (ex-data cause)))))))))
+
+  (testing "Target file does not exist."
+    (let [file-path (path/join tmp-dir "not-exists.edn")]
+      (is (thrown-with-msg? js/Error
+                            #"Failed to read catalog file\."
+                            (file/read-catalog-file file-path)))
+      (try
+        (file/read-catalog-file file-path)
+        (catch js/Error e
+          (let [data (ex-data e)
+                cause (:cause data)]
+            (is (= file-path (:file-path data)))
+            (is (= "Failed to read or parse EDN file." (ex-message cause)))
+            (is (= file-path (:file-path (ex-data cause)))))))))
+
+  (testing "Target file is invalid as catalog file."
+    (let [file-path (path/join tmp-dir "invalid.edn")]
+      (fs/writeFileSync file-path "{\"key\": \"value\"}")
+      (is (thrown-with-msg? js/Error
+                            #"Failed to read catalog file\."
+                            (file/read-catalog-file file-path)))
+      (try
+        (file/read-catalog-file file-path)
+        (catch js/Error e
+          (let [data (ex-data e)
+                cause (:cause data)]
+            (is (= file-path (:file-path data)))
+            (is (= "Failed to read or parse EDN file." (ex-message cause)))
+            (is (= file-path (:file-path (ex-data cause))))))))))

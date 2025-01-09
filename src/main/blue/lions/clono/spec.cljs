@@ -28,6 +28,27 @@
   [invalid-chars target]
   (not-any? invalid-chars (seq target)))
 
+(s/def :blue.lions.clono.spec.catalog/afterwords
+  (s/coll-of ::file-name :kind vector?))
+
+(s/def :blue.lions.clono.spec.catalog/appendices
+  (s/coll-of ::file-name :kind vector?))
+
+(s/def :blue.lions.clono.spec.catalog/chapters
+  (s/coll-of ::file-name :kind vector?))
+
+(s/def :blue.lions.clono.spec.catalog/forewords
+  (s/coll-of ::file-name :kind vector?))
+
+(s/def ::catalog
+  (s/and (s/keys :opt-un [:blue.lions.clono.spec.catalog/forewords
+                          :blue.lions.clono.spec.catalog/chapters
+                          :blue.lions.clono.spec.catalog/appendices
+                          :blue.lions.clono.spec.catalog/afterwords])
+         (fn [target]
+           (some #(contains? target %)
+                 [:forewords :chapters :appendices :afterwords]))))
+
 (def delayed-config ::edn)
 
 (s/def ::edn
