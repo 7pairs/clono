@@ -68,6 +68,9 @@
 (s/def ::id
   (s/and :blue.lions.clono.spec.common/non-blank-string
          valid-id?))
+
+(s/def ::markdown
+  :blue.lions.clono.spec.common/non-nil-string)
 (s/def ::config
   delayed-config)
 

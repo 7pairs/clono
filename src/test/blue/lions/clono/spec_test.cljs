@@ -214,3 +214,14 @@
       ""
       :not-string
       nil)))
+
+(deftest markdown-test
+  (testing "Succeeds to verify."
+    (are [target] (s/valid? ::spec/markdown target)
+      "# Markdown"
+      ""))
+
+  (testing "Fails to verify."
+    (are [target] (not (s/valid? ::spec/markdown target))
+      :not-string
+      nil)))
