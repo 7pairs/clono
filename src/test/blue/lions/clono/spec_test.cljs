@@ -176,6 +176,44 @@
       :not-string
       nil)))
 
+(deftest file-name-test
+  (testing "Succeeds to verify."
+    (are [target] (s/valid? ::spec/file-name target)
+      "file-name.md"
+      "日本語"))
+
+  (testing "Fails to verify."
+    (are [target] (not (s/valid? ::spec/file-name target))
+      "invalid\\file-name"
+      "invalid/file-name"
+      "invalid:file-name"
+      "invalid*file-name"
+      "invalid?file-name"
+      "invalid\"file-name"
+      "invalid>file-name"
+      "invalid<file-name"
+      "invalid|file-name"
+      ""
+      :not-string
+      nil)))
+
+(deftest file-names-test
+  (testing "Succeeds to verify."
+    (are [target] (s/valid? ::spec/file-names target)
+      ["file.md"]
+      ["file1.md" "file2.md"]
+      []))
+
+  (testing "Fails to verify."
+    (are [target] (not (s/valid? ::spec/file-names target))
+      ["invalid/file-name"]
+      [""]
+      [:not-string]
+      [nil]
+      ["file.md" "invalid/file-name"]
+      "not-vector"
+      nil)))
+
 (deftest file-path-test
   (testing "Succeeds to verify."
     (are [target] (s/valid? ::spec/file-path target)
@@ -224,4 +262,80 @@
   (testing "Fails to verify."
     (are [target] (not (s/valid? ::spec/markdown target))
       :not-string
+      nil)))
+
+(deftest name-and-markdown_name-test
+  (testing "Succeeds to verify."
+    (are [target] (s/valid? :blue.lions.clono.spec.name-and-markdown/name
+                            target)
+      "file-name.md"
+      "日本語"))
+
+  (testing "Fails to verify."
+    (are [target] (not (s/valid? :blue.lions.clono.spec.name-and-markdown/name
+                                 target))
+      "invalid\\file-name"
+      "invalid/file-name"
+      "invalid:file-name"
+      "invalid*file-name"
+      "invalid?file-name"
+      "invalid\"file-name"
+      "invalid>file-name"
+      "invalid<file-name"
+      "invalid|file-name"
+      ""
+      :not-string
+      nil)))
+
+(deftest name-and-markdown_markdown-test
+  (testing "Succeeds to verify."
+    (are [target] (s/valid? :blue.lions.clono.spec.name-and-markdown/markdown
+                            target)
+      "# Markdown"
+      ""))
+
+  (testing "Fails to verify."
+    (are [target] (not (s/valid?
+                        :blue.lions.clono.spec.name-and-markdown/markdown
+                        target))
+      :not-string
+      nil)))
+
+(deftest name-and-markdown-test
+  (testing "Succeeds to verify."
+    (is (s/valid? ::spec/name-and-markdown
+                  {:name "markdown.md", :markdown "# Markdown"})))
+
+  (testing "Fails to verify."
+    (are [target] (not (s/valid? ::spec/name-and-markdown target))
+      {:name :not-string :markdown "# Markdown"}
+      {:name "markdown.md" :markdown :not-string}
+      {:name "markdown.md"}
+      {:markdown "# Markdown"}
+      {:name "markdown.md" :markdown "# Markdown" :extra-key "extra-value"}
+      {:extra-key "extra-value"}
+      {}
+      "not-map"
+      nil)))
+
+(deftest name-and-markdown-list-test
+  (testing "Succeeds to verify."
+    (are [target] (s/valid? ::spec/name-and-markdown-list target)
+      [{:name "markdown.md" :markdown "# Markdown"}]
+      [{:name "markdown1.md" :markdown "# Markdown1"}
+       {:name "markdown2.md" :markdown "# Markdown2"}]
+      []))
+
+  (testing "Fails to verify."
+    (are [target] (not (s/valid? ::spec/name-and-markdown-list target))
+      [{:name :not-string :markdown "# Markdown"}]
+      [{:name "markdown.md" :markdown :not-string}]
+      [{:name "markdown.md"}]
+      [{:markdown "# Markdown"}]
+      [{:name "markdown.md" :markdown "# Markdown" :extra-key "extra-value"}]
+      ["not-map"]
+      [nil]
+      [{:name "markdown.md" :markdown "# Markdown1"}
+       {:name :not-string :markdown "# Markdown2"}]
+      "not-vector"
       nil)))

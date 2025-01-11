@@ -265,3 +265,41 @@
             (is (= file-path (:file-path data)))
             (is (= "Failed to read file." (ex-message cause)))
             (is (= file-path (:file-path (ex-data cause))))))))))
+
+(deftest read-markdown-files-test
+  (let [file-name1 "markdown1.md"
+        content1 "# Markdown1"
+        file-name2 "markdown2.md"
+        content2 "# Markdown2"
+        empty-file-name "blank.md"]
+    (fs/writeFileSync (path/join tmp-dir file-name1) content1)
+    (fs/writeFileSync (path/join tmp-dir file-name2) content2)
+    (fs/writeFileSync (path/join tmp-dir empty-file-name) "")
+
+    (testing "All target files exist."
+      (is (= [{:name file-name1 :markdown content1}
+              {:name file-name2 :markdown content2}]
+             (file/read-markdown-files tmp-dir [file-name1 file-name2]))))
+
+    (testing "Some target files are empty."
+      (is (= [{:name file-name1 :markdown content1}
+              {:name empty-file-name :markdown ""}
+              {:name file-name2 :markdown content2}]
+             (file/read-markdown-files tmp-dir
+                                       [file-name1
+                                        empty-file-name
+                                        file-name2]))))
+
+    (testing "Some target files do not exist."
+      (is (= [{:name file-name1 :markdown content1}
+              {:name file-name2 :markdown content2}]
+             (file/read-markdown-files tmp-dir
+                                       [file-name1
+                                        "not-exists1.md"
+                                        file-name2
+                                        "not-exists2.md"]))))
+
+    (testing "All target files do not exist."
+      (is (= []
+             (file/read-markdown-files tmp-dir
+                                       ["not-exists1.md" "not-exists2.md"]))))))

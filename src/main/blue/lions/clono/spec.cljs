@@ -59,6 +59,16 @@
 (s/def ::file-content
   :blue.lions.clono.spec.common/non-nil-string)
 
+(def valid-file-name?
+  (partial valid-string? #{"\\" "/" ":" "*" "?" "\"" ">" "<" "|"}))
+
+(s/def ::file-name
+  (s/and :blue.lions.clono.spec.common/non-blank-string
+         valid-file-name?))
+
+(s/def ::file-names
+  (s/coll-of ::file-name :kind vector?))
+
 (def valid-file-path? (partial valid-string? #{"*" "?" "\"" ">" "<" "|"}))
 
 (s/def ::file-path
@@ -71,6 +81,20 @@
 
 (s/def ::markdown
   :blue.lions.clono.spec.common/non-nil-string)
+
+(s/def :blue.lions.clono.spec.name-and-markdown/name
+  ::file-name)
+
+(s/def :blue.lions.clono.spec.name-and-markdown/markdown
+  ::markdown)
+
+(s/def ::name-and-markdown
+  (s/and (s/keys :req-un [:blue.lions.clono.spec.name-and-markdown/name
+                          :blue.lions.clono.spec.name-and-markdown/markdown])
+         #(every? #{:name :markdown} (keys %))))
+
+(s/def ::name-and-markdown-list
+  (s/coll-of ::name-and-markdown :kind vector?))
 (s/def ::config
   delayed-config)
 

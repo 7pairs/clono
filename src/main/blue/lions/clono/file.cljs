@@ -82,3 +82,22 @@
     (catch js/Error e
       (throw (ex-info "Failed to read Markdown file."
                       {:file-path file-path :cause e})))))
+
+(defn read-markdown-files
+  [dir-path file-names]
+  {:pre [(s/valid? ::spec/file-path dir-path)
+         (s/valid? ::spec/file-names file-names)]
+   :post [(s/valid? ::spec/name-and-markdown-list %)]}
+  (vec
+   (keep
+    (fn [file-name]
+      (let [file-path (path/join dir-path file-name)]
+        (try
+          {:name file-name
+           :markdown (read-markdown-file file-path)}
+          (catch js/Error e
+            (js/console.error "Failed to read Markdown file."
+                              (clj->js {:file-path file-path
+                                        :cause (ex-message e)}))
+            nil))))
+    file-names)))
