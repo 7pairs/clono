@@ -339,3 +339,46 @@
        {:name :not-string :markdown "# Markdown2"}]
       "not-vector"
       nil)))
+
+(deftest node_type-test
+  (testing "Succeeds to verify."
+    (are [target] (s/valid? :blue.lions.clono.spec.node/type target)
+      "type"
+      "Type"))
+
+  (testing "Fails to verify."
+    (are [target] (not (s/valid? :blue.lions.clono.spec.node/type target))
+      "12345"
+      "type12345"
+      ""
+      :not-string
+      nil)))
+
+(deftest node-test
+  (testing "Succeeds to verify."
+    (are [target] (s/valid? ::spec/node target)
+      {:type "type"}
+      {:type "type" :extra-key "extra-value"}))
+
+  (testing "Fails to verify."
+    (are [target] (not (s/valid? ::spec/node target))
+      {:type "12345"}
+      {:type ""}
+      {:type :not-string}
+      {:type nil}
+      {:extra-key "extra-value"}
+      {}
+      "not-map"
+      nil)))
+
+(deftest pred-result-test
+  (testing "Succeeds to verify."
+    (are [target] (s/valid? ::spec/pred-result target)
+      true
+      false))
+
+  (testing "Fails to verify."
+    (are [target] (not (s/valid? ::spec/pred-result target))
+      "true"
+      :false
+      nil)))

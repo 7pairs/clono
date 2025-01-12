@@ -95,6 +95,17 @@
 
 (s/def ::name-and-markdown-list
   (s/coll-of ::name-and-markdown :kind vector?))
+
+(def delayed-node_type ::type)
+
+(s/def ::node
+  (s/keys :req-un [:blue.lions.clono.spec.node/type]))
+
+(s/def ::pred-result
+  boolean?)
 (s/def ::config
   delayed-config)
 
+
+(s/def :blue.lions.clono.spec.node/type
+  delayed-node_type)
