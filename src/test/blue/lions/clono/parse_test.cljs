@@ -70,3 +70,30 @@
     (is (= {:type "root" :children [{:type "node" :children []}]}
            (parse/remove-comments {:type "root"
                                    :children [{:type "node" :children []}]})))))
+
+(deftest remove-positions-test
+  (testing "Target AST has positions."
+    (is (= {:type "root"}
+           (parse/remove-positions {:type "root" :position 1}))))
+
+  (testing "Target AST has children with positions."
+    (is (= {:type "root" :children [{:type "child"} {:type "child"}]}
+           (parse/remove-positions {:type "root"
+                                    :position 1
+                                    :children [{:type "child" :position 2}
+                                               {:type "child" :position 3}]}))))
+
+  (testing "Target AST has children without positions."
+    (is (= {:type "root" :children [{:type "child"}]}
+           (parse/remove-positions {:type "root"
+                                    :position 1
+                                    :children [{:type "child"}]}))))
+
+  (testing "Target AST does not have positions."
+    (are [ast] (= ast (parse/remove-positions ast))
+      {:type "root"}
+      {:type "root" :children [{:type "child"}]}))
+
+  (testing "Target AST has empty children."
+    (is (= {:type "root" :children []}
+           (parse/remove-positions {:type "root" :children []})))))
