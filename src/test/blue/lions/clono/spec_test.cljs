@@ -41,6 +41,16 @@
       :not-string
       nil)))
 
+(deftest caption-test
+  (testing "Succeeds to verify."
+    (is (s/valid? ::spec/caption "caption")))
+
+  (testing "Fails to verify."
+    (are [target] (not (s/valid? ::spec/caption target))
+      ""
+      :not-string
+      nil)))
+
 (deftest catalog_afterwords-test
   (testing "Succeeds to verify."
     (are [target] (s/valid? :blue.lions.clono.spec.catalog/afterwords target)
@@ -381,4 +391,47 @@
     (are [target] (not (s/valid? ::spec/pred-result target))
       "true"
       :false
+      nil)))
+
+(deftest slug-test
+  (testing "Succeeds to verify."
+    (are [target] (s/valid? ::spec/slug target)
+      "valid-slug"
+      "日本語"))
+
+  (testing "Fails to verify."
+    (are [target] (not (s/valid? ::spec/slug target))
+      "invalid!slug"
+      "invalid\"slug"
+      "invalid#slug"
+      "invalid$slug"
+      "invalid%slug"
+      "invalid&slug"
+      "invalid'slug"
+      "invalid(slug"
+      "invalid)slug"
+      "invalid*slug"
+      "invalid+slug"
+      "invalid,slug"
+      "invalid.slug"
+      "invalid/slug"
+      "invalid:slug"
+      "invalid;slug"
+      "invalid<slug"
+      "invalid=slug"
+      "invalid>slug"
+      "invalid?slug"
+      "invalid@slug"
+      "invalid[slug"
+      "invalid\\slug"
+      "invalid]slug"
+      "invalid^slug"
+      "invalid`slug"
+      "invalid{slug"
+      "invalid|slug"
+      "invalid}slug"
+      "invalid~slug"
+      "invalid slug"
+      ""
+      :not-string
       nil)))

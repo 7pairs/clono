@@ -28,6 +28,9 @@
   [invalid-chars target]
   (not-any? invalid-chars (seq target)))
 
+(s/def ::caption
+  :blue.lions.clono.spec.common/non-blank-string)
+
 (s/def :blue.lions.clono.spec.catalog/afterwords
   (s/coll-of ::file-name :kind vector?))
 
@@ -103,6 +106,15 @@
 
 (s/def ::pred-result
   boolean?)
+
+(def valid-slug?
+  (partial valid-string? #{"!" "\"" "#" "$" "%" "&" "'" "(" ")" "*" "+" "," "."
+                           "/" ":" ";" "<" "=" ">" "?" "@" "[" "\\" "]" "^" "`"
+                           "{" "|" "}" "~" " "}))
+
+(s/def ::slug
+  (s/and :blue.lions.clono.spec.common/non-blank-string
+         valid-slug?))
 (s/def ::config
   delayed-config)
 

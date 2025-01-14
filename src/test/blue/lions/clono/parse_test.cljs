@@ -97,3 +97,33 @@
   (testing "Target AST has empty children."
     (is (= {:type "root" :children []}
            (parse/remove-positions {:type "root" :children []})))))
+
+(deftest generate-slug-test
+  (testing "Target text contains upper case letters."
+    (is (= "pascalcase" (parse/generate-slug "PascalCase")))
+    (is (= "uppercase" (parse/generate-slug "UPPERCASE"))))
+
+  (testing "Target text does not contain upper case letters."
+    (is (= "lowercase" (parse/generate-slug "lowercase"))))
+
+  (testing "Target text contains symbols."
+    (is (= "helloworld" (parse/generate-slug "Hello,World!!")))
+    (is (= "334" (parse/generate-slug "33:4"))))
+
+  (testing "Target text contains spaces."
+    (is (= "1-2-3" (parse/generate-slug "1 2 3"))))
+
+  (testing "Target text contains Japanese letters."
+    (is (= "日本語" (parse/generate-slug "日本語")))
+    (is (= "ａｎｄｒｏｉｄ" (parse/generate-slug "Ａｎｄｒｏｉｄ")))
+    (is (= "こんにちは世界" (parse/generate-slug "こんにちは、世界！"))))
+
+  (testing "Target texts are duplicated."
+    (is (= "duplicated" (parse/generate-slug "duplicated")))
+    (is (= "duplicated-1" (parse/generate-slug "duplicated"))))
+
+  (testing "Target text is invalid."
+    (are [target] (thrown-with-msg? js/Error #"Assert failed:"
+                                    (parse/generate-slug target))
+      ""
+      nil)))
