@@ -78,6 +78,9 @@
   (s/and :blue.lions.clono.spec.common/non-blank-string
          valid-file-path?))
 
+(s/def ::function
+  fn?)
+
 (s/def ::id
   (s/and :blue.lions.clono.spec.common/non-blank-string
          valid-id?))
@@ -103,6 +106,9 @@
 
 (s/def ::node
   (s/keys :req-un [:blue.lions.clono.spec.node/type]))
+
+(s/def ::nodes
+  (s/coll-of ::node :kind vector?))
 
 (s/def ::pred-result
   boolean?)

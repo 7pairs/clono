@@ -127,3 +127,38 @@
                                     (parse/generate-slug target))
       ""
       nil)))
+
+(deftest generate-heading-slug-test
+  (testing "Target AST has single text."
+    (is (= "value2"
+           (parse/generate-heading-slug {:type "heading"
+                                         :children [{:type "html"
+                                                     :value "<value1>"}
+                                                    {:type "text"
+                                                     :value "value2"}
+                                                    {:type "html"
+                                                     :value "<value3>"}]}))))
+
+  (testing "Target AST has multiple texts."
+    (is (= "value1value3"
+           (parse/generate-heading-slug {:type "heading"
+                                         :children [{:type "text"
+                                                     :value "value1"}
+                                                    {:type "html"
+                                                     :value "<value2>"}
+                                                    {:type "text"
+                                                     :value "value3"}]}))))
+
+  (testing "Target AST does not have texts."
+    (let [node {:type "heading" :children [{:type "html" :value "<value>"}]}]
+      (is (thrown-with-msg? js/Error #"Failed to generate heading slug\."
+                            (parse/generate-heading-slug node)))
+      (try
+        (parse/generate-heading-slug node)
+        (catch js/Error e
+          (let [data (ex-data e)]
+            (is (= "" (:text data)))
+            (is (= {:type "heading" :children [{:type "html" :value "<value>"}]}
+                   (:node data)))
+            (is (str/starts-with? (ex-message (:cause data))
+                                  "Assert failed:"))))))))

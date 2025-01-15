@@ -243,6 +243,18 @@
       :not-string
       nil)))
 
+(deftest function-test
+  (testing "Succeeds to verify."
+    (are [target] (s/valid? ::spec/function target)
+      (fn [x y] (+ x y))
+      #(* % 2)
+      inc))
+
+  (testing "Fails to verify."
+    (are [target] (not (s/valid? ::spec/function target))
+      "not-function"
+      nil)))
+
 (deftest id-test
   (testing "Succeeds to verify."
     (are [target] (s/valid? ::spec/id target)
@@ -379,6 +391,26 @@
       {:extra-key "extra-value"}
       {}
       "not-map"
+      nil)))
+
+(deftest nodes-test
+  (testing "Succeeds to verify."
+    (are [target] (s/valid? ::spec/nodes target)
+      [{:type "type"}]
+      [{:type "type"} {:type "type"}]
+      []))
+
+  (testing "Fails to verify."
+    (are [target] (not (s/valid? ::spec/nodes target))
+      [{:type "12345"}]
+      [{:type ""}]
+      [{:type :not-string}]
+      [{:type nil}]
+      [{:extra-key "extra-value"}]
+      ["not-map"]
+      [nil]
+      [{:type "type"} {:type ""}]
+      "not-vector"
       nil)))
 
 (deftest pred-result-test

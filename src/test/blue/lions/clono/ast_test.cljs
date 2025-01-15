@@ -28,3 +28,54 @@
       {:type "html" :value "<!-- invalid -- comment -->"}
       {:type "html" :value ""}
       {:type "text" :value "<!-- comment -->"})))
+
+(deftest extract-nodes-test
+  (testing "AST itself is target."
+    (is (= [{:type "text" :value "value"}]
+           (ast/extract-nodes #(= (:type %) "text")
+                              {:type "text" :value "value"}))))
+
+  (testing "AST has target nodes."
+    (is (= [{:type "text" :value "value1"} {:type "text" :value "value3"}]
+           (ast/extract-nodes #(= (:type %) "text")
+                              {:type "root"
+                               :children [{:type "text" :value "value1"}
+                                          {:type "html" :value "<value2>"}
+                                          {:type "text" :value "value3"}]}))))
+
+  (testing "AST has children."
+    (is (= [{:type "text" :value "value1"}
+            {:type "text" :value "value4"}
+            {:type "text" :value "value7"}]
+           (ast/extract-nodes
+            #(= (:type %) "text")
+            {:type "root"
+             :children [{:type "text" :value "value1"}
+                        {:type "html" :value "<value2>"}
+                        {:type "node" :children [{:type "html"
+                                                  :value "<value3>"}
+                                                 {:type "text"
+                                                  :value "value4"}
+                                                 {:type "html"
+                                                  :value "<value5>"}]}
+                        {:type "html" :value "<value6>"}
+                        {:type "text" :value "value7"}]}))))
+
+  (testing "AST does not have target nodes."
+    (are [target] (= [] (ast/extract-nodes #(= (:type %) "text") target))
+      {:type "root"}
+      {:type "root" :children [{:type "html" :value "<value>"}]}))
+
+  (testing "Predication function is invalid."
+    (are [target] (thrown-with-msg? js/Error #"Assert failed:"
+                                    (ast/extract-nodes target {:type "text"
+                                                               :value "value"}))
+      "not-function"
+      nil))
+
+  (testing "AST is invalid."
+    (are [target] (thrown-with-msg? js/Error #"Assert failed:"
+                                    (ast/extract-nodes #(= (:type %) "text")
+                                                       target))
+      "not-node"
+      nil)))

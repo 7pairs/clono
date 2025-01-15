@@ -49,3 +49,17 @@
     (catch js/Error e
       (throw (ex-info "Failed to generate slug."
                       {:caption caption :cause e})))))
+
+(defn generate-heading-slug
+  [node]
+  {:pre [(s/valid? ::spec/node node)]
+   :post [(s/valid? ::spec/slug %)]}
+  (let [text (->> node
+                  ast/extract-texts
+                  (map :value)
+                  (str/join ""))]
+    (try
+      (generate-slug text)
+      (catch js/Error e
+        (throw (ex-info "Failed to generate heading slug."
+                        {:text text :node node :cause e}))))))
