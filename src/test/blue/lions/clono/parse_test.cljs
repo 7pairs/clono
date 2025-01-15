@@ -162,3 +162,43 @@
                    (:node data)))
             (is (str/starts-with? (ex-message (:cause data))
                                   "Assert failed:"))))))))
+
+(deftest add-heading-slugs-test
+  (testing "Target AST has single heading."
+    (is (= {:type "root"
+            :children [{:type "text" :value "valueA1"}
+                       {:type "heading"
+                        :children [{:type "text" :value "valueA2"}]
+                        :slug "valuea2"}
+                       {:type "text" :value "valueA3"}]}
+           (parse/add-heading-slugs
+            {:type "root"
+             :children [{:type "text" :value "valueA1"}
+                        {:type "heading"
+                         :children [{:type "text" :value "valueA2"}]}
+                        {:type "text" :value "valueA3"}]}))))
+
+  (testing "Target AST has multiple headings."
+    (is (= {:type "root"
+            :children [{:type "heading"
+                        :children [{:type "text" :value "valueB1"}]
+                        :slug "valueb1"}
+                       {:type "heading"
+                        :children [{:type "text" :value "valueB2"}]
+                        :slug "valueb2"}]}
+           (parse/add-heading-slugs
+            {:type "root"
+             :children [{:type "heading"
+                         :children [{:type "text" :value "valueB1"}]}
+                        {:type "heading"
+                         :children [{:type "text" :value "valueB2"}]}]}))))
+
+  (testing "Target AST does not have headings."
+    (are [target] (= target (parse/add-heading-slugs target))
+      {:type "root"}
+      {:type "root" :children [{:type "text" :value "value"}]}))
+
+  (testing "Target AST has empty children."
+    (are [target] (= target (parse/add-heading-slugs target))
+      {:type "root" :children []}
+      {:type "root" :children [{:type "node" :children []}]})))

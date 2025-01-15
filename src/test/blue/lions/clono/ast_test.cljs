@@ -29,6 +29,24 @@
       {:type "html" :value ""}
       {:type "text" :value "<!-- comment -->"})))
 
+(deftest node-type?-test
+  (testing "Target type matches."
+    (is (true? (ast/node-type? "text" {:type "text" :value "value"}))))
+
+  (testing "Target type does not match."
+    (is (false? (ast/node-type? "text" {:type "html" :value "<value>"}))))
+
+  (testing "Target type is invalid."
+    (is (thrown-with-msg? js/Error #"Assert failed:"
+                          (ast/node-type? nil {:type "text" :value "value"}))))
+
+  (testing "Target node is invalid."
+    (are [target] (thrown-with-msg? js/Error #"Assert failed:"
+                                    (ast/node-type? "text" target))
+      {:value "value"}
+      "not-node"
+      nil)))
+
 (deftest extract-nodes-test
   (testing "AST itself is target."
     (is (= [{:type "text" :value "value"}]

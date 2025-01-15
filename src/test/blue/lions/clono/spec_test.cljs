@@ -17,6 +17,23 @@
             [cljs.test :refer [are deftest is testing]]
             [blue.lions.clono.spec :as spec]))
 
+(deftest common_alphabet-string-test
+  (testing "Succeeds to verify."
+    (are [target] (s/valid? :blue.lions.clono.spec.common/alphabet-string
+                            target)
+      "alphabet"
+      "ALPHABET"
+      "Alphabet"))
+
+  (testing "Fails to verify."
+    (are [target] (not (s/valid? :blue.lions.clono.spec.common/alphabet-string
+                                 target))
+      "12345"
+      "alphabet12345"
+      ""
+      :not-string
+      nil)))
+
 (deftest common_non-blank-string-test
   (testing "Succeeds to verify."
     (is (s/valid? :blue.lions.clono.spec.common/non-blank-string
@@ -464,6 +481,20 @@
       "invalid}slug"
       "invalid~slug"
       "invalid slug"
+      ""
+      :not-string
+      nil)))
+
+(deftest type-test
+  (testing "Succeeds to verify."
+    (are [target] (s/valid? ::spec/type target)
+      "type"
+      "Type"))
+
+  (testing "Fails to verify."
+    (are [target] (not (s/valid? ::spec/type target))
+      "12345"
+      "type12345"
       ""
       :not-string
       nil)))

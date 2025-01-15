@@ -26,6 +26,15 @@
           (string? value)
           (re-matches #"(?s)<!--(?!>)[^-]*(-[^-][^-]*)*-->" value)))))
 
+(defn node-type?
+  [type node]
+  {:pre [(s/valid? ::spec/type type)
+         (s/valid? ::spec/node node)]
+   :post [(s/valid? ::spec/pred-result %)]}
+  (= (:type node) type))
+
+(def heading? (partial node-type? "heading"))
+
 (defn extract-nodes
   [pred node]
   {:pre [(s/valid? ::spec/function pred)

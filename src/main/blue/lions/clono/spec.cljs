@@ -16,6 +16,10 @@
   (:require [cljs.spec.alpha :as s]
             [clojure.string :as str]))
 
+(s/def :blue.lions.clono.spec.common/alphabet-string
+  (s/and string?
+         #(re-matches #"[a-zA-Z]+" %)))
+
 (s/def :blue.lions.clono.spec.common/non-blank-string
   (s/and string?
          #(not (str/blank? %))))
@@ -121,6 +125,9 @@
 (s/def ::slug
   (s/and :blue.lions.clono.spec.common/non-blank-string
          valid-slug?))
+
+(s/def ::type
+  :blue.lions.clono.spec.common/alphabet-string)
 (s/def ::config
   delayed-config)
 
