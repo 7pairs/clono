@@ -4,6 +4,12 @@
   "private": true,
   "description": "A CLI tool that processes Markdown with custom notation, transforming it into a format suitable for Vivliostyle-based publishing.",
   "main": "out/clono.js",
+  "scripts": {
+    "compile": "npx shadow-cljs compile app",
+    "release": "npx shadow-cljs release app",
+    "test": "npx shadow-cljs compile test && node out/test.js",
+    "watch": "npx shadow-cljs watch app"
+  },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com:7pairs/clono.git"
