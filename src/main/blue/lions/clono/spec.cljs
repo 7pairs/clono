@@ -21,9 +21,16 @@
   (s/and string?
          #(not (str/blank? %))))
 
+(s/def ::common/non-nil-string
+  (s/and string?
+         (complement nil?)))
+
 (defn- valid-string?
   [invalid-characters value]
   (not-any? invalid-characters (seq value)))
+
+(s/def ::file-content
+  ::common/non-nil-string)
 
 (def valid-file-name?
   (partial valid-string? #{"\\" "/" ":" "*" "?" "\"" ">" "<" "|"}))

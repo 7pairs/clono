@@ -14,7 +14,26 @@
 
 (ns blue.lions.clono.file-test
   (:require [cljs.test :as t]
+            [clojure.string :as str]
+            ["fs" :as fs]
+            ["os" :as os]
+            ["path" :as path]
             [blue.lions.clono.file :as file]))
+
+(defn- setup-tmp-dir
+  []
+  (let [tmp-dir (path/join (os/tmpdir) "file-test")]
+    (when (not (fs/existsSync tmp-dir))
+      (fs/mkdirSync tmp-dir))
+    tmp-dir))
+
+(defn- teardown-tmp-dir
+  [tmp-dir]
+  (fs/rmdirSync tmp-dir #js {:recursive true}))
+
+(t/use-fixtures :once
+  {:before #(def tmp-dir (setup-tmp-dir))
+   :after #(teardown-tmp-dir tmp-dir)})
 
 (t/deftest extract-base-name-test
   (t/testing "File path has directories."
@@ -53,3 +72,28 @@
       ""
       :not-string
       nil)))
+
+(t/deftest read-file-test
+  (t/testing "File exists."
+    (let [file-path (path/join tmp-dir "exists.txt")
+          file-content "I am a text file."]
+      (fs/writeFileSync file-path file-content)
+      (t/is (= file-content (file/read-file file-path)))))
+
+  (t/testing "File is empty."
+    (let [file-path (path/join tmp-dir "empty.txt")
+          file-content ""]
+      (fs/writeFileSync file-path file-content)
+      (t/is (= file-content (file/read-file file-path)))))
+
+  (t/testing "File does not exist."
+    (let [file-path (path/join tmp-dir "not-exists.txt")]
+      (try
+        (file/read-file file-path)
+        (catch js/Error e
+          (let [data (ex-data e)
+                cause (:cause data)]
+            (t/is (str/starts-with? (ex-message e) "Failed to read file."))
+            (t/is (= file-path (:file-path data)))
+            (t/is (= "File does not exist." (ex-message cause)))
+            (t/is (= file-path (:file-path (ex-data cause))))))))))

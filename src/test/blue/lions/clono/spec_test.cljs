@@ -28,6 +28,28 @@
       :not-string
       nil)))
 
+(t/deftest common_non-nil-string-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::common/non-nil-string value)
+      "non-nil-string"
+      ""))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::common/non-nil-string value))
+      :not-string
+      nil)))
+
+(t/deftest file-content-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/file-content value)
+      "file-content"
+      ""))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/file-content value))
+      :not-string
+      nil)))
+
 (t/deftest file-name-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/file-name value)
