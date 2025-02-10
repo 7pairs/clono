@@ -14,7 +14,6 @@
 
 (ns blue.lions.clono.file-test
   (:require [cljs.test :as t]
-            [clojure.string :as str]
             ["fs" :as fs]
             ["os" :as os]
             ["path" :as path]
@@ -77,13 +76,13 @@
   (t/testing "File exists."
     (let [file-path (path/join tmp-dir "exists.txt")
           file-content "I am a text file."]
-      (fs/writeFileSync file-path file-content)
+      (fs/writeFileSync file-path file-content "utf8")
       (t/is (= file-content (file/read-file file-path)))))
 
   (t/testing "File is empty."
     (let [file-path (path/join tmp-dir "empty.txt")
           file-content ""]
-      (fs/writeFileSync file-path file-content)
+      (fs/writeFileSync file-path file-content "utf8")
       (t/is (= file-content (file/read-file file-path)))))
 
   (t/testing "File does not exist."
@@ -93,7 +92,7 @@
         (catch js/Error e
           (let [data (ex-data e)
                 cause (:cause data)]
-            (t/is (str/starts-with? (ex-message e) "Failed to read file."))
+            (t/is (= "Failed to read file." (ex-message e)))
             (t/is (= file-path (:file-path data)))
             (t/is (= "File does not exist." (ex-message cause)))
             (t/is (= file-path (:file-path (ex-data cause))))))))))
