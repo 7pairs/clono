@@ -143,3 +143,47 @@
             (t/is (str/starts-with?
                    (ex-message (:cause data))
                    "A single colon is not a valid keyword."))))))))
+
+(t/deftest read-config-file-test
+  (t/testing "File is valid as config file."
+    (let [file-path (path/join tmp-dir "config.edn")]
+      (fs/writeFileSync file-path "{:key \"value\"}" "utf8")
+      (t/is (= {:key "value"} (file/read-config-file file-path)))))
+
+  (t/testing "File is empty."
+    (let [file-path (path/join tmp-dir "empty.edn")]
+      (fs/writeFileSync file-path "" "utf8")
+      (try
+        (file/read-config-file file-path)
+        (catch js/Error e
+          (let [data (ex-data e)
+                cause (:cause data)]
+            (t/is (= "Failed to read config file." (ex-message e)))
+            (t/is (= file-path (:file-path data)))
+            (t/is (= "Failed to read or parse EDN file." (ex-message cause)))
+            (t/is (= file-path (:file-path (ex-data cause)))))))))
+
+  (t/testing "File does not exist."
+    (let [file-path (path/join tmp-dir "not-exists.edn")]
+      (try
+        (file/read-config-file file-path)
+        (catch js/Error e
+          (let [data (ex-data e)
+                cause (:cause data)]
+            (t/is (= "Failed to read config file." (ex-message e)))
+            (t/is (= file-path (:file-path data)))
+            (t/is (= "Failed to read or parse EDN file." (ex-message cause)))
+            (t/is (= file-path (:file-path (ex-data cause)))))))))
+
+  (t/testing "File is invalid as config file."
+    (let [file-path (path/join tmp-dir "invalid.edn")]
+      (fs/writeFileSync file-path "{\"key\": \"value\"}" "utf8")
+      (try
+        (file/read-config-file file-path)
+        (catch js/Error e
+          (let [data (ex-data e)
+                cause (:cause data)]
+            (t/is (= "Failed to read config file." (ex-message e)))
+            (t/is (= file-path (:file-path data)))
+            (t/is (= "Failed to read or parse EDN file." (ex-message cause)))
+            (t/is (= file-path (:file-path (ex-data cause))))))))))

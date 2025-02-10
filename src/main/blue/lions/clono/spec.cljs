@@ -29,6 +29,9 @@
   [invalid-characters value]
   (not-any? invalid-characters (seq value)))
 
+(def config
+  ::edn)
+
 (s/def ::edn
   (s/and map?
          (complement nil?)
@@ -49,3 +52,6 @@
 (s/def ::file-path
   (s/and ::common/non-blank-string
          valid-file-path?))
+
+(s/def ::config
+  config)
