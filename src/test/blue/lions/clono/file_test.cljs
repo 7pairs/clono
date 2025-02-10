@@ -14,6 +14,7 @@
 
 (ns blue.lions.clono.file-test
   (:require [cljs.test :as t]
+            [clojure.string :as str]
             ["fs" :as fs]
             ["os" :as os]
             ["path" :as path]
@@ -96,3 +97,49 @@
             (t/is (= file-path (:file-path data)))
             (t/is (= "File does not exist." (ex-message cause)))
             (t/is (= file-path (:file-path (ex-data cause))))))))))
+
+(t/deftest read-edn-file-test
+  (t/testing "File is valid as EDN."
+    (let [file-path (path/join tmp-dir "valid.edn")]
+      (fs/writeFileSync file-path "{:key \"value\"}" "utf8")
+      (t/is (= {:key "value"} (file/read-edn-file file-path)))))
+
+  (t/testing "File is empty."
+    (let [file-path (path/join tmp-dir "empty.edn")]
+      (fs/writeFileSync file-path "" "utf8")
+      (try
+        (file/read-edn-file file-path)
+        (catch js/Error e
+          (let [data (ex-data e)
+                cause (:cause data)
+                cause-data (ex-data cause)]
+            (t/is (= "Failed to read or parse EDN file." (ex-message e)))
+            (t/is (= file-path (:file-path data)))
+            (t/is (= "EDN file is empty or invalid." (ex-message cause)))
+            (t/is (= file-path (:file-path cause-data)))
+            (t/is (= "" (:content cause-data))))))))
+
+  (t/testing "File does not exist."
+    (let [file-path (path/join tmp-dir "not-exists.edn")]
+      (try
+        (file/read-edn-file file-path)
+        (catch js/Error e
+          (let [data (ex-data e)
+                cause (:cause data)]
+            (t/is (= "Failed to read or parse EDN file." (ex-message e)))
+            (t/is (= file-path (:file-path data)))
+            (t/is (= "Failed to read file." (ex-message cause)))
+            (t/is (= file-path (:file-path (ex-data cause)))))))))
+
+  (t/testing "File is invalid as EDN."
+    (let [file-path (path/join tmp-dir "invalid.edn")]
+      (fs/writeFileSync file-path "{\"key\": \"value\"}" "utf8")
+      (try
+        (file/read-edn-file file-path)
+        (catch js/Error e
+          (let [data (ex-data e)]
+            (t/is (= "Failed to read or parse EDN file." (ex-message e)))
+            (t/is (= file-path (:file-path data)))
+            (t/is (str/starts-with?
+                   (ex-message (:cause data))
+                   "A single colon is not a valid keyword."))))))))

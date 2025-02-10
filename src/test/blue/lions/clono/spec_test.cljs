@@ -39,6 +39,20 @@
       :not-string
       nil)))
 
+(t/deftest edn-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/edn value)
+      {:key "value"}
+      {:key1 1 :key2 ["vector"]}
+      {}))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/edn value))
+      {"not-keyword" "value"}
+      {:key "value1" "not-keyword" "value2"}
+      "not-map"
+      nil)))
+
 (t/deftest file-content-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/file-content value)

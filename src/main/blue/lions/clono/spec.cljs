@@ -29,6 +29,11 @@
   [invalid-characters value]
   (not-any? invalid-characters (seq value)))
 
+(s/def ::edn
+  (s/and map?
+         (complement nil?)
+         (s/every-kv keyword? any?)))
+
 (s/def ::file-content
   ::common/non-nil-string)
 

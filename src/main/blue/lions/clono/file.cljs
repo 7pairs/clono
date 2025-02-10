@@ -13,7 +13,8 @@
 ; limitations under the License.
 
 (ns blue.lions.clono.file
-  (:require [cljs.spec.alpha :as s]
+  (:require [cljs.reader :as reader]
+            [cljs.spec.alpha :as s]
             ["fs" :as fs]
             ["path" :as path]
             [blue.lions.clono.spec :as spec]))
@@ -35,4 +36,19 @@
     (fs/readFileSync file-path "utf8")
     (catch js/Error e
       (throw (ex-info "Failed to read file."
+                      {:file-path file-path :cause e})))))
+
+(defn read-edn-file
+  [file-path]
+  {:pre [(s/valid? ::spec/file-path file-path)]
+   :post [(s/valid? ::spec/edn %)]}
+  (try
+    (let [content (read-file file-path)
+          edn (reader/read-string content)]
+      (when (nil? edn)
+        (throw (ex-info "EDN file is empty or invalid."
+                        {:file-path file-path :content content})))
+      edn)
+    (catch js/Error e
+      (throw (ex-info "Failed to read or parse EDN file."
                       {:file-path file-path :cause e})))))
