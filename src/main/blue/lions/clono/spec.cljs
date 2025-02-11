@@ -15,6 +15,7 @@
 (ns blue.lions.clono.spec
   (:require [cljs.spec.alpha :as s]
             [clojure.string :as str]
+            [blue.lions.clono.spec.catalog :as catalog]
             [blue.lions.clono.spec.common :as common]))
 
 (s/def ::common/non-blank-string
@@ -28,6 +29,27 @@
 (defn- valid-string?
   [invalid-characters value]
   (not-any? invalid-characters (seq value)))
+
+(s/def ::catalog/afterwords
+  (s/coll-of ::file-name :kind vector?))
+
+(s/def ::catalog/appendices
+  (s/coll-of ::file-name :kind vector?))
+
+(s/def ::catalog/chapters
+  (s/coll-of ::file-name :kind vector?))
+
+(s/def ::catalog/forewords
+  (s/coll-of ::file-name :kind vector?))
+
+(s/def ::catalog
+  (s/and (s/keys :opt-un [::catalog/forewords
+                          ::catalog/chapters
+                          ::catalog/appendices
+                          ::catalog/afterwords])
+         (fn [key]
+           (some #(contains? key %)
+                 [:forewords :chapters :appendices :afterwords]))))
 
 (def config
   ::edn)

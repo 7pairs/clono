@@ -16,6 +16,7 @@
   (:require [cljs.spec.alpha :as s]
             [cljs.test :as t]
             [blue.lions.clono.spec :as spec]
+            [blue.lions.clono.spec.catalog :as catalog]
             [blue.lions.clono.spec.common :as common]))
 
 (t/deftest common_non-blank-string-test
@@ -37,6 +38,98 @@
   (t/testing "Fails to verify."
     (t/are [value] (not (s/valid? ::common/non-nil-string value))
       :not-string
+      nil)))
+
+(t/deftest catalog_afterwords-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::catalog/afterwords value)
+      ["afterword.md"]
+      ["afterword1.md" "afterword2.md"]
+      []))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::catalog/afterwords value))
+      ["invalid/file-name"]
+      [""]
+      [:not-string]
+      [nil]
+      ["afterword.md" "invalid/file-name"]
+      "not-vector"
+      nil)))
+
+(t/deftest catalog_appendices-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::catalog/appendices value)
+      ["appendix.md"]
+      ["appendix1.md" "appendix2.md"]
+      []))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::catalog/appendices value))
+      ["invalid/file-name"]
+      [""]
+      [:not-string]
+      [nil]
+      ["appendix.md" "invalid/file-name"]
+      "not-vector"
+      nil)))
+
+(t/deftest catalog_chapters-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::catalog/chapters value)
+      ["chapter.md"]
+      ["chapter1.md" "chapter2.md"]
+      []))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::catalog/chapters value))
+      ["invalid/file-name"]
+      [""]
+      [:not-string]
+      [nil]
+      ["chapter.md" "invalid/file-name"]
+      "not-vector"
+      nil)))
+
+(t/deftest catalog_forewords-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::catalog/forewords value)
+      ["foreword.md"]
+      ["foreword1.md" "foreword2.md"]
+      []))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::catalog/forewords value))
+      ["invalid/file-name"]
+      [""]
+      [:not-string]
+      [nil]
+      ["foreword.md" "invalid/file-name"]
+      "not-vector"
+      nil)))
+
+(t/deftest catalog-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/catalog value)
+      {:forewords []
+       :chapters ["chapter1.md"]
+       :appendices ["appendix1.md" "appendix2.md"]
+       :afterwords ["afterword1.md" "afterword2.md" "afterword3.md"]}
+      {:forewords [] :chapters [] :appendices [] :afterwords []}
+      {:chapters ["chapter.md"]}
+      {:chapters ["chapter.md"] :extra-key "extra-value"}))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/catalog value))
+      {:chapters "not-vector"}
+      {:chapters nil}
+      {:forewords ["foreword.md"]
+       :chapters ["chapter.md"]
+       :appendices ["appendix.md"]
+       :afterwords "not-vector"}
+      {:extra-key "extra-value"}
+      {}
+      "not-map"
       nil)))
 
 (t/deftest config-test

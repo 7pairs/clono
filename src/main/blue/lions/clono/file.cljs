@@ -62,3 +62,13 @@
     (catch js/Error e
       (throw (ex-info "Failed to read config file."
                       {:file-path file-path :cause e})))))
+
+(defn read-catalog-file
+  [file-path]
+  {:pre [(s/valid? ::spec/file-path file-path)]
+   :post [(s/valid? ::spec/catalog %)]}
+  (try
+    (read-edn-file file-path)
+    (catch js/Error e
+      (throw (ex-info "Failed to read catalog file."
+                      {:file-path file-path :cause e})))))

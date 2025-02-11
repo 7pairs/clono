@@ -187,3 +187,48 @@
             (t/is (= file-path (:file-path data)))
             (t/is (= "Failed to read or parse EDN file." (ex-message cause)))
             (t/is (= file-path (:file-path (ex-data cause))))))))))
+
+(t/deftest read-catalog-file-test
+  (t/testing "File is valid as catalog file."
+    (let [file-path (path/join tmp-dir "catalog.edn")]
+      (fs/writeFileSync file-path "{:chapters [\"chapter.md\"]}" "utf8")
+      (t/is (= {:chapters ["chapter.md"]}
+               (file/read-catalog-file file-path)))))
+
+  (t/testing "File is empty."
+    (let [file-path (path/join tmp-dir "empty.edn")]
+      (fs/writeFileSync file-path "" "utf8")
+      (try
+        (file/read-catalog-file file-path)
+        (catch js/Error e
+          (let [data (ex-data e)
+                cause (:cause data)]
+            (t/is (= "Failed to read catalog file." (ex-message e)))
+            (t/is (= file-path (:file-path data)))
+            (t/is (= "Failed to read or parse EDN file." (ex-message cause)))
+            (t/is (= file-path (:file-path (ex-data cause)))))))))
+
+  (t/testing "File does not exist."
+    (let [file-path (path/join tmp-dir "not-exists.edn")]
+      (try
+        (file/read-catalog-file file-path)
+        (catch js/Error e
+          (let [data (ex-data e)
+                cause (:cause data)]
+            (t/is (= "Failed to read catalog file." (ex-message e)))
+            (t/is (= file-path (:file-path data)))
+            (t/is (= "Failed to read or parse EDN file." (ex-message cause)))
+            (t/is (= file-path (:file-path (ex-data cause)))))))))
+
+  (t/testing "File is invalid as catalog file."
+    (let [file-path (path/join tmp-dir "invalid.edn")]
+      (fs/writeFileSync file-path "{\"chapters\": [\"chapter.md\"]}")
+      (try
+        (file/read-catalog-file file-path)
+        (catch js/Error e
+          (let [data (ex-data e)
+                cause (:cause data)]
+            (t/is (= "Failed to read catalog file." (ex-message e)))
+            (t/is (= file-path (:file-path data)))
+            (t/is (= "Failed to read or parse EDN file." (ex-message cause)))
+            (t/is (= file-path (:file-path (ex-data cause))))))))))
