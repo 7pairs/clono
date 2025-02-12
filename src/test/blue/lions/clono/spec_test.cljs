@@ -233,3 +233,14 @@
       ""
       :not-string
       nil)))
+
+(t/deftest markdown-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/markdown value)
+      "# Markdown"
+      ""))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/markdown value))
+      :not-string
+      nil)))

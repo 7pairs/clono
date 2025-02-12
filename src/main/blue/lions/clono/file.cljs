@@ -72,3 +72,13 @@
     (catch js/Error e
       (throw (ex-info "Failed to read catalog file."
                       {:file-path file-path :cause e})))))
+
+(defn read-markdown-file
+  [file-path]
+  {:pre [(s/valid? ::spec/file-path file-path)]
+   :post [(s/valid? ::spec/markdown %)]}
+  (try
+    (read-file file-path)
+    (catch js/Error e
+      (throw (ex-info "Failed to read Markdown file."
+                      {:file-path file-path :cause e})))))

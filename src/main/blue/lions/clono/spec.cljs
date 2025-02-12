@@ -75,5 +75,8 @@
   (s/and ::common/non-blank-string
          valid-file-path?))
 
+(s/def ::markdown
+  ::common/non-nil-string)
+
 (s/def ::config
   config)

@@ -232,3 +232,28 @@
             (t/is (= file-path (:file-path data)))
             (t/is (= "Failed to read or parse EDN file." (ex-message cause)))
             (t/is (= file-path (:file-path (ex-data cause))))))))))
+
+(t/deftest read-markdown-file-test
+  (t/testing "File is valid as Markdown file."
+    (let [file-path (path/join tmp-dir "markdown.md")
+          file-content "# Markdown"]
+      (fs/writeFileSync file-path file-content "utf8")
+      (t/is (= file-content (file/read-markdown-file file-path)))))
+
+  (t/testing "File is empty."
+    (let [file-path (path/join tmp-dir "empty.md")
+          file-content ""]
+      (fs/writeFileSync file-path file-content "utf8")
+      (t/is (= file-content (file/read-markdown-file file-path)))))
+
+  (t/testing "File does not exist."
+    (let [file-path (path/join tmp-dir "not-exists.md")]
+      (try
+        (file/read-markdown-file file-path)
+        (catch js/Error e
+          (let [data (ex-data e)
+                cause (:cause data)]
+            (t/is (= "Failed to read Markdown file." (ex-message e)))
+            (t/is (= file-path (:file-path data)))
+            (t/is (= "Failed to read file." (ex-message cause)))
+            (t/is (= file-path (:file-path (ex-data cause))))))))))
