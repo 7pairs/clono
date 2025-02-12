@@ -99,7 +99,7 @@
             (t/is (= file-path (:file-path (ex-data cause))))))))))
 
 (t/deftest read-edn-file-test
-  (t/testing "File is valid as EDN."
+  (t/testing "File is valid as EDN file."
     (let [file-path (path/join tmp-dir "valid.edn")]
       (fs/writeFileSync file-path "{:key \"value\"}" "utf8")
       (t/is (= {:key "value"} (file/read-edn-file file-path)))))
@@ -131,7 +131,7 @@
             (t/is (= "Failed to read file." (ex-message cause)))
             (t/is (= file-path (:file-path (ex-data cause)))))))))
 
-  (t/testing "File is invalid as EDN."
+  (t/testing "File is invalid as EDN file."
     (let [file-path (path/join tmp-dir "invalid.edn")]
       (fs/writeFileSync file-path "{\"key\": \"value\"}" "utf8")
       (try
