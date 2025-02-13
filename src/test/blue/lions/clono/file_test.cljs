@@ -18,7 +18,8 @@
             ["fs" :as fs]
             ["os" :as os]
             ["path" :as path]
-            [blue.lions.clono.file :as file]))
+            [blue.lions.clono.file :as file]
+            [blue.lions.clono.log :as logger]))
 
 (defn- setup-tmp-dir
   []
@@ -257,3 +258,119 @@
             (t/is (= file-path (:file-path data)))
             (t/is (= "Failed to read file." (ex-message cause)))
             (t/is (= file-path (:file-path (ex-data cause))))))))))
+
+(t/deftest read-markdown-files-test
+  (let [foreword-name "foreword.md"
+        foreword-content "# Foreword"
+        chapter-name "chapter.md"
+        chapter-content "# Chapter"
+        appendix-name "appendix.md"
+        appendix-content "# Appendix"
+        afterword-name "afterword.md"
+        afterword-content "# Afterword"
+        empty-name "empty.md"
+        empty-content ""]
+    (fs/writeFileSync (path/join tmp-dir foreword-name)
+                      foreword-content
+                      "utf8")
+    (fs/writeFileSync (path/join tmp-dir chapter-name)
+                      chapter-content
+                      "utf8")
+    (fs/writeFileSync (path/join tmp-dir appendix-name)
+                      appendix-content
+                      "utf8")
+    (fs/writeFileSync (path/join tmp-dir afterword-name)
+                      afterword-content
+                      "utf8")
+    (fs/writeFileSync (path/join tmp-dir empty-name)
+                      empty-content
+                      "utf8")
+
+    (t/testing "All files exist."
+      (t/is (= [{:name foreword-name
+                 :type :forewords
+                 :markdown foreword-content}
+                {:name chapter-name
+                 :type :chapters
+                 :markdown chapter-content}
+                {:name appendix-name
+                 :type :appendices
+                 :markdown appendix-content}
+                {:name afterword-name
+                 :type :afterwords
+                 :markdown afterword-content}]
+               (file/read-markdown-files tmp-dir
+                                         {:forewords [foreword-name]
+                                          :chapters [chapter-name]
+                                          :appendices [appendix-name]
+                                          :afterwords [afterword-name]}))))
+
+    (t/testing "Some files are empty."
+      (t/is (= [{:name foreword-name
+                 :type :forewords
+                 :markdown foreword-content}
+                {:name empty-name
+                 :type :chapters
+                 :markdown empty-content}
+                {:name appendix-name
+                 :type :appendices
+                 :markdown appendix-content}
+                {:name empty-name
+                 :type :afterwords
+                 :markdown empty-content}]
+               (file/read-markdown-files tmp-dir
+                                         {:forewords [foreword-name]
+                                          :chapters [empty-name]
+                                          :appendices [appendix-name]
+                                          :afterwords [empty-name]}))))
+
+    (t/testing "Some files do not exist."
+      (reset! logger/enabled? false)
+      (reset! logger/entries [])
+      (t/is (= [{:name chapter-name
+                 :type :chapters
+                 :markdown chapter-content}
+                {:name afterword-name
+                 :type :afterwords
+                 :markdown afterword-content}]
+               (file/read-markdown-files tmp-dir
+                                         {:forewords ["not-exists1.md"]
+                                          :chapters [chapter-name]
+                                          :appendices ["not-exists2.md"]
+                                          :afterwords [afterword-name]})))
+      (t/is (= [{:level :error
+                 :message "Failed to read Markdown file."
+                 :data {:file-path (path/join tmp-dir "not-exists1.md")
+                        :cause "Failed to read Markdown file."}}
+                {:level :error
+                 :message "Failed to read Markdown file."
+                 :data {:file-path (path/join tmp-dir "not-exists2.md")
+                        :cause "Failed to read Markdown file."}}]
+               @logger/entries)))
+
+    (t/testing "All files do not exist."
+      (reset! logger/enabled? false)
+      (reset! logger/entries [])
+      (t/is (= []
+               (file/read-markdown-files tmp-dir
+                                         {:forewords ["not-exists1.md"]
+                                          :chapters ["not-exists2.md"]
+                                          :appendices ["not-exists3.md"]
+                                          :afterwords ["not-exists4.md"]})))
+      (t/is (= [{:level :error
+                 :message "Failed to read Markdown file."
+                 :data {:file-path (path/join tmp-dir "not-exists1.md")
+                        :cause "Failed to read Markdown file."}}
+                {:level :error
+                 :message "Failed to read Markdown file."
+                 :data {:file-path (path/join tmp-dir "not-exists2.md")
+                        :cause "Failed to read Markdown file."}}
+                {:level :error
+                 :message "Failed to read Markdown file."
+                 :data {:file-path (path/join tmp-dir "not-exists3.md")
+                        :cause "Failed to read Markdown file."}}
+                {:level :error
+                 :message "Failed to read Markdown file."
+                 :data {:file-path (path/join tmp-dir "not-exists4.md")
+                        :cause "Failed to read Markdown file."}}]
+               @logger/entries)))))

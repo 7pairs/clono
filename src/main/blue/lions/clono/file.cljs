@@ -17,6 +17,7 @@
             [cljs.spec.alpha :as s]
             ["fs" :as fs]
             ["path" :as path]
+            [blue.lions.clono.log :as logger]
             [blue.lions.clono.spec :as spec]))
 
 (defn extract-base-name
@@ -82,3 +83,29 @@
     (catch js/Error e
       (throw (ex-info "Failed to read Markdown file."
                       {:file-path file-path :cause e})))))
+
+(def valid-manuscript-types #{:forewords :chapters :appendices :afterwords})
+
+(defn read-markdown-files
+  [dir-path catalog]
+  {:pre [(s/valid? ::spec/file-path dir-path)
+         (s/valid? ::spec/catalog catalog)]
+   :post [(s/valid? ::spec/manuscripts %)]}
+  (vec
+   (mapcat
+    (fn [[type file-names]]
+      (if (valid-manuscript-types type)
+        (keep (fn [file-name]
+                (let [file-path (path/join dir-path file-name)]
+                  (try
+                    {:name file-name
+                     :type type
+                     :markdown (read-markdown-file file-path)}
+                    (catch js/Error e
+                      (logger/log :error
+                                  "Failed to read Markdown file."
+                                  {:file-path file-path :cause (ex-message e)})
+                      nil))))
+              file-names)
+        []))
+    catalog)))

@@ -4,7 +4,8 @@
   "src/test"]
 
  :dependencies
- [[org.clojure/spec.alpha "0.5.238"]]
+ [[org.clojure/spec.alpha "0.5.238"]
+  [tortue/spy "2.15.0"]]
 
  :builds
  {:app {:target :node-script

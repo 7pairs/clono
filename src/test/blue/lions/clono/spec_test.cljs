@@ -17,7 +17,8 @@
             [cljs.test :as t]
             [blue.lions.clono.spec :as spec]
             [blue.lions.clono.spec.catalog :as catalog]
-            [blue.lions.clono.spec.common :as common]))
+            [blue.lions.clono.spec.common :as common]
+            [blue.lions.clono.spec.manuscript :as manuscript]))
 
 (t/deftest common_non-blank-string-test
   (t/testing "Succeeds to verify."
@@ -232,6 +233,140 @@
       "invalid|file-path"
       ""
       :not-string
+      nil)))
+
+(t/deftest log-data-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/log-data value)
+      {:key "value"}
+      {:key1 1 :key2 ["vector"]}
+      {}
+      nil))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/log-data value))
+      {"not-keyword" "value"}
+      {:key "value1" "not-keyword" "value2"}
+      "not-map")))
+
+(t/deftest log-level-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/log-level value)
+      :info
+      :warn
+      :error))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/log-level value))
+      :invalid
+      "info"
+      nil)))
+
+(t/deftest log-message-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/log-message value)
+      "log-message"
+      ""))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/log-message value))
+      :not-string
+      nil)))
+
+(t/deftest manuscript_markdown-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::manuscript/markdown value)
+      "# Markdown"
+      ""))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::manuscript/markdown value))
+      :not-string
+      nil)))
+
+(t/deftest manuscript_name-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::manuscript/name value)
+      "name.md"
+      "日本語"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::manuscript/name value))
+      "invalid\\name"
+      "invalid/name"
+      "invalid:name"
+      "invalid*name"
+      "invalid?name"
+      "invalid\"name"
+      "invalid>name"
+      "invalid<name"
+      "invalid|name"
+      ""
+      :not-string
+      nil)))
+
+(t/deftest manuscript_type-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::manuscript/type value)
+      :forewords
+      :chapters
+      :appendices
+      :afterwords))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::manuscript/type value))
+      :invalid
+      "forewords"
+      nil)))
+
+(t/deftest manuscript-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::spec/manuscript
+                    {:name "name.md" :type :chapters :markdown "# Markdown"})))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/manuscript value))
+      {:name :not-string :type :chapters :markdown "# Markdown"}
+      {:name "name.md" :type :invalid :markdown "# Markdown"}
+      {:name "name.md" :type :chapters :markdown :not-string}
+      {:name "name.md" :type :chapters}
+      {:name "name.md" :markdown "# Markdown"}
+      {:type :chapters :markdown "# Markdown"}
+      {:name "name.md"
+       :type :chapters
+       :markdown "# Markdown"
+       :extra-key "extra-value"}
+      {:extra-key "extra-value"}
+      {}
+      "not-map"
+      nil)))
+
+(t/deftest manuscripts-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/manuscripts value)
+      [{:name "name.md" :type :chapters :markdown "# Markdown"}]
+      [{:name "name1.md" :type :chapters :markdown "# Markdown1"}
+       {:name "name2.md" :type :appendices :markdown "# Markdown2"}]
+      []))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/manuscripts value))
+      [{:name :not-string :type :chapters :markdown "# Markdown"}]
+      [{:name "name.md" :type :invalid :markdown "# Markdown"}]
+      [{:name "name.md" :type :chapters :markdown :not-string}]
+      [{:name "name.md" :type :chapters}]
+      [{:name "name.md" :markdown "# Markdown"}]
+      [{:type :chapters :markdown "# Markdown"}]
+      [{:name "name.md"
+        :type :chapters
+        :markdown "# Markdown"
+        :extra-key "extra-value"}]
+      [{:extra-key "extra-value"}]
+      ["not-map"]
+      [nil]
+      [{:name "name1.md" :type :chapters :markdown "# Markdown1"}
+       {:name :not-string :type :chapters :markdown "# Markdown2"}]
+      "not-vector"
       nil)))
 
 (t/deftest markdown-test

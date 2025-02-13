@@ -16,7 +16,8 @@
   (:require [cljs.spec.alpha :as s]
             [clojure.string :as str]
             [blue.lions.clono.spec.catalog :as catalog]
-            [blue.lions.clono.spec.common :as common]))
+            [blue.lions.clono.spec.common :as common]
+            [blue.lions.clono.spec.manuscript :as manuscript]))
 
 (s/def ::common/non-blank-string
   (s/and string?
@@ -75,8 +76,40 @@
   (s/and ::common/non-blank-string
          valid-file-path?))
 
+(s/def ::log-data
+  (s/and (s/or :map (s/and map?
+                           (s/every-kv keyword? any?))
+               :nil nil?)))
+
+(s/def ::log-level
+  #{:info :warn :error})
+
+(s/def ::log-message
+  ::common/non-nil-string)
+
+(def manuscript_markdown
+  ::markdown)
+
+(s/def ::manuscript/name
+  ::file-name)
+
+(s/def ::manuscript/type
+  #{:forewords :chapters :appendices :afterwords})
+
+(s/def ::manuscript
+  (s/and (s/keys :req-un [::manuscript/name
+                          ::manuscript/type
+                          ::manuscript/markdown])
+         #(every? #{:name :type :markdown} (keys %))))
+
+(s/def ::manuscripts
+  (s/coll-of ::manuscript :kind vector?))
+
 (s/def ::markdown
   ::common/non-nil-string)
 
 (s/def ::config
   config)
+
+(s/def ::manuscript/markdown
+  manuscript_markdown)
