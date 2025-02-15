@@ -28,8 +28,8 @@
          (complement nil?)))
 
 (defn- valid-string?
-  [invalid-characters value]
-  (not-any? invalid-characters (seq value)))
+  [invalid-chars value]
+  (not-any? invalid-chars (seq value)))
 
 (s/def ::catalog/afterwords
   (s/coll-of ::file-name :kind vector?))
