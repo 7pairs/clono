@@ -18,7 +18,23 @@
             [blue.lions.clono.spec :as spec]
             [blue.lions.clono.spec.catalog :as catalog]
             [blue.lions.clono.spec.common :as common]
-            [blue.lions.clono.spec.manuscript :as manuscript]))
+            [blue.lions.clono.spec.manuscript :as manuscript]
+            [blue.lions.clono.spec.node :as node]))
+
+(t/deftest common_alphabet-string-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::common/alphabet-string value)
+      "alphabet"
+      "ALPHABET"
+      "Alphabet"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::common/alphabet-string value))
+      "12345"
+      "alphabet12345"
+      ""
+      :not-string
+      nil)))
 
 (t/deftest common_non-blank-string-test
   (t/testing "Succeeds to verify."
@@ -378,4 +394,63 @@
   (t/testing "Fails to verify."
     (t/are [value] (not (s/valid? ::spec/markdown value))
       :not-string
+      nil)))
+
+(t/deftest node_type-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::node/type value)
+      "type"
+      "TYPE"
+      "Type"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::node/type value))
+      "12345"
+      "type12345"
+      ""
+      :not-string
+      nil)))
+
+(t/deftest node-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/node value)
+      {:type "type"}
+      {:type "type" :extra-key "extra-value"}))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/node value))
+      {:type "12345"}
+      {:type ""}
+      {:type :not-string}
+      {:type nil}
+      {:extra-key "extra-value"}
+      {}
+      "not-map"
+      nil)))
+
+(t/deftest node-type-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/node-type value)
+      "nodetype"
+      "NODETYPE"
+      "nodeType"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/node-type value))
+      "12345"
+      "nodetype12345"
+      ""
+      :not-string
+      nil)))
+
+(t/deftest pred-result-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/pred-result value)
+      true
+      false))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/pred-result value))
+      "true"
+      :false
       nil)))

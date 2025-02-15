@@ -17,7 +17,12 @@
             [clojure.string :as str]
             [blue.lions.clono.spec.catalog :as catalog]
             [blue.lions.clono.spec.common :as common]
-            [blue.lions.clono.spec.manuscript :as manuscript]))
+            [blue.lions.clono.spec.manuscript :as manuscript]
+            [blue.lions.clono.spec.node :as node]))
+
+(s/def ::common/alphabet-string
+  (s/and string?
+         #(re-matches #"[a-zA-Z]+" %)))
 
 (s/def ::common/non-blank-string
   (s/and string?
@@ -108,8 +113,23 @@
 (s/def ::markdown
   ::common/non-nil-string)
 
+(def node_type
+  ::node-type)
+
+(s/def ::node
+  (s/keys :req-un [::node/type]))
+
+(s/def ::node-type
+  ::common/alphabet-string)
+
+(s/def ::pred-result
+  boolean?)
+
 (s/def ::config
   config)
 
 (s/def ::manuscript/markdown
   manuscript_markdown)
+
+(s/def ::node/type
+  node_type)
