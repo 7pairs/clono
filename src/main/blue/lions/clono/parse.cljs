@@ -26,3 +26,12 @@
                                  (remove ast/comment? children))]
       (assoc node :children updated-children))
     node))
+
+(defn remove-positions
+  [node]
+  {:pre [(s/valid? ::spec/node node)]
+   :post [(s/valid? ::spec/node %)]}
+  (let [updated-node (dissoc node :position)]
+    (if-let [children (seq (:children node))]
+      (assoc updated-node :children (mapv remove-positions children))
+      updated-node)))

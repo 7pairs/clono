@@ -62,3 +62,33 @@
                            :children [{:type "text" :value "text1"}
                                       {:type "text" :value "text2"}]}
                           {:type "text" :value "text3"}]})))))
+
+(t/deftest remove-positions-test
+  (t/testing "Node has positions."
+    (t/is (= {:type "root"}
+             (parse/remove-positions
+              {:type "root" :position 1}))))
+
+  (t/testing "Node has children with positions."
+    (t/is (= {:type "root" :children [{:type "child"}
+                                      {:type "child"}]}
+             (parse/remove-positions
+              {:type "root"
+               :position 1
+               :children [{:type "child" :position 2}
+                          {:type "child" :position 3}]}))))
+
+  (t/testing "Node has children without positions."
+    (t/is (= {:type "root" :children [{:type "child"}]}
+             (parse/remove-positions
+              {:type "root" :position 1 :children [{:type "child"}]}))))
+
+  (t/testing "Node does not have positions."
+    (t/are [node] (= node (parse/remove-positions node))
+      {:type "root"}
+      {:type "root" :children [{:type "child"}]}))
+
+  (t/testing "Node has empty children."
+    (t/is (= {:type "root" :children []}
+             (parse/remove-positions
+              {:type "root" :children []})))))
