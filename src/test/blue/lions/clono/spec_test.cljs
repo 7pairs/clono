@@ -149,6 +149,16 @@
       "not-map"
       nil)))
 
+(t/deftest caption-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::spec/caption "caption")))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/caption value))
+      ""
+      :not-string
+      nil)))
+
 (t/deftest config-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/config value)
@@ -249,6 +259,18 @@
       "invalid|file-path"
       ""
       :not-string
+      nil)))
+
+(t/deftest function-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/function value)
+      (fn [x y] (+ x y))
+      #(* % 2)
+      inc))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/function value))
+      "not-function"
       nil)))
 
 (t/deftest log-data-test
@@ -396,6 +418,20 @@
       :not-string
       nil)))
 
+(t/deftest module-name-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/module-name value)
+      "package"
+      "@scope/package"
+      "./local"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/module-name value))
+      "invalid module name"
+      ""
+      :not-string
+      nil)))
+
 (t/deftest node_type-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::node/type value)
@@ -453,4 +489,61 @@
     (t/are [value] (not (s/valid? ::spec/pred-result value))
       "true"
       :false
+      nil)))
+
+(t/deftest property-name-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/property-name value)
+      "property"
+      "_property"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/property-name value))
+      "1nvalid"
+      "invalid property name"
+      ""
+      :not-string
+      nil)))
+
+(t/deftest slug-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/slug value)
+      "valid-slug"
+      "日本語"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/slug value))
+      "invalid!slug"
+      "invalid\"slug"
+      "invalid#slug"
+      "invalid$slug"
+      "invalid%slug"
+      "invalid&slug"
+      "invalid'slug"
+      "invalid(slug"
+      "invalid)slug"
+      "invalid*slug"
+      "invalid+slug"
+      "invalid,slug"
+      "invalid.slug"
+      "invalid/slug"
+      "invalid:slug"
+      "invalid;slug"
+      "invalid<slug"
+      "invalid=slug"
+      "invalid>slug"
+      "invalid?slug"
+      "invalid@slug"
+      "invalid[slug"
+      "invalid\\slug"
+      "invalid]slug"
+      "invalid^slug"
+      "invalid`slug"
+      "invalid{slug"
+      "invalid|slug"
+      "invalid}slug"
+      "invalid~slug"
+      "invalid slug"
+      ""
+      :not-string
       nil)))

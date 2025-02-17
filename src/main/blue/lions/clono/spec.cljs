@@ -57,6 +57,9 @@
            (some #(contains? key %)
                  [:forewords :chapters :appendices :afterwords]))))
 
+(s/def ::caption
+  ::common/non-blank-string)
+
 (def config
   ::edn)
 
@@ -80,6 +83,9 @@
 (s/def ::file-path
   (s/and ::common/non-blank-string
          valid-file-path?))
+
+(s/def ::function
+  fn?)
 
 (s/def ::log-data
   (s/and (s/or :map (s/and map?
@@ -113,6 +119,10 @@
 (s/def ::markdown
   ::common/non-nil-string)
 
+(s/def ::module-name
+  (s/and string?
+         #(re-matches #"[a-zA-Z0-9@/\-._]+" %)))
+
 (def node_type
   ::node-type)
 
@@ -124,6 +134,19 @@
 
 (s/def ::pred-result
   boolean?)
+
+(s/def ::property-name
+  (s/and string?
+         #(re-matches #"[a-zA-Z_$][a-zA-Z0-9_$]*" %)))
+
+(def valid-slug?
+  (partial valid-string? #{"!" "\"" "#" "$" "%" "&" "'" "(" ")" "*" "+" "," "."
+                           "/" ":" ";" "<" "=" ">" "?" "@" "[" "\\" "]" "^" "`"
+                           "{" "|" "}" "~" " "}))
+
+(s/def ::slug
+  (s/and ::common/non-blank-string
+         valid-slug?))
 
 (s/def ::config
   config)

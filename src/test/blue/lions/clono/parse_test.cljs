@@ -92,3 +92,33 @@
     (t/is (= {:type "root" :children []}
              (parse/remove-positions
               {:type "root" :children []})))))
+
+(t/deftest generate-slug-test
+  (t/testing "Caption contains upper case letters."
+    (t/is (= "pascalcase" (parse/generate-slug "PascalCase")))
+    (t/is (= "uppercase" (parse/generate-slug "UPPERCASE"))))
+
+  (t/testing "Caption does not contain upper case letters."
+    (t/is (= "lowercase" (parse/generate-slug "lowercase"))))
+
+  (t/testing "Caption contains symbols."
+    (t/is (= "helloworld" (parse/generate-slug "Hello,World!!")))
+    (t/is (= "334" (parse/generate-slug "33:4"))))
+
+  (t/testing "Caption contains spaces."
+    (t/is (= "1-2-3" (parse/generate-slug "1 2 3"))))
+
+  (t/testing "Caption contains Japanese letters."
+    (t/is (= "日本語" (parse/generate-slug "日本語")))
+    (t/is (= "ａｎｄｒｏｉｄ" (parse/generate-slug "Ａｎｄｒｏｉｄ")))
+    (t/is (= "こんにちは世界" (parse/generate-slug "こんにちは、世界！"))))
+
+  (t/testing "Captions are duplicated."
+    (t/is (= "duplicated" (parse/generate-slug "duplicated")))
+    (t/is (= "duplicated-1" (parse/generate-slug "duplicated"))))
+
+  (t/testing "Caption is invalid."
+    (t/are [caption] (thrown-with-msg? js/Error #"Assert failed:"
+                                       (parse/generate-slug caption))
+      ""
+      nil)))

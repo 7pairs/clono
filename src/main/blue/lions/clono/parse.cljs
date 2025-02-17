@@ -15,6 +15,7 @@
 (ns blue.lions.clono.parse
   (:require [cljs.spec.alpha :as s]
             [blue.lions.clono.ast :as ast]
+            [blue.lions.clono.esm :as esm]
             [blue.lions.clono.spec :as spec]))
 
 (defn remove-comments
@@ -35,3 +36,15 @@
     (if-let [children (seq (:children node))]
       (assoc updated-node :children (mapv remove-positions children))
       updated-node)))
+
+(defonce slugger-instance (new esm/github-slugger))
+
+(defn generate-slug
+  [caption]
+  {:pre [(s/valid? ::spec/caption caption)]
+   :post [(s/valid? ::spec/slug %)]}
+  (try
+    (.slug slugger-instance caption)
+    (catch js/Error e
+      (throw (ex-info "Failed to generate slug."
+                      {:caption caption :cause e})))))
