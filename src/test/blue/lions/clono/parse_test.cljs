@@ -14,6 +14,7 @@
 
 (ns blue.lions.clono.parse-test
   (:require [cljs.test :as t]
+            [clojure.string :as str]
             [blue.lions.clono.parse :as parse]))
 
 (t/deftest remove-comments-test
@@ -122,3 +123,31 @@
                                        (parse/generate-slug caption))
       ""
       nil)))
+
+(t/deftest generate-heading-slug-test
+  (t/testing "Node has single text."
+    (t/is (= "value2"
+             (parse/generate-heading-slug
+              {:type "heading"
+               :children [{:type "html" :value "<value1>"}
+                          {:type "text" :value "value2"}
+                          {:type "html" :value "<value3>"}]}))))
+
+  (t/testing "Node has multiple texts."
+    (t/is (= "value1value3"
+             (parse/generate-heading-slug
+              {:type "heading" :children [{:type "text" :value "value1"}
+                                          {:type "html" :value "<value2>"}
+                                          {:type "text" :value "value3"}]}))))
+
+  (t/testing "Node does not have texts."
+    (let [node {:type "heading" :children [{:type "html" :value "<value>"}]}]
+      (try
+        (parse/generate-heading-slug node)
+        (catch js/Error e
+          (let [data (ex-data e)]
+            (t/is (= "Failed to generate heading slug." (ex-message e)))
+            (t/is (= node (:node data)))
+            (t/is (= "" (:caption data)))
+            (t/is (str/starts-with? (ex-message (:cause data))
+                                    "Assert failed:"))))))))

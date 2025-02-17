@@ -479,6 +479,26 @@
       :not-string
       nil)))
 
+(t/deftest nodes-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/nodes value)
+      [{:type "type"}]
+      [{:type "typeOne"} {:type "typeTwo"}]
+      []))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/nodes value))
+      [{:type "12345"}]
+      [{:type ""}]
+      [{:type :not-string}]
+      [{:type nil}]
+      [{:extra-key "extra-value"}]
+      ["not-map"]
+      [nil]
+      [{:type "type"} {:type ""}]
+      "not-vector"
+      nil)))
+
 (t/deftest pred-result-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/pred-result value)

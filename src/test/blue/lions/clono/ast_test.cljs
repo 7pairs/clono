@@ -29,3 +29,74 @@
       {:type "html" :value ""}
       {:type "html"}
       {:type "text" :value "<!-- comment -->"})))
+
+(t/deftest node-type?-test
+  (t/testing "Types match."
+    (t/is (true? (ast/node-type? "text" {:type "text" :value "value"}))))
+
+  (t/testing "Types do not match."
+    (t/is (false? (ast/node-type? "text" {:type "html" :value "<value>"}))))
+
+  (t/testing "Type is invalid."
+    (t/is (thrown-with-msg?
+           js/Error #"Assert failed:"
+           (ast/node-type? nil {:type "text" :value "value"}))))
+
+  (t/testing "Node is invalid."
+    (t/are [node] (thrown-with-msg? js/Error #"Assert failed:"
+                                    (ast/node-type? "text" node))
+      {:value "value"}
+      "not-node"
+      nil)))
+
+(t/deftest extract-nodes-test
+  (t/testing "Node itself is target."
+    (t/is (= [{:type "text" :value "value"}]
+             (ast/extract-nodes
+              #(= (:type %) "text")
+              {:type "text" :value "value"}))))
+
+  (t/testing "Node has target nodes."
+    (t/is (= [{:type "text" :value "value1"}
+              {:type "text" :value "value3"}]
+           (ast/extract-nodes
+            #(= (:type %) "text")
+            {:type "root"
+             :children [{:type "text" :value "value1"}
+                        {:type "html" :value "<value2>"}
+                        {:type "text" :value "value3"}]}))))
+
+  (t/testing "Node has children."
+    (t/is (= [{:type "text" :value "value1"}
+              {:type "text" :value "value4"}
+              {:type "text" :value "value7"}]
+             (ast/extract-nodes
+              #(= (:type %) "text")
+              {:type "root"
+               :children [{:type "text" :value "value1"}
+                          {:type "html" :value "<value2>"}
+                          {:type "node"
+                           :children [{:type "html" :value "<value3>"}
+                                      {:type "text" :value "value4"}
+                                      {:type "html" :value "<value5>"}]}
+                          {:type "html" :value "<value6>"}
+                          {:type "text" :value "value7"}]}))))
+
+  (t/testing "Node does not have target."
+    (t/are [node] (= [] (ast/extract-nodes #(= (:type %) "text") node))
+      {:type "root"}
+      {:type "root" :children [{:type "html" :value "<value>"}]}))
+
+  (t/testing "Predication function is invalid."
+    (t/are [pred] (thrown-with-msg?
+                   js/Error #"Assert failed:"
+                   (ast/extract-nodes pred {:type "text" :value "value"}))
+      "not-function"
+      nil))
+
+  (t/testing "Node is invalid."
+    (t/are [node] (thrown-with-msg?
+                   js/Error #"Assert failed:"
+                   (ast/extract-nodes #(= (:type %) "text") node))
+      "not-node"
+      nil)))

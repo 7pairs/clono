@@ -132,6 +132,9 @@
 (s/def ::node-type
   ::common/alphabet-string)
 
+(s/def ::nodes
+  (s/coll-of ::node :kind vector?))
+
 (s/def ::pred-result
   boolean?)
 

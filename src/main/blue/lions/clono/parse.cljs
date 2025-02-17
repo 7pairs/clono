@@ -14,6 +14,7 @@
 
 (ns blue.lions.clono.parse
   (:require [cljs.spec.alpha :as s]
+            [clojure.string :as str]
             [blue.lions.clono.ast :as ast]
             [blue.lions.clono.esm :as esm]
             [blue.lions.clono.spec :as spec]))
@@ -48,3 +49,17 @@
     (catch js/Error e
       (throw (ex-info "Failed to generate slug."
                       {:caption caption :cause e})))))
+
+(defn generate-heading-slug
+  [node]
+  {:pre [(s/valid? ::spec/node node)]
+   :post [(s/valid? ::spec/slug %)]}
+  (let [caption (->> node
+                  ast/extract-texts
+                  (map :value)
+                  str/join)]
+    (try
+      (generate-slug caption)
+      (catch js/Error e
+        (throw (ex-info "Failed to generate heading slug."
+                        {:node node :caption caption :cause e}))))))

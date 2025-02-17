@@ -25,3 +25,23 @@
      (and (some? value)
           (string? value)
           (re-matches #"(?s)<!--(?!>)[^-]*(-[^-][^-]*)*-->" value)))))
+
+(defn node-type?
+  [type node]
+  {:pre [(s/valid? ::spec/node-type type)
+         (s/valid? ::spec/node node)]
+   :post [(s/valid? ::spec/pred-result %)]}
+  (= (:type node) type))
+
+(def text? (partial node-type? "text"))
+
+(defn extract-nodes
+  [pred node]
+  {:pre [(s/valid? ::spec/function pred)
+         (s/valid? ::spec/node node)]
+   :post [(s/valid? ::spec/nodes %)]}
+  (vec
+   (concat (if (pred node) [node] [])
+           (mapcat #(extract-nodes pred %) (get node :children [])))))
+
+(def extract-texts (partial extract-nodes text?))
