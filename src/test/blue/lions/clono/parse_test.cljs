@@ -151,3 +151,45 @@
             (t/is (= "" (:caption data)))
             (t/is (str/starts-with? (ex-message (:cause data))
                                     "Assert failed:"))))))))
+
+(t/deftest add-heading-slugs-test
+  (t/testing "Node has single heading."
+    (t/is (= {:type "root"
+              :children [{:type "text" :value "valueA1"}
+                         {:type "heading"
+                          :children [{:type "text" :value "valueA2"}]
+                          :slug "valuea2"}
+                         {:type "text" :value "valueA3"}]}
+             (parse/add-heading-slugs
+              {:type "root"
+               :children [{:type "text" :value "valueA1"}
+                          {:type "heading"
+                           :children [{:type "text" :value "valueA2"}]}
+                          {:type "text" :value "valueA3"}]}))))
+
+  (t/testing "Node has multiple headings."
+    (t/is (= {:type "root"
+              :children [{:type "heading"
+                          :children [{:type "text" :value "valueB1"}]
+                          :slug "valueb1"}
+                         {:type "text" :value "valueB2"}
+                         {:type "heading"
+                          :children [{:type "text" :value "valueB3"}]
+                          :slug "valueb3"}]}
+             (parse/add-heading-slugs
+              {:type "root"
+               :children [{:type "heading"
+                           :children [{:type "text" :value "valueB1"}]}
+                          {:type "text" :value "valueB2"}
+                          {:type "heading"
+                           :children [{:type "text" :value "valueB3"}]}]}))))
+
+  (t/testing "Node does not have headings."
+    (t/are [node] (= node (parse/add-heading-slugs node))
+      {:type "root"}
+      {:type "root" :children [{:type "text" :value "value"}]}))
+
+  (t/testing "Node has empty children."
+    (t/are [node] (= node (parse/add-heading-slugs node))
+      {:type "root" :children []}
+      {:type "root" :children [{:type "node" :children []}]})))

@@ -33,6 +33,8 @@
    :post [(s/valid? ::spec/pred-result %)]}
   (= (:type node) type))
 
+(def heading? (partial node-type? "heading"))
+
 (def text? (partial node-type? "text"))
 
 (defn extract-nodes

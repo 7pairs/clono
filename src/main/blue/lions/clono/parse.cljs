@@ -63,3 +63,18 @@
       (catch js/Error e
         (throw (ex-info "Failed to generate heading slug."
                         {:node node :caption caption :cause e}))))))
+
+(defn add-heading-slugs
+  [node]
+  {:pre [(s/valid? ::spec/node node)]
+   :post [(s/valid? ::spec/node %)]}
+  (letfn [(update-node
+            [target]
+            (let [updated-node (if (ast/heading? target)
+                                 (assoc target
+                                        :slug (generate-heading-slug target))
+                                 target)]
+              (if (seq (:children target))
+                (update updated-node :children #(mapv update-node %))
+                updated-node)))]
+    (update-node node)))
