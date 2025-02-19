@@ -63,6 +63,9 @@
 (def config
   ::edn)
 
+(s/def ::directive-name
+  ::common/alphabet-string)
+
 (s/def ::edn
   (s/and map?
          (complement nil?)

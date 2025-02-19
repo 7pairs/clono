@@ -49,6 +49,32 @@
       "not-node"
       nil)))
 
+(t/deftest text-directive?-test
+  (t/testing "Node is text directive."
+    (t/is (true? (ast/text-directive? "directive"
+                                      {:type "textDirective"
+                                       :name "directive"}))))
+
+  (t/testing "Node is not text directive."
+    (t/is (false? (ast/text-directive? "directive"
+                                       {:type "text" :name "directive"}))))
+
+  (t/testing "Directive names do not match."
+    (t/is (false? (ast/text-directive? "directive"
+                                       {:type "textDirective" :name "name"}))))
+
+  (t/testing "Directive name is invalid."
+    (t/is (thrown-with-msg? js/Error #"Assert failed:"
+                            (ast/text-directive? nil {:type "textDirective"
+                                                      :name "directive"}))))
+
+  (t/testing "Node is invalid."
+    (t/are [node] (thrown-with-msg? js/Error #"Assert failed:"
+                                    (ast/text-directive? "directive" node))
+      {:name "directive"}
+      "not-node"
+      nil)))
+
 (t/deftest extract-nodes-test
   (t/testing "Node itself is target."
     (t/is (= [{:type "text" :value "value"}]

@@ -193,3 +193,70 @@
     (t/are [node] (= node (parse/add-heading-slugs node))
       {:type "root" :children []}
       {:type "root" :children [{:type "node" :children []}]})))
+
+(t/deftest add-index-ids-test
+  (let [create-generator (fn []
+                           (let [counter (atom 0)]
+                             #(swap! counter inc)))]
+
+    (t/testing "Node has indices."
+      (t/is (= {:type "root" :children [{:type "textDirective"
+                                         :name "index"
+                                         :id "index-1"
+                                         :order 1}
+                                        {:type "text" :value "value"}
+                                        {:type "textDirective"
+                                         :name "index"
+                                         :id "index-2"
+                                         :order 2}]}
+               (parse/add-index-ids
+                {:type "root" :children [{:type "textDirective"
+                                          :name "index"}
+                                         {:type "text" :value "value"}
+                                         {:type "textDirective"
+                                          :name "index"}]}
+                (create-generator)))))
+
+    (t/testing "Node has indices and children."
+      (t/is (= {:type "root"
+                :children [{:type "textDirective"
+                            :name "index"
+                            :id "index-1"
+                            :order 1}
+                           {:type "text" :value "value1"}
+                           {:type "node"
+                            :children [{:type "textDirective"
+                                        :name "index"
+                                        :id "index-2"
+                                        :order 2}
+                                       {:type "text" :value "value2"}
+                                       {:type "textDirective"
+                                        :name "index"
+                                        :id "index-3"
+                                        :order 3}]}
+                           {:type "text" :value "value3"}
+                           {:type "textDirective"
+                            :name "index"
+                            :id "index-4"
+                            :order 4}]}
+               (parse/add-index-ids
+                {:type "root"
+                 :children [{:type "textDirective" :name "index"}
+                            {:type "text" :value "value1"}
+                            {:type "node"
+                             :children [{:type "textDirective" :name "index"}
+                                        {:type "text" :value "value2"}
+                                        {:type "textDirective" :name "index"}]}
+                            {:type "text" :value "value3"}
+                            {:type "textDirective" :name "index"}]}
+                (create-generator)))))
+
+    (t/testing "Node does not have indices."
+      (t/are [node] (= node (parse/add-index-ids node (create-generator)))
+        {:type "root"}
+        {:type "root" :children [{:type "text" :value "value"}]}))
+
+    (t/testing "Node has empty children."
+      (t/are [node] (= node (parse/add-index-ids node (create-generator)))
+        {:type "root" :children []}
+        {:type "root" :children [{:type "node" :children []}]}))))

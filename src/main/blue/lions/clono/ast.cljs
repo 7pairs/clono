@@ -37,6 +37,16 @@
 
 (def text? (partial node-type? "text"))
 
+(defn text-directive?
+  [name node]
+  {:pre [(s/valid? ::spec/directive-name name)
+         (s/valid? ::spec/node node)]
+   :post [(s/valid? ::spec/pred-result %)]}
+  (and (= (:type node) "textDirective")
+       (= (:name node) name)))
+
+(def index? (partial text-directive? "index"))
+
 (defn extract-nodes
   [pred node]
   {:pre [(s/valid? ::spec/function pred)

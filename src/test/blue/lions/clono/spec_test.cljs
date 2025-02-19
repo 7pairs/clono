@@ -173,6 +173,21 @@
       "not-map"
       nil)))
 
+(t/deftest directive-name-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/directive-name value)
+      "directivename"
+      "DIRECTIVENAME"
+      "DirectiveName"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/directive-name value))
+      "1nvalid"
+      "invalid directive name"
+      ""
+      :not-string
+      nil)))
+
 (t/deftest edn-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/edn value)

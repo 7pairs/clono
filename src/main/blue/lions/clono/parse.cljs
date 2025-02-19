@@ -78,3 +78,21 @@
                 (update updated-node :children #(mapv update-node %))
                 updated-node)))]
     (update-node node)))
+
+(defn add-index-ids
+  [node generate-order]
+  {:pre [(s/valid? ::spec/node node)
+         (s/valid? ::spec/function generate-order)]
+   :post [(s/valid? ::spec/node %)]}
+  (letfn [(update-node
+           [target]
+           (let [updated-node (if (ast/index? target)
+                                (let [order (generate-order)]
+                                  (assoc target
+                                         :id (str "index-" order)
+                                         :order order))
+                                target)]
+             (if (seq (:children target))
+               (update updated-node :children #(mapv update-node %))
+               updated-node)))]
+    (update-node node)))
