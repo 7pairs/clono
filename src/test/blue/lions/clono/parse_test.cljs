@@ -260,3 +260,26 @@
       (t/are [node] (= node (parse/add-index-ids node (create-generator)))
         {:type "root" :children []}
         {:type "root" :children [{:type "node" :children []}]}))))
+
+(t/deftest create-order-generator-test
+  (t/testing "Initial order is set."
+    (let [generator (parse/create-order-generator 5)]
+      (t/is (= 6 (generator)))
+      (t/is (= 7 (generator)))
+      (t/is (= 8 (generator)))))
+
+  (t/testing "Initial order is not set."
+    (let [generator (parse/create-order-generator)]
+      (t/is (= 1 (generator)))
+      (t/is (= 2 (generator)))
+      (t/is (= 3 (generator)))))
+
+  (t/testing "Multiple generators are called."
+    (let [generator1 (parse/create-order-generator)
+          generator2 (parse/create-order-generator 10)]
+      (t/is (= 1 (generator1)))
+      (t/is (= 2 (generator1)))
+      (t/is (= 11 (generator2)))
+      (t/is (= 12 (generator2)))
+      (t/is (= 3 (generator1)))
+      (t/is (= 13 (generator2))))))

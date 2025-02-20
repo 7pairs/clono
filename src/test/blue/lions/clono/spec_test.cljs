@@ -514,6 +514,19 @@
       "not-vector"
       nil)))
 
+(t/deftest order-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/order value)
+      0
+      1
+      100))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/order value))
+      -1
+      "1"
+      nil)))
+
 (t/deftest pred-result-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/pred-result value)

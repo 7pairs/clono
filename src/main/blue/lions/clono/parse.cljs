@@ -96,3 +96,13 @@
                (update updated-node :children #(mapv update-node %))
                updated-node)))]
     (update-node node)))
+
+(defn create-order-generator
+  ([]
+   {:post [(s/valid? ::spec/function %)]}
+   (create-order-generator 0))
+  ([initial-order]
+   {:pre [(s/valid? ::spec/order initial-order)]
+    :post [(s/valid? ::spec/function %)]}
+   (let [counter (atom initial-order)]
+     #(swap! counter inc))))

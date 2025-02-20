@@ -138,6 +138,10 @@
 (s/def ::nodes
   (s/coll-of ::node :kind vector?))
 
+(s/def ::order
+  (s/and integer?
+         #(>= % 0)))
+
 (s/def ::pred-result
   boolean?)
 
