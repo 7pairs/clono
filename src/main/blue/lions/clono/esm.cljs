@@ -38,5 +38,20 @@
     (finally
       (.unregister fix-esm))))
 
+(def from-markdown
+  (load-esm "mdast-util-from-markdown" "fromMarkdown"))
+
+(def gfm-footnote
+  (load-esm "micromark-extension-gfm-footnote" "gfmFootnote"))
+
+(def gfm-footnote-from-markdown
+  (load-esm "mdast-util-gfm-footnote" "gfmFootnoteFromMarkdown"))
+
+(def directive
+  (load-esm "micromark-extension-directive" "directive"))
+
+(def directive-from-markdown
+  (load-esm "mdast-util-directive" "directiveFromMarkdown"))
+
 (def github-slugger
   (load-esm "github-slugger" "default"))

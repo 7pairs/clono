@@ -106,3 +106,25 @@
     :post [(s/valid? ::spec/function %)]}
    (let [counter (atom initial-order)]
      #(swap! counter inc))))
+
+(defn markdown->ast
+  [markdown order-generator]
+  {:pre [(s/valid? ::spec/markdown markdown)
+         (s/valid? ::spec/function order-generator)]
+   :post [(s/valid? ::spec/node %)]}
+  (try
+    (let [js-ast (esm/from-markdown
+                  markdown
+                  (clj->js {:extensions [(esm/gfm-footnote)
+                                         (esm/directive)]
+                            :mdastExtensions [(esm/gfm-footnote-from-markdown)
+                                              (esm/directive-from-markdown)]}))
+          ast (js->clj js-ast {:keywordize-keys true})]
+      (-> ast
+          remove-comments
+          remove-positions
+          add-heading-slugs
+          (add-index-ids order-generator)))
+    (catch js/Error e
+      (throw (ex-info "Failed to convert Markdown to AST."
+                      {:markdown markdown :cause e})))))

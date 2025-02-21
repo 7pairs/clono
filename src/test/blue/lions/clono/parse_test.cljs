@@ -283,3 +283,43 @@
       (t/is (= 12 (generator2)))
       (t/is (= 3 (generator1)))
       (t/is (= 13 (generator2))))))
+
+(t/deftest markdown->ast-test
+  (t/testing "String is valid as Markdown."
+    (t/is (= {:type "root"
+              :children [{:type "heading"
+                          :depth 1
+                          :children [{:type "text" :value "Markdown"}]
+                          :slug "markdown"}]}
+             (parse/markdown->ast "# Markdown" (fn [] 1)))))
+
+  (t/testing "String is empty."
+    (t/is (= {:type "root" :children []}
+             (parse/markdown->ast "" (fn [] 1)))))
+
+  (t/testing "Markdown has footnotes."
+    (t/is (= {:type "root"
+              :children [{:type "paragraph"
+                          :children [{:type "text" :value "I have footnote"}
+                                     {:type "footnoteReference"
+                                      :identifier "1"
+                                      :label "1"}
+                                     {:type "text" :value "."}]}
+                         {:type "footnoteDefinition"
+                          :identifier "1"
+                          :label "1"
+                          :children [{:type "paragraph"
+                                      :children [{:type "text"
+                                                  :value "I'm footnote."}]}]}]}
+             (parse/markdown->ast
+              "I have footnote[^1].\n\n[^1]: I'm footnote." (fn [] 1)))))
+
+  (t/testing "Markdown has directives."
+    (t/is (= {:type "root"
+              :children [{:type "paragraph"
+                          :children [{:type "textDirective"
+                                      :name "element"
+                                      :attributes {:key "value"}
+                                      :children [{:type "text"
+                                                  :value "content"}]}]}]}
+             (parse/markdown->ast ":element[content]{key=value}" (fn [] 1))))))
