@@ -17,6 +17,7 @@
             [clojure.string :as str]
             [blue.lions.clono.ast :as ast]
             [blue.lions.clono.esm :as esm]
+            [blue.lions.clono.log :as logger]
             [blue.lions.clono.spec :as spec]))
 
 (defn remove-comments
@@ -128,3 +129,25 @@
     (catch js/Error e
       (throw (ex-info "Failed to convert Markdown to AST."
                       {:markdown markdown :cause e})))))
+
+(defn parse-manuscripts
+  [manuscripts order-generator]
+  {:pre [(s/valid? ::spec/manuscripts manuscripts)
+         (s/valid? ::spec/function order-generator)]
+   :post [(s/valid? ::spec/documents %)]}
+  (vec
+   (keep
+    (fn [{:keys [name type markdown]}]
+      (try
+        {:name name
+         :type type
+         :ast (markdown->ast markdown order-generator)}
+        (catch js/Error e
+          (logger/log :error
+                      "Failed to parse markdown."
+                      {:name name
+                       :type type
+                       :markdown markdown
+                       :cause (ex-message e)})
+          nil)))
+    manuscripts)))

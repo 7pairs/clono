@@ -18,6 +18,7 @@
             [blue.lions.clono.spec :as spec]
             [blue.lions.clono.spec.catalog :as catalog]
             [blue.lions.clono.spec.common :as common]
+            [blue.lions.clono.spec.document :as document]
             [blue.lions.clono.spec.manuscript :as manuscript]
             [blue.lions.clono.spec.node :as node]))
 
@@ -186,6 +187,108 @@
       "invalid directive name"
       ""
       :not-string
+      nil)))
+
+(t/deftest document_ast-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::document/ast value)
+      {:type "type"}
+      {:type "type" :extra-key "extra-value"}))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::document/ast value))
+      {:type "12345"}
+      {:type ""}
+      {:type :not-string}
+      {:type nil}
+      {:extra-key "extra-value"}
+      {}
+      "not-map"
+      nil)))
+
+(t/deftest document_name-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::document/name value)
+      "name.md"
+      "日本語"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::document/name value))
+      "invalid\\name"
+      "invalid/name"
+      "invalid:name"
+      "invalid*name"
+      "invalid?name"
+      "invalid\"name"
+      "invalid>name"
+      "invalid<name"
+      "invalid|name"
+      ""
+      :not-string
+      nil)))
+
+(t/deftest document_type-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::document/type value)
+      :forewords
+      :chapters
+      :appendices
+      :afterwords))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::document/type value))
+      :invalid
+      "forewords"
+      nil)))
+
+(t/deftest document-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::spec/document
+                    {:name "name.md" :type :chapters :ast {:type "type"}})))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/document value))
+      {:name :not-string :type :chapters :ast {:type "type"}}
+      {:name "name.md" :type :invalid :ast {:type "type"}}
+      {:name "name.md" :type :chapters :ast "not-map"}
+      {:name "name.md" :type :chapters}
+      {:name "name.md" :ast {:type "type"}}
+      {:type :chapters :ast {:type "type"}}
+      {:name "name.md"
+       :type :chapters
+       :ast {:type "type"}
+       :extra-key "extra-value"}
+      {:extra-key "extra-value"}
+      {}
+      "not-map"
+      nil)))
+
+(t/deftest documents-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/documents value)
+      [{:name "name.md" :type :chapters :ast {:type "type"}}]
+      [{:name "name1.md" :type :chapters :ast {:type "typeA"}}
+       {:name "name2.md" :type :appendices :ast {:type "typeB"}}]
+      []))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/documents value))
+      [{:name :not-string :type :chapters :ast {:type "type"}}]
+      [{:name "name.md" :type :invalid :ast {:type "type"}}]
+      [{:name "name.md" :type :chapters :ast "not-map"}]
+      [{:name "name.md" :type :chapters}]
+      [{:name "name.md" :ast {:type "type"}}]
+      [{:type :chapters :ast {:type "type"}}]
+      [{:name "name.md"
+        :type :chapters
+        :ast {:type "type"}
+        :extra-key "extra-value"}]
+      [{:extra-key "extra-value"}]
+      ["not-map"]
+      [nil]
+      [{:name "name1.md" :type :chapters :ast {:type "typeA"}}
+       {:name :not-string :type :chapters :ast {:type "typeB"}}]
+      "not-vector"
       nil)))
 
 (t/deftest edn-test

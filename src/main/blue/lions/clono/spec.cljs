@@ -17,6 +17,7 @@
             [clojure.string :as str]
             [blue.lions.clono.spec.catalog :as catalog]
             [blue.lions.clono.spec.common :as common]
+            [blue.lions.clono.spec.document :as document]
             [blue.lions.clono.spec.manuscript :as manuscript]
             [blue.lions.clono.spec.node :as node]))
 
@@ -65,6 +66,24 @@
 
 (s/def ::directive-name
   ::common/alphabet-string)
+
+(def document_ast
+  ::node)
+
+(def document_name
+  ::file-name)
+
+(s/def ::document/type
+  #{:forewords :chapters :appendices :afterwords})
+
+(s/def ::document
+  (s/and (s/keys :req-un [::document/name
+                          ::document/type
+                          ::document/ast])
+         #(every? #{:name :type :ast} (keys %))))
+
+(s/def ::documents
+  (s/coll-of ::document :kind vector?))
 
 (s/def ::edn
   (s/and map?
@@ -160,6 +179,12 @@
 
 (s/def ::config
   config)
+
+(s/def ::document/ast
+  document_ast)
+
+(s/def ::document/name
+  document_name)
 
 (s/def ::manuscript/markdown
   manuscript_markdown)

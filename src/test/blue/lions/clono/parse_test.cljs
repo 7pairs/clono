@@ -323,3 +323,38 @@
                                       :children [{:type "text"
                                                   :value "content"}]}]}]}
              (parse/markdown->ast ":element[content]{key=value}" (fn [] 1))))))
+
+(t/deftest parse-manuscripts-test
+  (t/testing "All texts are valid as Markdown."
+    (t/is (= [{:name "markdown1.md"
+               :type :chapters
+               :ast {:type "root"
+                     :children [{:type "heading"
+                                 :depth 1
+                                 :children [{:type "text" :value "Markdown1"}]
+                                 :slug "markdown1"}]}}
+              {:name "markdown2.md"
+               :type :appendices
+               :ast {:type "root"
+                     :children [{:type "heading"
+                                 :depth 1
+                                 :children [{:type "text" :value "Markdown2"}]
+                                 :slug "markdown2"}]}}]
+             (parse/parse-manuscripts
+              [{:name "markdown1.md"
+                :type :chapters
+                :markdown "# Markdown1"}
+               {:name "markdown2.md"
+                :type :appendices
+                :markdown "# Markdown2"}]
+              (fn [] 1)))))
+
+  (t/testing "Manuscript list is empty."
+    (t/is (= [] (parse/parse-manuscripts [] (fn [] 1)))))
+
+  (t/testing "Order generator is invalid."
+    (t/is (thrown-with-msg? js/Error #"Assert failed:"
+                            (parse/parse-manuscripts [{:name "markdown.md"
+                                                       :type :chapters
+                                                       :markdown "# Markdown"}]
+                                                     nil)))))
