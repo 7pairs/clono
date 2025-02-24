@@ -47,6 +47,8 @@
 
 (def index? (partial text-directive? "index"))
 
+(def label? (partial text-directive? "label"))
+
 (defn extract-nodes
   [pred node]
   {:pre [(s/valid? ::spec/function pred)
@@ -55,5 +57,7 @@
   (vec
    (concat (if (pred node) [node] [])
            (mapcat #(extract-nodes pred %) (get node :children [])))))
+
+(def extract-labels (partial extract-nodes label?))
 
 (def extract-texts (partial extract-nodes text?))
