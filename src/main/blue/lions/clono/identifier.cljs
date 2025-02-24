@@ -23,3 +23,18 @@
    :post [(s/valid? ::spec/file-name %)]}
   (let [ext (path/extname file-path)]
     (path/basename file-path ext)))
+
+(defn build-url
+  [base-name id & {:keys [extension separator]
+                   :or {extension ".html" separator "#"}}]
+  {:pre [(s/valid? ::spec/file-name base-name)
+         (s/valid? ::spec/id id)]
+   :post [(s/valid? ::spec/url %)]}
+  (str base-name extension separator (js/encodeURIComponent id)))
+
+(defn build-dic-key
+  [base-name id]
+  {:pre [(s/valid? ::spec/file-name base-name)
+         (s/valid? ::spec/id id)]
+   :post [(s/valid? ::spec/id %)]}
+  (str base-name "|" id))

@@ -18,6 +18,7 @@
             [blue.lions.clono.spec.catalog :as catalog]
             [blue.lions.clono.spec.common :as common]
             [blue.lions.clono.spec.document :as document]
+            [blue.lions.clono.spec.heading :as heading]
             [blue.lions.clono.spec.manuscript :as manuscript]
             [blue.lions.clono.spec.node :as node]))
 
@@ -64,6 +65,10 @@
 (def config
   ::edn)
 
+(s/def ::depth
+  (s/and integer?
+         #(<= 1 % 6)))
+
 (s/def ::directive-name
   ::common/alphabet-string)
 
@@ -108,6 +113,36 @@
 
 (s/def ::function
   fn?)
+
+(s/def ::heading/caption
+  ::caption)
+
+(s/def ::heading/depth
+  ::depth)
+
+(def heading_id
+  ::id)
+
+(def heading_url
+  ::url)
+
+(s/def ::heading
+  (s/and (s/keys :req-un [::heading/id
+                          ::heading/depth
+                          ::heading/caption
+                          ::heading/url])
+         #(every? #{:id :depth :caption :url} (keys %))))
+
+(s/def ::heading-or-nil
+  (s/or :heading ::heading
+        :nil nil?))
+
+(def valid-id?
+  (partial valid-string? #{"\\" "/" ":" "*" "?" "\"" ">" "<"}))
+
+(s/def ::id
+  (s/and ::common/non-blank-string
+         valid-id?))
 
 (s/def ::log-data
   (s/and (s/or :map (s/and map?
@@ -177,6 +212,13 @@
   (s/and ::common/non-blank-string
          valid-slug?))
 
+(def valid-url?
+  (partial valid-string? #{"\\" "/" ":" "*" "?" "\"" ">" "<"}))
+
+(s/def ::url
+  (s/and ::common/non-blank-string
+         valid-url?))
+
 (s/def ::config
   config)
 
@@ -185,6 +227,12 @@
 
 (s/def ::document/name
   document_name)
+
+(s/def ::heading/id
+  heading_id)
+
+(s/def ::heading/url
+  heading_url)
 
 (s/def ::manuscript/markdown
   manuscript_markdown)

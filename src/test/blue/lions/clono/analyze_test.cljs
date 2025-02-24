@@ -70,3 +70,76 @@
                               {:type "textDirective"
                                :name "label"
                                :attributes {:id "ID2"}}]})))))
+
+(t/deftest get-heading-info-test
+  (t/testing "Node has valid ID."
+    (t/is (= {:id "markdown|ID"
+              :depth 2
+              :caption "text1"
+              :url "markdown.html#text1"}
+             (analyze/get-heading-info
+              "markdown.md"
+              {:type "heading"
+               :depth 2
+               :children [{:type "textDirective"
+                           :name "label"
+                           :attributes {:id "ID"}}
+                          {:type "text" :value "text1"}]
+               :slug "text1"}))))
+
+  (t/testing "Node has root depth."
+    (t/is (= {:id "markdown"
+              :depth 1
+              :caption "text2"
+              :url "markdown.html#text2"}
+             (analyze/get-heading-info
+              "markdown.md"
+              {:type "heading"
+               :depth 1
+               :children [{:type "text" :value "text2"}]
+               :slug "text2"}))))
+
+  (t/testing "Node has valid ID and root depth."
+    (t/is (= {:id "markdown"
+              :depth 1
+              :caption "text3"
+              :url "markdown.html#text3"}
+             (analyze/get-heading-info
+              "markdown.md"
+              {:type "heading"
+               :depth 1
+               :children [{:type "textDirective"
+                           :name "label"
+                           :attributes {:id "ID"}}
+                          {:type "text" :value "text3"}]
+               :slug "text3"}))))
+
+  (t/testing "Node does not have valid ID or root depth."
+    (t/is (nil? (analyze/get-heading-info
+                 "markdown.md"
+                 {:type "heading"
+                  :depth 2
+                  :children [{:type "text" :value "text4"}]
+                  :slug "text4"}))))
+
+  (t/testing "Node does not have slug."
+    (let [node {:type "heading"
+                :depth 2
+                :children [{:type "textDirective"
+                            :name "label"
+                            :attributes {:id "ID"}}
+                           {:type "text" :value "text5"}]}]
+      (try
+        (analyze/get-heading-info "markdown.md" node)
+        (catch js/Error e
+          (let [data (ex-data e)]
+            (t/is (= "Node does not have slug." (ex-message e)))
+            (t/is (= "markdown.md" (:file-name data)))
+            (t/is (= node (:node data))))))))
+
+  (t/testing "File name is invalid."
+    (t/are [file-name] (thrown-with-msg?
+                        js/Error #"Assert failed:"
+                        (analyze/get-heading-info file-name {:type "heading"}))
+      ""
+      nil)))

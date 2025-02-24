@@ -52,3 +52,52 @@
       ""
       :not-string
       nil)))
+
+(t/deftest build-url-test
+  (t/testing "Base name and ID are valid."
+    (t/is (= "base-name.html#id" (id/build-url "base-name" "id")))
+    (t/is (= "base-name.html#id-2" (id/build-url "base-name" "id-2"))))
+
+  (t/testing "ID contains special characters."
+    (t/is (= "base-name.html#%40id" (id/build-url "base-name" "@id"))))
+
+  (t/testing "Base name is invalid."
+    (t/are [base-name] (thrown-with-msg? js/Error #"Assert failed:"
+                                         (id/build-url base-name "id"))
+      ""
+      nil))
+
+  (t/testing "ID is invalid."
+    (t/are [id] (thrown-with-msg? js/Error #"Assert failed:"
+                                  (id/build-url "base-name" id))
+      ""
+      nil))
+
+  (t/testing "Extension is passed."
+    (t/is (= "base-name.htm#id"
+             (id/build-url "base-name" "id" {:extension ".htm"}))))
+
+  (t/testing "Separator is passed."
+    (t/is (= "base-name.html|id"
+             (id/build-url "base-name" "id" {:separator "|"}))))
+
+  (t/testing "Extension and separator are passed."
+    (t/is (= "base-name.htm|id"
+             (id/build-url "base-name" "id" {:extension ".htm"
+                                             :separator "|"})))))
+
+(t/deftest build-dic-key-test
+  (t/testing "Base name and ID are valid."
+    (t/is (= "base-name|id" (id/build-dic-key "base-name" "id"))))
+
+  (t/testing "Base name is invalid."
+    (t/are [base-name] (thrown-with-msg? js/Error #"Assert failed:"
+                                         (id/build-dic-key base-name "id"))
+      ""
+      nil))
+
+  (t/testing "ID is invalid."
+    (t/are [id] (thrown-with-msg? js/Error #"Assert failed:"
+                                  (id/build-dic-key "base-name" id))
+      ""
+      nil)))
