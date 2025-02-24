@@ -627,6 +627,7 @@
   (t/testing "Fails to verify."
     (t/are [value] (not (s/valid? ::spec/order value))
       -1
+      2.5
       "1"
       nil)))
 
