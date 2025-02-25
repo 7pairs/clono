@@ -30,7 +30,7 @@
           some?)
       (= (:depth node) 1)))
 
-(defn get-heading-info
+(defn get-heading-infos
   [file-name node]
   {:pre [(s/valid? ::spec/file-name file-name)
          (s/valid? ::spec/node node)]
