@@ -58,6 +58,8 @@
    (concat (if (pred node) [node] [])
            (mapcat #(extract-nodes pred %) (get node :children [])))))
 
+(def extract-headings (partial extract-nodes heading?))
+
 (def extract-labels (partial extract-nodes label?))
 
 (def extract-texts (partial extract-nodes text?))

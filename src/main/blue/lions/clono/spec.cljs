@@ -133,6 +133,11 @@
                           ::heading/url])
          #(every? #{:id :depth :caption :url} (keys %))))
 
+(s/def ::heading-dic
+  (s/and map?
+         (complement nil?)
+         (s/every-kv ::id ::heading)))
+
 (s/def ::heading-or-nil
   (s/or :heading ::heading
         :nil nil?))

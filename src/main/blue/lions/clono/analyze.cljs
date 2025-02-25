@@ -59,3 +59,15 @@
                                    {:file-name file-name :node node})))
           url (id/build-url base-name slug)]
       {:id id :depth depth :caption caption :url url})))
+
+(defn create-heading-dic
+  [documents]
+  {:pre [(s/valid? ::spec/documents documents)]
+   :post [(s/valid? ::spec/heading-dic %)]}
+  (->> (for [{:keys [name ast]} documents
+             headings (ast/extract-headings ast)
+             :let [{:keys [id] :as heading-infos}
+                   (get-heading-infos name headings)]
+             :when id]
+         [id heading-infos])
+       (into {})))

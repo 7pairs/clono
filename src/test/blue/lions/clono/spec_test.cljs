@@ -507,6 +507,29 @@
       "not-map"
       nil)))
 
+(t/deftest heading-dic-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/heading-dic value)
+      {"ID" {:id "ID" :depth 1 :caption "caption" :url "markdown.html#id"}}
+      {"ID1" {:id "ID1" :depth 1 :caption "caption1" :url "markdown.html#id1"}
+       "ID2" {:id "ID2" :depth 2 :caption "caption2" :url "markdown.html#id2"}}
+      {}))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/heading-dic value))
+      {:not-string {:id "ID"
+                    :depth 1
+                    :caption "caption"
+                    :url "markdown.html#id"}}
+      {"ID" {:id :not-string
+             :depth 1
+             :caption "caption"
+             :url "markdown.html#id"}}
+      {"ID1" {:id "ID1" :depth 1 :caption "caption1" :url "markdown.html#id1"}
+       "ID2" {:id "ID2" :depth 2 :caption "caption2" :url :not-string}}
+      "not-map"
+      nil)))
+
 (t/deftest heading-or-nil-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/heading-or-nil value)

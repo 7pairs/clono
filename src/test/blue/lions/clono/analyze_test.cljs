@@ -143,3 +143,73 @@
                         (analyze/get-heading-infos file-name {:type "heading"}))
       ""
       nil)))
+
+(t/deftest create-heading-dic-test
+  (t/testing "Documents have headings."
+    (t/is (= {"markdown1" {:id "markdown1"
+                           :depth 1
+                           :caption "value1"
+                           :url "markdown1.html#value1"}
+              "markdown1|ID" {:id "markdown1|ID"
+                              :depth 2
+                              :caption "value3"
+                              :url "markdown1.html#value3"}
+              "markdown2" {:id "markdown2"
+                           :depth 1
+                           :caption "value6"
+                           :url "markdown2.html#value6"}}
+             (analyze/create-heading-dic
+              [{:name "markdown1.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "heading"
+                                  :depth 1
+                                  :children [{:type "text" :value "value1"}]
+                                  :slug "value1"}
+                                 {:type "text" :value "value2"}
+                                 {:type "heading"
+                                  :depth 2
+                                  :children [{:type "textDirective"
+                                              :name "label"
+                                              :attributes {:id "ID"}}
+                                             {:type "text" :value "value3"}]
+                                  :slug "value3"}
+                                 {:type "text" :value "value4"}
+                                 {:type "heading"
+                                  :depth 2
+                                  :children [{:type "text" :value "value5"}]
+                                  :slug "value5"}]}}
+               {:name "markdown2.md"
+                :type :appendices
+                :ast {:type "root"
+                      :children [{:type "heading"
+                                  :depth 1
+                                  :children [{:type "text" :value "value6"}]
+                                  :slug "value6"}]}}]))))
+
+  (t/testing "Documents do not have headings."
+    (t/is (= {}
+             (analyze/create-heading-dic
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "text" :value "value"}]}}]))))
+
+  (t/testing "Documents have invalid AST."
+    (t/are [documents] (thrown-with-msg?
+                        js/Error #"Assert failed:"
+                        (analyze/create-heading-dic documents))
+      {:name "markdown.md" :type :chapters :ast "not-map"}
+      {:name "markdown.md" :type :chapters :ast nil}))
+
+  (t/testing "Documents have headings without slug."
+    (t/is (thrown-with-msg?
+           js/Error #"Node does not have slug\."
+           (analyze/create-heading-dic
+            [{:name "markdown.md"
+              :type :chapters
+              :ast {:type "root"
+                    :children [{:type "heading"
+                                :depth 1
+                                :children [{:type "text"
+                                            :value "value"}]}]}}])))))
