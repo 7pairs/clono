@@ -65,9 +65,9 @@
   {:pre [(s/valid? ::spec/documents documents)]
    :post [(s/valid? ::spec/heading-dic %)]}
   (->> (for [{:keys [name ast]} documents
-             headings (ast/extract-headings ast)
+             nodes (ast/extract-headings ast)
              :let [{:keys [id] :as heading-infos}
-                   (get-heading-infos name headings)]
+                   (get-heading-infos name nodes)]
              :when id]
          [id heading-infos])
        (into {})))
