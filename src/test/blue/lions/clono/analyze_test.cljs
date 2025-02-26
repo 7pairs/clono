@@ -16,6 +16,42 @@
   (:require [cljs.test :as t]
             [blue.lions.clono.analyze :as analyze]))
 
+(t/deftest create-toc-item-test
+  (t/testing "Node has single text."
+    (t/is (= {:depth 1
+              :caption "text1"
+              :url "markdown.html#text1"}
+             (analyze/create-toc-item
+              "markdown.md"
+              {:type "heading"
+               :depth 1
+               :children [{:type "text" :value "text1"}]
+               :slug "text1"}))))
+
+  (t/testing "Node has multiple texts."
+    (t/is (= {:depth 2
+              :caption "text2text3"
+              :url "markdown.html#text2text3"}
+             (analyze/create-toc-item
+              "markdown.md"
+              {:type "heading"
+               :depth 2
+               :children [{:type "text" :value "text2"}
+                          {:type "text" :value "text3"}]
+               :slug "text2text3"}))))
+
+  (t/testing "Node does not have slug."
+    (let [node {:type "heading"
+                :depth 3
+                :children [{:type "text" :value "text4"}]}]
+      (try
+        (analyze/create-toc-item "markdown.md" node)
+        (catch js/Error e
+          (let [data (ex-data e)]
+            (t/is (= "Node does not have slug." (ex-message e)))
+            (t/is (= "markdown.md" (:file-name data)))
+            (t/is (= node (:node data)))))))))
+
 (t/deftest has-valid-id-or-root-depth?-test
   (t/testing "Node has valid ID."
     (t/is (true? (analyze/has-valid-id-or-root-depth?

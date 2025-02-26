@@ -19,6 +19,27 @@
             [blue.lions.clono.identifier :as id]
             [blue.lions.clono.spec :as spec]))
 
+(defn create-toc-item
+  [file-name node]
+  {:pre [(s/valid? ::spec/file-name file-name)
+         (s/valid? ::spec/node node)]
+   :post [(s/valid? ::spec/toc-item %)]}
+  (let [depth (:depth node)
+        caption (->> node
+                     ast/extract-texts
+                     (map :value)
+                     str/join)
+        base-name (try
+                    (id/extract-base-name file-name)
+                    (catch js/Error e
+                      (throw (ex-info "Failed to extract base name."
+                                      {:file-name file-name :cause e}))))
+        slug (or (:slug node)
+                 (throw (ex-info "Node does not have slug."
+                                 {:file-name file-name :node node})))
+        url (id/build-url base-name slug)]
+    {:depth depth :caption caption :url url}))
+
 (defn has-valid-id-or-root-depth?
   [node]
   {:pre [(s/valid? ::spec/node node)]
@@ -36,12 +57,8 @@
          (s/valid? ::spec/node node)]
    :post [(s/valid? ::spec/heading-or-nil %)]}
   (when (has-valid-id-or-root-depth? node)
-    (let [depth (:depth node)
-          base-name (try
-                      (id/extract-base-name file-name)
-                      (catch js/Error e
-                        (throw (ex-info "Failed to extract base name."
-                                        {:file-name file-name :cause e}))))
+    (let [{:keys [depth caption url]} (create-toc-item file-name node)
+          base-name (id/extract-base-name file-name)
           label-id (-> node
                        ast/extract-labels
                        first
@@ -49,15 +66,7 @@
                        :id)
           id (if (= depth 1)
                base-name
-               (id/build-dic-key base-name label-id))
-          caption (->> node
-                       ast/extract-texts
-                       (map :value)
-                       str/join)
-          slug (or (:slug node)
-                   (throw (ex-info "Node does not have slug."
-                                   {:file-name file-name :node node})))
-          url (id/build-url base-name slug)]
+               (id/build-dic-key base-name label-id))]
       {:id id :depth depth :caption caption :url url})))
 
 (defn create-heading-dic

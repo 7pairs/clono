@@ -21,7 +21,8 @@
             [blue.lions.clono.spec.document :as document]
             [blue.lions.clono.spec.heading :as heading]
             [blue.lions.clono.spec.manuscript :as manuscript]
-            [blue.lions.clono.spec.node :as node]))
+            [blue.lions.clono.spec.node :as node]
+            [blue.lions.clono.spec.toc :as toc]))
 
 (t/deftest common_alphabet-string-test
   (t/testing "Succeeds to verify."
@@ -883,6 +884,78 @@
       "invalid slug"
       ""
       :not-string
+      nil)))
+
+(t/deftest toc_caption-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::toc/caption "caption")))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::toc/caption value))
+      ""
+      :not-string
+      nil)))
+
+(t/deftest toc_depth-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::toc/depth value)
+      1
+      2
+      3
+      4
+      5
+      6))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::toc/depth value))
+      -1
+      0
+      7
+      3.5
+      "1"
+      nil)))
+
+(t/deftest toc_url-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::toc/url value)
+      "file-name.html#id"
+      "日本語"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::toc/url value))
+      "invalid\\url"
+      "invalid/url"
+      "invalid:url"
+      "invalid*url"
+      "invalid?url"
+      "invalid\"url"
+      "invalid>url"
+      "invalid<url"
+      ""
+      :not-string
+      nil)))
+
+(t/deftest toc-item-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::spec/toc-item {:depth 1
+                                     :caption "caption"
+                                     :url "markdown.html#id"})))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/toc-item value))
+      {:depth 0 :caption "caption" :url "markdown.html#id"}
+      {:depth 1 :caption :not-string :url "markdown.html#id"}
+      {:depth 1 :caption "caption" :url :not-string}
+      {:caption "caption" :url "markdown.html#id"}
+      {:depth 1 :url "markdown.html#id"}
+      {:depth 1 :caption "caption"}
+      {:depth 1
+       :caption "caption"
+       :url "markdown.html#id"
+       :extra-key "extra-value"}
+      {:extra-key "extra-value"}
+      {}
+      "not-map"
       nil)))
 
 (t/deftest url-test

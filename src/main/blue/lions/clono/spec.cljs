@@ -20,7 +20,8 @@
             [blue.lions.clono.spec.document :as document]
             [blue.lions.clono.spec.heading :as heading]
             [blue.lions.clono.spec.manuscript :as manuscript]
-            [blue.lions.clono.spec.node :as node]))
+            [blue.lions.clono.spec.node :as node]
+            [blue.lions.clono.spec.toc :as toc]))
 
 (s/def ::common/alphabet-string
   (s/and string?
@@ -217,6 +218,21 @@
   (s/and ::common/non-blank-string
          valid-slug?))
 
+(s/def ::toc/caption
+  ::caption)
+
+(s/def ::toc/depth
+  ::depth)
+
+(def toc_url
+  ::url)
+
+(s/def ::toc-item
+  (s/and (s/keys :req-un [::toc/depth
+                          ::toc/caption
+                          ::toc/url])
+         #(every? #{:depth :caption :url} (keys %))))
+
 (def valid-url?
   (partial valid-string? #{"\\" "/" ":" "*" "?" "\"" ">" "<"}))
 
@@ -244,3 +260,6 @@
 
 (s/def ::node/type
   node_type)
+
+(s/def ::toc/url
+  toc_url)
