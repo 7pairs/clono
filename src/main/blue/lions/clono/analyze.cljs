@@ -51,7 +51,7 @@
           some?)
       (= (:depth node) 1)))
 
-(defn get-heading-infos
+(defn create-heading-info
   [file-name node]
   {:pre [(s/valid? ::spec/file-name file-name)
          (s/valid? ::spec/node node)]
@@ -75,8 +75,8 @@
    :post [(s/valid? ::spec/heading-dic %)]}
   (->> (for [{:keys [name ast]} documents
              nodes (ast/extract-headings ast)
-             :let [{:keys [id] :as heading-infos}
-                   (get-heading-infos name nodes)]
+             :let [{:keys [id] :as heading-info}
+                   (create-heading-info name nodes)]
              :when id]
-         [id heading-infos])
+         [id heading-info])
        (into {})))
