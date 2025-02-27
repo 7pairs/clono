@@ -233,6 +233,9 @@
                           ::toc/url])
          #(every? #{:depth :caption :url} (keys %))))
 
+(s/def ::toc-items
+  (s/coll-of ::toc-item :kind vector?))
+
 (def valid-url?
   (partial valid-string? #{"\\" "/" ":" "*" "?" "\"" ">" "<"}))
 

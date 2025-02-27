@@ -958,6 +958,34 @@
       "not-map"
       nil)))
 
+(t/deftest toc-items-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/toc-items value)
+      [{:depth 1 :caption "caption" :url "markdown.html#id"}]
+      [{:depth 1 :caption "caption1" :url "markdown.html#id1"}
+       {:depth 2 :caption "caption2" :url "markdown.html#id2"}]
+      []))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/toc-items value))
+      [{:depth 0 :caption "caption" :url "markdown.html#id"}]
+      [{:depth 1 :caption :not-string :url "markdown.html#id"}]
+      [{:depth 1 :caption "caption" :url :not-string}]
+      [{:caption "caption" :url "markdown.html#id"}]
+      [{:depth 1 :url "markdown.html#id"}]
+      [{:depth 1 :caption "caption"}]
+      [{:depth 1
+        :caption "caption"
+        :url "markdown.html#id"
+        :extra-key "extra-value"}]
+      [{:extra-key "extra-value"}]
+      ["not-map"]
+      [nil]
+      [{:depth 1 :caption "caption1" :url "markdown.html#id1"}
+       {:depth 0 :caption "caption2" :url "markdown.html#id2"}]
+      "not-vector"
+      nil)))
+
 (t/deftest url-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/url value)

@@ -40,6 +40,16 @@
         url (id/build-url base-name slug)]
     {:depth depth :caption caption :url url}))
 
+(defn create-toc-items
+  [documents]
+  {:pre [(s/valid? ::spec/documents documents)]
+   :post [(s/valid? ::spec/toc-items %)]}
+  (vec
+   (mapcat (fn [{:keys [name ast]}]
+             (map #(create-toc-item name %)
+                  (ast/extract-headings ast)))
+           documents)))
+
 (defn has-valid-id-or-root-depth?
   [node]
   {:pre [(s/valid? ::spec/node node)]

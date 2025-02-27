@@ -52,6 +52,56 @@
             (t/is (= "markdown.md" (:file-name data)))
             (t/is (= node (:node data)))))))))
 
+(t/deftest create-toc-items-test
+  (t/testing "Documents have headings."
+    (t/is (= [{:depth 1 :caption "text1" :url "markdown1.html#text1"}
+              {:depth 2 :caption "text3" :url "markdown1.html#text3"}
+              {:depth 2 :caption "text5" :url "markdown1.html#text5"}
+              {:depth 1 :caption "text6" :url "markdown2.html#text6"}]
+             (analyze/create-toc-items
+              [{:name "markdown1.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "heading"
+                                  :depth 1
+                                  :children [{:type "text" :value "text1"}]
+                                  :slug "text1"}
+                                 {:type "text" :value "text2"}
+                                 {:type "heading"
+                                  :depth 2
+                                  :children [{:type "textDirective"
+                                              :name "label"
+                                              :attributes {:id "ID"}}
+                                             {:type "text" :value "text3"}]
+                                  :slug "text3"}
+                                 {:type "text" :value "text4"}
+                                 {:type "heading"
+                                  :depth 2
+                                  :children [{:type "text" :value "text5"}]
+                                  :slug "text5"}]}}
+               {:name "markdown2.md"
+                :type :appendices
+                :ast {:type "root"
+                      :children [{:type "heading"
+                                  :depth 1
+                                  :children [{:type "text" :value "text6"}]
+                                  :slug "text6"}]}}]))))
+
+  (t/testing "Documents do not have headings."
+    (t/is (= []
+             (analyze/create-toc-items
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "text" :value "value"}]}}]))))
+
+  (t/testing "Documents have invalid AST."
+    (t/are [documents] (thrown-with-msg?
+                        js/Error #"Assert failed:"
+                        (analyze/create-toc-items documents))
+      [{:name "markdown.md" :type :chapters :ast "not-map"}]
+      [{:name "markdown.md" :type :chapters :ast nil}])))
+
 (t/deftest has-valid-id-or-root-depth?-test
   (t/testing "Node has valid ID."
     (t/is (true? (analyze/has-valid-id-or-root-depth?
