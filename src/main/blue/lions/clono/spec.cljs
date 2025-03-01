@@ -112,6 +112,11 @@
   (s/and ::common/non-blank-string
          valid-file-path?))
 
+(s/def ::footnote-dic
+  (s/and map?
+         (complement nil?)
+         (s/every-kv ::id ::node)))
+
 (s/def ::function
   fn?)
 

@@ -400,6 +400,21 @@
       :not-string
       nil)))
 
+(t/deftest footnote-dic-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/footnote-dic value)
+      {"ID" {:type "type"}}
+      {"ID1" {:type "typeA"} "ID2" {:type "typeB"}}
+      {}))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/footnote-dic value))
+      {:not-string {:type "type"}}
+      {"ID" "not-node"}
+      {"ID1" {:type "typeA"} :not-string {:type "typeB"}}
+      "not-map"
+      nil)))
+
 (t/deftest function-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/function value)

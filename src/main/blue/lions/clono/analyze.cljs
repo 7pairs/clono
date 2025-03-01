@@ -90,3 +90,16 @@
              :when id]
          [id heading-info])
        (into {})))
+
+(defn create-footnote-dic
+  [documents]
+  {:pre [(s/valid? ::spec/documents documents)]
+   :post [(s/valid? ::spec/footnote-dic %)]}
+  (->> (for [{:keys [name ast]} documents
+             footnote (ast/extract-footnote-definition ast)
+             :let [base-name (id/extract-base-name name)
+                   id (:identifier footnote)
+                   child (first (:children footnote))]
+             :when child]
+         [(id/build-dic-key base-name id) child])
+       (into {})))

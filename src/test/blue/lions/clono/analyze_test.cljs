@@ -300,3 +300,46 @@
                                 :depth 1
                                 :children [{:type "text"
                                             :value "value"}]}]}}])))))
+
+(t/deftest create-footnote-dic-test
+  (t/testing "Documents have footnotes."
+    (t/is (= {"markdown1|footnote1" {:type "text" :value "Footnote-1."}
+              "markdown1|footnote2" {:type "text" :value "Footnote-2."}
+              "markdown2|footnote3" {:type "text" :value "Footnote-3."}}
+             (analyze/create-footnote-dic
+              [{:name "markdown1.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "footnoteDefinition"
+                                  :identifier "footnote1"
+                                  :children [{:type "text"
+                                              :value "Footnote-1."}]}
+                                 {:type "text" :value "I am not footnote."}
+                                 {:type "footnoteDefinition"
+                                  :identifier "footnote2"
+                                  :children [{:type "text"
+                                              :value "Footnote-2."}]}]}}
+               {:name "markdown2.md"
+                :type :appendices
+                :ast {:type "root"
+                      :children [{:type "footnoteDefinition"
+                                  :identifier "footnote3"
+                                  :children [{:type "text"
+                                              :value "Footnote-3."}]}]}}]))))
+
+  (t/testing "Documents do not have footnotes."
+    (t/is (= {}
+             (analyze/create-footnote-dic
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "text" :value "value"}]}}]))))
+
+  (t/testing "Documents have footnotes without children."
+    (t/is (= {}
+             (analyze/create-footnote-dic
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "footnoteDefinition"
+                                  :identifier "footnote"}]}}])))))
