@@ -109,3 +109,46 @@
   {:pre [(s/valid? ::spec/ruby ruby)]
    :post [(s/valid? ::spec/pred-result %)]}
   (boolean (re-matches #"^[a-z]+" ruby)))
+
+(def vowel-map
+  {"あ" "あ" "か" "あ" "さ" "あ" "た" "あ" "な" "あ" "は" "あ" "ま" "あ"
+   "や" "あ" "ら" "あ" "わ" "あ"
+   "い" "い" "き" "い" "し" "い" "ち" "い" "に" "い" "ひ" "い" "み" "い"
+   "り" "い"
+   "う" "う" "く" "う" "す" "う" "つ" "う" "ぬ" "う" "ふ" "う" "む" "う"
+   "ゆ" "う" "る" "う"
+   "え" "え" "け" "え" "せ" "え" "て" "え" "ね" "え" "へ" "え" "め" "え"
+   "れ" "え"
+   "お" "お" "こ" "お" "そ" "お" "と" "お" "の" "お" "ほ" "お" "も" "お"
+   "よ" "お" "ろ" "お" "を" "お"})
+
+(def seion-map
+  {"ゔ" "う"
+   "ぁ" "あ" "ぃ" "い" "ぅ" "う" "ぇ" "え" "ぉ" "お"
+   "が" "か" "ぎ" "き" "ぐ" "く" "げ" "け" "ご" "こ"
+   "ざ" "さ" "じ" "し" "ず" "す" "ぜ" "せ" "ぞ" "そ"
+   "だ" "た" "ぢ" "ち" "づ" "つ" "で" "て" "ど" "と"
+   "っ" "つ"
+   "ば" "は" "び" "ひ" "ぶ" "ふ" "べ" "へ" "ぼ" "ほ"
+   "ぱ" "は" "ぴ" "ひ" "ぷ" "ふ" "ぺ" "へ" "ぽ" "ほ"
+   "ゃ" "や" "ゅ" "ゆ" "ょ" "よ"
+   "ゎ" "わ"})
+
+(defn normalize-hiragana
+  [ruby]
+  {:pre [(s/valid? ::spec/ruby ruby)]
+   :post [(s/valid? ::spec/ruby %)]}
+  (let [chars (seq ruby)]
+    (apply str
+           (loop [result []
+                  rest-chars chars]
+             (if (empty? rest-chars)
+               result
+               (let [current (str (first rest-chars))
+                     next-chars (rest rest-chars)]
+                 (if (= current "ー")
+                   (if-let [vowel (some vowel-map (take-last 1 result))]
+                     (recur (conj result vowel) next-chars)
+                     (recur (conj result current) next-chars))
+                   (let [normalized (get seion-map current current)]
+                     (recur (conj result normalized) next-chars)))))))))
