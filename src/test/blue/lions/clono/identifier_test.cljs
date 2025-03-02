@@ -73,15 +73,15 @@
       ""
       nil))
 
-  (t/testing "Extension is passed."
+  (t/testing "Extension is given."
     (t/is (= "base-name.htm#id"
              (id/build-url "base-name" "id" {:extension ".htm"}))))
 
-  (t/testing "Separator is passed."
+  (t/testing "Separator is given."
     (t/is (= "base-name.html|id"
              (id/build-url "base-name" "id" {:separator "|"}))))
 
-  (t/testing "Extension and separator are passed."
+  (t/testing "Extension and separator are given."
     (t/is (= "base-name.htm|id"
              (id/build-url "base-name" "id" {:extension ".htm"
                                              :separator "|"})))))
