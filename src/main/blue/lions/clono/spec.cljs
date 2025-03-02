@@ -214,6 +214,9 @@
   (s/and string?
          #(re-matches #"[a-zA-Z_$][a-zA-Z0-9_$]*" %)))
 
+(s/def ::ruby
+  ::common/non-blank-string)
+
 (def valid-slug?
   (partial valid-string? #{"!" "\"" "#" "$" "%" "&" "'" "(" ")" "*" "+" "," "."
                            "/" ":" ";" "<" "=" ">" "?" "@" "[" "\\" "]" "^" "`"

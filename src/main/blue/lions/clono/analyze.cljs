@@ -103,3 +103,9 @@
              :when child]
          [(id/build-dic-key base-name id) child])
        (into {})))
+
+(defn english-ruby?
+  [ruby]
+  {:pre [(s/valid? ::spec/ruby ruby)]
+   :post [(s/valid? ::spec/pred-result %)]}
+  (boolean (re-matches #"^[a-z]+" ruby)))

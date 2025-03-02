@@ -343,3 +343,12 @@
                 :ast {:type "root"
                       :children [{:type "footnoteDefinition"
                                   :identifier "footnote"}]}}])))))
+
+(t/deftest english-ruby?-test
+  (t/testing "Ruby is English."
+    (t/is (true? (analyze/english-ruby? "ruby"))))
+
+  (t/testing "Ruby is not English."
+    (t/are [ruby] (false? (analyze/english-ruby? ruby))
+      "ルビ"
+      "12345")))

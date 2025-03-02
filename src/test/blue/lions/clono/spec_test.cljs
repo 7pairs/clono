@@ -858,6 +858,18 @@
       :not-string
       nil)))
 
+(t/deftest ruby-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/ruby value)
+      "ruby"
+      "ルビ"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/ruby value))
+      ""
+      :not-string
+      nil)))
+
 (t/deftest slug-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/slug value)
