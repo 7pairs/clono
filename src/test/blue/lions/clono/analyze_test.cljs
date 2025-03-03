@@ -355,50 +355,29 @@
 
 (t/deftest normalize-hiragana-test
   (t/testing "Seion is given."
-    (t/is (= "あいうえお"
-             (analyze/normalize-hiragana "あいうえお"))))
+    (t/is (= "あいうえお" (analyze/normalize-hiragana "あいうえお"))))
 
   (t/testing "Dakuon is given."
-    (t/is (= "あいうえお"
-             (analyze/normalize-hiragana "あいゔえお")))
-
-    (t/is (= "かきくけこ"
-             (analyze/normalize-hiragana "がぎぐげご")))
-
-    (t/is (= "さしすせそ"
-             (analyze/normalize-hiragana "ざじずぜぞ")))
-
-    (t/is (= "たちつてと"
-             (analyze/normalize-hiragana "だぢづでど")))
-
-    (t/is (= "はひふへほ"
-             (analyze/normalize-hiragana "ばびぶべぼ"))))
+    (t/is (= "あいうえお" (analyze/normalize-hiragana "あいゔえお")))
+    (t/is (= "かきくけこ" (analyze/normalize-hiragana "がぎぐげご")))
+    (t/is (= "さしすせそ" (analyze/normalize-hiragana "ざじずぜぞ")))
+    (t/is (= "たちつてと" (analyze/normalize-hiragana "だぢづでど")))
+    (t/is (= "はひふへほ" (analyze/normalize-hiragana "ばびぶべぼ"))))
 
   (t/testing "Handakuon is given."
-    (t/is (= "はひふへほ"
-             (analyze/normalize-hiragana "ぱぴぷぺぽ"))))
+    (t/is (= "はひふへほ" (analyze/normalize-hiragana "ぱぴぷぺぽ"))))
 
   (t/testing "Youon is given."
-    (t/is (= "やゆよ"
-             (analyze/normalize-hiragana "ゃゅょ")))
-
-    (t/is (= "わをん"
-             (analyze/normalize-hiragana "ゎをん"))))
+    (t/is (= "やゆよ" (analyze/normalize-hiragana "ゃゅょ")))
+    (t/is (= "わをん" (analyze/normalize-hiragana "ゎをん"))))
 
   (t/testing "Sokuon is given."
-    (t/is (= "たちつてと"
-             (analyze/normalize-hiragana "たちってと"))))
+    (t/is (= "たちつてと" (analyze/normalize-hiragana "たちってと"))))
 
   (t/testing "Kogakimoji is given."
-    (t/is (= "あいうえお"
-             (analyze/normalize-hiragana "ぁぃぅぇぉ"))))
+    (t/is (= "あいうえお" (analyze/normalize-hiragana "ぁぃぅぇぉ"))))
 
   (t/testing "Onbiki is given."
-    (t/is (= "ああ"
-             (analyze/normalize-hiragana "あー")))
-
-    (t/is (= "きい"
-             (analyze/normalize-hiragana "きー")))
-
-    (t/is (= "くう"
-             (analyze/normalize-hiragana "ぐー")))))
+    (t/is (= "ああ" (analyze/normalize-hiragana "あー")))
+    (t/is (= "きい" (analyze/normalize-hiragana "きー")))
+    (t/is (= "くう" (analyze/normalize-hiragana "ぐー")))))
