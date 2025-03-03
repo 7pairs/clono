@@ -381,3 +381,27 @@
     (t/is (= "ああ" (analyze/normalize-hiragana "あー")))
     (t/is (= "きい" (analyze/normalize-hiragana "きー")))
     (t/is (= "くう" (analyze/normalize-hiragana "ぐー")))))
+
+(t/deftest create-row-caption-test
+  (t/testing "Ruby is English."
+    (t/is (= "英数字" (analyze/create-row-caption "ruby"))))
+
+  (t/testing "Ruby is Hiragana."
+    (t/is (= "あ行" (analyze/create-row-caption "あかさたな")))
+    (t/is (= "か行" (analyze/create-row-caption "きしちにひ")))
+    (t/is (= "か行" (analyze/create-row-caption "ぐずづぬぶ")))
+    (t/is (= "さ行" (analyze/create-row-caption "せてねへめ")))
+    (t/is (= "さ行" (analyze/create-row-caption "ぞどのぼも")))
+    (t/is (= "た行" (analyze/create-row-caption "たなはまや")))
+    (t/is (= "た行" (analyze/create-row-caption "ぢにびみり")))
+    (t/is (= "な行" (analyze/create-row-caption "ぬふむゆる")))
+    (t/is (= "は行" (analyze/create-row-caption "へめれえけ")))
+    (t/is (= "は行" (analyze/create-row-caption "ぼもよろを")))
+    (t/is (= "は行" (analyze/create-row-caption "ぱまやらわ")))
+    (t/is (= "ま行" (analyze/create-row-caption "みりいきし")))
+    (t/is (= "や行" (analyze/create-row-caption "ゆるうくす")))
+    (t/is (= "ら行" (analyze/create-row-caption "ろをおこそ")))
+    (t/is (= "わ行" (analyze/create-row-caption "わあかさた"))))
+
+  (t/testing "Ruby is invalid."
+    (t/is (= "その他" (analyze/create-row-caption "！あかさた")))))

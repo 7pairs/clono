@@ -152,3 +152,21 @@
                      (recur (conj result current) next-chars))
                    (let [normalized (get seion-map current current)]
                      (recur (conj result normalized) next-chars)))))))))
+
+(defn create-row-caption
+  [ruby]
+  {:pre [(s/valid? ::spec/ruby ruby)]
+   :post [(s/valid? ::spec/caption %)]}
+  (cond
+    (english-ruby? ruby) "英数字"
+    (#{"あ" "い" "う" "え" "お"} (subs (normalize-hiragana ruby) 0 1)) "あ行"
+    (#{"か" "き" "く" "け" "こ"} (subs (normalize-hiragana ruby) 0 1)) "か行"
+    (#{"さ" "し" "す" "せ" "そ"} (subs (normalize-hiragana ruby) 0 1)) "さ行"
+    (#{"た" "ち" "つ" "て" "と"} (subs (normalize-hiragana ruby) 0 1)) "た行"
+    (#{"な" "に" "ぬ" "ね" "の"} (subs (normalize-hiragana ruby) 0 1)) "な行"
+    (#{"は" "ひ" "ふ" "へ" "ほ"} (subs (normalize-hiragana ruby) 0 1)) "は行"
+    (#{"ま" "み" "む" "め" "も"} (subs (normalize-hiragana ruby) 0 1)) "ま行"
+    (#{"や" "ゆ" "よ"} (subs (normalize-hiragana ruby) 0 1)) "や行"
+    (#{"ら" "り" "る" "れ" "ろ"} (subs (normalize-hiragana ruby) 0 1)) "ら行"
+    (#{"わ" "を" "ん"} (subs (normalize-hiragana ruby) 0 1)) "わ行"
+    :else "その他"))
