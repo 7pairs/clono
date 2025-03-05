@@ -170,3 +170,21 @@
     (#{"ら" "り" "る" "れ" "ろ"} (subs (normalize-hiragana ruby) 0 1)) "ら行"
     (#{"わ" "を" "ん"} (subs (normalize-hiragana ruby) 0 1)) "わ行"
     :else "その他"))
+
+(defn insert-row-captions
+  [indices]
+  {:pre [(s/valid? ::spec/indices indices)]
+   :post [(s/valid? ::spec/indices %)]}
+  (loop [result []
+         current-caption nil
+         rest-items indices]
+    (if (empty? rest-items)
+      result
+      (let [{:keys [ruby] :as item} (first rest-items)
+            next-caption (ruby->caption ruby)
+            add-header? (not= current-caption next-caption)]
+        (recur (cond-> result
+                 add-header? (conj {:type :caption :text next-caption})
+                 true        (conj item))
+               next-caption
+               (rest rest-items))))))

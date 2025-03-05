@@ -19,6 +19,7 @@
             [blue.lions.clono.spec.common :as common]
             [blue.lions.clono.spec.document :as document]
             [blue.lions.clono.spec.heading :as heading]
+            [blue.lions.clono.spec.index :as index]
             [blue.lions.clono.spec.manuscript :as manuscript]
             [blue.lions.clono.spec.node :as node]
             [blue.lions.clono.spec.toc :as toc]))
@@ -155,6 +156,39 @@
   (s/and ::common/non-blank-string
          valid-id?))
 
+(s/def ::index/text
+  ::common/non-blank-string)
+
+(s/def ::index/type
+  #{:item :caption})
+
+(def index_ruby
+  ::ruby)
+
+(s/def ::index/urls
+  (s/coll-of ::url :kind vector? :min-count 1))
+
+(s/def ::index
+  (s/or :item ::index-item
+        :caption ::index-caption))
+
+(s/def ::index-caption
+  (s/and (s/keys :req-un [::index/type
+                          ::index/text])
+         #(every? #{:type :text} (keys %))
+         #(= (:type %) :caption)))
+
+(s/def ::index-item
+  (s/and (s/keys :req-un [::index/type
+                          ::index/text
+                          ::index/ruby
+                          ::index/urls])
+         #(every? #{:type :text :ruby :urls} (keys %))
+         #(= (:type %) :item)))
+
+(s/def ::indices
+  (s/coll-of ::index :kind vector?))
+
 (s/def ::log-data
   (s/and (s/or :map (s/and map?
                            (s/every-kv keyword? any?))
@@ -265,6 +299,9 @@
 
 (s/def ::heading/url
   heading_url)
+
+(s/def ::index/ruby
+  index_ruby)
 
 (s/def ::manuscript/markdown
   manuscript_markdown)
