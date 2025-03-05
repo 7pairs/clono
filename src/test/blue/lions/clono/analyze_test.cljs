@@ -382,26 +382,26 @@
     (t/is (= "きい" (analyze/normalize-hiragana "きー")))
     (t/is (= "くう" (analyze/normalize-hiragana "ぐー")))))
 
-(t/deftest create-row-caption-test
+(t/deftest ruby->caption-test
   (t/testing "Ruby is English."
-    (t/is (= "英数字" (analyze/create-row-caption "ruby"))))
+    (t/is (= "英数字" (analyze/ruby->caption "ruby"))))
 
   (t/testing "Ruby is Hiragana."
-    (t/is (= "あ行" (analyze/create-row-caption "あかさたな")))
-    (t/is (= "か行" (analyze/create-row-caption "きしちにひ")))
-    (t/is (= "か行" (analyze/create-row-caption "ぐずづぬぶ")))
-    (t/is (= "さ行" (analyze/create-row-caption "せてねへめ")))
-    (t/is (= "さ行" (analyze/create-row-caption "ぞどのぼも")))
-    (t/is (= "た行" (analyze/create-row-caption "たなはまや")))
-    (t/is (= "た行" (analyze/create-row-caption "ぢにびみり")))
-    (t/is (= "な行" (analyze/create-row-caption "ぬふむゆる")))
-    (t/is (= "は行" (analyze/create-row-caption "へめれえけ")))
-    (t/is (= "は行" (analyze/create-row-caption "ぼもよろを")))
-    (t/is (= "は行" (analyze/create-row-caption "ぱまやらわ")))
-    (t/is (= "ま行" (analyze/create-row-caption "みりいきし")))
-    (t/is (= "や行" (analyze/create-row-caption "ゆるうくす")))
-    (t/is (= "ら行" (analyze/create-row-caption "ろをおこそ")))
-    (t/is (= "わ行" (analyze/create-row-caption "わあかさた"))))
+    (t/is (= "あ行" (analyze/ruby->caption "あかさたな")))
+    (t/is (= "か行" (analyze/ruby->caption "きしちにひ")))
+    (t/is (= "か行" (analyze/ruby->caption "ぐずづぬぶ")))
+    (t/is (= "さ行" (analyze/ruby->caption "せてねへめ")))
+    (t/is (= "さ行" (analyze/ruby->caption "ぞどのぼも")))
+    (t/is (= "た行" (analyze/ruby->caption "たなはまや")))
+    (t/is (= "た行" (analyze/ruby->caption "ぢにびみり")))
+    (t/is (= "な行" (analyze/ruby->caption "ぬふむゆる")))
+    (t/is (= "は行" (analyze/ruby->caption "へめれえけ")))
+    (t/is (= "は行" (analyze/ruby->caption "ぼもよろを")))
+    (t/is (= "は行" (analyze/ruby->caption "ぱまやらわ")))
+    (t/is (= "ま行" (analyze/ruby->caption "みりいきし")))
+    (t/is (= "や行" (analyze/ruby->caption "ゆるうくす")))
+    (t/is (= "ら行" (analyze/ruby->caption "ろをおこそ")))
+    (t/is (= "わ行" (analyze/ruby->caption "わあかさた"))))
 
   (t/testing "Ruby is invalid."
-    (t/is (= "その他" (analyze/create-row-caption "！あかさた")))))
+    (t/is (= "その他" (analyze/ruby->caption "！あかさた")))))

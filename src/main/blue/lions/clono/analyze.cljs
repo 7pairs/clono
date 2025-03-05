@@ -153,7 +153,7 @@
                    (let [normalized (get seion-map current current)]
                      (recur (conj result normalized) next-chars)))))))))
 
-(defn create-row-caption
+(defn ruby->caption
   [ruby]
   {:pre [(s/valid? ::spec/ruby ruby)]
    :post [(s/valid? ::spec/caption %)]}
