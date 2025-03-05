@@ -40,6 +40,9 @@
   [invalid-chars value]
   (not-any? invalid-chars (seq value)))
 
+(s/def ::caption
+  ::common/non-blank-string)
+
 (s/def ::catalog/afterwords
   (s/coll-of ::file-name :kind vector?))
 
@@ -60,9 +63,6 @@
          (fn [key]
            (some #(contains? key %)
                  [:forewords :chapters :appendices :afterwords]))))
-
-(s/def ::caption
-  ::common/non-blank-string)
 
 (def config
   ::edn)
@@ -156,14 +156,14 @@
   (s/and ::common/non-blank-string
          valid-id?))
 
+(def index_ruby
+  ::ruby)
+
 (s/def ::index/text
   ::common/non-blank-string)
 
 (s/def ::index/type
   #{:item :caption})
-
-(def index_ruby
-  ::ruby)
 
 (s/def ::index/urls
   (s/coll-of ::url :kind vector? :min-count 1))

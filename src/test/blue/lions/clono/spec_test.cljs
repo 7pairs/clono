@@ -61,6 +61,16 @@
       :not-string
       nil)))
 
+(t/deftest caption-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::spec/caption "caption")))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/caption value))
+      ""
+      :not-string
+      nil)))
+
 (t/deftest catalog_afterwords-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::catalog/afterwords value)
@@ -151,16 +161,6 @@
       {:extra-key "extra-value"}
       {}
       "not-map"
-      nil)))
-
-(t/deftest caption-test
-  (t/testing "Succeeds to verify."
-    (t/is (s/valid? ::spec/caption "caption")))
-
-  (t/testing "Fails to verify."
-    (t/are [value] (not (s/valid? ::spec/caption value))
-      ""
-      :not-string
       nil)))
 
 (t/deftest config-test
@@ -593,6 +593,18 @@
       :not-string
       nil)))
 
+(t/deftest index_ruby-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::index/ruby value)
+      "ruby"
+      "ルビ"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::index/ruby value))
+      ""
+      :not-string
+      nil)))
+
 (t/deftest index_text-test
   (t/testing "Succeeds to verify."
     (t/is (s/valid? ::index/text "text")))
@@ -613,18 +625,6 @@
     (t/are [value] (not (s/valid? ::index/type value))
       :invalid
       "item"
-      nil)))
-
-(t/deftest index_ruby-test
-  (t/testing "Succeeds to verify."
-    (t/are [value] (s/valid? ::index/ruby value)
-      "ruby"
-      "ルビ"))
-
-  (t/testing "Fails to verify."
-    (t/are [value] (not (s/valid? ::index/ruby value))
-      ""
-      :not-string
       nil)))
 
 (t/deftest index_urls-test
@@ -671,46 +671,6 @@
       "not-map"
       nil))))
 
-(t/deftest indices-test
-  (t/testing "Succeeds to verify."
-    (t/are [value] (s/valid? ::spec/indices value)
-      [{:type :item :text "text" :ruby "ruby" :urls ["file-name.html#id"]}]
-      [{:type :caption :text "text"}]
-      [{:type :item :text "text1" :ruby "ruby1" :urls ["file-name.html#id1"]}
-       {:type :item :text "text2" :ruby "ruby2" :urls ["file-name.html#id2"]}]
-      [{:type :caption :text "text1"} {:type :caption :text "text2"}]
-      [{:type :item :text "text1" :ruby "ruby" :urls ["file-name.html#id"]}
-       {:type :caption :text "text2"}]
-      []))
-
-  (t/testing "Fails to verify."
-    (t/are [value] (not (s/valid? ::spec/indices value))
-      [{:type "item" :text "text" :ruby "ruby" :urls ["url"]}]
-      [{:type :item :text :not-string :ruby "ruby" :urls ["url"]}]
-      [{:type :item :text "text" :ruby :not-string :urls ["url"]}]
-      [{:type :item :text "text" :ruby "ruby" :urls "not-vector"}]
-      [{:text "text" :ruby "ruby" :urls ["url"]}]
-      [{:type :item :ruby "ruby" :urls ["url"]}]
-      [{:type :item :text "text" :urls ["url"]}]
-      [{:type :item :text "text" :ruby "ruby"}]
-      [{:type :item
-        :text "text"
-        :ruby "ruby"
-        :urls ["url"]
-        :extra-key "extra-value"}]
-      [{:type "caption" :text "text"}]
-      [{:type :caption :text :not-string}]
-      [{:type :caption}]
-      [{:text "text"}]
-      [{:type :caption :text "text" :extra-key "extra-value"}]
-      [{:extra-key "extra-value"}]
-      ["not-vector"]
-      [{:type :item :text "text" :ruby "ruby" :urls ["url"]}
-       {:type "caption" :text "text"}]
-      [{:type "item" :text "text" :ruby "ruby" :urls ["url"]}
-       {:type :caption :text "text"}]
-      nil)))
-
 (t/deftest index-caption-test
   (t/testing "Succeeds to verify."
     (t/is (s/valid? ::spec/index-caption {:type :caption :text "text"})))
@@ -750,6 +710,46 @@
        :extra-key "extra-value"}
       {:extra-key "extra-value"}
       "not-map"
+      nil)))
+
+(t/deftest indices-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/indices value)
+      [{:type :item :text "text" :ruby "ruby" :urls ["file-name.html#id"]}]
+      [{:type :caption :text "text"}]
+      [{:type :item :text "text1" :ruby "ruby1" :urls ["file-name.html#id1"]}
+       {:type :item :text "text2" :ruby "ruby2" :urls ["file-name.html#id2"]}]
+      [{:type :caption :text "text1"} {:type :caption :text "text2"}]
+      [{:type :item :text "text1" :ruby "ruby" :urls ["file-name.html#id"]}
+       {:type :caption :text "text2"}]
+      []))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/indices value))
+      [{:type "item" :text "text" :ruby "ruby" :urls ["url"]}]
+      [{:type :item :text :not-string :ruby "ruby" :urls ["url"]}]
+      [{:type :item :text "text" :ruby :not-string :urls ["url"]}]
+      [{:type :item :text "text" :ruby "ruby" :urls "not-vector"}]
+      [{:text "text" :ruby "ruby" :urls ["url"]}]
+      [{:type :item :ruby "ruby" :urls ["url"]}]
+      [{:type :item :text "text" :urls ["url"]}]
+      [{:type :item :text "text" :ruby "ruby"}]
+      [{:type :item
+        :text "text"
+        :ruby "ruby"
+        :urls ["url"]
+        :extra-key "extra-value"}]
+      [{:type "caption" :text "text"}]
+      [{:type :caption :text :not-string}]
+      [{:type :caption}]
+      [{:text "text"}]
+      [{:type :caption :text "text" :extra-key "extra-value"}]
+      [{:extra-key "extra-value"}]
+      ["not-vector"]
+      [{:type :item :text "text" :ruby "ruby" :urls ["url"]}
+       {:type "caption" :text "text"}]
+      [{:type "item" :text "text" :ruby "ruby" :urls ["url"]}
+       {:type :caption :text "text"}]
       nil)))
 
 (t/deftest log-data-test
