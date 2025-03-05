@@ -156,6 +156,9 @@
   (s/and ::common/non-blank-string
          valid-id?))
 
+(def index_order
+  ::order)
+
 (def index_ruby
   ::ruby)
 
@@ -164,6 +167,9 @@
 
 (s/def ::index/type
   #{:item :caption})
+
+(def index_url
+  ::url)
 
 (s/def ::index/urls
   (s/coll-of ::url :kind vector? :min-count 1))
@@ -177,6 +183,13 @@
                           ::index/text])
          #(every? #{:type :text} (keys %))
          #(= (:type %) :caption)))
+
+(s/def ::index-entry
+  (s/and (s/keys :req-un [::index/order
+                          ::index/text
+                          ::index/ruby
+                          ::index/url])
+         #(every? #{:order :text :ruby :url} (keys %))))
 
 (s/def ::index-item
   (s/and (s/keys :req-un [::index/type
@@ -300,8 +313,14 @@
 (s/def ::heading/url
   heading_url)
 
+(s/def ::index/order
+  index_order)
+
 (s/def ::index/ruby
   index_ruby)
+
+(s/def ::index/url
+  index_url)
 
 (s/def ::manuscript/markdown
   manuscript_markdown)

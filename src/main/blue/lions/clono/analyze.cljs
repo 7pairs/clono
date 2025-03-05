@@ -104,6 +104,27 @@
          [(id/build-dic-key base-name id) child])
        (into {})))
 
+(defn build-index-entry
+  [base-name node]
+  {:pre [(s/valid? ::spec/file-name base-name)
+         (s/valid? ::spec/node node)]
+   :post [(s/valid? ::spec/index-entry %)]}
+  (let [{:keys [order id attributes]} node]
+    (when (or (nil? order) (nil? id))
+      (throw (ex-info "Node is invalid."
+                      {:base-name base-name
+                       :node node
+                       :missing (cond
+                                  (nil? order) :order
+                                  (nil? id) :id)})))
+    {:order order
+     :text (->> node
+                ast/extract-texts
+                (map :value)
+                str/join)
+     :ruby (:ruby attributes)
+     :url (id/build-url base-name id)}))
+
 (defn english-ruby?
   [ruby]
   {:pre [(s/valid? ::spec/ruby ruby)]

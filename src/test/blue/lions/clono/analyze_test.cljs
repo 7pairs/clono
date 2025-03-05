@@ -344,6 +344,51 @@
                       :children [{:type "footnoteDefinition"
                                   :identifier "footnote"}]}}])))))
 
+(t/deftest build-index-entry-test
+  (t/testing "Node is valid."
+    (t/is (= {:order 1
+              :text "テスト"
+              :ruby "てすと"
+              :url "markdown.html#index-1"}
+             (analyze/build-index-entry
+              "markdown"
+              {:type "textDirective"
+               :name "index"
+               :attributes {:ruby "てすと"}
+               :children [{:type "text" :value "テスト"}]
+               :id "index-1"
+               :order 1}))))
+
+  (t/testing "Node does not have order."
+    (let [node {:type "textDirective"
+                :name "index"
+                :attributes {:ruby "てすと"}
+                :children [{:type "text" :value "テスト"}]
+                :id "index-1"}]
+      (try
+        (analyze/build-index-entry "markdown" node)
+        (catch js/Error e
+          (let [data (ex-data e)]
+            (t/is (= "Node is invalid." (ex-message e)))
+            (t/is (= "markdown" (:base-name data)))
+            (t/is (= node (:node data)))
+            (t/is (= :order (:missing data))))))))
+
+  (t/testing "Node does not have ID."
+    (let [node {:type "textDirective"
+                :name "index"
+                :attributes {:ruby "てすと"}
+                :children [{:type "text" :value "テスト"}]
+                :order 1}]
+      (try
+        (analyze/build-index-entry "markdown" node)
+        (catch js/Error e
+          (let [data (ex-data e)]
+            (t/is (= "Node is invalid." (ex-message e)))
+            (t/is (= "markdown" (:base-name data)))
+            (t/is (= node (:node data)))
+            (t/is (= :id (:missing data)))))))))
+
 (t/deftest english-ruby?-test
   (t/testing "Ruby is English."
     (t/is (true? (analyze/english-ruby? "ruby"))))

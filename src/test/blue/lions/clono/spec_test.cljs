@@ -593,6 +593,20 @@
       :not-string
       nil)))
 
+(t/deftest index_order-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::index/order value)
+      0
+      1
+      100))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::index/order value))
+      -1
+      2.5
+      "1"
+      nil)))
+
 (t/deftest index_ruby-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::index/ruby value)
@@ -625,6 +639,26 @@
     (t/are [value] (not (s/valid? ::index/type value))
       :invalid
       "item"
+      nil)))
+
+(t/deftest index_url-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::index/url value)
+      "file-name.html#id"
+      "日本語"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::index/url value))
+      "invalid\\url"
+      "invalid/url"
+      "invalid:url"
+      "invalid*url"
+      "invalid?url"
+      "invalid\"url"
+      "invalid>url"
+      "invalid<url"
+      ""
+      :not-string
       nil)))
 
 (t/deftest index_urls-test
@@ -682,6 +716,32 @@
       {:type :caption}
       {:text "text"}
       {:type :caption :text "text" :extra-key "extra-value"}
+      {:extra-key "extra-value"}
+      "not-map"
+      nil)))
+
+(t/deftest index-entry-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::spec/index-entry {:order 1
+                                        :text "text"
+                                        :ruby "ruby"
+                                        :url "file-name.html#id"})))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/index-entry value))
+      {:order "1" :text "text" :ruby "ruby" :url "file-name.html#id"}
+      {:order 1 :text :not-string :ruby "ruby" :url "file-name.html#id"}
+      {:order 1 :text "text" :ruby :not-string :url "file-name.html#id"}
+      {:order 1 :text "text" :ruby "ruby" :url :not-string}
+      {:text "text" :ruby "ruby" :url "file-name.html#id"}
+      {:order 1 :ruby "ruby" :url "file-name.html#id"}
+      {:order 1 :text "text" :url "file-name.html#id"}
+      {:order 1 :text "text" :ruby "ruby"}
+      {:order 1
+       :text "text"
+       :ruby "ruby"
+       :url "file-name.html#id"
+       :extra-key "extra-value"}
       {:extra-key "extra-value"}
       "not-map"
       nil)))
