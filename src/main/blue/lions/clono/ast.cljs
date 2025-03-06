@@ -65,6 +65,8 @@
 
 (def extract-headings (partial extract-nodes heading?))
 
+(def extract-indices (partial extract-nodes index?))
+
 (def extract-labels (partial extract-nodes label?))
 
 (def extract-texts (partial extract-nodes text?))

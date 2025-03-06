@@ -512,3 +512,522 @@
 
   (t/testing "Items are empty."
     (t/is (= [] (analyze/insert-row-captions [])))))
+
+(t/deftest create-indices-test
+  (t/testing "Indices are not duplicated."
+    (t/is (= [{:type :caption :text "さ行"}
+              {:type :item
+               :text "索引"
+               :ruby "さくいん"
+               :urls ["markdown.html#index-1"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "text" :value "value1"}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "さくいん"}
+                                  :children [{:type "text" :value "索引"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "text" :value "value2"}]}}])))
+    (t/is (= [{:type :caption :text "あ行"}
+              {:type :item
+               :text "いい"
+               :ruby "いい"
+               :urls ["markdown.html#index-9"]}
+              {:type :item
+               :text "いー"
+               :ruby "いー"
+               :urls ["markdown.html#index-8"]}
+              {:type :caption :text "か行"}
+              {:type :item
+               :text "かっと"
+               :ruby "かっと"
+               :urls ["markdown.html#index-5"]}
+              {:type :item
+               :text "かつと"
+               :ruby "かつと"
+               :urls ["markdown.html#index-4"]}
+              {:type :caption :text "さ行"}
+              {:type :item
+               :text "しょう"
+               :ruby "しょう"
+               :urls ["markdown.html#index-7"]}
+              {:type :item
+               :text "しよう"
+               :ruby "しよう"
+               :urls ["markdown.html#index-6"]}
+              {:type :caption :text "は行"}
+              {:type :item
+               :text "はい"
+               :ruby "はい"
+               :urls ["markdown.html#index-1"]}
+              {:type :item
+               :text "ばい"
+               :ruby "ばい"
+               :urls ["markdown.html#index-2"]}
+              {:type :item
+               :text "ぱい"
+               :ruby "ぱい"
+               :urls ["markdown.html#index-3"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "はい"}
+                                  :children [{:type "text" :value "はい"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ばい"}
+                                  :children [{:type "text" :value "ばい"}]
+                                  :id "index-2"
+                                  :order 2}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ぱい"}
+                                  :children [{:type "text" :value "ぱい"}]
+                                  :id "index-3"
+                                  :order 3}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "かつと"}
+                                  :children [{:type "text" :value "かつと"}]
+                                  :id "index-4"
+                                  :order 4}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "かっと"}
+                                  :children [{:type "text" :value "かっと"}]
+                                  :id "index-5"
+                                  :order 5}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "しよう"}
+                                  :children [{:type "text" :value "しよう"}]
+                                  :id "index-6"
+                                  :order 6}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "しょう"}
+                                  :children [{:type "text" :value "しょう"}]
+                                  :id "index-7"
+                                  :order 7}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "いー"}
+                                  :children [{:type "text" :value "いー"}]
+                                  :id "index-8"
+                                  :order 8}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "いい"}
+                                  :children [{:type "text" :value "いい"}]
+                                  :id "index-9"
+                                  :order 9}]}}]))))
+
+  (t/testing "Indices are duplicated."
+    (t/is (= [{:type :caption :text "さ行"}
+              {:type :item
+               :text "索引"
+               :ruby "さくいん"
+               :urls ["markdown.html#index-1"
+                      "markdown.html#index-2"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "text" :value "value1"}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "さくいん"}
+                                  :children [{:type "text" :value "索引"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "text" :value "value2"}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "さくいん"}
+                                  :children [{:type "text" :value "索引"}]
+                                  :id "index-2"
+                                  :order 2}
+                                 {:type "text" :value "value3"}]}}])))
+    (t/is (= [{:type :caption :text "英数字"}
+              {:type :item
+               :text "Indexデータ"
+               :ruby "indexでーた"
+               :urls ["markdown1.html#index-1"
+                      "markdown2.html#index-2"]}]
+             (analyze/create-indices
+              [{:name "markdown1.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "text" :value "value1"}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "indexでーた"}
+                                  :children [{:type "text"
+                                              :value "Indexデータ"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "text" :value "value2"}]}}
+               {:name "markdown2.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "text" :value "value3"}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "indexでーた"}
+                                  :children [{:type "text"
+                                              :value "Indexデータ"}]
+                                  :id "index-2"
+                                  :order 2}
+                                 {:type "text" :value "value4"}]}}])))
+    (t/is (= [{:type :caption :text "英数字"}
+              {:type :item
+               :text "9m"
+               :ruby "9m"
+               :urls ["markdown.html#index-1"
+                      "markdown.html#index-2"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "text" :value "value1"}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "9m"}
+                                  :children [{:type "text" :value "9m"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "text" :value "value2"}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "9m"}
+                                  :children [{:type "text" :value "9m"}]
+                                  :id "index-2"
+                                  :order 2}]}}]))))
+
+  (t/testing "Indices contain number and alphabet."
+    (t/is (= [{:type :caption :text "英数字"}
+              {:type :item
+               :text "1m"
+               :ruby "1m"
+               :urls ["markdown.html#index-3"]}
+              {:type :item
+               :text "2m"
+               :ruby "2m"
+               :urls ["markdown.html#index-4"]}
+              {:type :item
+               :text "5m"
+               :ruby "5m"
+               :urls ["markdown.html#index-1"]}
+              {:type :item
+               :text "6m"
+               :ruby "6m"
+               :urls ["markdown.html#index-5"]}
+              {:type :item
+               :text "9m"
+               :ruby "9m"
+               :urls ["markdown.html#index-2"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "5m"}
+                                  :children [{:type "text" :value "5m"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "9m"}
+                                  :children [{:type "text" :value "9m"}]
+                                  :id "index-2"
+                                  :order 2}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "1m"}
+                                  :children [{:type "text" :value "1m"}]
+                                  :id "index-3"
+                                  :order 3}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "2m"}
+                                  :children [{:type "text" :value "2m"}]
+                                  :id "index-4"
+                                  :order 4}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "6m"}
+                                  :children [{:type "text" :value "6m"}]
+                                  :id "index-5"
+                                  :order 5}]}}])))
+    (t/is (= [{:type :caption :text "英数字"}
+              {:type :item
+               :text "12m"
+               :ruby "12m"
+               :urls ["markdown.html#index-4"]}
+              {:type :item
+               :text "15m"
+               :ruby "15m"
+               :urls ["markdown.html#index-1"]}
+              {:type :item
+               :text "21m"
+               :ruby "21m"
+               :urls ["markdown.html#index-3"]}
+              {:type :item
+               :text "26m"
+               :ruby "26m"
+               :urls ["markdown.html#index-5"]}
+              {:type :item
+               :text "29m"
+               :ruby "29m"
+               :urls ["markdown.html#index-2"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "15m"}
+                                  :children [{:type "text" :value "15m"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "29m"}
+                                  :children [{:type "text" :value "29m"}]
+                                  :id "index-2"
+                                  :order 2}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "21m"}
+                                  :children [{:type "text" :value "21m"}]
+                                  :id "index-3"
+                                  :order 3}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "12m"}
+                                  :children [{:type "text" :value "12m"}]
+                                  :id "index-4"
+                                  :order 4}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "26m"}
+                                  :children [{:type "text" :value "26m"}]
+                                  :id "index-5"
+                                  :order 5}]}}])))
+    (t/is (= [{:type :caption :text "英数字"}
+              {:type :item
+               :text "15m"
+               :ruby "15m"
+               :urls ["markdown.html#index-2"]}
+              {:type :item
+               :text "19m"
+               :ruby "19m"
+               :urls ["markdown.html#index-1"]}
+              {:type :item
+               :text "1m"
+               :ruby "1m"
+               :urls ["markdown.html#index-3"]}
+              {:type :item
+               :text "2m"
+               :ruby "2m"
+               :urls ["markdown.html#index-5"]}
+              {:type :item
+               :text "m1"
+               :ruby "m1"
+               :urls ["markdown.html#index-4"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "19m"}
+                                  :children [{:type "text" :value "19m"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "15m"}
+                                  :children [{:type "text" :value "15m"}]
+                                  :id "index-2"
+                                  :order 2}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "1m"}
+                                  :children [{:type "text" :value "1m"}]
+                                  :id "index-3"
+                                  :order 3}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "m1"}
+                                  :children [{:type "text" :value "m1"}]
+                                  :id "index-4"
+                                  :order 4}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "2m"}
+                                  :children [{:type "text" :value "2m"}]
+                                  :id "index-5"
+                                  :order 5}]}}]))))
+
+  (t/testing "Indices are alphabetic."
+    (t/is (= [{:type :caption :text "英数字"}
+              {:type :item
+               :text "A"
+               :ruby "a"
+               :urls ["markdown.html#index-3"]}
+              {:type :item
+               :text "B"
+               :ruby "b"
+               :urls ["markdown.html#index-1"]}
+              {:type :item
+               :text "C"
+               :ruby "c"
+               :urls ["markdown.html#index-4"]}
+              {:type :item
+               :text "D"
+               :ruby "d"
+               :urls ["markdown.html#index-2"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "b"}
+                                  :children [{:type "text" :value "B"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "d"}
+                                  :children [{:type "text" :value "D"}]
+                                  :id "index-2"
+                                  :order 2}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "a"}
+                                  :children [{:type "text" :value "A"}]
+                                  :id "index-3"
+                                  :order 3}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "c"}
+                                  :children [{:type "text" :value "C"}]
+                                  :id "index-4"
+                                  :order 4}]}}])))
+    (t/is (= [{:type :caption :text "英数字"}
+              {:type :item
+               :text "AA"
+               :ruby "aa"
+               :urls ["markdown.html#index-1"]}
+              {:type :item
+               :text "AAA"
+               :ruby "aaa"
+               :urls ["markdown.html#index-3"]}
+              {:type :item
+               :text "AC"
+               :ruby "ac"
+               :urls ["markdown.html#index-5"]}
+              {:type :item
+               :text "AI"
+               :ruby "ai"
+               :urls ["markdown.html#index-4"]}
+              {:type :item
+               :text "BA"
+               :ruby "ba"
+               :urls ["markdown.html#index-2"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+               :type :chapters
+               :ast {:type "root"
+                     :children [{:type "textDirective"
+                                 :name "index"
+                                 :attributes {:ruby "aa"}
+                                 :children [{:type "text" :value "AA"}]
+                                 :id "index-1"
+                                 :order 1}
+                                {:type "textDirective"
+                                 :name "index"
+                                 :attributes {:ruby "ba"}
+                                 :children [{:type "text" :value "BA"}]
+                                 :id "index-2"
+                                 :order 2}
+                                {:type "textDirective"
+                                 :name "index"
+                                 :attributes {:ruby "aaa"}
+                                 :children [{:type "text" :value "AAA"}]
+                                 :id "index-3"
+                                 :order 3}
+                                {:type "textDirective"
+                                 :name "index"
+                                 :attributes {:ruby "ai"}
+                                 :children [{:type "text" :value "AI"}]
+                                 :id "index-4"
+                                 :order 4}
+                                {:type "textDirective"
+                                 :name "index"
+                                 :attributes {:ruby "ac"}
+                                 :children [{:type "text" :value "AC"}]
+                                 :id "index-5"
+                                 :order 5}]}}]))))
+
+  (t/testing "Documents do not have indices."
+    (t/is (= []
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "text" :value "value"}]}}]))))
+
+  (t/testing "Documents have indices without order."
+    (let [node {:type "textDirective"
+                :name "index"
+                :attributes {:ruby "さくいん"}
+                :children [{:type "text" :value "索引"}]
+                :id "index-1"}]
+      (try
+        (analyze/create-indices
+         [{:name "markdown.md"
+           :type :chapters
+           :ast {:type "root"
+                 :children [{:type "text" :value "value1"}
+                            node
+                            {:type "text" :value "value2"}]}}])
+        (catch js/Error e
+          (let [data (ex-data e)]
+            (t/is (= "Node is invalid." (ex-message e)))
+            (t/is (= "markdown" (:base-name data)))
+            (t/is (= node (:node data)))
+            (t/is (= :order (:missing data))))))))
+
+  (t/testing "Documents have indices without ID."
+    (let [node {:type "textDirective"
+                :name "index"
+                :attributes {:ruby "さくいん"}
+                :children [{:type "text" :value "索引"}]
+                :order 1}]
+      (try
+        (analyze/create-indices
+         [{:name "markdown.md"
+           :type :chapters
+           :ast {:type "root"
+                 :children [{:type "text" :value "value1"}
+                            node
+                            {:type "text" :value "value2"}]}}])
+        (catch js/Error e
+          (let [data (ex-data e)]
+            (t/is (= "Node is invalid." (ex-message e)))
+            (t/is (= "markdown" (:base-name data)))
+            (t/is (= node (:node data)))
+            (t/is (= :id (:missing data)))))))))

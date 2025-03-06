@@ -209,3 +209,27 @@
                  true        (conj item))
                next-caption
                (rest rest-items))))))
+
+(defn create-indices
+  [documents]
+  {:pre [(s/valid? ::spec/documents documents)]
+   :post [(s/valid? ::spec/indices %)]}
+  (->> (for [{:keys [name ast]} documents
+             index (ast/extract-indices ast)]
+         (let [base-name (id/extract-base-name name)]
+           (build-index-entry base-name index)))
+       (group-by :text)
+       (map (fn [[text entries]]
+              (let [{:keys [ruby]} (first entries)]
+                {:type :item
+                 :text text
+                 :ruby ruby
+                 :urls (->> entries
+                            (sort-by :order)
+                            (mapv :url))})))
+       (sort-by (fn [{:keys [ruby]}]
+                  (if (english-ruby? ruby)
+                    ["" ruby]
+                    [(normalize-hiragana ruby) ruby])))
+       vec
+       insert-row-captions))
