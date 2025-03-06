@@ -33,6 +33,8 @@
    :post [(s/valid? ::spec/pred-result %)]}
   (= (:type node) type))
 
+(def footnote-definition? (partial node-type? "footnoteDefinition"))
+
 (def heading? (partial node-type? "heading"))
 
 (def text? (partial node-type? "text"))
@@ -47,6 +49,8 @@
 
 (def index? (partial text-directive? "index"))
 
+(def label? (partial text-directive? "label"))
+
 (defn extract-nodes
   [pred node]
   {:pre [(s/valid? ::spec/function pred)
@@ -55,5 +59,14 @@
   (vec
    (concat (if (pred node) [node] [])
            (mapcat #(extract-nodes pred %) (get node :children [])))))
+
+(def extract-footnote-definition
+  (partial extract-nodes footnote-definition?))
+
+(def extract-headings (partial extract-nodes heading?))
+
+(def extract-indices (partial extract-nodes index?))
+
+(def extract-labels (partial extract-nodes label?))
 
 (def extract-texts (partial extract-nodes text?))

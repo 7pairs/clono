@@ -18,8 +18,11 @@
             [blue.lions.clono.spec.catalog :as catalog]
             [blue.lions.clono.spec.common :as common]
             [blue.lions.clono.spec.document :as document]
+            [blue.lions.clono.spec.heading :as heading]
+            [blue.lions.clono.spec.index :as index]
             [blue.lions.clono.spec.manuscript :as manuscript]
-            [blue.lions.clono.spec.node :as node]))
+            [blue.lions.clono.spec.node :as node]
+            [blue.lions.clono.spec.toc :as toc]))
 
 (s/def ::common/alphabet-string
   (s/and string?
@@ -36,6 +39,9 @@
 (defn- valid-string?
   [invalid-chars value]
   (not-any? invalid-chars (seq value)))
+
+(s/def ::caption
+  ::common/non-blank-string)
 
 (s/def ::catalog/afterwords
   (s/coll-of ::file-name :kind vector?))
@@ -58,11 +64,12 @@
            (some #(contains? key %)
                  [:forewords :chapters :appendices :afterwords]))))
 
-(s/def ::caption
-  ::common/non-blank-string)
-
 (def config
   ::edn)
+
+(s/def ::depth
+  (s/and integer?
+         #(<= 1 % 6)))
 
 (s/def ::directive-name
   ::common/alphabet-string)
@@ -106,8 +113,94 @@
   (s/and ::common/non-blank-string
          valid-file-path?))
 
+(s/def ::footnote-dic
+  (s/and map?
+         (complement nil?)
+         (s/every-kv ::id ::node)))
+
 (s/def ::function
   fn?)
+
+(s/def ::heading/caption
+  ::caption)
+
+(s/def ::heading/depth
+  ::depth)
+
+(def heading_id
+  ::id)
+
+(def heading_url
+  ::url)
+
+(s/def ::heading
+  (s/and (s/keys :req-un [::heading/id
+                          ::heading/depth
+                          ::heading/caption
+                          ::heading/url])
+         #(every? #{:id :depth :caption :url} (keys %))))
+
+(s/def ::heading-dic
+  (s/and map?
+         (complement nil?)
+         (s/every-kv ::id ::heading)))
+
+(s/def ::heading-or-nil
+  (s/or :heading ::heading
+        :nil nil?))
+
+(def valid-id?
+  (partial valid-string? #{"\\" "/" ":" "*" "?" "\"" ">" "<"}))
+
+(s/def ::id
+  (s/and ::common/non-blank-string
+         valid-id?))
+
+(def index_order
+  ::order)
+
+(def index_ruby
+  ::ruby)
+
+(s/def ::index/text
+  ::common/non-blank-string)
+
+(s/def ::index/type
+  #{:item :caption})
+
+(def index_url
+  ::url)
+
+(s/def ::index/urls
+  (s/coll-of ::url :kind vector? :min-count 1))
+
+(s/def ::index
+  (s/or :item ::index-item
+        :caption ::index-caption))
+
+(s/def ::index-caption
+  (s/and (s/keys :req-un [::index/type
+                          ::index/text])
+         #(every? #{:type :text} (keys %))
+         #(= (:type %) :caption)))
+
+(s/def ::index-entry
+  (s/and (s/keys :req-un [::index/order
+                          ::index/text
+                          ::index/ruby
+                          ::index/url])
+         #(every? #{:order :text :ruby :url} (keys %))))
+
+(s/def ::index-item
+  (s/and (s/keys :req-un [::index/type
+                          ::index/text
+                          ::index/ruby
+                          ::index/urls])
+         #(every? #{:type :text :ruby :urls} (keys %))
+         #(= (:type %) :item)))
+
+(s/def ::indices
+  (s/coll-of ::index :kind vector?))
 
 (s/def ::log-data
   (s/and (s/or :map (s/and map?
@@ -168,6 +261,9 @@
   (s/and string?
          #(re-matches #"[a-zA-Z_$][a-zA-Z0-9_$]*" %)))
 
+(s/def ::ruby
+  ::common/non-blank-string)
+
 (def valid-slug?
   (partial valid-string? #{"!" "\"" "#" "$" "%" "&" "'" "(" ")" "*" "+" "," "."
                            "/" ":" ";" "<" "=" ">" "?" "@" "[" "\\" "]" "^" "`"
@@ -176,6 +272,31 @@
 (s/def ::slug
   (s/and ::common/non-blank-string
          valid-slug?))
+
+(s/def ::toc/caption
+  ::caption)
+
+(s/def ::toc/depth
+  ::depth)
+
+(def toc_url
+  ::url)
+
+(s/def ::toc-item
+  (s/and (s/keys :req-un [::toc/depth
+                          ::toc/caption
+                          ::toc/url])
+         #(every? #{:depth :caption :url} (keys %))))
+
+(s/def ::toc-items
+  (s/coll-of ::toc-item :kind vector?))
+
+(def valid-url?
+  (partial valid-string? #{"\\" "/" ":" "*" "?" "\"" ">" "<"}))
+
+(s/def ::url
+  (s/and ::common/non-blank-string
+         valid-url?))
 
 (s/def ::config
   config)
@@ -186,8 +307,26 @@
 (s/def ::document/name
   document_name)
 
+(s/def ::heading/id
+  heading_id)
+
+(s/def ::heading/url
+  heading_url)
+
+(s/def ::index/order
+  index_order)
+
+(s/def ::index/ruby
+  index_ruby)
+
+(s/def ::index/url
+  index_url)
+
 (s/def ::manuscript/markdown
   manuscript_markdown)
 
 (s/def ::node/type
   node_type)
+
+(s/def ::toc/url
+  toc_url)

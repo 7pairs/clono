@@ -20,13 +20,6 @@
             [blue.lions.clono.log :as logger]
             [blue.lions.clono.spec :as spec]))
 
-(defn extract-base-name
-  [file-path]
-  {:pre [(s/valid? ::spec/file-path file-path)]
-   :post [(s/valid? ::spec/file-name %)]}
-  (let [ext (path/extname file-path)]
-    (path/basename file-path ext)))
-
 (defn read-file
   [file-path]
   {:pre [(s/valid? ::spec/file-path file-path)]

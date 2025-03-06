@@ -19,8 +19,11 @@
             [blue.lions.clono.spec.catalog :as catalog]
             [blue.lions.clono.spec.common :as common]
             [blue.lions.clono.spec.document :as document]
+            [blue.lions.clono.spec.heading :as heading]
+            [blue.lions.clono.spec.index :as index]
             [blue.lions.clono.spec.manuscript :as manuscript]
-            [blue.lions.clono.spec.node :as node]))
+            [blue.lions.clono.spec.node :as node]
+            [blue.lions.clono.spec.toc :as toc]))
 
 (t/deftest common_alphabet-string-test
   (t/testing "Succeeds to verify."
@@ -55,6 +58,16 @@
 
   (t/testing "Fails to verify."
     (t/are [value] (not (s/valid? ::common/non-nil-string value))
+      :not-string
+      nil)))
+
+(t/deftest caption-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::spec/caption "caption")))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/caption value))
+      ""
       :not-string
       nil)))
 
@@ -150,16 +163,6 @@
       "not-map"
       nil)))
 
-(t/deftest caption-test
-  (t/testing "Succeeds to verify."
-    (t/is (s/valid? ::spec/caption "caption")))
-
-  (t/testing "Fails to verify."
-    (t/are [value] (not (s/valid? ::spec/caption value))
-      ""
-      :not-string
-      nil)))
-
 (t/deftest config-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/config value)
@@ -172,6 +175,25 @@
       {"not-keyword" "value"}
       {:key "value1" "not-keyword" "value2"}
       "not-map"
+      nil)))
+
+(t/deftest depth-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/depth value)
+      1
+      2
+      3
+      4
+      5
+      6))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/depth value))
+      -1
+      0
+      7
+      3.5
+      "1"
       nil)))
 
 (t/deftest directive-name-test
@@ -379,6 +401,21 @@
       :not-string
       nil)))
 
+(t/deftest footnote-dic-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/footnote-dic value)
+      {"ID" {:type "type"}}
+      {"ID1" {:type "typeA"} "ID2" {:type "typeB"}}
+      {}))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/footnote-dic value))
+      {:not-string {:type "type"}}
+      {"ID" "not-node"}
+      {"ID1" {:type "typeA"} :not-string {:type "typeB"}}
+      "not-map"
+      nil)))
+
 (t/deftest function-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/function value)
@@ -389,6 +426,390 @@
   (t/testing "Fails to verify."
     (t/are [value] (not (s/valid? ::spec/function value))
       "not-function"
+      nil)))
+
+(t/deftest heading_caption-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::heading/caption "caption")))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::heading/caption value))
+      ""
+      :not-string
+      nil)))
+
+(t/deftest heading_depth-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::heading/depth value)
+      1
+      2
+      3
+      4
+      5
+      6))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::heading/depth value))
+      -1
+      0
+      7
+      3.5
+      "1"
+      nil)))
+
+(t/deftest heading_id-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::heading/id value)
+      "valid|id"
+      "日本語"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::heading/id value))
+      "invalid\\id"
+      "invalid/id"
+      "invalid:id"
+      "invalid*id"
+      "invalid?id"
+      "invalid\"id"
+      "invalid>id"
+      "invalid<id"
+      ""
+      :not-string
+      nil)))
+
+(t/deftest heading_url-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::heading/url value)
+      "file-name.html#id"
+      "日本語"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::heading/url value))
+      "invalid\\url"
+      "invalid/url"
+      "invalid:url"
+      "invalid*url"
+      "invalid?url"
+      "invalid\"url"
+      "invalid>url"
+      "invalid<url"
+      ""
+      :not-string
+      nil)))
+
+(t/deftest heading-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::spec/heading {:id "ID"
+                                    :depth 1
+                                    :caption "caption"
+                                    :url "markdown.html#id"})))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/heading value))
+      {:id :not-string :depth 1 :caption "caption" :url "markdown.html#id"}
+      {:id "ID" :depth 0 :caption "caption" :url "markdown.html#id"}
+      {:id "ID" :depth 1 :caption :not-string :url "markdown.html#id"}
+      {:id "ID" :depth 1 :caption "caption" :url :not-string}
+      {:depth 1 :caption "caption" :url "markdown.html#id"}
+      {:id "ID" :caption "caption" :url "markdown.html#id"}
+      {:id "ID" :depth 1 :url "markdown.html#id"}
+      {:id "ID" :depth 1 :caption "caption"}
+      {:id "ID"
+       :depth 1
+       :caption "caption"
+       :url "markdown.html#id"
+       :extra-key "extra-value"}
+      {:extra-key "extra-value"}
+      {}
+      "not-map"
+      nil)))
+
+(t/deftest heading-dic-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/heading-dic value)
+      {"ID" {:id "ID" :depth 1 :caption "caption" :url "markdown.html#id"}}
+      {"ID1" {:id "ID1" :depth 1 :caption "caption1" :url "markdown.html#id1"}
+       "ID2" {:id "ID2" :depth 2 :caption "caption2" :url "markdown.html#id2"}}
+      {}))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/heading-dic value))
+      {:not-string {:id "ID"
+                    :depth 1
+                    :caption "caption"
+                    :url "markdown.html#id"}}
+      {"ID" {:id :not-string
+             :depth 1
+             :caption "caption"
+             :url "markdown.html#id"}}
+      {"ID1" {:id "ID1" :depth 1 :caption "caption1" :url "markdown.html#id1"}
+       "ID2" {:id "ID2" :depth 2 :caption "caption2" :url :not-string}}
+      "not-map"
+      nil)))
+
+(t/deftest heading-or-nil-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/heading-or-nil value)
+      {:id "ID" :depth 1 :caption "caption" :url "markdown.html#id"}
+      nil))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/heading value))
+      {:id :not-string :depth 1 :caption "caption" :url "markdown.html#id"}
+      {:id "ID" :depth 0 :caption "caption" :url "markdown.html#id"}
+      {:id "ID" :depth 1 :caption :not-string :url "markdown.html#id"}
+      {:id "ID" :depth 1 :caption "caption" :url :not-string}
+      {:depth 1 :caption "caption" :url "markdown.html#id"}
+      {:id "ID" :caption "caption" :url "markdown.html#id"}
+      {:id "ID" :depth 1 :url "markdown.html#id"}
+      {:id "ID" :depth 1 :caption "caption"}
+      {:id "ID"
+       :depth 1
+       :caption "caption"
+       :url "markdown.html#id"
+       :extra-key "extra-value"}
+      {:extra-key "extra-value"}
+      {}
+      "not-map"
+      nil)))
+
+(t/deftest id-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/id value)
+      "valid|id"
+      "日本語"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/id value))
+      "invalid\\id"
+      "invalid/id"
+      "invalid:id"
+      "invalid*id"
+      "invalid?id"
+      "invalid\"id"
+      "invalid>id"
+      "invalid<id"
+      ""
+      :not-string
+      nil)))
+
+(t/deftest index_order-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::index/order value)
+      0
+      1
+      100))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::index/order value))
+      -1
+      2.5
+      "1"
+      nil)))
+
+(t/deftest index_ruby-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::index/ruby value)
+      "ruby"
+      "ルビ"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::index/ruby value))
+      ""
+      :not-string
+      nil)))
+
+(t/deftest index_text-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::index/text "text")))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::index/text value))
+      ""
+      :not-string
+      nil)))
+
+(t/deftest index_type-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::index/type value)
+      :item
+      :caption))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::index/type value))
+      :invalid
+      "item"
+      nil)))
+
+(t/deftest index_url-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::index/url value)
+      "file-name.html#id"
+      "日本語"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::index/url value))
+      "invalid\\url"
+      "invalid/url"
+      "invalid:url"
+      "invalid*url"
+      "invalid?url"
+      "invalid\"url"
+      "invalid>url"
+      "invalid<url"
+      ""
+      :not-string
+      nil)))
+
+(t/deftest index_urls-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::index/urls value)
+      ["file-name.html#id"]
+      ["file-name.html#id1" "file-name.html#id2"]))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::index/urls value))
+      ["invalid\\url"]
+      ["file-name.html#id" "invalid\\url"]
+      []
+      "not-vector"
+      nil)))
+
+(t/deftest index-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/index value)
+      {:type :item :text "text" :ruby "ruby" :urls ["file-name.html#id"]}
+      {:type :caption :text "text"})
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/index value))
+      {:type "item" :text "text" :ruby "ruby" :urls ["file-name.html#id"]}
+      {:type :item :text :not-string :ruby "ruby" :urls ["file-name.html#id"]}
+      {:type :item :text "text" :ruby :not-string :urls ["file-name.html#id"]}
+      {:type :item :text "text" :ruby "ruby" :urls "not-vector"}
+      {:text "text" :ruby "ruby" :urls ["file-name.html#id"]}
+      {:type :item :ruby "ruby" :urls ["file-name.html#id"]}
+      {:type :item :text "text" :urls ["file-name.html#id"]}
+      {:type :item :text "text" :ruby "ruby"}
+      {:type :item
+       :text "text"
+       :ruby "ruby"
+       :urls ["file-name.html#id"]
+       :extra-key "extra-value"}
+      {:type "caption" :text "text"}
+      {:type :caption :text :not-string}
+      {:type :caption}
+      {:text "text"}
+      {:type :caption :text "text" :extra-key "extra-value"}
+      {:extra-key "extra-value"}
+      "not-map"
+      nil))))
+
+(t/deftest index-caption-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::spec/index-caption {:type :caption :text "text"})))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/index-caption value))
+      {:type "caption" :text "text"}
+      {:type :caption :text :not-string}
+      {:type :caption}
+      {:text "text"}
+      {:type :caption :text "text" :extra-key "extra-value"}
+      {:extra-key "extra-value"}
+      "not-map"
+      nil)))
+
+(t/deftest index-entry-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::spec/index-entry {:order 1
+                                        :text "text"
+                                        :ruby "ruby"
+                                        :url "file-name.html#id"})))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/index-entry value))
+      {:order "1" :text "text" :ruby "ruby" :url "file-name.html#id"}
+      {:order 1 :text :not-string :ruby "ruby" :url "file-name.html#id"}
+      {:order 1 :text "text" :ruby :not-string :url "file-name.html#id"}
+      {:order 1 :text "text" :ruby "ruby" :url :not-string}
+      {:text "text" :ruby "ruby" :url "file-name.html#id"}
+      {:order 1 :ruby "ruby" :url "file-name.html#id"}
+      {:order 1 :text "text" :url "file-name.html#id"}
+      {:order 1 :text "text" :ruby "ruby"}
+      {:order 1
+       :text "text"
+       :ruby "ruby"
+       :url "file-name.html#id"
+       :extra-key "extra-value"}
+      {:extra-key "extra-value"}
+      "not-map"
+      nil)))
+
+(t/deftest index-item-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::spec/index-item {:type :item
+                                       :text "text"
+                                       :ruby "ruby"
+                                       :urls ["file-name.html#id"]})))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/index-item value))
+      {:type "item" :text "text" :ruby "ruby" :urls ["file-name.html#id"]}
+      {:type :item :text :not-string :ruby "ruby" :urls ["file-name.html#id"]}
+      {:type :item :text "text" :ruby :not-string :urls ["file-name.html#id"]}
+      {:type :item :text "text" :ruby "ruby" :urls "not-vector"}
+      {:text "text" :ruby "ruby" :urls ["file-name.html#id"]}
+      {:type :item :ruby "ruby" :urls ["file-name.html#id"]}
+      {:type :item :text "text" :urls ["file-name.html#id"]}
+      {:type :item :text "text" :ruby "ruby"}
+      {:type :item
+       :text "text"
+       :ruby "ruby"
+       :urls ["file-name.html#id"]
+       :extra-key "extra-value"}
+      {:extra-key "extra-value"}
+      "not-map"
+      nil)))
+
+(t/deftest indices-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/indices value)
+      [{:type :item :text "text" :ruby "ruby" :urls ["file-name.html#id"]}]
+      [{:type :caption :text "text"}]
+      [{:type :item :text "text1" :ruby "ruby1" :urls ["file-name.html#id1"]}
+       {:type :item :text "text2" :ruby "ruby2" :urls ["file-name.html#id2"]}]
+      [{:type :caption :text "text1"} {:type :caption :text "text2"}]
+      [{:type :item :text "text1" :ruby "ruby" :urls ["file-name.html#id"]}
+       {:type :caption :text "text2"}]
+      []))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/indices value))
+      [{:type "item" :text "text" :ruby "ruby" :urls ["url"]}]
+      [{:type :item :text :not-string :ruby "ruby" :urls ["url"]}]
+      [{:type :item :text "text" :ruby :not-string :urls ["url"]}]
+      [{:type :item :text "text" :ruby "ruby" :urls "not-vector"}]
+      [{:text "text" :ruby "ruby" :urls ["url"]}]
+      [{:type :item :ruby "ruby" :urls ["url"]}]
+      [{:type :item :text "text" :urls ["url"]}]
+      [{:type :item :text "text" :ruby "ruby"}]
+      [{:type :item
+        :text "text"
+        :ruby "ruby"
+        :urls ["url"]
+        :extra-key "extra-value"}]
+      [{:type "caption" :text "text"}]
+      [{:type :caption :text :not-string}]
+      [{:type :caption}]
+      [{:text "text"}]
+      [{:type :caption :text "text" :extra-key "extra-value"}]
+      [{:extra-key "extra-value"}]
+      ["not-vector"]
+      [{:type :item :text "text" :ruby "ruby" :urls ["url"]}
+       {:type "caption" :text "text"}]
+      [{:type "item" :text "text" :ruby "ruby" :urls ["url"]}
+       {:type :caption :text "text"}]
       nil)))
 
 (t/deftest log-data-test
@@ -627,6 +1048,7 @@
   (t/testing "Fails to verify."
     (t/are [value] (not (s/valid? ::spec/order value))
       -1
+      2.5
       "1"
       nil)))
 
@@ -652,6 +1074,18 @@
     (t/are [value] (not (s/valid? ::spec/property-name value))
       "1nvalid"
       "invalid property name"
+      ""
+      :not-string
+      nil)))
+
+(t/deftest ruby-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/ruby value)
+      "ruby"
+      "ルビ"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/ruby value))
       ""
       :not-string
       nil)))
@@ -695,6 +1129,126 @@
       "invalid}slug"
       "invalid~slug"
       "invalid slug"
+      ""
+      :not-string
+      nil)))
+
+(t/deftest toc_caption-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::toc/caption "caption")))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::toc/caption value))
+      ""
+      :not-string
+      nil)))
+
+(t/deftest toc_depth-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::toc/depth value)
+      1
+      2
+      3
+      4
+      5
+      6))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::toc/depth value))
+      -1
+      0
+      7
+      3.5
+      "1"
+      nil)))
+
+(t/deftest toc_url-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::toc/url value)
+      "file-name.html#id"
+      "日本語"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::toc/url value))
+      "invalid\\url"
+      "invalid/url"
+      "invalid:url"
+      "invalid*url"
+      "invalid?url"
+      "invalid\"url"
+      "invalid>url"
+      "invalid<url"
+      ""
+      :not-string
+      nil)))
+
+(t/deftest toc-item-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::spec/toc-item {:depth 1
+                                     :caption "caption"
+                                     :url "markdown.html#id"})))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/toc-item value))
+      {:depth 0 :caption "caption" :url "markdown.html#id"}
+      {:depth 1 :caption :not-string :url "markdown.html#id"}
+      {:depth 1 :caption "caption" :url :not-string}
+      {:caption "caption" :url "markdown.html#id"}
+      {:depth 1 :url "markdown.html#id"}
+      {:depth 1 :caption "caption"}
+      {:depth 1
+       :caption "caption"
+       :url "markdown.html#id"
+       :extra-key "extra-value"}
+      {:extra-key "extra-value"}
+      {}
+      "not-map"
+      nil)))
+
+(t/deftest toc-items-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/toc-items value)
+      [{:depth 1 :caption "caption" :url "markdown.html#id"}]
+      [{:depth 1 :caption "caption1" :url "markdown.html#id1"}
+       {:depth 2 :caption "caption2" :url "markdown.html#id2"}]
+      []))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/toc-items value))
+      [{:depth 0 :caption "caption" :url "markdown.html#id"}]
+      [{:depth 1 :caption :not-string :url "markdown.html#id"}]
+      [{:depth 1 :caption "caption" :url :not-string}]
+      [{:caption "caption" :url "markdown.html#id"}]
+      [{:depth 1 :url "markdown.html#id"}]
+      [{:depth 1 :caption "caption"}]
+      [{:depth 1
+        :caption "caption"
+        :url "markdown.html#id"
+        :extra-key "extra-value"}]
+      [{:extra-key "extra-value"}]
+      ["not-map"]
+      [nil]
+      [{:depth 1 :caption "caption1" :url "markdown.html#id1"}
+       {:depth 0 :caption "caption2" :url "markdown.html#id2"}]
+      "not-vector"
+      nil)))
+
+(t/deftest url-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/url value)
+      "file-name.html#id"
+      "日本語"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/url value))
+      "invalid\\url"
+      "invalid/url"
+      "invalid:url"
+      "invalid*url"
+      "invalid?url"
+      "invalid\"url"
+      "invalid>url"
+      "invalid<url"
       ""
       :not-string
       nil)))
