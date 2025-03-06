@@ -391,12 +391,16 @@
 
 (t/deftest english-ruby?-test
   (t/testing "Ruby is English."
-    (t/is (true? (analyze/english-ruby? "ruby"))))
+    (t/are [ruby] (true? (analyze/english-ruby? ruby))
+      "ruby"
+      "12345"
+      "!!!!!"
+      "rubyルビ")))
 
   (t/testing "Ruby is not English."
     (t/are [ruby] (false? (analyze/english-ruby? ruby))
       "ルビ"
-      "12345")))
+      "ルビruby"))
 
 (t/deftest normalize-hiragana-test
   (t/testing "Seion is given."

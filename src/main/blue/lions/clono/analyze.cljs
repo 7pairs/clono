@@ -129,7 +129,7 @@
   [ruby]
   {:pre [(s/valid? ::spec/ruby ruby)]
    :post [(s/valid? ::spec/pred-result %)]}
-  (boolean (re-matches #"^[a-z]+" ruby)))
+  (boolean (re-matches #"^[ -~].*" ruby)))
 
 (def vowel-map
   {"あ" "あ" "か" "あ" "さ" "あ" "た" "あ" "な" "あ" "は" "あ" "ま" "あ"
