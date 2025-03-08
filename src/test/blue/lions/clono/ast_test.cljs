@@ -126,3 +126,31 @@
                    (ast/extract-nodes #(= (:type %) "text") node))
       "not-node"
       nil)))
+
+(t/deftest get-type-test
+  (t/testing "Node is text directive."
+    (t/is (= "label" (ast/get-type {:type "textDirective"
+                                    :name "label"}))))
+
+  (t/testing "Node is container directive."
+    (t/is (= "table" (ast/get-type {:type "containerDirective"
+                                    :name "table"}))))
+
+  (t/testing "Node is not directive."
+    (t/is (= "text" (ast/get-type {:type "text" :value "value"}))))
+
+  (t/testing "Node is text directive without name."
+    (let [node {:type "textDirective"}]
+      (try
+        (ast/get-type node)
+        (catch js/Error e
+          (t/is (= "Node does not have name." (ex-message e)))
+          (t/is (= node (:node (ex-data e))))))))
+
+  (t/testing "Node is container directive without name."
+    (let [node {:type "containerDirective"}]
+      (try
+        (ast/get-type node)
+        (catch js/Error e
+          (t/is (= "Node does not have name." (ex-message e)))
+          (t/is (= node (:node (ex-data e)))))))))
