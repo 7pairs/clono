@@ -71,6 +71,12 @@
   (s/and integer?
          #(<= 1 % 6)))
 
+(s/def ::dic
+  (s/map-of ::common/non-blank-string any?))
+
+(s/def ::dics
+  (s/map-of keyword? ::dic))
+
 (s/def ::directive-name
   ::common/alphabet-string)
 

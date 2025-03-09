@@ -15,6 +15,8 @@
 (ns blue.lions.clono.transform
   (:require [cljs.spec.alpha :as s]
             [blue.lions.clono.ast :as ast]
+            [blue.lions.clono.identifier :as id]
+            [blue.lions.clono.log :as logger]
             [blue.lions.clono.spec :as spec]))
 
 (defmulti deletable-node?
@@ -42,3 +44,40 @@
   {:pre [(s/valid? ::spec/node node)]
    :post [(s/valid? ::spec/pred-result %)]}
   true)
+
+(defmulti update-node
+  (fn [node _ _]
+    (try
+      (ast/get-type node)
+      (catch js/Error e
+        (throw (ex-info "Failed to determine node type for update."
+                        {:node node :cause e}))))))
+
+(defmethod update-node :default
+  [node base-name dics]
+  {:pre [(s/valid? ::spec/node node)
+         (s/valid? ::spec/file-name base-name)
+         (s/valid? ::spec/dics dics)]
+   :post [(s/valid? ::spec/node %)]}
+  node)
+
+(defmethod update-node "footnoteReference"
+  [node base-name dics]
+  {:pre [(s/valid? ::spec/node node)
+         (s/valid? ::spec/file-name base-name)
+         (s/valid? ::spec/dics dics)]
+   :post [(s/valid? ::spec/node %)]}
+  (let [dic (:footnote dics)]
+    (when-not dic
+      (throw (ex-info "Footnote dictionary is not found."
+                      {:dics dics :node node})))
+    (let [key (id/build-dic-key base-name (:identifier node))
+          footnote (dic key)]
+      (assoc node :children
+             (if footnote
+               [footnote]
+               (do
+                 (logger/log :error
+                             "Footnote is not found in dictionary."
+                             {:key key :node node})
+                 []))))))

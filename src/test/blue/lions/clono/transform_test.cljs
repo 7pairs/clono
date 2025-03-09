@@ -15,6 +15,7 @@
 (ns blue.lions.clono.transform-test
   (:require [cljs.test :as t]
             [clojure.string :as str]
+            [blue.lions.clono.log :as logger]
             [blue.lions.clono.transform :as transform]))
 
 (t/deftest deletable-node?-test
@@ -44,6 +45,73 @@
         (catch js/Error e
           (let [data (ex-data e)]
             (t/is (= "Failed to determine node type." (ex-message e)))
+            (t/is (= node (:node data)))
+            (t/is (str/starts-with? (ex-message (:cause data))
+                                    "Assert failed:"))))))))
+
+(t/deftest update-node-test
+  (t/testing "Node is footnoteReference."
+    (t/testing "ID is found."
+      (t/is (= {:type "footnoteReference"
+                :identifier "id1"
+                :children [{:type "text" :value "value1"}]}
+               (transform/update-node
+                {:type "footnoteReference" :identifier "id1"}
+                "name1"
+                {:footnote {"name1|id1" {:type "text" :value "value1"}
+                            "name1|id2" {:type "text" :value "value2"}
+                            "name2|id1" {:type "text" :value "value3"}}}))))
+
+    (t/testing "ID is not found."
+      (let [node {:type "footnoteReference" :identifier "id1"}]
+        (reset! logger/enabled? false)
+        (reset! logger/entries [])
+        (t/is (= {:type "footnoteReference" :identifier "id1" :children []}
+                 (transform/update-node
+                  node
+                  "name1"
+                  {:footnote {"name2|id1" {:type "text" :value "value1"}}})))
+        (t/is (= [{:level :error
+                   :message "Footnote is not found in dictionary."
+                   :data {:key "name1|id1" :node node}}]
+                 @logger/entries))))
+
+    (t/testing "Footnote dictionary is not found."
+      (let [node {:type "footnoteReference" :identifier "id1"}
+            dics {:not-footnote {"key" "value"}}]
+        (try
+          (transform/update-node node "name" dics)
+          (catch js/Error e
+            (let [data (ex-data e)]
+              (t/is (= "Footnote dictionary is not found." (ex-message e)))
+              (t/is (= dics (:dics data)))
+              (t/is (= node (:node data)))))))))
+
+  (t/testing "Node does not to be updated."
+    (let [node {:type "root" :children [{:type "text" :value "value1"}
+                                        {:type "text" :value "value2"}]}]
+      (t/is (= node (transform/update-node node "name" {})))))
+
+  (t/testing "Node does not have type."
+    (let [node {:value "value"}]
+      (try
+        (transform/update-node node "name" {})
+        (catch js/Error e
+          (let [data (ex-data e)]
+            (t/is (= "Failed to determine node type for update."
+                     (ex-message e)))
+            (t/is (= node (:node data)))
+            (t/is (str/starts-with? (ex-message (:cause data))
+                                    "Assert failed:")))))))
+
+  (t/testing "Node has invalid type."
+    (let [node {:type :not-string :value "value"}]
+      (try
+        (transform/update-node node "name" {})
+        (catch js/Error e
+          (let [data (ex-data e)]
+            (t/is (= "Failed to determine node type for update."
+                     (ex-message e)))
             (t/is (= node (:node data)))
             (t/is (str/starts-with? (ex-message (:cause data))
                                     "Assert failed:"))))))))
