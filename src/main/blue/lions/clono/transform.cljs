@@ -81,3 +81,50 @@
                              "Footnote is not found in dictionary."
                              {:key key :node node})
                  []))))))
+
+(defn update-ref-heading-node
+  [node base-name dics node-type]
+  {:pre [(s/valid? ::spec/node node)
+         (s/valid? ::spec/file-name base-name)
+         (s/valid? ::spec/dics dics)
+         (s/valid? ::spec/node-type node-type)]
+   :post [(s/valid? ::spec/node %)]}
+  (let [dic (:heading dics)]
+    (when-not dic
+      (throw (ex-info "Heading dictionary is not found."
+                      {:dics dics :node node})))
+    (let [node-id (-> node
+                      :attributes
+                      :id)]
+      (if-not node-id
+        (do
+          (logger/log :error
+                      "Reference node does not have ID."
+                      {:node node :base-name base-name :dics dics})
+          node)
+        (let [data (or (dic node-id)
+                       (dic (id/build-dic-key base-name node-id)))]
+          (if data
+            (cond-> (assoc node :url (:url data))
+              (= node-type "refHeadingName") (assoc :caption (:caption data)))
+            (do
+              (logger/log :error
+                          "Heading is not found in dictionary."
+                          {:base-name base-name :id node-id :dics dics})
+              node)))))))
+
+(defmethod update-node "refHeading"
+  [node base-name dics]
+  {:pre [(s/valid? ::spec/node node)
+         (s/valid? ::spec/file-name base-name)
+         (s/valid? ::spec/dics dics)]
+   :post [(s/valid? ::spec/node %)]}
+  (update-ref-heading-node node base-name dics "refHeading"))
+
+(defmethod update-node "refHeadingName"
+  [node base-name dics]
+  {:pre [(s/valid? ::spec/node node)
+         (s/valid? ::spec/file-name base-name)
+         (s/valid? ::spec/dics dics)]
+   :post [(s/valid? ::spec/node %)]}
+  (update-ref-heading-node node base-name dics "refHeadingName"))

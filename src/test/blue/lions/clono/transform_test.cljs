@@ -115,3 +115,155 @@
             (t/is (= node (:node data)))
             (t/is (str/starts-with? (ex-message (:cause data))
                                     "Assert failed:"))))))))
+
+(t/deftest update-ref-heading-node-test
+  (t/testing "ID is found."
+    (t/is (= {:type "textDirective"
+              :name "refHeading"
+              :attributes {:id "id1"}
+              :url "url1"}
+             (transform/update-ref-heading-node
+              {:type "textDirective"
+               :name "refHeading"
+               :attributes {:id "id1"}}
+              "base-name1"
+              {:heading {"id1" {:id "id1"
+                                :depth 1
+                                :caption "caption1"
+                                :url "url1"}
+                         "id2" {:id "id2"
+                                :depth 2
+                                :caption "caption2"
+                                :url "url2"}
+                         "base-name1|id1" {:id "base-name1|id1"
+                                           :depth 3
+                                           :caption "caption3"
+                                           :url "url3"}}}
+              "refHeading")))
+    (t/is (= {:type "textDirective"
+              :name "refHeading"
+              :attributes {:id "id1"}
+              :url "url3"}
+             (transform/update-ref-heading-node
+              {:type "textDirective"
+               :name "refHeading"
+               :attributes {:id "id1"}}
+              "base-name1"
+              {:heading {"id2" {:id "id2"
+                                :depth 1
+                                :caption "caption1"
+                                :url "url1"}
+                         "id3" {:id "id3"
+                                :depth 2
+                                :caption "caption2"
+                                :url "url2"}
+                         "base-name1|id1" {:id "base-name1|id1"
+                                           :depth 3
+                                           :caption "caption3"
+                                           :url "url3"}}}
+              "refHeading")))
+    (t/is (= {:type "textDirective"
+              :name "refHeadingName"
+              :attributes {:id "id1"}
+              :url "url1"
+              :caption "caption1"}
+             (transform/update-ref-heading-node
+              {:type "textDirective"
+               :name "refHeadingName"
+               :attributes {:id "id1"}}
+              "base-name1"
+              {:heading {"id1" {:id "id1"
+                                :depth 1
+                                :caption "caption1"
+                                :url "url1"}
+                         "id2" {:id "id2"
+                                :depth 2
+                                :caption "caption2"
+                                :url "url2"}
+                         "base-name1|id1" {:id "base-name1|id1"
+                                           :depth 3
+                                           :caption "caption3"
+                                           :url "url3"}}}
+              "refHeadingName")))
+    (t/is (= {:type "textDirective"
+              :name "refHeadingName"
+              :attributes {:id "id1"}
+              :url "url3"
+              :caption "caption3"}
+             (transform/update-ref-heading-node
+              {:type "textDirective"
+               :name "refHeadingName"
+               :attributes {:id "id1"}}
+              "base-name1"
+              {:heading {"id2" {:id "id2"
+                                :depth 1
+                                :caption "caption1"
+                                :url "url1"}
+                         "id3" {:id "id3"
+                                :depth 2
+                                :caption "caption2"
+                                :url "url2"}
+                         "base-name1|id1" {:id "base-name1|id1"
+                                           :depth 3
+                                           :caption "caption3"
+                                           :url "url3"}}}
+              "refHeadingName"))))
+
+  (t/testing "ID is not found."
+    (reset! logger/enabled? false)
+    (reset! logger/entries [])
+    (t/is (= {:type "textDirective" :name "refHeading" :attributes {:id "id1"}}
+             (transform/update-ref-heading-node
+              {:type "textDirective"
+               :name "refHeading"
+               :attributes {:id "id1"}}
+              "base-name1"
+              {:heading {"id2" {:id "id2"
+                                :depth 1
+                                :caption "caption1"
+                                :url "url1"}}}
+              "refHeading")))
+    (t/is (= [{:level :error
+               :message "Heading is not found in dictionary."
+               :data {:base-name "base-name1"
+                      :id "id1"
+                      :dics {:heading {"id2" {:id "id2"
+                                              :depth 1
+                                              :caption "caption1"
+                                              :url "url1"}}}}}]
+             @logger/entries)))
+
+  (t/testing "Node does not have ID."
+    (reset! logger/enabled? false)
+    (reset! logger/entries [])
+    (t/is (= {:type "textDirective" :name "refHeading" :attributes {}}
+             (transform/update-ref-heading-node
+              {:type "textDirective" :name "refHeading" :attributes {}}
+              "base-name1"
+              {:heading {"id1" {:id "id1"
+                                :depth 1
+                                :caption "caption1"
+                                :url "url1"}}}
+              "refHeading")))
+    (t/is (= [{:level :error
+               :message "Reference node does not have ID."
+               :data {:node {:type "textDirective"
+                             :name "refHeading"
+                             :attributes {}}
+                      :base-name "base-name1"
+                      :dics {:heading {"id1" {:id "id1"
+                                              :depth 1
+                                              :caption "caption1"
+                                              :url "url1"}}}}}]
+             @logger/entries)))
+
+  (t/testing "Heading dictionary is not found."
+    (let [node {:type "refHeading" :attributes {:id "id1"}}
+          dics {:not-heading {"key" "value"}}]
+      (try
+        (transform/update-ref-heading-node node "base-name1" dics "refHeading")
+        (catch js/Error e
+          (let [data (ex-data e)]
+            (t/is (= "Heading dictionary is not found." (ex-message e)))
+            (t/is (= dics (:dics data)))
+            (t/is (= node (:node data)))))))))
