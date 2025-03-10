@@ -117,10 +117,11 @@
                                     "Assert failed:"))))))))
 
 (t/deftest update-ref-heading-node-test
-  (t/testing "ID is found."
+  (t/testing "Node is refHeading."
     (t/is (= {:type "textDirective"
               :name "refHeading"
               :attributes {:id "id1"}
+              :depth 1
               :url "url1"}
              (transform/update-ref-heading-node
               {:type "textDirective"
@@ -143,6 +144,7 @@
     (t/is (= {:type "textDirective"
               :name "refHeading"
               :attributes {:id "id1"}
+              :depth 3
               :url "url3"}
              (transform/update-ref-heading-node
               {:type "textDirective"
@@ -161,10 +163,13 @@
                                            :depth 3
                                            :caption "caption3"
                                            :url "url3"}}}
-              "refHeading")))
+              "refHeading"))))
+
+  (t/testing "Node is refHeadingName."
     (t/is (= {:type "textDirective"
               :name "refHeadingName"
               :attributes {:id "id1"}
+              :depth 1
               :url "url1"
               :caption "caption1"}
              (transform/update-ref-heading-node
@@ -188,6 +193,7 @@
     (t/is (= {:type "textDirective"
               :name "refHeadingName"
               :attributes {:id "id1"}
+              :depth 3
               :url "url3"
               :caption "caption3"}
              (transform/update-ref-heading-node

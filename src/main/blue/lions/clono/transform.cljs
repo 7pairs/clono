@@ -105,7 +105,7 @@
         (let [data (or (dic node-id)
                        (dic (id/build-dic-key base-name node-id)))]
           (if data
-            (cond-> (assoc node :url (:url data))
+            (cond-> (assoc node :depth (:depth data) :url (:url data))
               (= node-type "refHeadingName") (assoc :caption (:caption data)))
             (do
               (logger/log :error
