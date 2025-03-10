@@ -128,3 +128,19 @@
          (s/valid? ::spec/dics dics)]
    :post [(s/valid? ::spec/node %)]}
   (update-ref-heading-node node base-name dics "refHeadingName"))
+
+(defn transform-node
+  [node base-name dics]
+  {:pre [(s/valid? ::spec/node node)
+         (s/valid? ::spec/file-name base-name)
+         (s/valid? ::spec/dics dics)]
+   :post [(s/valid? ::spec/node-or-nil %)]}
+  (when-not (deletable-node? node)
+    (let [updated-node (update-node node base-name dics)
+          children (:children updated-node)]
+      (if (seq children)
+        (assoc updated-node
+               :children (->> children
+                              (keep #(transform-node % base-name dics))
+                              vec))
+        updated-node))))

@@ -1033,6 +1033,23 @@
       "not-map"
       nil)))
 
+(t/deftest node-or-nil-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/node-or-nil value)
+      {:type "type"}
+      {:type "type" :extra-key "extra-value"}
+      nil))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/node-or-nil value))
+      {:type "12345"}
+      {:type ""}
+      {:type :not-string}
+      {:type nil}
+      {:extra-key "extra-value"}
+      {}
+      "not-map")))
+
 (t/deftest node-type-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/node-type value)

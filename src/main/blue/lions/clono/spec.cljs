@@ -250,6 +250,10 @@
 (s/def ::node
   (s/keys :req-un [::node/type]))
 
+(s/def ::node-or-nil
+  (s/or :node ::node
+        :nil nil?))
+
 (s/def ::node-type
   ::common/alphabet-string)
 

@@ -273,3 +273,46 @@
             (t/is (= "Heading dictionary is not found." (ex-message e)))
             (t/is (= dics (:dics data)))
             (t/is (= node (:node data)))))))))
+
+(t/deftest transform-node-test
+  (t/testing "Node has deletable nodes."
+    (t/is (= {:type "root"
+              :children [{:type "text" :value "value1"}
+                         {:type "text" :value "value2"}]}
+             (transform/transform-node
+              {:type "root"
+               :children [{:type "text" :value "value1"}
+                          {:type "label"}
+                          {:type "text" :value "value2"}]}
+              "base-name"
+              {}))))
+
+  (t/testing "Node does not have deletable node."
+    (let [node {:type "root"
+                :children [{:type "text" :value "value1"}
+                           {:type "text" :value "value2"}]}]
+      (t/is (= node
+               (transform/transform-node node "base-name" {})))))
+
+  (t/testing "Node has children."
+    (t/is (= {:type "root"
+              :children [{:type "text" :value "value1"}
+                         {:type "node"
+                          :children [{:type "text" :value "value2"}]}]}
+             (transform/transform-node
+              {:type "root"
+               :children [{:type "text" :value "value1"}
+                          {:type "label"}
+                          {:type "node"
+                           :children [{:type "text" :value "value2"}
+                                      {:type "label"}]}]}
+              "base-name"
+              {}))))
+
+  (t/testing "All children are deletable."
+    (t/is (= {:type "root" :children []}
+             (transform/transform-node {:type "root"
+                                        :children [{:type "label"}
+                                                   {:type "label"}]}
+                                       "base-name"
+                                       {})))))
