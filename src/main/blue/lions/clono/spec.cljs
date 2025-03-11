@@ -71,6 +71,12 @@
   (s/and integer?
          #(<= 1 % 6)))
 
+(s/def ::dic
+  (s/map-of ::common/non-blank-string any?))
+
+(s/def ::dics
+  (s/map-of keyword? ::dic))
+
 (s/def ::directive-name
   ::common/alphabet-string)
 
@@ -243,6 +249,10 @@
 
 (s/def ::node
   (s/keys :req-un [::node/type]))
+
+(s/def ::node-or-nil
+  (s/or :node ::node
+        :nil nil?))
 
 (s/def ::node-type
   ::common/alphabet-string)

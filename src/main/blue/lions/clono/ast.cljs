@@ -70,3 +70,34 @@
 (def extract-labels (partial extract-nodes label?))
 
 (def extract-texts (partial extract-nodes text?))
+
+(defmulti get-type
+  (fn [node]
+    (:type node)))
+
+(defmethod get-type :default
+  [node]
+  {:pre [(s/valid? ::spec/node node)]
+   :post [(s/valid? ::spec/node-type %)]}
+  (:type node))
+
+(defn directive-type
+  [node]
+  {:pre [(s/valid? ::spec/node node)]
+   :post [(s/valid? ::spec/node-type %)]}
+  (let [name (:name node)]
+    (if name
+      name
+      (throw (ex-info "Node does not have name." {:node node})))))
+
+(defmethod get-type "textDirective"
+  [node]
+  {:pre [(s/valid? ::spec/node node)]
+   :post [(s/valid? ::spec/node-type %)]}
+  (directive-type node))
+
+(defmethod get-type "containerDirective"
+  [node]
+  {:pre [(s/valid? ::spec/node node)]
+   :post [(s/valid? ::spec/node-type %)]}
+  (directive-type node))

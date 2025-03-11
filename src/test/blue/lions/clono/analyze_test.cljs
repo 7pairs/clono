@@ -949,38 +949,1605 @@
                :urls ["markdown.html#index-2"]}]
              (analyze/create-indices
               [{:name "markdown.md"
-               :type :chapters
-               :ast {:type "root"
-                     :children [{:type "textDirective"
-                                 :name "index"
-                                 :attributes {:ruby "aa"}
-                                 :children [{:type "text" :value "AA"}]
-                                 :id "index-1"
-                                 :order 1}
-                                {:type "textDirective"
-                                 :name "index"
-                                 :attributes {:ruby "ba"}
-                                 :children [{:type "text" :value "BA"}]
-                                 :id "index-2"
-                                 :order 2}
-                                {:type "textDirective"
-                                 :name "index"
-                                 :attributes {:ruby "aaa"}
-                                 :children [{:type "text" :value "AAA"}]
-                                 :id "index-3"
-                                 :order 3}
-                                {:type "textDirective"
-                                 :name "index"
-                                 :attributes {:ruby "ai"}
-                                 :children [{:type "text" :value "AI"}]
-                                 :id "index-4"
-                                 :order 4}
-                                {:type "textDirective"
-                                 :name "index"
-                                 :attributes {:ruby "ac"}
-                                 :children [{:type "text" :value "AC"}]
-                                 :id "index-5"
-                                 :order 5}]}}]))))
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "aa"}
+                                  :children [{:type "text" :value "AA"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ba"}
+                                  :children [{:type "text" :value "BA"}]
+                                  :id "index-2"
+                                  :order 2}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "aaa"}
+                                  :children [{:type "text" :value "AAA"}]
+                                  :id "index-3"
+                                  :order 3}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ai"}
+                                  :children [{:type "text" :value "AI"}]
+                                  :id "index-4"
+                                  :order 4}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ac"}
+                                  :children [{:type "text" :value "AC"}]
+                                  :id "index-5"
+                                  :order 5}]}}]))))
+
+  (t/testing "Indices contain alphabet and hiragana."
+    (t/is (= [{:type :caption :text "英数字"}
+              {:type :item
+               :text "B"
+               :ruby "b"
+               :urls ["markdown.html#index-2"]}
+              {:type :item
+               :text "B1リーグ"
+               :ruby "b1りーぐ"
+               :urls ["markdown.html#index-5"]}
+              {:type :item
+               :text "Bリーグ"
+               :ruby "bりーぐ"
+               :urls ["markdown.html#index-1"]}
+              {:type :item
+               :text "C"
+               :ruby "c"
+               :urls ["markdown.html#index-4"]}
+              {:type :caption :text "あ行"}
+              {:type :item
+               :text "あ"
+               :ruby "あ"
+               :urls ["markdown.html#index-3"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "bりーぐ"}
+                                  :children [{:type "text" :value "Bリーグ"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "b"}
+                                  :children [{:type "text" :value "B"}]
+                                  :id "index-2"
+                                  :order 2}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "あ"}
+                                  :children [{:type "text" :value "あ"}]
+                                  :id "index-3"
+                                  :order 3}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "c"}
+                                  :children [{:type "text" :value "C"}]
+                                  :id "index-4"
+                                  :order 4}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "b1りーぐ"}
+                                  :children [{:type "text" :value "B1リーグ"}]
+                                  :id "index-5"
+                                  :order 5}]}}]))))
+
+  (t/testing "Indices are seion."
+    (t/is (= [{:type :caption :text "あ行"}
+              {:type :item
+               :text "あ"
+               :ruby "あ"
+               :urls ["markdown.html#index-3"]}
+              {:type :item
+               :text "い"
+               :ruby "い"
+               :urls ["markdown.html#index-2"]}
+              {:type :item
+               :text "う"
+               :ruby "う"
+               :urls ["markdown.html#index-5"]}
+              {:type :item
+               :text "え"
+               :ruby "え"
+               :urls ["markdown.html#index-1"]}
+              {:type :item
+               :text "お"
+               :ruby "お"
+               :urls ["markdown.html#index-4"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "え"}
+                                  :children [{:type "text" :value "え"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "い"}
+                                  :children [{:type "text" :value "い"}]
+                                  :id "index-2"
+                                  :order 2}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "あ"}
+                                  :children [{:type "text" :value "あ"}]
+                                  :id "index-3"
+                                  :order 3}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "お"}
+                                  :children [{:type "text" :value "お"}]
+                                  :id "index-4"
+                                  :order 4}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "う"}
+                                  :children [{:type "text" :value "う"}]
+                                  :id "index-5"
+                                  :order 5}]}}])))
+    (t/is (= [{:type :caption :text "あ行"}
+              {:type :item
+               :text "あ"
+               :ruby "あ"
+               :urls ["markdown.html#index-7"]}
+              {:type :item
+               :text "ああ"
+               :ruby "ああ"
+               :urls ["markdown.html#index-3"]}
+              {:type :item
+               :text "あえ"
+               :ruby "あえ"
+               :urls ["markdown.html#index-1"]}
+              {:type :item
+               :text "あお"
+               :ruby "あお"
+               :urls ["markdown.html#index-6"]}
+              {:type :item
+               :text "お"
+               :ruby "お"
+               :urls ["markdown.html#index-5"]}
+              {:type :item
+               :text "おあ"
+               :ruby "おあ"
+               :urls ["markdown.html#index-4"]}
+              {:type :item
+               :text "おい"
+               :ruby "おい"
+               :urls ["markdown.html#index-2"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "あえ"}
+                                  :children [{:type "text" :value "あえ"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "おい"}
+                                  :children [{:type "text" :value "おい"}]
+                                  :id "index-2"
+                                  :order 2}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ああ"}
+                                  :children [{:type "text" :value "ああ"}]
+                                  :id "index-3"
+                                  :order 3}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "おあ"}
+                                  :children [{:type "text" :value "おあ"}]
+                                  :id "index-4"
+                                  :order 4}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "お"}
+                                  :children [{:type "text" :value "お"}]
+                                  :id "index-5"
+                                  :order 5}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "あお"}
+                                  :children [{:type "text" :value "あお"}]
+                                  :id "index-6"
+                                  :order 6}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "あ"}
+                                  :children [{:type "text" :value "あ"}]
+                                  :id "index-7"
+                                  :order 7}]}}]))))
+
+  (t/testing "Indices contain dakuon."
+    (t/is (= [{:type :caption :text "か行"}
+              {:type :item
+               :text "か"
+               :ruby "か"
+               :urls ["markdown.html#index-6"]}
+              {:type :item
+               :text "が"
+               :ruby "が"
+               :urls ["markdown.html#index-10"]}
+              {:type :item
+               :text "き"
+               :ruby "き"
+               :urls ["markdown.html#index-7"]}
+              {:type :item
+               :text "ぎ"
+               :ruby "ぎ"
+               :urls ["markdown.html#index-4"]}
+              {:type :item
+               :text "く"
+               :ruby "く"
+               :urls ["markdown.html#index-3"]}
+              {:type :item
+               :text "ぐ"
+               :ruby "ぐ"
+               :urls ["markdown.html#index-1"]}
+              {:type :item
+               :text "け"
+               :ruby "け"
+               :urls ["markdown.html#index-2"]}
+              {:type :item
+               :text "げ"
+               :ruby "げ"
+               :urls ["markdown.html#index-8"]}
+              {:type :item
+               :text "こ"
+               :ruby "こ"
+               :urls ["markdown.html#index-9"]}
+              {:type :item
+               :text "ご"
+               :ruby "ご"
+               :urls ["markdown.html#index-5"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ぐ"}
+                                  :children [{:type "text" :value "ぐ"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "け"}
+                                  :children [{:type "text" :value "け"}]
+                                  :id "index-2"
+                                  :order 2}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "く"}
+                                  :children [{:type "text" :value "く"}]
+                                  :id "index-3"
+                                  :order 3}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ぎ"}
+                                  :children [{:type "text" :value "ぎ"}]
+                                  :id "index-4"
+                                  :order 4}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ご"}
+                                  :children [{:type "text" :value "ご"}]
+                                  :id "index-5"
+                                  :order 5}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "か"}
+                                  :children [{:type "text" :value "か"}]
+                                  :id "index-6"
+                                  :order 6}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "き"}
+                                  :children [{:type "text" :value "き"}]
+                                  :id "index-7"
+                                  :order 7}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "げ"}
+                                  :children [{:type "text" :value "げ"}]
+                                  :id "index-8"
+                                  :order 8}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "こ"}
+                                  :children [{:type "text" :value "こ"}]
+                                  :id "index-9"
+                                  :order 9}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "が"}
+                                  :children [{:type "text" :value "が"}]
+                                  :id "index-10"
+                                  :order 10}]}}])))
+    (t/is (= [{:type :caption :text "か行"}
+              {:type :item
+               :text "か"
+               :ruby "か"
+               :urls ["markdown.html#index-5"]}
+              {:type :item
+               :text "かか"
+               :ruby "かか"
+               :urls ["markdown.html#index-9"]}
+              {:type :item
+               :text "かが"
+               :ruby "かが"
+               :urls ["markdown.html#index-2"]}
+              {:type :item
+               :text "かぎ"
+               :ruby "かぎ"
+               :urls ["markdown.html#index-3"]}
+              {:type :item
+               :text "かく"
+               :ruby "かく"
+               :urls ["markdown.html#index-4"]}
+              {:type :item
+               :text "き"
+               :ruby "き"
+               :urls ["markdown.html#index-6"]}
+              {:type :item
+               :text "きか"
+               :ruby "きか"
+               :urls ["markdown.html#index-8"]}
+              {:type :item
+               :text "きが"
+               :ruby "きが"
+               :urls ["markdown.html#index-1"]}
+              {:type :item
+               :text "きご"
+               :ruby "きご"
+               :urls ["markdown.html#index-7"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "きが"}
+                                  :children [{:type "text" :value "きが"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "かが"}
+                                  :children [{:type "text" :value "かが"}]
+                                  :id "index-2"
+                                  :order 2}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "かぎ"}
+                                  :children [{:type "text" :value "かぎ"}]
+                                  :id "index-3"
+                                  :order 3}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "かく"}
+                                  :children [{:type "text" :value "かく"}]
+                                  :id "index-4"
+                                  :order 4}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "か"}
+                                  :children [{:type "text" :value "か"}]
+                                  :id "index-5"
+                                  :order 5}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "き"}
+                                  :children [{:type "text" :value "き"}]
+                                  :id "index-6"
+                                  :order 6}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "きご"}
+                                  :children [{:type "text" :value "きご"}]
+                                  :id "index-7"
+                                  :order 7}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "きか"}
+                                  :children [{:type "text" :value "きか"}]
+                                  :id "index-8"
+                                  :order 8}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "かか"}
+                                  :children [{:type "text" :value "かか"}]
+                                  :id "index-9"
+                                  :order 9}]}}]))))
+
+  (t/testing "Indices contain dakuon and handakuon."
+    (t/is (= [{:type :caption :text "は行"}
+              {:type :item
+               :text "は"
+               :ruby "は"
+               :urls ["markdown.html#index-3"]}
+              {:type :item
+               :text "ば"
+               :ruby "ば"
+               :urls ["markdown.html#index-8"]}
+              {:type :item
+               :text "ぱ"
+               :ruby "ぱ"
+               :urls ["markdown.html#index-15"]}
+              {:type :item
+               :text "ひ"
+               :ruby "ひ"
+               :urls ["markdown.html#index-11"]}
+              {:type :item
+               :text "び"
+               :ruby "び"
+               :urls ["markdown.html#index-10"]}
+              {:type :item
+               :text "ぴ"
+               :ruby "ぴ"
+               :urls ["markdown.html#index-1"]}
+              {:type :item
+               :text "ふ"
+               :ruby "ふ"
+               :urls ["markdown.html#index-12"]}
+              {:type :item
+               :text "ぶ"
+               :ruby "ぶ"
+               :urls ["markdown.html#index-9"]}
+              {:type :item
+               :text "ぷ"
+               :ruby "ぷ"
+               :urls ["markdown.html#index-4"]}
+              {:type :item
+               :text "へ"
+               :ruby "へ"
+               :urls ["markdown.html#index-5"]}
+              {:type :item
+               :text "べ"
+               :ruby "べ"
+               :urls ["markdown.html#index-2"]}
+              {:type :item
+               :text "ぺ"
+               :ruby "ぺ"
+               :urls ["markdown.html#index-13"]}
+              {:type :item
+               :text "ほ"
+               :ruby "ほ"
+               :urls ["markdown.html#index-6"]}
+              {:type :item
+               :text "ぼ"
+               :ruby "ぼ"
+               :urls ["markdown.html#index-7"]}
+              {:type :item
+               :text "ぽ"
+               :ruby "ぽ"
+               :urls ["markdown.html#index-14"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ぴ"}
+                                  :children [{:type "text" :value "ぴ"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "べ"}
+                                  :children [{:type "text" :value "べ"}]
+                                  :id "index-2"
+                                  :order 2}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "は"}
+                                  :children [{:type "text" :value "は"}]
+                                  :id "index-3"
+                                  :order 3}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ぷ"}
+                                  :children [{:type "text" :value "ぷ"}]
+                                  :id "index-4"
+                                  :order 4}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "へ"}
+                                  :children [{:type "text" :value "へ"}]
+                                  :id "index-5"
+                                  :order 5}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ほ"}
+                                  :children [{:type "text" :value "ほ"}]
+                                  :id "index-6"
+                                  :order 6}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ぼ"}
+                                  :children [{:type "text" :value "ぼ"}]
+                                  :id "index-7"
+                                  :order 7}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ば"}
+                                  :children [{:type "text" :value "ば"}]
+                                  :id "index-8"
+                                  :order 8}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ぶ"}
+                                  :children [{:type "text" :value "ぶ"}]
+                                  :id "index-9"
+                                  :order 9}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "び"}
+                                  :children [{:type "text" :value "び"}]
+                                  :id "index-10"
+                                  :order 10}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ひ"}
+                                  :children [{:type "text" :value "ひ"}]
+                                  :id "index-11"
+                                  :order 11}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ふ"}
+                                  :children [{:type "text" :value "ふ"}]
+                                  :id "index-12"
+                                  :order 12}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ぺ"}
+                                  :children [{:type "text" :value "ぺ"}]
+                                  :id "index-13"
+                                  :order 13}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ぽ"}
+                                  :children [{:type "text" :value "ぽ"}]
+                                  :id "index-14"
+                                  :order 14}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ぱ"}
+                                  :children [{:type "text" :value "ぱ"}]
+                                  :id "index-15"
+                                  :order 15}]}}])))
+    (t/is (= [{:type :caption :text "は行"}
+              {:type :item
+               :text "は"
+               :ruby "は"
+               :urls ["markdown.html#index-10"]}
+              {:type :item
+               :text "ぱ"
+               :ruby "ぱ"
+               :urls ["markdown.html#index-8"]}
+              {:type :item
+               :text "はは"
+               :ruby "はは"
+               :urls ["markdown.html#index-6"]}
+              {:type :item
+               :text "はば"
+               :ruby "はば"
+               :urls ["markdown.html#index-7"]}
+              {:type :item
+               :text "はぱ"
+               :ruby "はぱ"
+               :urls ["markdown.html#index-2"]}
+              {:type :item
+               :text "ばは"
+               :ruby "ばは"
+               :urls ["markdown.html#index-13"]}
+              {:type :item
+               :text "ばぱ"
+               :ruby "ばぱ"
+               :urls ["markdown.html#index-1"]}
+              {:type :item
+               :text "ぱぴ"
+               :ruby "ぱぴ"
+               :urls ["markdown.html#index-9"]}
+              {:type :item
+               :text "ぱふ"
+               :ruby "ぱふ"
+               :urls ["markdown.html#index-11"]}
+              {:type :item
+               :text "ぱぶ"
+               :ruby "ぱぶ"
+               :urls ["markdown.html#index-3"]}
+              {:type :item
+               :text "ぶは"
+               :ruby "ぶは"
+               :urls ["markdown.html#index-14"]}
+              {:type :item
+               :text "ぶば"
+               :ruby "ぶば"
+               :urls ["markdown.html#index-4"]}
+              {:type :item
+               :text "ぺぺ"
+               :ruby "ぺぺ"
+               :urls ["markdown.html#index-12"]}
+              {:type :item
+               :text "ぼ"
+               :ruby "ぼ"
+               :urls ["markdown.html#index-5"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ばぱ"}
+                                  :children [{:type "text" :value "ばぱ"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "はぱ"}
+                                  :children [{:type "text" :value "はぱ"}]
+                                  :id "index-2"
+                                  :order 2}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ぱぶ"}
+                                  :children [{:type "text" :value "ぱぶ"}]
+                                  :id "index-3"
+                                  :order 3}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ぶば"}
+                                  :children [{:type "text" :value "ぶば"}]
+                                  :id "index-4"
+                                  :order 4}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ぼ"}
+                                  :children [{:type "text" :value "ぼ"}]
+                                  :id "index-5"
+                                  :order 5}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "はは"}
+                                  :children [{:type "text" :value "はは"}]
+                                  :id "index-6"
+                                  :order 6}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "はば"}
+                                  :children [{:type "text" :value "はば"}]
+                                  :id "index-7"
+                                  :order 7}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ぱ"}
+                                  :children [{:type "text" :value "ぱ"}]
+                                  :id "index-8"
+                                  :order 8}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ぱぴ"}
+                                  :children [{:type "text" :value "ぱぴ"}]
+                                  :id "index-9"
+                                  :order 9}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "は"}
+                                  :children [{:type "text" :value "は"}]
+                                  :id "index-10"
+                                  :order 10}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ぱふ"}
+                                  :children [{:type "text" :value "ぱふ"}]
+                                  :id "index-11"
+                                  :order 11}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ぺぺ"}
+                                  :children [{:type "text" :value "ぺぺ"}]
+                                  :id "index-12"
+                                  :order 12}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ばは"}
+                                  :children [{:type "text" :value "ばは"}]
+                                  :id "index-13"
+                                  :order 13}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ぶは"}
+                                  :children [{:type "text" :value "ぶは"}]
+                                  :id "index-14"
+                                  :order 14}]}}]))))
+
+  (t/testing "Indices contain sokuon."
+    (t/is (= [{:type :caption :text "あ行"}
+              {:type :item
+               :text "あ"
+               :ruby "あ"
+               :urls ["markdown.html#index-6"]}
+              {:type :item
+               :text "あっ"
+               :ruby "あっ"
+               :urls ["markdown.html#index-2"]}
+              {:type :item
+               :text "あつ"
+               :ruby "あつ"
+               :urls ["markdown.html#index-1"]}
+              {:type :item
+               :text "あつあ"
+               :ruby "あつあ"
+               :urls ["markdown.html#index-4"]}
+              {:type :item
+               :text "あつさ"
+               :ruby "あつさ"
+               :urls ["markdown.html#index-5"]}
+              {:type :item
+               :text "あっと"
+               :ruby "あっと"
+               :urls ["markdown.html#index-3"]}
+              {:type :item
+               :text "あつと"
+               :ruby "あつと"
+               :urls ["markdown.html#index-7"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "あつ"}
+                                  :children [{:type "text" :value "あつ"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "あっ"}
+                                  :children [{:type "text" :value "あっ"}]
+                                  :id "index-2"
+                                  :order 2}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "あっと"}
+                                  :children [{:type "text" :value "あっと"}]
+                                  :id "index-3"
+                                  :order 3}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "あつあ"}
+                                  :children [{:type "text" :value "あつあ"}]
+                                  :id "index-4"
+                                  :order 4}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "あつさ"}
+                                  :children [{:type "text" :value "あつさ"}]
+                                  :id "index-5"
+                                  :order 5}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "あ"}
+                                  :children [{:type "text" :value "あ"}]
+                                  :id "index-6"
+                                  :order 6}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "あつと"}
+                                  :children [{:type "text" :value "あつと"}]
+                                  :id "index-7"
+                                  :order 7}]}}]))))
+
+  (t/testing "Indices contain youon."
+    (t/is (= [{:type :caption :text "な行"}
+              {:type :item
+               :text "にゃ"
+               :ruby "にゃ"
+               :urls ["markdown.html#index-6"]}
+              {:type :item
+               :text "にや"
+               :ruby "にや"
+               :urls ["markdown.html#index-3"]}
+              {:type :item
+               :text "にゃあ"
+               :ruby "にゃあ"
+               :urls ["markdown.html#index-8"]}
+              {:type :item
+               :text "にやり"
+               :ruby "にやり"
+               :urls ["markdown.html#index-4"]}
+              {:type :item
+               :text "にゅ"
+               :ruby "にゅ"
+               :urls ["markdown.html#index-1"]}
+              {:type :item
+               :text "にょ"
+               :ruby "にょ"
+               :urls ["markdown.html#index-2"]}
+              {:type :item
+               :text "によ"
+               :ruby "によ"
+               :urls ["markdown.html#index-7"]}
+              {:type :item
+               :text "にょん"
+               :ruby "にょん"
+               :urls ["markdown.html#index-5"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "にゅ"}
+                                  :children [{:type "text" :value "にゅ"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "にょ"}
+                                  :children [{:type "text" :value "にょ"}]
+                                  :id "index-2"
+                                  :order 2}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "にや"}
+                                  :children [{:type "text" :value "にや"}]
+                                  :id "index-3"
+                                  :order 3}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "にやり"}
+                                  :children [{:type "text" :value "にやり"}]
+                                  :id "index-4"
+                                  :order 4}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "にょん"}
+                                  :children [{:type "text" :value "にょん"}]
+                                  :id "index-5"
+                                  :order 5}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "にゃ"}
+                                  :children [{:type "text" :value "にゃ"}]
+                                  :id "index-6"
+                                  :order 6}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "によ"}
+                                  :children [{:type "text" :value "によ"}]
+                                  :id "index-7"
+                                  :order 7}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "にゃあ"}
+                                  :children [{:type "text" :value "にゃあ"}]
+                                  :id "index-8"
+                                  :order 8}]}}]))))
+
+  (t/testing "Indices contain onbiki."
+    (t/is (= [{:type :caption :text "あ行"}
+              {:type :item
+               :text "あ"
+               :ruby "あ"
+               :urls ["markdown.html#index-3"]}
+              {:type :item
+               :text "ああ"
+               :ruby "ああ"
+               :urls ["markdown.html#index-5"]}
+              {:type :item
+               :text "あー"
+               :ruby "あー"
+               :urls ["markdown.html#index-6"]}
+              {:type :item
+               :text "あか"
+               :ruby "あか"
+               :urls ["markdown.html#index-12"]}
+              {:type :item
+               :text "いー"
+               :ruby "いー"
+               :urls ["markdown.html#index-4"]}
+              {:type :item
+               :text "いか"
+               :ruby "いか"
+               :urls ["markdown.html#index-1"]}
+              {:type :item
+               :text "うー"
+               :ruby "うー"
+               :urls ["markdown.html#index-9"]}
+              {:type :item
+               :text "うか"
+               :ruby "うか"
+               :urls ["markdown.html#index-11"]}
+              {:type :item
+               :text "えー"
+               :ruby "えー"
+               :urls ["markdown.html#index-7"]}
+              {:type :item
+               :text "えか"
+               :ruby "えか"
+               :urls ["markdown.html#index-10"]}
+              {:type :item
+               :text "おあ"
+               :ruby "おあ"
+               :urls ["markdown.html#index-8"]}
+              {:type :item
+               :text "おー"
+               :ruby "おー"
+               :urls ["markdown.html#index-2"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "いか"}
+                                  :children [{:type "text" :value "いか"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "おー"}
+                                  :children [{:type "text" :value "おー"}]
+                                  :id "index-2"
+                                  :order 2}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "あ"}
+                                  :children [{:type "text" :value "あ"}]
+                                  :id "index-3"
+                                  :order 3}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "いー"}
+                                  :children [{:type "text" :value "いー"}]
+                                  :id "index-4"
+                                  :order 4}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ああ"}
+                                  :children [{:type "text" :value "ああ"}]
+                                  :id "index-5"
+                                  :order 5}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "あー"}
+                                  :children [{:type "text" :value "あー"}]
+                                  :id "index-6"
+                                  :order 6}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "えー"}
+                                  :children [{:type "text" :value "えー"}]
+                                  :id "index-7"
+                                  :order 7}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "おあ"}
+                                  :children [{:type "text" :value "おあ"}]
+                                  :id "index-8"
+                                  :order 8}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "うー"}
+                                  :children [{:type "text" :value "うー"}]
+                                  :id "index-9"
+                                  :order 9}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "えか"}
+                                  :children [{:type "text" :value "えか"}]
+                                  :id "index-10"
+                                  :order 10}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "うか"}
+                                  :children [{:type "text" :value "うか"}]
+                                  :id "index-11"
+                                  :order 11}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "あか"}
+                                  :children [{:type "text" :value "あか"}]
+                                  :id "index-12"
+                                  :order 12}]}}]))))
+
+  (t/testing "All captions exist."
+    (t/is (= [{:type :caption :text "英数字"}
+              {:type :item
+               :text "Mt.Fuji"
+               :ruby "mt.fuji"
+               :urls ["markdown.html#index-9"]}
+              {:type :caption :text "あ行"}
+              {:type :item
+               :text "阿寒摩周"
+               :ruby "あかんましゅう"
+               :urls ["markdown.html#index-5"]}
+              {:type :caption :text "か行"}
+              {:type :item
+               :text "釧路湿原"
+               :ruby "くしろしつげん"
+               :urls ["markdown.html#index-3"]}
+              {:type :caption :text "さ行"}
+              {:type :item
+               :text "知床"
+               :ruby "しれとこ"
+               :urls ["markdown.html#index-7"]}
+              {:type :caption :text "た行"}
+              {:type :item
+               :text "大雪山"
+               :ruby "たいせつざん"
+               :urls ["markdown.html#index-4"]}
+              {:type :caption :text "な行"}
+              {:type :item
+               :text "日光"
+               :ruby "にっこう"
+               :urls ["markdown.html#index-10"]}
+              {:type :caption :text "は行"}
+              {:type :item
+               :text "磐梯朝日"
+               :ruby "ばんだいあさひ"
+               :urls ["markdown.html#index-2"]}
+              {:type :caption :text "ま行"}
+              {:type :item
+               :text "南アルプス"
+               :ruby "みなみあるぷす"
+               :urls ["markdown.html#index-6"]}
+              {:type :caption :text "や行"}
+              {:type :item
+               :text "吉野熊野"
+               :ruby "よしのくまの"
+               :urls ["markdown.html#index-8"]}
+              {:type :caption :text "ら行"}
+              {:type :item
+               :text "利尻礼文サロベツ"
+               :ruby "りしりれぶんさろべつ"
+               :urls ["markdown.html#index-11"]}
+              {:type :caption :text "わ行"}
+              {:type :item
+               :text "若狭湾"
+               :ruby "わかさわん"
+               :urls ["markdown.html#index-1"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "わかさわん"}
+                                  :children [{:type "text" :value "若狭湾"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ばんだいあさひ"}
+                                  :children [{:type "text" :value "磐梯朝日"}]
+                                  :id "index-2"
+                                  :order 2}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "くしろしつげん"}
+                                  :children [{:type "text" :value "釧路湿原"}]
+                                  :id "index-3"
+                                  :order 3}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "たいせつざん"}
+                                  :children [{:type "text" :value "大雪山"}]
+                                  :id "index-4"
+                                  :order 4}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "あかんましゅう"}
+                                  :children [{:type "text" :value "阿寒摩周"}]
+                                  :id "index-5"
+                                  :order 5}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "みなみあるぷす"}
+                                  :children [{:type "text"
+                                              :value "南アルプス"}]
+                                  :id "index-6"
+                                  :order 6}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "しれとこ"}
+                                  :children [{:type "text" :value "知床"}]
+                                  :id "index-7"
+                                  :order 7}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "よしのくまの"}
+                                  :children [{:type "text" :value "吉野熊野"}]
+                                  :id "index-8"
+                                  :order 8}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "mt.fuji"}
+                                  :children [{:type "text" :value "Mt.Fuji"}]
+                                  :id "index-9"
+                                  :order 9}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "にっこう"}
+                                  :children [{:type "text" :value "日光"}]
+                                  :id "index-10"
+                                  :order 10}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "りしりれぶんさろべつ"}
+                                  :children [{:type "text"
+                                              :value "利尻礼文サロベツ"}]
+                                  :id "index-11"
+                                  :order 11}]}}]))))
+
+  (t/testing "Some captions do not exist."
+    (t/is (= [{:type :caption :text "あ行"}
+              {:type :item
+               :text "阿寒摩周"
+               :ruby "あかんましゅう"
+               :urls ["markdown.html#index-4"]}
+              {:type :caption :text "か行"}
+              {:type :item
+               :text "釧路湿原"
+               :ruby "くしろしつげん"
+               :urls ["markdown.html#index-9"]}
+              {:type :caption :text "さ行"}
+              {:type :item
+               :text "知床"
+               :ruby "しれとこ"
+               :urls ["markdown.html#index-2"]}
+              {:type :caption :text "た行"}
+              {:type :item
+               :text "大雪山"
+               :ruby "たいせつざん"
+               :urls ["markdown.html#index-1"]}
+              {:type :caption :text "な行"}
+              {:type :item
+               :text "日光"
+               :ruby "にっこう"
+               :urls ["markdown.html#index-7"]}
+              {:type :caption :text "は行"}
+              {:type :item
+               :text "磐梯朝日"
+               :ruby "ばんだいあさひ"
+               :urls ["markdown.html#index-8"]}
+              {:type :caption :text "ま行"}
+              {:type :item
+               :text "南アルプス"
+               :ruby "みなみあるぷす"
+               :urls ["markdown.html#index-6"]}
+              {:type :caption :text "や行"}
+              {:type :item
+               :text "吉野熊野"
+               :ruby "よしのくまの"
+               :urls ["markdown.html#index-3"]}
+              {:type :caption :text "ら行"}
+              {:type :item
+               :text "利尻礼文サロベツ"
+               :ruby "りしりれぶんさろべつ"
+               :urls ["markdown.html#index-10"]}
+              {:type :caption :text "わ行"}
+              {:type :item
+               :text "若狭湾"
+               :ruby "わかさわん"
+               :urls ["markdown.html#index-5"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "たいせつざん"}
+                                  :children [{:type "text" :value "大雪山"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "しれとこ"}
+                                  :children [{:type "text" :value "知床"}]
+                                  :id "index-2"
+                                  :order 2}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "よしのくまの"}
+                                  :children [{:type "text" :value "吉野熊野"}]
+                                  :id "index-3"
+                                  :order 3}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "あかんましゅう"}
+                                  :children [{:type "text" :value "阿寒摩周"}]
+                                  :id "index-4"
+                                  :order 4}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "わかさわん"}
+                                  :children [{:type "text" :value "若狭湾"}]
+                                  :id "index-5"
+                                  :order 5}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "みなみあるぷす"}
+                                  :children [{:type "text"
+                                              :value "南アルプス"}]
+                                  :id "index-6"
+                                  :order 6}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "にっこう"}
+                                  :children [{:type "text" :value "日光"}]
+                                  :id "index-7"
+                                  :order 7}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ばんだいあさひ"}
+                                  :children [{:type "text" :value "磐梯朝日"}]
+                                  :id "index-8"
+                                  :order 8}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "くしろしつげん"}
+                                  :children [{:type "text" :value "釧路湿原"}]
+                                  :id "index-9"
+                                  :order 9}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "りしりれぶんさろべつ"}
+                                  :children [{:type "text"
+                                              :value "利尻礼文サロベツ"}]
+                                  :id "index-10"
+                                  :order 10}]}}])))
+    (t/is (= [{:type :caption :text "英数字"}
+              {:type :item
+               :text "Mt.Fuji"
+               :ruby "mt.fuji"
+               :urls ["markdown.html#index-8"]}
+              {:type :caption :text "あ行"}
+              {:type :item
+               :text "阿寒摩周"
+               :ruby "あかんましゅう"
+               :urls ["markdown.html#index-5"]}
+              {:type :caption :text "か行"}
+              {:type :item
+               :text "釧路湿原"
+               :ruby "くしろしつげん"
+               :urls ["markdown.html#index-7"]}
+              {:type :caption :text "さ行"}
+              {:type :item
+               :text "知床"
+               :ruby "しれとこ"
+               :urls ["markdown.html#index-10"]}
+              {:type :caption :text "た行"}
+              {:type :item
+               :text "大雪山"
+               :ruby "たいせつざん"
+               :urls ["markdown.html#index-9"]}
+              {:type :caption :text "な行"}
+              {:type :item
+               :text "日光"
+               :ruby "にっこう"
+               :urls ["markdown.html#index-2"]}
+              {:type :caption :text "は行"}
+              {:type :item
+               :text "磐梯朝日"
+               :ruby "ばんだいあさひ"
+               :urls ["markdown.html#index-3"]}
+              {:type :caption :text "ま行"}
+              {:type :item
+               :text "南アルプス"
+               :ruby "みなみあるぷす"
+               :urls ["markdown.html#index-6"]}
+              {:type :caption :text "や行"}
+              {:type :item
+               :text "吉野熊野"
+               :ruby "よしのくまの"
+               :urls ["markdown.html#index-4"]}
+              {:type :caption :text "わ行"}
+              {:type :item
+               :text "若狭湾"
+               :ruby "わかさわん"
+               :urls ["markdown.html#index-1"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "わかさわん"}
+                                  :children [{:type "text" :value "若狭湾"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "にっこう"}
+                                  :children [{:type "text" :value "日光"}]
+                                  :id "index-2"
+                                  :order 2}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ばんだいあさひ"}
+                                  :children [{:type "text" :value "磐梯朝日"}]
+                                  :id "index-3"
+                                  :order 3}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "よしのくまの"}
+                                  :children [{:type "text" :value "吉野熊野"}]
+                                  :id "index-4"
+                                  :order 4}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "あかんましゅう"}
+                                  :children [{:type "text" :value "阿寒摩周"}]
+                                  :id "index-5"
+                                  :order 5}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "みなみあるぷす"}
+                                  :children [{:type "text"
+                                              :value "南アルプス"}]
+                                  :id "index-6"
+                                  :order 6}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "くしろしつげん"}
+                                  :children [{:type "text" :value "釧路湿原"}]
+                                  :id "index-7"
+                                  :order 7}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "mt.fuji"}
+                                  :children [{:type "text" :value "Mt.Fuji"}]
+                                  :id "index-8"
+                                  :order 8}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "たいせつざん"}
+                                  :children [{:type "text" :value "大雪山"}]
+                                  :id "index-9"
+                                  :order 9}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "しれとこ"}
+                                  :children [{:type "text" :value "知床"}]
+                                  :id "index-10"
+                                  :order 10}]}}])))
+    (t/is (= [{:type :caption :text "英数字"}
+              {:type :item
+               :text "Mt.Fuji"
+               :ruby "mt.fuji"
+               :urls ["markdown.html#index-5"]}
+              {:type :caption :text "あ行"}
+              {:type :item
+               :text "阿寒摩周"
+               :ruby "あかんましゅう"
+               :urls ["markdown.html#index-9"]}
+              {:type :caption :text "か行"}
+              {:type :item
+               :text "釧路湿原"
+               :ruby "くしろしつげん"
+               :urls ["markdown.html#index-1"]}
+              {:type :caption :text "さ行"}
+              {:type :item
+               :text "知床"
+               :ruby "しれとこ"
+               :urls ["markdown.html#index-2"]}
+              {:type :caption :text "た行"}
+              {:type :item
+               :text "大雪山"
+               :ruby "たいせつざん"
+               :urls ["markdown.html#index-3"]}
+              {:type :caption :text "な行"}
+              {:type :item
+               :text "日光"
+               :ruby "にっこう"
+               :urls ["markdown.html#index-4"]}
+              {:type :caption :text "は行"}
+              {:type :item
+               :text "磐梯朝日"
+               :ruby "ばんだいあさひ"
+               :urls ["markdown.html#index-8"]}
+              {:type :caption :text "ま行"}
+              {:type :item
+               :text "南アルプス"
+               :ruby "みなみあるぷす"
+               :urls ["markdown.html#index-7"]}
+              {:type :caption :text "わ行"}
+              {:type :item
+               :text "若狭湾"
+               :ruby "わかさわん"
+               :urls ["markdown.html#index-6"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "くしろしつげん"}
+                                  :children [{:type "text" :value "釧路湿原"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "しれとこ"}
+                                  :children [{:type "text" :value "知床"}]
+                                  :id "index-2"
+                                  :order 2}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "たいせつざん"}
+                                  :children [{:type "text" :value "大雪山"}]
+                                  :id "index-3"
+                                  :order 3}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "にっこう"}
+                                  :children [{:type "text" :value "日光"}]
+                                  :id "index-4"
+                                  :order 4}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "mt.fuji"}
+                                  :children [{:type "text" :value "Mt.Fuji"}]
+                                  :id "index-5"
+                                  :order 5}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "わかさわん"}
+                                  :children [{:type "text" :value "若狭湾"}]
+                                  :id "index-6"
+                                  :order 6}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "みなみあるぷす"}
+                                  :children [{:type "text"
+                                              :value "南アルプス"}]
+                                  :id "index-7"
+                                  :order 7}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ばんだいあさひ"}
+                                  :children [{:type "text" :value "磐梯朝日"}]
+                                  :id "index-8"
+                                  :order 8}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "あかんましゅう"}
+                                  :children [{:type "text" :value "阿寒摩周"}]
+                                  :id "index-9"
+                                  :order 9}]}}])))
+    (t/is (= [{:type :caption :text "英数字"}
+              {:type :item
+               :text "Mt.Fuji"
+               :ruby "mt.fuji"
+               :urls ["markdown.html#index-3"]}
+              {:type :caption :text "あ行"}
+              {:type :item
+               :text "阿寒摩周"
+               :ruby "あかんましゅう"
+               :urls ["markdown.html#index-6"]}
+              {:type :caption :text "か行"}
+              {:type :item
+               :text "釧路湿原"
+               :ruby "くしろしつげん"
+               :urls ["markdown.html#index-8"]}
+              {:type :caption :text "さ行"}
+              {:type :item
+               :text "知床"
+               :ruby "しれとこ"
+               :urls ["markdown.html#index-7"]}
+              {:type :caption :text "た行"}
+              {:type :item
+               :text "大雪山"
+               :ruby "たいせつざん"
+               :urls ["markdown.html#index-9"]}
+              {:type :caption :text "な行"}
+              {:type :item
+               :text "日光"
+               :ruby "にっこう"
+               :urls ["markdown.html#index-10"]}
+              {:type :caption :text "は行"}
+              {:type :item
+               :text "磐梯朝日"
+               :ruby "ばんだいあさひ"
+               :urls ["markdown.html#index-5"]}
+              {:type :caption :text "ま行"}
+              {:type :item
+               :text "南アルプス"
+               :ruby "みなみあるぷす"
+               :urls ["markdown.html#index-4"]}
+              {:type :caption :text "や行"}
+              {:type :item
+               :text "吉野熊野"
+               :ruby "よしのくまの"
+               :urls ["markdown.html#index-1"]}
+              {:type :caption :text "ら行"}
+              {:type :item
+               :text "利尻礼文サロベツ"
+               :ruby "りしりれぶんさろべつ"
+               :urls ["markdown.html#index-2"]}]
+             (analyze/create-indices
+              [{:name "markdown.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "よしのくまの"}
+                                  :children [{:type "text" :value "吉野熊野"}]
+                                  :id "index-1"
+                                  :order 1}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "りしりれぶんさろべつ"}
+                                  :children [{:type "text"
+                                              :value "利尻礼文サロベツ"}]
+                                  :id "index-2"
+                                  :order 2}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "mt.fuji"}
+                                  :children [{:type "text" :value "Mt.Fuji"}]
+                                  :id "index-3"
+                                  :order 3}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "みなみあるぷす"}
+                                  :children [{:type "text"
+                                              :value "南アルプス"}]
+                                  :id "index-4"
+                                  :order 4}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "ばんだいあさひ"}
+                                  :children [{:type "text" :value "磐梯朝日"}]
+                                  :id "index-5"
+                                  :order 5}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "あかんましゅう"}
+                                  :children [{:type "text" :value "阿寒摩周"}]
+                                  :id "index-6"
+                                  :order 6}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "しれとこ"}
+                                  :children [{:type "text" :value "知床"}]
+                                  :id "index-7"
+                                  :order 7}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "くしろしつげん"}
+                                  :children [{:type "text" :value "釧路湿原"}]
+                                  :id "index-8"
+                                  :order 8}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "たいせつざん"}
+                                  :children [{:type "text" :value "大雪山"}]
+                                  :id "index-9"
+                                  :order 9}
+                                 {:type "textDirective"
+                                  :name "index"
+                                  :attributes {:ruby "にっこう"}
+                                  :children [{:type "text" :value "日光"}]
+                                  :id "index-10"
+                                  :order 10}]}}]))))
 
   (t/testing "Documents do not have indices."
     (t/is (= []

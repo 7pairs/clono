@@ -196,6 +196,36 @@
       "1"
       nil)))
 
+(t/deftest dic-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/dic value)
+      {"key" "value"}
+      {"key" {:type "text" :value "value"}}
+      {"key1" "value1" "key2" {:type "text" :value "value2"}}
+      {}))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/dic value))
+      {:not-string "value"}
+      {"key1" "value1" :not-string "value2"}
+      "not-map"
+      nil)))
+
+(t/deftest dics-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/dics value)
+      {:key {"key" "value"}}
+      {:key1 {"key2" "value2"} :key3 {"key4" {:type "text"}}}
+      {}))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/dics value))
+      {"key1" {"key2" "value2"}}
+      {:key "not-map"}
+      {:key1 {"key2" "value2"} "key3" {"key4" "value4"}}
+      "not-map"
+      nil)))
+
 (t/deftest directive-name-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/directive-name value)
@@ -1002,6 +1032,23 @@
       {}
       "not-map"
       nil)))
+
+(t/deftest node-or-nil-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/node-or-nil value)
+      {:type "type"}
+      {:type "type" :extra-key "extra-value"}
+      nil))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/node-or-nil value))
+      {:type "12345"}
+      {:type ""}
+      {:type :not-string}
+      {:type nil}
+      {:extra-key "extra-value"}
+      {}
+      "not-map")))
 
 (t/deftest node-type-test
   (t/testing "Succeeds to verify."
