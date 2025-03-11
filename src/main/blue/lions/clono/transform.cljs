@@ -144,3 +144,22 @@
                               (keep #(transform-node % base-name dics))
                               vec))
         updated-node))))
+
+(defn transform-documents
+  [documents dics]
+  {:pre [(s/valid? ::spec/documents documents)
+         (s/valid? ::spec/dics dics)]
+   :post [(s/valid? ::spec/documents %)]}
+  (vec
+   (keep
+    (fn [{:keys [name type ast]}]
+      (try
+        {:name name
+         :type type
+         :ast (transform-node ast (id/extract-base-name name) dics)}
+        (catch js/Error e
+          (logger/log :error
+                      "Failed to transform AST."
+                      {:file-name name :cause (ex-message e)})
+          nil)))
+    documents)))

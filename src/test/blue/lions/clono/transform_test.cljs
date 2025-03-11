@@ -316,3 +316,83 @@
                                                    {:type "label"}]}
                                        "base-name"
                                        {})))))
+
+(t/deftest transform-documents-test
+  (t/testing "All documents are valid."
+    (t/is (= [{:name "markdown1.md"
+               :type :chapters
+               :ast {:type "root"
+                     :children [{:type "text" :value "value1"}
+                                {:type "text" :value "value3"}]}}
+              {:name "markdown2.md"
+               :type :appendices
+               :ast {:type "root"
+                     :children [{:type "text" :value "value4"}
+                                {:type "text" :value "value6"}]}}]
+             (transform/transform-documents
+              [{:name "markdown1.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "text" :value "value1"}
+                                 {:type "label" :value "value2"}
+                                 {:type "text" :value "value3"}]}}
+               {:name "markdown2.md"
+                :type :appendices
+                :ast {:type "root"
+                      :children [{:type "text" :value "value4"}
+                                 {:type "label" :value "value5"}
+                                 {:type "text" :value "value6"}]}}]
+              {}))))
+
+  (t/testing "Some documents are invalid."
+    (reset! logger/enabled? false)
+    (reset! logger/entries [])
+    (t/is (= [{:name "markdown1.md"
+               :type :chapters
+               :ast {:type "root"
+                     :children [{:type "text" :value "value1"}
+                                {:type "text" :value "value3"}]}}]
+             (transform/transform-documents
+              [{:name "markdown1.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "text" :value "value1"}
+                                 {:type "label" :value "value2"}
+                                 {:type "text" :value "value3"}]}}
+               {:name "markdown2.md"
+                :type :appendices
+                :ast {:type "root" :children ["not-node"]}}]
+              {})))
+    (let [entries @logger/entries]
+      (t/is (= 1 (count entries)))
+      (let [{:keys [level message data]} (first entries)]
+        (t/is (= :error level))
+        (t/is (= "Failed to transform AST." message))
+        (t/is (= "markdown2.md" (:file-name data)))
+        (t/is (str/starts-with? (:cause data) "Assert failed:")))))
+
+  (t/testing "All documents are invalid"
+    (reset! logger/enabled? false)
+    (reset! logger/entries [])
+    (t/is (= []
+             (transform/transform-documents
+              [{:name "markdown1.md"
+                :type :chapters
+                :ast {:type "root" :children ["not-node"]}}
+               {:name "markdown2.md"
+                :type :appendices
+                :ast {:type "root"
+                      :children ["not-node"]}}]
+              {})))
+    (let [entries @logger/entries]
+      (t/is (= 2 (count entries)))
+      (let [{:keys [level message data]} (first entries)]
+        (t/is (= :error level))
+        (t/is (= "Failed to transform AST." message))
+        (t/is (= "markdown1.md" (:file-name data)))
+        (t/is (str/starts-with? (:cause data) "Assert failed:")))
+      (let [{:keys [level message data]} (second entries)]
+        (t/is (= :error level))
+        (t/is (= "Failed to transform AST." message))
+        (t/is (= "markdown2.md" (:file-name data)))
+        (t/is (str/starts-with? (:cause data) "Assert failed:"))))))
