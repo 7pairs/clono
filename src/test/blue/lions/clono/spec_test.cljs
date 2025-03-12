@@ -458,6 +458,17 @@
       "not-function"
       nil)))
 
+(t/deftest function-or-nil-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/function-or-nil value)
+      (fn [x y] (+ x y))
+      #(* % 2)
+      inc
+      nil))
+
+  (t/testing "Fails to verify."
+    (t/is (not (s/valid? ::spec/function-or-nil "not-function")))))
+
 (t/deftest heading_caption-test
   (t/testing "Succeeds to verify."
     (t/is (s/valid? ::heading/caption "caption")))

@@ -127,6 +127,10 @@
 (s/def ::function
   fn?)
 
+(s/def ::function-or-nil
+  (s/or :function ::function
+        :nil nil?))
+
 (s/def ::heading/caption
   ::caption)
 
