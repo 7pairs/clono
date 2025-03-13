@@ -15,6 +15,7 @@
 (ns blue.lions.clono.render
   (:require [cljs.spec.alpha :as s]
             ["path" :as path]
+            [blue.lions.clono.esm :as esm]
             [blue.lions.clono.log :as logger]
             [blue.lions.clono.spec :as spec]))
 
@@ -43,3 +44,14 @@
                 plugin)))
           (catch js/Error _
             nil)))))
+
+(defn ast->markdown
+  [ast]
+  {:pre [(s/valid? ::spec/node ast)]
+   :post [(s/valid? ::spec/markdown %)]}
+  (try
+    (let [converted-ast (clj->js ast {:keywordize-keys false})]
+      (esm/to-markdown converted-ast))
+    (catch js/Error e
+      (throw (ex-info "Failed to convert AST to Markdown."
+                      {:ast ast :cause e})))))

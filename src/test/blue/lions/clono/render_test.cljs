@@ -77,3 +77,27 @@
       (reset! logger/entries [])
       (t/is (nil? (render/load-plugin "notExists" :plugin-dir plugin-dir)))
       (t/is (= [] @logger/entries)))))
+
+(t/deftest ast->markdown-test
+  (t/testing "Valid AST is given."
+    (t/is (= "Hello, world!\n"
+             (render/ast->markdown
+              {:type "root"
+               :children [{:type "paragraph"
+                           :children [{:type "text"
+                                       :value "Hello, world!"}]}]}))))
+
+  (t/testing "Invalid AST is given."
+    (let [ast {:type "root"
+               :children [{:type "paragraph"
+                           :children [{:type "text"
+                                       :value "Hello, world!"}]}
+                          {:type "invalid"}]}]
+      (try
+        (render/ast->markdown ast)
+        (catch js/Error e
+          (let [data (ex-data e)]
+            (t/is (= "Failed to convert AST to Markdown." (ex-message e)))
+            (t/is (= ast (:ast data)))
+            (t/is (= "Cannot handle unknown node `invalid`"
+                     (ex-message (:cause data))))))))))
