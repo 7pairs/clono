@@ -36,7 +36,7 @@
    :after #(teardown-tmp-dir tmp-dir)})
 
 (t/deftest load-plugin-test
-  (let [plugin-dir (path/join tmp-dir "plugins")]
+  (let [plugin-dir (path/join tmp-dir "load-plugin")]
     (fs/mkdirSync plugin-dir)
     (fs/writeFileSync (path/join plugin-dir "valid.js")
                       "module.exports = function(n, b) { return n; };")
@@ -46,36 +46,36 @@
       (reset! render/plugin-cache {})
       (reset! logger/enabled? false)
       (reset! logger/entries [])
-      (t/is (fn? (render/load-plugin "valid" :plugin-dir plugin-dir)))
+      (t/is (fn? (render/load-plugin plugin-dir "valid")))
       (t/is (= [{:level :info
                  :message "Plugin is successfully loaded."
-                 :data {:type "valid" :plugin-dir plugin-dir}}]
+                 :data {:plugin-dir plugin-dir :type "valid"}}]
                @logger/entries)))
 
     (t/testing "Plugin is already loaded."
       (reset! render/plugin-cache {})
       (reset! logger/enabled? false)
-      (let [plugin (render/load-plugin "valid" :plugin-dir plugin-dir)]
+      (let [plugin (render/load-plugin plugin-dir "valid")]
         (reset! logger/entries [])
-        (t/is (= plugin (render/load-plugin "valid" :plugin-dir plugin-dir)))
+        (t/is (= plugin (render/load-plugin plugin-dir "valid")))
         (t/is (= [] @logger/entries))))
 
     (t/testing "Plugin is invalid."
       (reset! render/plugin-cache {})
       (reset! logger/enabled? false)
       (reset! logger/entries [])
-      (t/is (nil? (render/load-plugin "invalid" :plugin-dir plugin-dir)))
+      (t/is (nil? (render/load-plugin plugin-dir "invalid")))
       (t/is (= [{:level :warn
                  :message "Invalid JavaScript file is detected."
-                 :data {:type "invalid"
-                        :plugin-path (path/join plugin-dir "invalid.js")}}]
+                 :data {:plugin-path (path/join plugin-dir "invalid.js")
+                        :type "invalid"}}]
                @logger/entries)))
 
     (t/testing "Plugin does not exist."
       (reset! render/plugin-cache {})
       (reset! logger/enabled? false)
       (reset! logger/entries [])
-      (t/is (nil? (render/load-plugin "notExists" :plugin-dir plugin-dir)))
+      (t/is (nil? (render/load-plugin plugin-dir "notExists")))
       (t/is (= [] @logger/entries)))))
 
 (t/deftest ast->markdown-test

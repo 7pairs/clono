@@ -22,9 +22,9 @@
 (def plugin-cache (atom {}))
 
 (defn load-plugin
-  [type & {:keys [plugin-dir]
-           :or {plugin-dir (path/join js/__dirname "plugins")}}]
-  {:pre [(s/valid? ::spec/node-type type)]
+  [plugin-dir type]
+  {:pre [(s/valid? ::spec/file-path plugin-dir)
+         (s/valid? ::spec/node-type type)]
    :post [(s/valid? ::spec/function-or-nil %)]}
   (or (@plugin-cache type)
       (let [plugin-path (path/join plugin-dir (str type ".js"))]
@@ -34,13 +34,13 @@
               (do
                 (logger/log :warn
                             "Invalid JavaScript file is detected."
-                            {:type type :plugin-path plugin-path})
+                            {:plugin-path plugin-path :type type })
                 nil)
               (do
                 (swap! plugin-cache assoc type plugin)
                 (logger/log :info
                             "Plugin is successfully loaded."
-                            {:type type :plugin-dir plugin-dir})
+                            {:plugin-dir plugin-dir :type type })
                 plugin)))
           (catch js/Error _
             nil)))))
