@@ -15,9 +15,21 @@
 (ns blue.lions.clono.render
   (:require [cljs.spec.alpha :as s]
             ["path" :as path]
+            [blue.lions.clono.ast :as ast]
             [blue.lions.clono.esm :as esm]
             [blue.lions.clono.log :as logger]
             [blue.lions.clono.spec :as spec]))
+
+(defmulti default-handler
+  (fn [node _base-name]
+    (ast/get-type node)))
+
+(defmethod default-handler :default
+  [node base-name]
+  {:pre [(s/valid? ::spec/node node)
+         (s/valid? ::spec/file-name base-name)]
+   :post [(s/valid? ::spec/node %)]}
+  node)
 
 (def plugin-cache (atom {}))
 
@@ -44,6 +56,27 @@
                 plugin)))
           (catch js/Error _
             nil)))))
+
+(defn apply-plugin-or-default
+  [node base-name & {:keys [plugin-dir]
+                     :or {plugin-dir (path/join js/__dirname "plugins")}}]
+  {:pre [(s/valid? ::spec/node node)
+         (s/valid? ::spec/file-name base-name)]
+   :post [(s/valid? ::spec/node %)]}
+  (let [type (ast/get-type node)]
+    (or (when-let [plugin (load-plugin plugin-dir type)]
+          (try
+            (let [result (plugin node base-name)]
+              (if (string? result)
+                {:type "html" :value result}
+                (throw (ex-info "Plugin returns invalid value."
+                                {:type type :result result}))))
+            (catch js/Error e
+              (logger/log :warn
+                          "Plugin execution failed, using default logic."
+                          {:type type :node node :cause (.-message e)})
+              nil)))
+        (default-handler node base-name))))
 
 (defn ast->markdown
   [ast]

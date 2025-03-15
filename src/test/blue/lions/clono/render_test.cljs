@@ -35,6 +35,11 @@
   {:before #(def tmp-dir (setup-tmp-dir))
    :after #(teardown-tmp-dir tmp-dir)})
 
+(t/deftest default-handler-test
+  (t/testing "Node does not to be updated."
+    (let [node {:type "notExists"}]
+      (t/is (= node (render/default-handler node "base-name"))))))
+
 (t/deftest load-plugin-test
   (let [plugin-dir (path/join tmp-dir "load-plugin")]
     (fs/mkdirSync plugin-dir)
@@ -77,6 +82,43 @@
       (reset! logger/entries [])
       (t/is (nil? (render/load-plugin plugin-dir "notExists")))
       (t/is (= [] @logger/entries)))))
+
+(t/deftest apply-plugin-or-default-test
+  (let [plugin-dir (path/join tmp-dir "apply-plugin-or-default")]
+    (fs/mkdirSync plugin-dir)
+    (fs/writeFileSync
+     (path/join plugin-dir "valid.js")
+     "module.exports = function(n, b) { return 'Plugin is called.'; };")
+    (fs/writeFileSync
+     (path/join plugin-dir "invalid.js")
+     "module.exports = function(n, b) { return 0; };")
+
+    (t/testing "Plugin is valid."
+      (t/is (= {:type "html" :value "Plugin is called."}
+               (render/apply-plugin-or-default {:type "valid"}
+                                               "base-name"
+                                               :plugin-dir plugin-dir))))
+
+    (t/testing "Plugin is invalid."
+      (let [node {:type "invalid"}]
+        (reset! logger/enabled? false)
+        (reset! logger/entries [])
+        (t/is (= {:type "invalid"}
+                 (render/apply-plugin-or-default node
+                                                 "base-name"
+                                                 :plugin-dir plugin-dir)))
+        (let [entries @logger/entries]
+          (t/is (= 2 (count entries)))
+          (t/is (= {:level :warn
+                    :message "Plugin execution failed, using default logic."
+                    :data {:type "invalid"
+                           :node node
+                           :cause "Plugin returns invalid value."}}
+                   (second entries)))))))
+
+    (t/testing "Plugin does not exist."
+      (let [node {:type "notExists"}]
+        (t/is (= node (render/apply-plugin-or-default node "base-name"))))))
 
 (t/deftest ast->markdown-test
   (t/testing "Valid AST is given."
