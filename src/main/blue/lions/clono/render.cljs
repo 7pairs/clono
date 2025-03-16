@@ -78,6 +78,19 @@
               nil)))
         (default-handler node base-name))))
 
+(defn finalize-node
+  [node base-name]
+  {:pre [(s/valid? ::spec/node node)
+         (s/valid? ::spec/file-name base-name)]
+   :post [(s/valid? ::spec/node %)]}
+  (when-let [updated-node (apply-plugin-or-default node base-name)]
+    (let [new-children (->> (:children updated-node)
+                            (keep #(finalize-node % base-name))
+                            vec)]
+      (if (seq new-children)
+        (assoc updated-node :children new-children)
+        (dissoc updated-node :children)))))
+
 (defn ast->markdown
   [ast]
   {:pre [(s/valid? ::spec/node ast)]

@@ -121,6 +121,14 @@
       (let [node {:type "notExists"}]
         (t/is (= node (render/apply-plugin-or-default node "base-name"))))))
 
+(t/deftest finalize-node-test
+  (t/testing "All Nodes do not to be updated."
+    (let [node {:type "root"
+                :children [{:type "paragraph"
+                            :children [{:type "text"
+                                        :value "Hello, world!"}]}]}]
+      (t/is (= node (render/finalize-node node "base-name"))))))
+
 (t/deftest ast->markdown-test
   (t/testing "Valid AST is given."
     (t/is (= "Hello, world!\n"
