@@ -107,14 +107,15 @@
                  (render/apply-plugin-or-default node
                                                  "base-name"
                                                  :plugin-dir plugin-dir)))
-        (let [entries @logger/entries]
-          (t/is (= 2 (count entries)))
-          (t/is (= {:level :warn
-                    :message "Plugin execution failed, using default logic."
-                    :data {:type "invalid"
-                           :node node
-                           :cause "Plugin returns invalid value."}}
-                   (second entries)))))))
+        (t/is (= [{:level :info
+                   :message "Plugin is successfully loaded."
+                   :data {:plugin-dir plugin-dir :type "invalid"}}
+                  {:level :warn
+                   :message "Plugin execution failed, using default logic."
+                   :data {:type "invalid"
+                          :node node
+                          :cause "Plugin returns invalid value."}}]
+                 @logger/entries)))))
 
     (t/testing "Plugin does not exist."
       (let [node {:type "notExists"}]
