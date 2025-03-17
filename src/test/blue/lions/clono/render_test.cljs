@@ -89,10 +89,12 @@
     (fs/mkdirSync plugin-dir)
     (fs/writeFileSync
      (path/join plugin-dir "valid.js")
-     "module.exports = function(n, b) { return 'Plugin is called.'; };")
+     "module.exports = function(n, b) { return 'Plugin is called.'; };"
+     "utf8")
     (fs/writeFileSync
      (path/join plugin-dir "invalid.js")
-     "module.exports = function(n, b) { return 0; };")
+     "module.exports = function(n, b) { return 0; };"
+     "utf8")
 
     (t/testing "Plugin is valid."
       (t/is (= {:type "html" :value "Plugin is called."}
