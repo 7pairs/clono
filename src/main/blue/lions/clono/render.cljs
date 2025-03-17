@@ -14,6 +14,7 @@
 
 (ns blue.lions.clono.render
   (:require [cljs.spec.alpha :as s]
+            [clojure.string :as str]
             ["path" :as path]
             [blue.lions.clono.ast :as ast]
             [blue.lions.clono.esm :as esm]
@@ -101,3 +102,20 @@
     (catch js/Error e
       (throw (ex-info "Failed to convert AST to Markdown."
                       {:ast ast :cause e})))))
+
+(defn nodes->markdown
+  [nodes base-name]
+  {:pre [(s/valid? ::spec/nodes nodes)
+         (s/valid? ::spec/file-name base-name)]
+   :post [(s/valid? ::spec/markdown %)]}
+  (if (empty? nodes)
+    ""
+    (try
+      (if-let [ast (finalize-node {:type "root" :children nodes} base-name)]
+        (-> ast
+            ast->markdown
+            str/trim-newline)
+        "")
+      (catch js/Error e
+        (throw (ex-info "Failed to convert nodes to Markdown."
+                        {:nodes nodes :base-name base-name :cause e}))))))
