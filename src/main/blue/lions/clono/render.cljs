@@ -66,7 +66,7 @@
   (let [type (ast/get-type node)]
     (or (when-let [plugin (load-plugin plugin-dir type)]
           (try
-            (let [result (plugin node base-name)]
+            (let [result (plugin (clj->js node) base-name)]
               (if (string? result)
                 {:type "html" :value result}
                 (throw (ex-info "Plugin returns invalid value."
