@@ -44,8 +44,9 @@
   (let [plugin-dir (path/join tmp-dir "load-plugin")]
     (fs/mkdirSync plugin-dir)
     (fs/writeFileSync (path/join plugin-dir "valid.js")
-                      "module.exports = function(n, b) { return n; };")
-    (fs/writeFileSync (path/join plugin-dir "invalid.js") "")
+                      "module.exports = function(n, b) { return n; };"
+                      "utf8")
+    (fs/writeFileSync (path/join plugin-dir "invalid.js") "" "utf8")
 
     (t/testing "Plugin is valid."
       (reset! render/plugin-cache {})
