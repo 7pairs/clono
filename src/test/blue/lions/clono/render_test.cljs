@@ -195,3 +195,30 @@
             (t/is (= {:type "root" :children nodes} (:ast cause-data)))
             (t/is (= "Cannot handle unknown node `invalid`"
                      (ex-message (:cause cause-data))))))))))
+
+(t/deftest node->markdown-test
+  (t/testing "Node is valid."
+    (t/is (= "Hello, world!"
+             (render/node->markdown
+              {:type "paragraph"
+               :children [{:type "text" :value "Hello, world!"}]}
+              "base-name"))))
+
+  (t/testing "Node is invalid."
+    (let [node {:type "invalid"}
+          base-name "base-name"]
+      (try
+        (render/node->markdown node base-name)
+        (catch js/Error e
+          (let [data (ex-data e)
+                cause (:cause data)
+                cause-data (ex-data cause)]
+            (t/is (= "Failed to convert node to Markdown." (ex-message e)))
+            (t/is (= node (:node data)))
+            (t/is (= base-name (:base-name data)))
+            (t/is (= "Failed to convert nodes to Markdown."
+                     (ex-message cause)))
+            (t/is (= [node] (:nodes cause-data)))
+            (t/is (= base-name (:base-name cause-data)))
+            (t/is (= "Failed to convert AST to Markdown."
+                     (ex-message (:cause cause-data))))))))))

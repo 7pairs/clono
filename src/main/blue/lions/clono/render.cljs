@@ -119,3 +119,14 @@
       (catch js/Error e
         (throw (ex-info "Failed to convert nodes to Markdown."
                         {:nodes nodes :base-name base-name :cause e}))))))
+
+(defn node->markdown
+  [node base-name]
+  {:pre [(s/valid? ::spec/node node)
+         (s/valid? ::spec/file-name base-name)]
+   :post [(s/valid? ::spec/markdown %)]}
+  (try
+    (nodes->markdown [node] base-name)
+    (catch js/Error e
+      (throw (ex-info "Failed to convert node to Markdown."
+                      {:node node :base-name base-name :cause e})))))
