@@ -185,7 +185,7 @@
 
   (t/testing "File is invalid as catalog file."
     (let [file-path (path/join tmp-dir "invalid.edn")]
-      (fs/writeFileSync file-path "{\"chapters\": [\"chapter.md\"]}")
+      (fs/writeFileSync file-path "{\"chapters\": [\"chapter.md\"]}" "utf8")
       (try
         (file/read-catalog-file file-path)
         (catch js/Error e
