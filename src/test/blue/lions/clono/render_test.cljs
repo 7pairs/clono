@@ -36,6 +36,63 @@
    :after #(teardown-tmp-dir tmp-dir)})
 
 (t/deftest default-handler-test
+  (t/testing "Node is code."
+    (t/testing "Node has title and label."
+      (t/is (= {:type "html"
+                :value (str "<div class=\"cln-code\" id=\"hello\">\n\n"
+                            "```clojure title=First code\n"
+                            "(println \"Hello, world!\")\n"
+                            "```\n\n"
+                            "</div>")}
+               (render/default-handler
+                {:type "code"
+                 :lang "clojure"
+                 :meta "First code:label{#hello}"
+                 :value "(println \"Hello, world!\")"}
+                "base-name"))))
+
+    (t/testing "Node has title."
+      (t/is (= {:type "html"
+                :value (str "<div class=\"cln-code\">\n\n"
+                            "```clojure title=First code\n"
+                            "(println \"Hello, world!\")\n"
+                            "```\n\n"
+                            "</div>")}
+               (render/default-handler
+                {:type "code"
+                 :lang "clojure"
+                 :meta "First code"
+                 :value "(println \"Hello, world!\")"}
+                "base-name"))))
+
+    (t/testing "Node has label."
+      (t/is (= {:type "html"
+                :value (str "<div class=\"cln-code\" id=\"hello\">\n\n"
+                            "```clojure\n"
+                            "(println \"Hello, world!\")\n"
+                            "```\n\n"
+                            "</div>")}
+               (render/default-handler
+                {:type "code"
+                 :lang "clojure"
+                 :meta ":label{#hello}"
+                 :value "(println \"Hello, world!\")"}
+                "base-name"))))
+
+    (t/testing "Node does not have meta."
+      (t/is (= {:type "html"
+                :value (str "<div class=\"cln-code\">\n\n"
+                            "```clojure\n"
+                            "(println \"Hello, world!\")\n"
+                            "```\n\n"
+                            "</div>")}
+               (render/default-handler
+                {:type "code"
+                 :lang "clojure"
+                 :meta nil
+                 :value "(println \"Hello, world!\")"}
+                "base-name")))))
+
   (t/testing "Node does not to be updated."
     (let [node {:type "notExists"}]
       (t/is (= node (render/default-handler node "base-name"))))))
@@ -222,3 +279,26 @@
             (t/is (= base-name (:base-name cause-data)))
             (t/is (= "Failed to convert AST to Markdown."
                      (ex-message (:cause cause-data))))))))))
+
+(t/deftest build-code-html-test
+  (t/testing "ID is given."
+    (t/is (= (str "<div class=\"cln-code\" id=\"hello\">\n\n"
+                  "```\n"
+                  "(println \"Hello, world!\")\n"
+                  "```\n\n"
+                  "</div>")
+             (render/build-code-html (str "```\n"
+                                          "(println \"Hello, world!\")\n"
+                                          "```")
+                                     "hello"))))
+
+  (t/testing "ID is not given."
+    (t/is (= (str "<div class=\"cln-code\">\n\n"
+                  "```\n"
+                  "(println \"Hello, world!\")\n"
+                  "```\n\n"
+                  "</div>")
+             (render/build-code-html (str "```\n"
+                                          "(println \"Hello, world!\")\n"
+                                          "```")
+                                     nil)))))

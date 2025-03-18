@@ -614,6 +614,17 @@
       "not-map"
       nil)))
 
+(t/deftest html-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/html value)
+      "<h1>HTML</h1>"
+      ""))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/html value))
+      :not-string
+      nil)))
+
 (t/deftest id-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/id value)
@@ -633,6 +644,26 @@
       ""
       :not-string
       nil)))
+
+(t/deftest id-or-nil-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/id-or-nil value)
+      "valid|id"
+      "日本語"
+      nil))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/id-or-nil value))
+      "invalid\\id"
+      "invalid/id"
+      "invalid:id"
+      "invalid*id"
+      "invalid?id"
+      "invalid\"id"
+      "invalid>id"
+      "invalid<id"
+      ""
+      :not-string)))
 
 (t/deftest index_order-test
   (t/testing "Succeeds to verify."

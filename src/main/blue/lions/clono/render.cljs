@@ -15,10 +15,13 @@
 (ns blue.lions.clono.render
   (:require [cljs.spec.alpha :as s]
             [clojure.string :as str]
+            [goog.string :as gstr]
+            [goog.string.format]
             ["path" :as path]
             [blue.lions.clono.ast :as ast]
             [blue.lions.clono.esm :as esm]
             [blue.lions.clono.log :as logger]
+            [blue.lions.clono.parse :as parse]
             [blue.lions.clono.spec :as spec]))
 
 (defmulti default-handler
@@ -130,3 +133,40 @@
     (catch js/Error e
       (throw (ex-info "Failed to convert node to Markdown."
                       {:node node :base-name base-name :cause e})))))
+
+(defn build-code-html
+  [content id]
+  {:pre [(s/valid? ::spec/markdown content)
+         (s/valid? ::spec/id-or-nil id)]
+   :post [(s/valid? ::spec/html %)]}
+  (gstr/format "<div class=\"cln-code\"%s>\n\n%s\n\n</div>"
+               (if (seq id) (gstr/format " id=\"%s\"" id) "")
+               content))
+
+(defmethod default-handler "code"
+  [node base-name]
+  {:pre [(s/valid? ::spec/node node)
+         (s/valid? ::spec/file-name base-name)]
+   :post [(s/valid? ::spec/node %)]}
+  (let [lang (:lang node)
+        meta (:meta node)
+        value (:value node)
+        parsed-meta (when meta
+                      (parse/markdown->ast meta
+                                           (parse/create-order-generator)))
+        title (when parsed-meta
+                (->> parsed-meta
+                     ast/extract-texts
+                     (map :value)
+                     str/join))
+        markdown (gstr/format "```%s%s\n%s\n```"
+                              lang
+                              (if (seq title) (str " title=" title) "")
+                              value)
+        id (when parsed-meta
+             (-> parsed-meta
+                 ast/extract-labels
+                 first
+                 :attributes
+                 :id))]
+    {:type "html" :value (build-code-html markdown id)}))

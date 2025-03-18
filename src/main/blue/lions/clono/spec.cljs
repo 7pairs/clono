@@ -159,12 +159,19 @@
   (s/or :heading ::heading
         :nil nil?))
 
+(s/def ::html
+  ::common/non-nil-string)
+
 (def valid-id?
   (partial valid-string? #{"\\" "/" ":" "*" "?" "\"" ">" "<"}))
 
 (s/def ::id
   (s/and ::common/non-blank-string
          valid-id?))
+
+(s/def ::id-or-nil
+  (s/or :id ::id
+        :nil nil?))
 
 (def index_order
   ::order)
