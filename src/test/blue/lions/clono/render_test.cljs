@@ -93,6 +93,56 @@
                  :value "(println \"Hello, world!\")"}
                 "base-name")))))
 
+  (t/testing "Node is column."
+    (t/testing "Node is valid."
+      (t/is (= {:type "html"
+                :value (str "<div class=\"cln-column\">\n\n"
+                            "#### Column title\n\n"
+                            "I am a column.\n\n"
+                            "</div>")}
+               (render/default-handler
+                {:type "containerDirective"
+                 :name "column"
+                 :children [{:type "paragraph"
+                             :data {:directiveLabel true}
+                             :children [{:type "text"
+                                         :value "Column title"}]}
+                            {:type "paragraph"
+                             :children [{:type "text"
+                                         :value "I am a column."}]}]}
+                "base-name"))))
+  
+    (t/testing "Node does not have caption."
+      (reset! logger/enabled? false)
+      (reset! logger/entries [])
+      (let [node {:type "containerDirective"
+                  :name "column"
+                  :children [{:type "paragraph"
+                              :data {:directiveLabel true}
+                              :children []}
+                             {:type "paragraph"
+                              :children [{:type "text"
+                                          :value "I am a column."}]}]}
+            base-name "base-name"]
+        (t/is (= {:type "html" :value ""}
+                 (render/default-handler node base-name)))
+        (t/is (= [{:level :error
+                   :message "Column node does not have caption."
+                   :data {:node node :base-name base-name}}]
+                 @logger/entries))))
+  
+    (t/testing "Node does not have children."
+      (reset! logger/enabled? false)
+      (reset! logger/entries [])
+      (let [node {:type "containerDirective" :name "column" :children []}
+            base-name "base-name"]
+        (t/is (= {:type "html" :value ""}
+                 (render/default-handler node base-name)))
+        (t/is (= [{:level :error
+                   :message "Column node does not have children."
+                   :data {:node node :base-name base-name}}]
+                 @logger/entries)))))
+
   (t/testing "Node does not to be updated."
     (let [node {:type "notExists"}]
       (t/is (= node (render/default-handler node "base-name"))))))
@@ -302,3 +352,20 @@
                                           "(println \"Hello, world!\")\n"
                                           "```")
                                      nil)))))
+
+(t/deftest build-column-html-test
+  (t/testing "Heading level is not given."
+    (t/is (= (str "<div class=\"cln-column\">\n\n"
+                  "#### Column title\n\n"
+                  "I am a column.\n\n"
+                  "</div>")
+             (render/build-column-html "Column title" "I am a column."))))
+
+  (t/testing "Heading level is given."
+    (t/is (= (str "<div class=\"cln-column\">\n\n"
+                  "## Column title\n\n"
+                  "I am a column.\n\n"
+                  "</div>")
+             (render/build-column-html "Column title"
+                                       "I am a column."
+                                       :heading-level 2)))))

@@ -170,3 +170,37 @@
                  :attributes
                  :id))]
     {:type "html" :value (build-code-html markdown id)}))
+
+(defn build-column-html
+  [caption content & {:keys [heading-level] :or {heading-level 4}}]
+  {:pre [(s/valid? ::spec/caption caption)
+         (s/valid? ::spec/markdown content)]
+   :post [(s/valid? ::spec/html %)]}
+  (gstr/format "<div class=\"cln-column\">\n\n%s %s\n\n%s\n\n</div>"
+               (str/join (repeat heading-level "#")) caption content))
+
+(defmethod default-handler "column"
+  [node base-name]
+  {:pre [(s/valid? ::spec/node node)
+         (s/valid? ::spec/file-name base-name)]
+   :post [(s/valid? ::spec/node %)]}
+  (let [children (:children node)]
+    (if (seq children)
+      (let [caption (-> children
+                        first
+                        :children
+                        first
+                        :value)]
+        (if caption
+          (let [content (nodes->markdown (vec (rest children)) base-name)]
+            {:type "html" :value (build-column-html caption content)})
+          (do
+            (logger/log :error
+                        "Column node does not have caption."
+                        {:node node :base-name base-name})
+            {:type "html" :value ""})))
+      (do
+        (logger/log :error
+                    "Column node does not have children."
+                    {:node node :base-name base-name})
+        {:type "html" :value ""}))))
