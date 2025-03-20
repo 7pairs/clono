@@ -111,7 +111,7 @@
                              :children [{:type "text"
                                          :value "I am a column."}]}]}
                 "base-name"))))
-  
+
     (t/testing "Node does not have caption."
       (reset! logger/enabled? false)
       (reset! logger/entries [])
@@ -130,7 +130,7 @@
                    :message "Column node does not have caption."
                    :data {:node node :base-name base-name}}]
                  @logger/entries))))
-  
+
     (t/testing "Node does not have children."
       (reset! logger/enabled? false)
       (reset! logger/entries [])
@@ -142,6 +142,67 @@
                    :message "Column node does not have children."
                    :data {:node node :base-name base-name}}]
                  @logger/entries)))))
+
+  (t/testing "Node is figure."
+    (t/testing "Node has attributes."
+      (t/is (= {:type "html"
+                :value "![Caption](image.jpg){id=image class=image-class}"}
+               (render/default-handler
+                {:type "textDirective"
+                 :name "figure"
+                 :attributes {:src "image.jpg" :class "image-class"}
+                 :children [{:type "text" :value "Caption"}]}
+                "base-name")))
+      (t/is (= {:type "html"
+                :value (str "![Caption](image.jpg)"
+                            "{id=image class=image-class width=100}")}
+               (render/default-handler
+                {:type "textDirective"
+                 :name "figure"
+                 :attributes {:src "image.jpg"
+                              :class "image-class"
+                              :width "100"}
+                 :children [{:type "text" :value "Caption"}]}
+                "base-name"))))
+
+    (t/testing "Node does not have attributes."
+      (t/is (= {:type "html" :value "![Caption](image.jpg){id=image}"}
+               (render/default-handler
+                {:type "textDirective"
+                 :name "figure"
+                 :attributes {:src "image.jpg"}
+                 :children [{:type "text" :value "Caption"}]}
+                "base-name"))))
+
+    (t/testing "Node does not have child."
+      (reset! logger/enabled? false)
+      (reset! logger/entries [])
+      (let [node {:type "textDirective"
+                  :name "figure"
+                  :attributes {:src "image.jpg"}
+                  :children []}
+            base-name "base-name"]
+        (t/is (= {:type "html" :value ""}
+                 (render/default-handler node base-name))
+              (t/is (= [{:level :error
+                         :message "Figure node is invalid."
+                         :data {:node node :base-name base-name :missing :child}}]
+                       @logger/entries)))))
+
+    (t/testing "Node does not have src."
+      (reset! logger/enabled? false)
+      (reset! logger/entries [])
+      (let [node {:type "textDirective"
+                  :name "figure"
+                  :attributes {}
+                  :children [{:type "text" :value "Caption"}]}
+            base-name "base-name"]
+        (t/is (= {:type "html" :value ""}
+                 (render/default-handler node base-name))
+              (t/is (= [{:level :error
+                         :message "Figure node is invalid."
+                         :data {:node node :base-name base-name :missing :src}}]
+                       @logger/entries))))))
 
   (t/testing "Node does not to be updated."
     (let [node {:type "notExists"}]
@@ -330,6 +391,19 @@
             (t/is (= "Failed to convert AST to Markdown."
                      (ex-message (:cause cause-data))))))))))
 
+(t/deftest format-attributes-test
+  (t/testing "Single attribute is given."
+    (t/is (= "class=class-value"
+             (render/format-attributes-for-markdown {:class "class-value"}))))
+
+  (t/testing "Multiple attributes are given."
+    (t/is (= "class=class-value id=id-value"
+             (render/format-attributes-for-markdown {:class "class-value"
+                                                     :id "id-value"}))))
+
+  (t/testing "Empty map are given."
+    (t/is (= "" (render/format-attributes-for-markdown {})))))
+
 (t/deftest build-code-html-test
   (t/testing "ID is given."
     (t/is (= (str "<div class=\"cln-code\" id=\"hello\">\n\n"
@@ -369,3 +443,24 @@
              (render/build-column-html "Column title"
                                        "I am a column."
                                        :heading-level 2)))))
+
+(t/deftest build-image-markdown-test
+  (t/testing "Image has attributes."
+    (t/is (= "![Caption](image.jpg){id=image-id class=image-class}"
+             (render/build-image-markdown "Caption"
+                                          "image.jpg"
+                                          "image-id"
+                                          {:class "image-class"})))
+    (t/is (= "![Caption](image.jpg){id=image-id class=image-class width=100}"
+             (render/build-image-markdown "Caption"
+                                          "image.jpg"
+                                          "image-id"
+                                          {:class "image-class"
+                                           :width "100"}))))
+
+  (t/testing "Image does not have attributes."
+    (t/is (= "![Caption](image.jpg){id=image-id}"
+             (render/build-image-markdown "Caption"
+                                          "image.jpg"
+                                          "image-id"
+                                          {})))))

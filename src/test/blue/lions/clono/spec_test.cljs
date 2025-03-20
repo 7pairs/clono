@@ -61,6 +61,21 @@
       :not-string
       nil)))
 
+(t/deftest attributes-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/attributes value)
+      {:key "value"}
+      {:key1 "value1" :key2 "value2"}
+      {}))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/attributes value))
+      {"not-keyword" "value"}
+      {:key ""}
+      {:key "value1" "not-keyword" "value2"}
+      "not-map"
+      nil)))
+
 (t/deftest caption-test
   (t/testing "Succeeds to verify."
     (t/is (s/valid? ::spec/caption "caption")))
@@ -444,6 +459,18 @@
       {"ID" "not-node"}
       {"ID1" {:type "typeA"} :not-string {:type "typeB"}}
       "not-map"
+      nil)))
+
+(t/deftest formatted-attributes-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/formatted-attributes value)
+      "attr=\"value\""
+      "attr1=\"value1\" attr2=\"value2\""
+      ""))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/formatted-attributes value))
+      :not-string
       nil)))
 
 (t/deftest function-test

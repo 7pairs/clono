@@ -20,6 +20,7 @@
             ["path" :as path]
             [blue.lions.clono.ast :as ast]
             [blue.lions.clono.esm :as esm]
+            [blue.lions.clono.identifier :as id]
             [blue.lions.clono.log :as logger]
             [blue.lions.clono.parse :as parse]
             [blue.lions.clono.spec :as spec]))
@@ -134,6 +135,16 @@
       (throw (ex-info "Failed to convert node to Markdown."
                       {:node node :base-name base-name :cause e})))))
 
+(defn format-attributes-for-markdown
+  [attributes]
+  {:pre [(s/valid? ::spec/attributes attributes)]
+   :post [(s/valid? ::spec/formatted-attributes %)]}
+  (->> attributes
+       (remove (comp nil? second))
+       (map (fn [[k v]]
+              (str (name k) "=" (gstr/htmlEscape v))))
+       (str/join " ")))
+
 (defn build-code-html
   [content id]
   {:pre [(s/valid? ::spec/markdown content)
@@ -203,4 +214,44 @@
         (logger/log :error
                     "Column node does not have children."
                     {:node node :base-name base-name})
+        {:type "html" :value ""}))))
+
+(defn build-image-markdown
+  [caption file-path id attributes]
+  {:pre [(s/valid? ::spec/caption caption)
+         (s/valid? ::spec/file-path file-path)
+         (s/valid? ::spec/id id)
+         (s/valid? ::spec/attributes attributes)]
+   :post [(s/valid? ::spec/markdown %)]}
+  (let [id-str (when (seq id) (str "id=" id))
+        attr-str (format-attributes-for-markdown attributes)
+        brace-content (str/join " " (remove empty? [id-str attr-str]))]
+    (if (seq brace-content)
+      (gstr/format "![%s](%s){%s}" caption file-path brace-content)
+      (gstr/format "![%s](%s)" caption file-path))))
+
+(defmethod default-handler "figure"
+  [node base-name]
+  {:pre [(s/valid? ::spec/node node)
+         (s/valid? ::spec/file-name base-name)]
+   :post [(s/valid? ::spec/node %)]}
+  (let [child (-> node
+                  :children
+                  first)
+        attributes (:attributes node)
+        src (:src attributes)]
+    (if (and child src)
+      {:type "html"
+       :value (build-image-markdown (node->markdown child base-name)
+                                    src
+                                    (id/extract-base-name src)
+                                    (dissoc attributes :src))}
+      (do
+        (logger/log :error
+                    "Figure node is invalid."
+                    {:node node
+                     :base-name base-name
+                     :missing (cond
+                                (nil? child) :child
+                                (nil? src) :src)})
         {:type "html" :value ""}))))

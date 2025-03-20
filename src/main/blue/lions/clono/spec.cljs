@@ -40,6 +40,9 @@
   [invalid-chars value]
   (not-any? invalid-chars (seq value)))
 
+(s/def ::attributes
+  (s/map-of keyword? ::common/non-blank-string))
+
 (s/def ::caption
   ::common/non-blank-string)
 
@@ -123,6 +126,9 @@
   (s/and map?
          (complement nil?)
          (s/every-kv ::id ::node)))
+
+(s/def ::formatted-attributes
+  ::common/non-nil-string)
 
 (s/def ::function
   fn?)
