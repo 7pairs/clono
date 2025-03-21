@@ -252,6 +252,6 @@
                     {:node node
                      :base-name base-name
                      :missing (cond
-                                (nil? child) :child
+                                (nil? child) :children
                                 (nil? src) :src)})
         {:type "html" :value ""}))))

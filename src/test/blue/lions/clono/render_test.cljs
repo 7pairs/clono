@@ -174,7 +174,7 @@
                  :children [{:type "text" :value "Caption"}]}
                 "base-name"))))
 
-    (t/testing "Node does not have child."
+    (t/testing "Node does not have children."
       (reset! logger/enabled? false)
       (reset! logger/entries [])
       (let [node {:type "textDirective"
@@ -186,7 +186,9 @@
                  (render/default-handler node base-name))
               (t/is (= [{:level :error
                          :message "Figure node is invalid."
-                         :data {:node node :base-name base-name :missing :child}}]
+                         :data {:node node
+                                :base-name base-name
+                                :missing :children}}]
                        @logger/entries)))))
 
     (t/testing "Node does not have src."
@@ -201,7 +203,9 @@
                  (render/default-handler node base-name))
               (t/is (= [{:level :error
                          :message "Figure node is invalid."
-                         :data {:node node :base-name base-name :missing :src}}]
+                         :data {:node node
+                                :base-name base-name
+                                :missing :src}}]
                        @logger/entries))))))
 
   (t/testing "Node does not to be updated."
