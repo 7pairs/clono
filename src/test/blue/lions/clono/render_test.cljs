@@ -208,6 +208,35 @@
                                 :missing :src}}]
                        @logger/entries))))))
 
+  (t/testing "Node is footnoteReference."
+    (t/testing "Node has children."
+      (t/is (= {:type "html"
+                :value "<span class=\"cln-footnote\">I am a footnote.</span>"}
+               (render/default-handler
+                {:type "footnoteReference"
+                 :identifier "fn"
+                 :label "fn"
+                 :children [{:type "paragraph"
+                             :children [{:type "text"
+                                         :value "I am a footnote."}]}]}
+                "base-name"))))
+
+    (t/testing "Node does not have children."
+      (reset! logger/enabled? false)
+      (reset! logger/entries [])
+      (let [node {:type "footnoteReference"
+                  :identifier "fn"
+                  :label "fn"
+                  :children []}
+            base-name "base-name"]
+        (t/is (= {:type "html" :value ""}
+                 (render/default-handler node base-name))
+              (t/is (= [{:level :error
+                         :message (str "FootnoteReference node "
+                                       "does not have children.")
+                         :data {:node node :base-name base-name}}]
+                       @logger/entries))))))
+
   (t/testing "Node does not to be updated."
     (let [node {:type "notExists"}]
       (t/is (= node (render/default-handler node "base-name"))))))
@@ -468,3 +497,11 @@
                                           "image.jpg"
                                           "image-id"
                                           {})))))
+
+(t/deftest build-footnote-html-test
+  (t/testing "Footnote is given."
+    (t/is (= "<span class=\"cln-footnote\">I am a footnote.</span>"
+             (render/build-footnote-html "I am a footnote."))))
+
+  (t/testing "Footnote is not given."
+    (t/is (= "" (render/build-footnote-html "")))))

@@ -255,3 +255,27 @@
                                 (nil? child) :children
                                 (nil? src) :src)})
         {:type "html" :value ""}))))
+
+(defn build-footnote-html
+  [footnote]
+  {:pre [(s/valid? ::spec/markdown footnote)]
+   :post [(s/valid? ::spec/html %)]}
+  (if (seq footnote)
+    (gstr/format "<span class=\"cln-footnote\">%s</span>" footnote)
+    ""))
+
+(defmethod default-handler "footnoteReference"
+  [node base-name]
+  {:pre [(s/valid? ::spec/node node)
+         (s/valid? ::spec/file-name base-name)]
+   :post [(s/valid? ::spec/node %)]}
+  (let [value (if-let [child (-> node
+                                 :children
+                                 first)]
+                (build-footnote-html (node->markdown child base-name))
+                (do
+                  (logger/log :error
+                              "FootnoteReference node does not have children."
+                              {:node node :base-name base-name})
+                  ""))]
+    {:type "html" :value value}))
