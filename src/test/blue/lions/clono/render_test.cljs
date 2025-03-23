@@ -462,15 +462,15 @@
             (t/is (= "Failed to convert AST to Markdown."
                      (ex-message (:cause cause-data))))))))))
 
-(t/deftest format-attributes-test
+(t/deftest format-attributes-for-markdown-test
   (t/testing "Single attribute is given."
-    (t/is (= "class=class-value"
-             (render/format-attributes-for-markdown {:class "class-value"}))))
+    (t/is (= "class=class1"
+             (render/format-attributes-for-markdown {:class "class1"}))))
 
   (t/testing "Multiple attributes are given."
-    (t/is (= "class=class-value id=id-value"
-             (render/format-attributes-for-markdown {:class "class-value"
-                                                     :id "id-value"}))))
+    (t/is (= "class=class2 id=id2"
+             (render/format-attributes-for-markdown {:class "class2"
+                                                     :id "id2"}))))
 
   (t/testing "Empty map are given."
     (t/is (= "" (render/format-attributes-for-markdown {})))))
