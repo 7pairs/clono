@@ -279,3 +279,30 @@
                               {:node node :base-name base-name})
                   ""))]
     {:type "html" :value value}))
+
+(defn build-index-html
+  [id content]
+  {:pre [(s/valid? ::spec/id-or-nil id)
+         (s/valid? ::spec/markdown content)]
+   :post [(s/valid? ::spec/html %)]}
+  (if (seq id)
+    (gstr/format "<span id=\"%s\">%s</span>" (gstr/htmlEscape id) content)
+    (gstr/format "<span>%s</span>" content)))
+
+(defmethod default-handler "index"
+  [node base-name]
+  {:pre [(s/valid? ::spec/node node)
+         (s/valid? ::spec/file-name base-name)]
+   :post [(s/valid? ::spec/node %)]}
+  (let [child (-> node
+                  :children
+                  first)]
+    (if child
+      {:type "html"
+       :value (build-index-html (:id node)
+                                (node->markdown child base-name))}
+      (do
+        (logger/log :error
+                    "Index node does not have children."
+                    {:node node :base-name base-name})
+        {:type "html" :value ""}))))

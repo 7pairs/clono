@@ -237,6 +237,44 @@
                          :data {:node node :base-name base-name}}]
                        @logger/entries))))))
 
+  (t/testing "Node is index."
+    (t/testing "Node has ID."
+      (t/is (= {:type "html" :value "<span id=\"index-1\">索引</span>"}
+               (render/default-handler
+                {:type "textDirective"
+                 :name "index"
+                 :attribute {:ruby "さくいん"}
+                 :children [{:type "text" :value "索引"}]
+                 :id "index-1"
+                 :order 1}
+                "base-name"))))
+
+    (t/testing "Node does not have ID."
+      (t/is (= {:type "html" :value "<span>索引</span>"}
+               (render/default-handler
+                {:type "textDirective"
+                 :name "index"
+                 :attribute {:ruby "さくいん"}
+                 :children [{:type "text" :value "索引"}]}
+                "base-name"))))
+
+    (t/testing "Node does not have children."
+      (reset! logger/enabled? false)
+      (reset! logger/entries [])
+      (let [node {:type "textDirective"
+                  :name "index"
+                  :attribute {:ruby "さくいん"}
+                  :children []
+                  :id "index-1"
+                  :order 1}
+            base-name "base-name"]
+        (t/is (= {:type "html" :value ""}
+                 (render/default-handler node base-name)))
+        (t/is (= [{:level :error
+                   :message "Index node does not have children."
+                   :data {:node node :base-name base-name}}]
+                 @logger/entries)))))
+
   (t/testing "Node does not to be updated."
     (let [node {:type "notExists"}]
       (t/is (= node (render/default-handler node "base-name"))))))
@@ -505,3 +543,11 @@
 
   (t/testing "Footnote is not given."
     (t/is (= "" (render/build-footnote-html "")))))
+
+(t/deftest build-index-html-test
+  (t/testing "ID is given."
+    (t/is (= "<span id=\"index-id\">word</span>"
+             (render/build-index-html "index-id" "word"))))
+
+  (t/testing "ID is not given."
+    (t/is (= "<span>word</span>" (render/build-index-html nil "word")))))
