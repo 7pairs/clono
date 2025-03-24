@@ -440,3 +440,46 @@
                   "RefTable node does not have ID."
                   {:node node :base-name base-name})
       {:type "html" :value ""})))
+
+(defn build-table-html
+  [id caption content]
+  {:pre [(s/valid? ::spec/id id)
+         (s/valid? ::spec/caption caption)
+         (s/valid? ::spec/markdown content)]
+   :post [(s/valid? ::spec/html %)]}
+  (gstr/format (str "<div class=\"cln-table\" id=\"%s\">\n"
+                    "<figcaption>%s</figcaption>\n\n%s\n\n</div>")
+               id (gstr/htmlEscape caption) content))
+
+(defmethod default-handler "table"
+  [node base-name]
+  {:pre [(s/valid? ::spec/node node)
+         (s/valid? ::spec/file-name base-name)]
+   :post [(s/valid? ::spec/node %)]}
+  (let [id (-> node
+               :attributes
+               :id)
+        children (:children node)]
+    (if (and id (seq children))
+      (let [caption (-> children
+                        first
+                        :children
+                        first
+                        :value)
+            content (nodes->markdown (vec (rest children)) base-name)]
+        (if caption
+          {:type "html" :value (build-table-html id caption content)}
+          (do
+            (logger/log :error
+                        "Table node does not have caption."
+                        {:node node :base-name base-name})
+            {:type "html" :value ""})))
+      (do
+        (logger/log :error
+                    "Table node is invalid."
+                    {:node node
+                     :base-name base-name
+                     :missing (cond
+                                (not id) :id
+                                (not (seq children)) :children)})
+        {:type "html" :value ""}))))

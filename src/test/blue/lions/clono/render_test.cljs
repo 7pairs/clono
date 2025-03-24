@@ -446,6 +446,79 @@
                          :data {:node node :base-name base-name}}]
                        @logger/entries))))))
 
+  (t/testing "Node is table."
+    (t/testing "Node is valid."
+      (t/is (= {:type "html"
+                :value (str "<div class=\"cln-table\" id=\"id1\">\n"
+                            "<figcaption>Caption1</figcaption>\n\n"
+                            "Table1\n\n"
+                            "</div>")}
+               (render/default-handler
+                {:type "containerDirective"
+                 :name "table"
+                 :attributes {:id "id1"}
+                 :children [{:type "paragraph"
+                             :data {:directiveLabel true}
+                             :children [{:type "text" :value "Caption1"}]}
+                            {:type "paragraph"
+                             :children [{:type "text" :value "Table1"}]}]}
+                "base-name"))))
+
+    (t/testing "Node does not have caption."
+      (reset! logger/enabled? false)
+      (reset! logger/entries [])
+      (let [node {:type "containerDirective"
+                  :name "table"
+                  :attributes {:id "id2"}
+                  :children [{:type "paragraph"
+                              :data {:directiveLabel true}
+                              :children []}
+                             {:type "paragraph"
+                              :children [{:type "text" :value "Table2"}]}]}
+            base-name "base-name"]
+        (t/is (= {:type "html" :value ""}
+                 (render/default-handler node base-name))
+              (t/is (= [{:level :error
+                         :message "Table node does not have caption."
+                         :data {:node node :base-name base-name}}]
+                       @logger/entries)))))
+
+    (t/testing "Node does not have ID."
+      (reset! logger/enabled? false)
+      (reset! logger/entries [])
+      (let [node {:type "containerDirective"
+                  :name "table"
+                  :attributes {}
+                  :children [{:type "paragraph"
+                              :data {:directiveLabel true}
+                              :children [{:type "text" :value "Caption3"}]}
+                             {:type "paragraph"
+                              :children [{:type "text" :value "Table3"}]}]}
+            base-name "base-name"]
+        (t/is (= {:type "html" :value ""}
+                 (render/default-handler node base-name))
+              (t/is (= [{:level :error
+                         :message "Table node is invalid."
+                         :data {:node node :base-name base-name :missing :id}}]
+                       @logger/entries)))))
+
+    (t/testing "Node does not have children."
+      (reset! logger/enabled? false)
+      (reset! logger/entries [])
+      (let [node {:type "containerDirective"
+                  :name "table"
+                  :attributes {:id "id4"}
+                  :children []}
+            base-name "base-name"]
+        (t/is (= {:type "html" :value ""}
+                 (render/default-handler node base-name))
+              (t/is (= [{:level :error
+                         :message "Table node is invalid."
+                         :data {:node node
+                                :base-name base-name
+                                :missing :children}}]
+                       @logger/entries))))))
+
   (t/testing "Node does not to be updated."
     (let [node {:type "notExists"}]
       (t/is (= node (render/default-handler node "base-name"))))))
@@ -779,3 +852,27 @@
     (t/is (= {:type "html"
               :value "<a href=\"url3\">Caption3</a>"}
              (render/build-ref-link "url3" "Caption3" {})))))
+
+(t/deftest build-table-html-test
+  (t/testing "All parameters are given."
+    (t/is (= (str "<div class=\"cln-table\" id=\"id1\">\n"
+                  "<figcaption>Caption1</figcaption>\n\nTable1\n\n</div>")
+             (render/build-table-html "id1" "Caption1" "Table1"))))
+
+  (t/testing "ID is not given."
+    (t/is (thrown-with-msg? js/Error #"Assert failed:"
+                            (render/build-table-html nil
+                                                     "Caption2"
+                                                     "Table2"))))
+
+  (t/testing "Caption is not given."
+    (t/is (thrown-with-msg? js/Error #"Assert failed:"
+                            (render/build-table-html "id3"
+                                                     nil
+                                                     "Table3"))))
+
+  (t/testing "Table is not given."
+    (t/is (thrown-with-msg? js/Error #"Assert failed:"
+                            (render/build-table-html "id4"
+                                                     "Caption4"
+                                                     nil)))))
