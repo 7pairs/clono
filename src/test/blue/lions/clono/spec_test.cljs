@@ -15,6 +15,7 @@
 (ns blue.lions.clono.spec-test
   (:require [cljs.spec.alpha :as s]
             [cljs.test :as t]
+            [blue.lions.clono.spec.anchor :as anchor]
             [blue.lions.clono.spec :as spec]
             [blue.lions.clono.spec.catalog :as catalog]
             [blue.lions.clono.spec.common :as common]
@@ -58,6 +59,75 @@
 
   (t/testing "Fails to verify."
     (t/are [value] (not (s/valid? ::common/non-nil-string value))
+      :not-string
+      nil)))
+
+(t/deftest anchor_chapter-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::anchor/chapter value)
+      "valid|id"
+      "日本語"
+      nil))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::anchor/chapter value))
+      "invalid\\id"
+      "invalid/id"
+      "invalid:id"
+      "invalid*id"
+      "invalid?id"
+      "invalid\"id"
+      "invalid>id"
+      "invalid<id"
+      ""
+      :not-string)))
+
+(t/deftest anchor_id-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::anchor/id value)
+      "valid|id"
+      "日本語"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::anchor/id value))
+      "invalid\\id"
+      "invalid/id"
+      "invalid:id"
+      "invalid*id"
+      "invalid?id"
+      "invalid\"id"
+      "invalid>id"
+      "invalid<id"
+      ""
+      :not-string
+      nil)))
+
+(t/deftest anchor-info-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/anchor-info value)
+      {:chapter "chapter" :id "id"}
+      {:chapter nil :id "id"}))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/anchor-info value))
+      {:chapter :not-string :id "id"}
+      {:chapter "chapter" :id :not-string}
+      {:chapter "chapter"}
+      {:id "id"}
+      {:chapter "chapter" :id "id" :extra-key "extra-value"}
+      {:extra-key "extra-value"}
+      {}
+      "not-map"
+      nil)))
+
+(t/deftest anchor-text-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/anchor-text value)
+      "anchor-text"
+      ""))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/anchor-text value))
       :not-string
       nil)))
 

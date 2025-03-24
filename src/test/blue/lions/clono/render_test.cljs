@@ -275,6 +275,177 @@
                    :data {:node node :base-name base-name}}]
                  @logger/entries)))))
 
+  (t/testing "Node is refCode."
+    (t/testing "Target ID has chapter."
+      (t/is (= {:type "html"
+                :value (str "<a href=\"chapter1.html#id1\" "
+                            "class=\"cln-ref-code\"></a>")}
+               (render/default-handler
+                {:type "textDirective"
+                 :name "refCode"
+                 :attributes {:id "chapter1|id1"}
+                 :children []}
+                "base-name"))))
+
+    (t/testing "Target ID does not have chapter."
+      (t/is (= {:type "html"
+                :value "<a href=\"#id2\" class=\"cln-ref-code\"></a>"}
+               (render/default-handler
+                {:type "textDirective"
+                 :name "refCode"
+                 :attributes {:id "id2"}
+                 :children []}
+                "base-name"))))
+
+    (t/testing "Node does not have ID."
+      (reset! logger/enabled? false)
+      (reset! logger/entries [])
+      (let [node {:type "textDirective"
+                  :name "refCode"
+                  :attributes {}
+                  :children []}
+            base-name "base-name"]
+        (t/is (= {:type "html" :value ""}
+                 (render/default-handler node base-name))
+              (t/is (= [{:level :error
+                         :message "RefCode node does not have ID."
+                         :data {:node node :base-name base-name}}]
+                       @logger/entries))))))
+
+  (t/testing "Node is refFigure."
+    (t/testing "Target ID has chapter."
+      (t/is (= {:type "html"
+                :value (str "<a href=\"chapter1.html#id1\" "
+                            "class=\"cln-ref-figure\"></a>")}
+               (render/default-handler
+                {:type "textDirective"
+                 :name "refFigure"
+                 :attributes {:id "chapter1|id1"}
+                 :children []}
+                "base-name"))))
+
+    (t/testing "Target ID does not have chapter."
+      (t/is (= {:type "html"
+                :value "<a href=\"#id2\" class=\"cln-ref-figure\"></a>"}
+               (render/default-handler
+                {:type "textDirective"
+                 :name "refFigure"
+                 :attributes {:id "id2"}
+                 :children []}
+                "base-name"))))
+
+    (t/testing "Node does not have ID."
+      (reset! logger/enabled? false)
+      (reset! logger/entries [])
+      (let [node {:type "textDirective"
+                  :name "refFigure"
+                  :attributes {}
+                  :children []}
+            base-name "base-name"]
+        (t/is (= {:type "html" :value ""}
+                 (render/default-handler node base-name))
+              (t/is (= [{:level :error
+                         :message "RefFigure node does not have ID."
+                         :data {:node node :base-name base-name}}]
+                       @logger/entries))))))
+
+  (t/testing "Node is refHeading."
+    (t/testing "Node has URL."
+      (t/is (= {:type "html"
+                :value (str "<a href=\"url1\" "
+                            "class=\"cln-ref-heading cln-depth1\"></a>")}
+               (render/default-handler
+                {:type "textDirective"
+                 :name "refHeading"
+                 :attributes {:id "chapter1|id1"}
+                 :children []
+                 :depth 1
+                 :url "url1"}
+                "base-name"))))
+
+    (t/testing "Node does not have URL."
+      (reset! logger/enabled? false)
+      (reset! logger/entries [])
+      (let [node {:type "textDirective"
+                  :name "refHeading"
+                  :attributes {:id "chapter2|id2"}
+                  :children []
+                  :depth 2}
+            base-name "base-name"]
+        (t/is (= {:type "html" :value ""}
+                 (render/default-handler node base-name))
+              (t/is (= [{:level :error
+                         :message "RefHeading node does not have URL."
+                         :data {:node node :base-name base-name}}]
+                       @logger/entries))))))
+
+  (t/testing "Node is refHeadingName."
+    (t/testing "Node has URL."
+      (t/is (= {:type "html"
+                :value (str "<a href=\"url1\" class=\"cln-ref-heading-name "
+                            "cln-depth1\">Caption1</a>")}
+               (render/default-handler
+                {:type "textDirective"
+                 :name "refHeadingName"
+                 :attributes {:id "chapter1|id1"}
+                 :children []
+                 :depth 1
+                 :url "url1"
+                 :caption "Caption1"}
+                "base-name"))))
+
+    (t/testing "Node does not have URL."
+      (reset! logger/enabled? false)
+      (reset! logger/entries [])
+      (let [node {:type "textDirective"
+                  :name "refHeadingName"
+                  :attributes {:id "chapter2|id2"}
+                  :children []
+                  :depth 2
+                  :caption "Caption2"}
+            base-name "base-name"]
+        (t/is (= {:type "html" :value ""}
+                 (render/default-handler node base-name))
+              (t/is (= [{:level :error
+                         :message "RefHeadingName node does not have URL."
+                         :data {:node node :base-name base-name}}]
+                       @logger/entries))))))
+
+  (t/testing "Node is refTable."
+    (t/testing "Target ID has cahpter."
+      (t/is (= {:type "html"
+                :value (str "<a href=\"chapter1.html#id1\" "
+                            "class=\"cln-ref-table\"></a>")}
+               (render/default-handler
+                {:type "textDirective"
+                 :name "refTable"
+                 :attributes {:id "chapter1|id1"}
+                 :children []}
+                "base-name"))))
+    (t/testing "Target ID does not have chapter."
+      (t/is (= {:type "html"
+                :value "<a href=\"#id2\" class=\"cln-ref-table\"></a>"}
+               (render/default-handler
+                {:type "textDirective"
+                 :name "refTable"
+                 :attributes {:id "id2"}
+                 :children []}
+                "base-name"))))
+    (t/testing "Node does not have ID."
+      (reset! logger/enabled? false)
+      (reset! logger/entries [])
+      (let [node {:type "textDirective"
+                  :name "refTable"
+                  :attributes {}
+                  :children []}
+            base-name "base-name"]
+        (t/is (= {:type "html" :value ""}
+                 (render/default-handler node base-name))
+              (t/is (= [{:level :error
+                         :message "RefTable node does not have ID."
+                         :data {:node node :base-name base-name}}]
+                       @logger/entries))))))
+
   (t/testing "Node does not to be updated."
     (let [node {:type "notExists"}]
       (t/is (= node (render/default-handler node "base-name"))))))
@@ -475,6 +646,44 @@
   (t/testing "Empty map are given."
     (t/is (= "" (render/format-attributes-for-markdown {})))))
 
+(t/deftest format-attributes-for-html-test
+  (t/testing "Single attribute is given."
+    (t/is (= "class=\"class1\""
+             (render/format-attributes-for-html {:class "class1"}))))
+
+  (t/testing "Multiple attributes are given."
+    (t/is (= "class=\"class2\" id=\"id2\""
+             (render/format-attributes-for-html {:class "class2"
+                                                 :id "id2"}))))
+
+  (t/testing "Empty map are given."
+    (t/is (= "" (render/format-attributes-for-markdown {})))))
+
+(t/deftest build-href-test
+  (t/testing "Key has chapter."
+    (t/is (= "chapter1.html#id1" (render/build-href "chapter1|id1"))))
+
+  (t/testing "Key does not have chapter."
+    (t/is (= "#id2" (render/build-href "id2")))))
+
+(t/deftest build-link-html-test
+  (t/testing "Single attribute is given."
+    (t/is (= "<a href=\"url1\" class=\"class1\">Caption1</a>"
+             (render/build-link-html "url1"
+                                     "Caption1"
+                                     :attributes {:class "class1"}))))
+
+  (t/testing "Multiple attributes are given."
+    (t/is (= "<a href=\"url2\" id=\"id2\" class=\"class2\">Caption2</a>"
+             (render/build-link-html "url2"
+                                     "Caption2"
+                                     :attributes {:id "id2"
+                                                  :class "class2"}))))
+
+  (t/testing "Attributes are not given."
+    (t/is (= "<a href=\"url3\">Caption3</a>"
+             (render/build-link-html "url3" "Caption3")))))
+
 (t/deftest build-code-html-test
   (t/testing "ID is given."
     (t/is (= (str "<div class=\"cln-code\" id=\"hello\">\n\n"
@@ -551,3 +760,22 @@
 
   (t/testing "ID is not given."
     (t/is (= "<span>word</span>" (render/build-index-html nil "word")))))
+
+(t/deftest build-ref-link-test
+  (t/testing "Single attribute is given."
+    (t/is (= {:type "html"
+              :value "<a href=\"url1\" class=\"class1\">Caption1</a>"}
+             (render/build-ref-link "url1" "Caption1" {:class "class1"}))))
+
+  (t/testing "Multiple attributes are given."
+    (t/is (= {:type "html"
+              :value (str "<a href=\"url2\" id=\"id2\" class=\"class2\">"
+                          "Caption2</a>")}
+             (render/build-ref-link "url2"
+                                    "Caption2"
+                                    {:id "id2" :class "class2"}))))
+
+  (t/testing "Attributes are not given."
+    (t/is (= {:type "html"
+              :value "<a href=\"url3\">Caption3</a>"}
+             (render/build-ref-link "url3" "Caption3" {})))))

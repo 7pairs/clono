@@ -15,6 +15,7 @@
 (ns blue.lions.clono.spec
   (:require [cljs.spec.alpha :as s]
             [clojure.string :as str]
+            [blue.lions.clono.spec.anchor :as anchor]
             [blue.lions.clono.spec.catalog :as catalog]
             [blue.lions.clono.spec.common :as common]
             [blue.lions.clono.spec.document :as document]
@@ -39,6 +40,21 @@
 (defn- valid-string?
   [invalid-chars value]
   (not-any? invalid-chars (seq value)))
+
+(def anchor_chapter
+  (s/or :id ::id
+        :nil nil?))
+
+(def anchor_id
+  ::id)
+
+(s/def ::anchor-info
+  (s/and (s/keys :req-un [::anchor/chapter
+                          ::anchor/id])
+         #(every? #{:chapter :id} (keys %))))
+
+(s/def ::anchor-text
+  ::common/non-nil-string)
 
 (s/def ::attributes
   (s/map-of keyword? ::common/non-blank-string))
@@ -324,6 +340,12 @@
 (s/def ::url
   (s/and ::common/non-blank-string
          valid-url?))
+
+(s/def ::anchor/chapter
+  anchor_chapter)
+
+(s/def ::anchor/id
+  anchor_id)
 
 (s/def ::config
   config)

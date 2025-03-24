@@ -135,6 +135,16 @@
       (throw (ex-info "Failed to convert node to Markdown."
                       {:node node :base-name base-name :cause e})))))
 
+(defn format-attributes-for-html
+  [attributes]
+  {:pre [(s/valid? ::spec/attributes attributes)]
+   :post [(s/valid? ::spec/formatted-attributes %)]}
+  (->> attributes
+       (remove (comp nil? second))
+       (map (fn [[k v]]
+              (str (name k) "=\"" (gstr/htmlEscape v) "\"")))
+       (str/join " ")))
+
 (defn format-attributes-for-markdown
   [attributes]
   {:pre [(s/valid? ::spec/attributes attributes)]
@@ -144,6 +154,30 @@
        (map (fn [[k v]]
               (str (name k) "=" (gstr/htmlEscape v))))
        (str/join " ")))
+
+(defn build-href
+  [key]
+  {:pre [(s/valid? ::spec/id key)]
+   :post [(s/valid? ::spec/url %)]}
+  (let [{:keys [chapter id]} (id/parse-dic-key key)]
+    (if (seq id)
+      (if chapter
+        (gstr/format "%s.html#%s" chapter id)
+        (gstr/format "#%s" id))
+      "")))
+
+(defn build-link-html
+  [href text & {:keys [attributes] :or {attributes {}}}]
+  {:pre [(s/valid? ::spec/url href)
+         (s/valid? ::spec/anchor-text text)]
+   :post [(s/valid? ::spec/html %)]}
+  (let [attr-str (format-attributes-for-html attributes)]
+    (if (seq href)
+      (gstr/format "<a href=\"%s\"%s>%s</a>"
+                   (gstr/htmlEscape href)
+                   (if (seq attr-str) (str " " attr-str) "")
+                   (gstr/htmlEscape text))
+      (gstr/htmlEscape text))))
 
 (defn build-code-html
   [content id]
@@ -306,3 +340,103 @@
                     "Index node does not have children."
                     {:node node :base-name base-name})
         {:type "html" :value ""}))))
+
+(defn build-ref-link
+  [href text attributes]
+  {:pre [(s/valid? ::spec/url href)
+         (s/valid? ::spec/anchor-text text)
+         (s/valid? ::spec/attributes attributes)]
+   :post [(s/valid? ::spec/node %)]}
+  (try
+    (let [html (build-link-html href text :attributes attributes)]
+      {:type "html" :value html})
+    (catch js/Error e
+      (logger/log :error
+                  "Failed to build ref link."
+                  {:href href
+                   :text text
+                   :attributes attributes
+                   :cause (.-message e)})
+      {:type "html" :value ""})))
+
+(defmethod default-handler "refCode"
+  [node base-name]
+  {:pre [(s/valid? ::spec/node node)
+         (s/valid? ::spec/file-name base-name)]
+   :post [(s/valid? ::spec/node %)]}
+  (if-let [target-id (-> node
+                         :attributes
+                         :id)]
+    (build-ref-link (build-href target-id)
+                    ""
+                    {:class "cln-ref-code"})
+    (do
+      (logger/log :error
+                  "RefCode node does not have ID."
+                  {:node node :base-name base-name})
+      {:type "html" :value ""})))
+
+(defmethod default-handler "refFigure"
+  [node base-name]
+  {:pre [(s/valid? ::spec/node node)
+         (s/valid? ::spec/file-name base-name)]
+   :post [(s/valid? ::spec/node %)]}
+  (if-let [target-id (-> node
+                         :attributes
+                         :id)]
+    (build-ref-link (build-href target-id)
+                    ""
+                    {:class "cln-ref-figure"})
+    (do
+      (logger/log :error
+                  "RefFigure node does not have ID."
+                  {:node node :base-name base-name})
+      {:type "html" :value ""})))
+
+(defmethod default-handler "refHeading"
+  [node base-name]
+  {:pre [(s/valid? ::spec/node node)
+         (s/valid? ::spec/file-name base-name)]
+   :post [(s/valid? ::spec/node %)]}
+  (if-let [href (:url node)]
+    (build-ref-link href
+                    ""
+                    {:class (str "cln-ref-heading cln-depth" (:depth node))})
+    (do
+      (logger/log :error
+                  "RefHeading node does not have URL."
+                  {:node node :base-name base-name})
+      {:type "html" :value ""})))
+
+(defmethod default-handler "refHeadingName"
+  [node base-name]
+  {:pre [(s/valid? ::spec/node node)
+         (s/valid? ::spec/file-name base-name)]
+   :post [(s/valid? ::spec/node %)]}
+  (if-let [href (:url node)]
+    (build-ref-link href
+                    (:caption node)
+                    {:class (str "cln-ref-heading-name cln-depth"
+                                 (:depth node))})
+    (do
+      (logger/log :error
+                  "RefHeadingName node does not have URL."
+                  {:node node :base-name base-name})
+      {:type "html" :value ""})))
+
+(defmethod default-handler "refTable"
+  [node base-name]
+  {:pre [(s/valid? ::spec/node node)
+         (s/valid? ::spec/file-name base-name)]
+   :post [(s/valid? ::spec/node %)]}
+  (if-let [target-id (-> node
+                         :attributes
+                         :id)]
+    (build-ref-link (build-href target-id)
+                    ""
+                    {:class "cln-ref-table"})
+    (do
+      (logger/log :error
+                  "RefTable node does not have ID."
+                  {:node node :base-name base-name})
+      {:type "html" :value ""})))
