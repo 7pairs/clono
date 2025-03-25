@@ -400,6 +400,20 @@
       "not-map"
       nil)))
 
+(t/deftest document-type-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/document-type value)
+      :forewords
+      :chapters
+      :appendices
+      :afterwords))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/document-type value))
+      :invalid
+      "forewords"
+      nil)))
+
 (t/deftest documents-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/documents value)

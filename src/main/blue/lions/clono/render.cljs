@@ -483,3 +483,61 @@
                                 (not id) :id
                                 (not (seq children)) :children)})
         {:type "html" :value ""}))))
+
+(defmulti append-outer-div
+  (fn [type _markdown]
+    type))
+
+(defmethod append-outer-div :default
+  [type markdown]
+  {:pre [(s/valid? ::spec/document-type type)
+         (s/valid? ::spec/markdown markdown)]
+   :post [(s/valid? ::spec/markdown %)]}
+  (throw (ex-info "Unknown type in append-div."
+                  {:type type :markdown markdown})))
+
+(defmethod append-outer-div :forewords
+  [type markdown]
+  {:pre [(s/valid? ::spec/document-type type)
+         (s/valid? ::spec/markdown markdown)]
+   :post [(s/valid? ::spec/markdown %)]}
+  (str "<div class=\"cln-foreword\">\n\n" markdown "\n\n</div>"))
+
+(defmethod append-outer-div :chapters
+  [type markdown]
+  {:pre [(s/valid? ::spec/document-type type)
+         (s/valid? ::spec/markdown markdown)]
+   :post [(s/valid? ::spec/markdown %)]}
+  (str "<div class=\"cln-chapter\">\n\n" markdown "\n\n</div>"))
+
+(defmethod append-outer-div :appendices
+  [type markdown]
+  {:pre [(s/valid? ::spec/document-type type)
+         (s/valid? ::spec/markdown markdown)]
+   :post [(s/valid? ::spec/markdown %)]}
+  (str "<div class=\"cln-appendix\">\n\n" markdown "\n\n</div>"))
+
+(defmethod append-outer-div :afterwords
+  [type markdown]
+  {:pre [(s/valid? ::spec/document-type type)
+         (s/valid? ::spec/markdown markdown)]
+   :post [(s/valid? ::spec/markdown %)]}
+  (str "<div class=\"cln-afterword\">\n\n" markdown "\n\n</div>"))
+
+(defn render-documents
+  [documents]
+  {:pre [(s/valid? ::spec/documents documents)]
+   :post [(s/valid? ::spec/manuscripts %)]}
+  (vec
+   (keep
+    (fn [{:keys [name type ast]}]
+      (try
+        (let [finalized-ast (finalize-node ast (id/extract-base-name name))]
+          (when finalized-ast
+            {:name name
+             :type type
+             :markdown (append-outer-div type (ast->markdown finalized-ast))}))
+        (catch js/Error e
+          (throw (ex-info "Failed to render AST."
+                          {:name name :ast ast :cause e})))))
+    documents)))

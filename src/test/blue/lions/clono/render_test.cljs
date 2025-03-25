@@ -876,3 +876,81 @@
                             (render/build-table-html "id4"
                                                      "Caption4"
                                                      nil)))))
+
+(t/deftest append-outer-div-test
+  (t/testing "Type is forewords."
+    (t/is (= "<div class=\"cln-foreword\">\n\n# Markdown\n\n</div>"
+             (render/append-outer-div :forewords "# Markdown"))))
+
+  (t/testing "Type is chapters."
+    (t/is (= "<div class=\"cln-chapter\">\n\n# Markdown\n\n</div>"
+             (render/append-outer-div :chapters "# Markdown"))))
+
+  (t/testing "Type is appendices."
+    (t/is (= "<div class=\"cln-appendix\">\n\n# Markdown\n\n</div>"
+             (render/append-outer-div :appendices "# Markdown"))))
+
+  (t/testing "Type is afterwords."
+    (t/is (= "<div class=\"cln-afterword\">\n\n# Markdown\n\n</div>"
+             (render/append-outer-div :afterwords "# Markdown"))))
+
+  (t/testing "Type is invalid."
+    (t/is (thrown-with-msg? js/Error #"Assert failed:"
+                            (render/append-outer-div :invalid "# Markdown")))))
+
+(t/deftest render-documents-test
+  (t/testing "All ASTs are valid."
+    (t/is (= [{:name "markdown1.md"
+               :type :chapters
+               :markdown (str "<div class=\"cln-chapter\">\n\n"
+                              "# Markdown1\n\n\n"
+                              "</div>")}
+              {:name "markdown2.md"
+               :type :appendices
+               :markdown (str "<div class=\"cln-appendix\">\n\n"
+                              "# Markdown2\n\n\n"
+                              "</div>")}]
+             (render/render-documents
+              [{:name "markdown1.md"
+                :type :chapters
+                :ast {:type "root"
+                      :children [{:type "heading"
+                                  :depth 1
+                                  :children [{:type "text" :value "Markdown1"}]
+                                  :slug "markdown1"}]}}
+               {:name "markdown2.md"
+                :type :appendices
+                :ast {:type "root"
+                      :children [{:type "heading"
+                                  :depth 1
+                                  :children [{:type "text" :value "Markdown2"}]
+                                  :slug "markdown2"}]}}]))))
+
+  (t/testing "Some ASTs are invalid."
+    (let [name "markdown2.md"
+          ast {:type "root"
+               :children [{:type "invalid"}]}]
+      (try
+        (render/render-documents
+         [{:name "markdown1.md"
+           :type :chapters
+           :ast {:type "root"
+                 :children [{:type "heading"
+                             :depth 1
+                             :children [{:type "text" :value "Markdown1"}]
+                             :slug "markdown1"}]}}
+          {:name name :type :appendices :ast ast}])
+        (catch js/Error e
+          (let [data (ex-data e)
+                cause (:cause data)
+                cause-data (ex-data cause)]
+            (t/is (= "Failed to render AST." (ex-message e)))
+            (t/is (= name (:name data)))
+            (t/is (= ast (:ast data)))
+            (t/is (= "Failed to convert AST to Markdown." (ex-message cause)))
+            (t/is (= ast (:ast cause-data)))
+            (t/is (= "Cannot handle unknown node `invalid`"
+                     (ex-message (:cause cause-data)))))))))
+
+  (t/testing "Documents list is empty."
+    (t/is (= [] (render/render-documents [])))))

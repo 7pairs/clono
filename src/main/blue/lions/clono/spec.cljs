@@ -114,6 +114,9 @@
                           ::document/ast])
          #(every? #{:name :type :ast} (keys %))))
 
+(s/def ::document-type
+  #{:forewords :chapters :appendices :afterwords})
+
 (s/def ::documents
   (s/coll-of ::document :kind vector?))
 
