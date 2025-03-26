@@ -336,3 +336,16 @@
                  :data {:file-path (path/join tmp-dir "not-exists4.md")
                         :cause "Failed to read Markdown file."}}]
                @logger/entries)))))
+
+(t/deftest write-file-test
+  (t/testing "Content is not empty."
+    (let [file-path (path/join tmp-dir "text.txt")
+          file-content "I am a text file."]
+      (file/write-file file-path file-content)
+      (t/is (= file-content (fs/readFileSync file-path "utf8")))))
+
+  (t/testing "Content is empty."
+    (let [file-path (path/join tmp-dir "empty.txt")
+          file-content ""]
+      (file/write-file file-path file-content)
+      (t/is (= file-content (fs/readFileSync file-path "utf8"))))))

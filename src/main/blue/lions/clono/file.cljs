@@ -102,3 +102,14 @@
               file-names)
         []))
     catalog)))
+
+(defn write-file
+  [file-path content]
+  {:pre [(s/valid? ::spec/file-path file-path)
+         (s/valid? ::spec/file-content content)]}
+  (try
+    (fs/mkdirSync (path/dirname file-path) #js {:recursive true})
+    (fs/writeFileSync file-path content "utf8")
+    (catch js/Error e
+      (throw (ex-info "Failed to write file."
+                      {:file-path file-path :cause e})))))
