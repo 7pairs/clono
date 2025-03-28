@@ -113,3 +113,17 @@
     (catch js/Error e
       (throw (ex-info "Failed to write file."
                       {:file-path file-path :cause e})))))
+
+(defn write-markdown-files
+  [dir-path manuscripts]
+  {:pre [(s/valid? ::spec/file-path dir-path)
+         (s/valid? ::spec/manuscripts manuscripts)]}
+  (doseq [{:keys [name markdown]} manuscripts]
+    (let [file-path (path/join dir-path name)]
+      (try
+        (write-file file-path markdown)
+        (catch js/Error e
+          (logger/log :error
+                      "Failed to write Markdown file."
+                      {:file-path file-path
+                       :cause (ex-message e)}))))))
