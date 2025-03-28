@@ -954,3 +954,24 @@
 
   (t/testing "Documents list is empty."
     (t/is (= [] (render/render-documents [])))))
+
+(t/deftest render-toc-test
+  (t/testing "TOC items are valid."
+    (t/is (= (str "<nav id=\"toc\" role=\"doc-toc\">\n\n"
+                  "# 目次\n\n"
+                  "- <a href=\"url1\" class=\"cln-ref-heading-name "
+                  "cln-depth1\">Item1</a>\n"
+                  "    - <a href=\"url2\" class=\"cln-ref-heading-name "
+                  "cln-depth2\">Item2</a>\n"
+                  "        - <a href=\"url3\" class=\"cln-ref-heading-name "
+                  "cln-depth3\">Item3</a>\n\n"
+                  "</nav>")
+             (render/render-toc
+              [{:depth 1 :caption "Item1" :url "url1"}
+               {:depth 2 :caption "Item2" :url "url2"}
+               {:depth 3 :caption "Item3" :url "url3"}]))))
+
+  (t/testing "TOC items are invalid."
+    (t/is (thrown-with-msg? js/Error #"Assert failed:"
+                            (render/render-toc
+                             [{:depth 1 :caption "Item1"}])))))

@@ -541,3 +541,22 @@
           (throw (ex-info "Failed to render AST."
                           {:name name :ast ast :cause e})))))
     documents)))
+
+(defn render-toc
+  [toc-items]
+  {:pre [(s/valid? ::spec/toc-items toc-items)]
+   :post [(s/valid? ::spec/html %)]}
+  (str "<nav id=\"toc\" role=\"doc-toc\">\n\n"
+       "# 目次\n\n"
+       (str/join
+        "\n"
+        (map (fn [{:keys [depth caption url]}]
+               (str (str/join (repeat (* (- depth 1) 4) " "))
+                    "- "
+                    (build-link-html
+                     url
+                     caption
+                     :attributes {:class (str "cln-ref-heading-name cln-depth"
+                                              depth)})))
+             toc-items))
+       "\n\n</nav>"))
