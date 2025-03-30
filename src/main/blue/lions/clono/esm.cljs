@@ -41,6 +41,9 @@
 (def from-markdown
   (load-esm "mdast-util-from-markdown" "fromMarkdown"))
 
+(def to-markdown
+  (load-esm "mdast-util-to-markdown" "toMarkdown"))
+
 (def gfm-footnote
   (load-esm "micromark-extension-gfm-footnote" "gfmFootnote"))
 

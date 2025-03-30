@@ -15,6 +15,7 @@
 (ns blue.lions.clono.spec-test
   (:require [cljs.spec.alpha :as s]
             [cljs.test :as t]
+            [blue.lions.clono.spec.anchor :as anchor]
             [blue.lions.clono.spec :as spec]
             [blue.lions.clono.spec.catalog :as catalog]
             [blue.lions.clono.spec.common :as common]
@@ -59,6 +60,90 @@
   (t/testing "Fails to verify."
     (t/are [value] (not (s/valid? ::common/non-nil-string value))
       :not-string
+      nil)))
+
+(t/deftest anchor_chapter-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::anchor/chapter value)
+      "valid|id"
+      "日本語"
+      nil))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::anchor/chapter value))
+      "invalid\\id"
+      "invalid/id"
+      "invalid:id"
+      "invalid*id"
+      "invalid?id"
+      "invalid\"id"
+      "invalid>id"
+      "invalid<id"
+      ""
+      :not-string)))
+
+(t/deftest anchor_id-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::anchor/id value)
+      "valid|id"
+      "日本語"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::anchor/id value))
+      "invalid\\id"
+      "invalid/id"
+      "invalid:id"
+      "invalid*id"
+      "invalid?id"
+      "invalid\"id"
+      "invalid>id"
+      "invalid<id"
+      ""
+      :not-string
+      nil)))
+
+(t/deftest anchor-info-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/anchor-info value)
+      {:chapter "chapter" :id "id"}
+      {:chapter nil :id "id"}))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/anchor-info value))
+      {:chapter :not-string :id "id"}
+      {:chapter "chapter" :id :not-string}
+      {:chapter "chapter"}
+      {:id "id"}
+      {:chapter "chapter" :id "id" :extra-key "extra-value"}
+      {:extra-key "extra-value"}
+      {}
+      "not-map"
+      nil)))
+
+(t/deftest anchor-text-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/anchor-text value)
+      "anchor-text"
+      ""))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/anchor-text value))
+      :not-string
+      nil)))
+
+(t/deftest attributes-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/attributes value)
+      {:key "value"}
+      {:key1 "value1" :key2 "value2"}
+      {}))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/attributes value))
+      {"not-keyword" "value"}
+      {:key ""}
+      {:key "value1" "not-keyword" "value2"}
+      "not-map"
       nil)))
 
 (t/deftest caption-test
@@ -315,6 +400,20 @@
       "not-map"
       nil)))
 
+(t/deftest document-type-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/document-type value)
+      :forewords
+      :chapters
+      :appendices
+      :afterwords))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/document-type value))
+      :invalid
+      "forewords"
+      nil)))
+
 (t/deftest documents-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/documents value)
@@ -446,6 +545,18 @@
       "not-map"
       nil)))
 
+(t/deftest formatted-attributes-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/formatted-attributes value)
+      "attr=\"value\""
+      "attr1=\"value1\" attr2=\"value2\""
+      ""))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/formatted-attributes value))
+      :not-string
+      nil)))
+
 (t/deftest function-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/function value)
@@ -457,6 +568,17 @@
     (t/are [value] (not (s/valid? ::spec/function value))
       "not-function"
       nil)))
+
+(t/deftest function-or-nil-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/function-or-nil value)
+      (fn [x y] (+ x y))
+      #(* % 2)
+      inc
+      nil))
+
+  (t/testing "Fails to verify."
+    (t/is (not (s/valid? ::spec/function-or-nil "not-function")))))
 
 (t/deftest heading_caption-test
   (t/testing "Succeeds to verify."
@@ -603,6 +725,17 @@
       "not-map"
       nil)))
 
+(t/deftest html-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/html value)
+      "<h1>HTML</h1>"
+      ""))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/html value))
+      :not-string
+      nil)))
+
 (t/deftest id-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/id value)
@@ -622,6 +755,26 @@
       ""
       :not-string
       nil)))
+
+(t/deftest id-or-nil-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/id-or-nil value)
+      "valid|id"
+      "日本語"
+      nil))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/id-or-nil value))
+      "invalid\\id"
+      "invalid/id"
+      "invalid:id"
+      "invalid*id"
+      "invalid?id"
+      "invalid\"id"
+      "invalid>id"
+      "invalid<id"
+      ""
+      :not-string)))
 
 (t/deftest index_order-test
   (t/testing "Succeeds to verify."
@@ -1298,4 +1451,27 @@
       "invalid<url"
       ""
       :not-string
+      nil)))
+
+(t/deftest urls-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/urls value)
+      ["file-name.html#id"]
+      ["file-name.html#id" "日本語"]
+      []))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/urls value))
+      ["invalid\\url"]
+      ["invalid/url"]
+      ["invalid:url"]
+      ["invalid*url"]
+      ["invalid?url"]
+      ["invalid\"url"]
+      ["invalid>url"]
+      ["invalid<url"]
+      [:not-string]
+      [nil]
+      ["file-name.html#id" "invalid\\url"]
+      "not-vector"
       nil)))

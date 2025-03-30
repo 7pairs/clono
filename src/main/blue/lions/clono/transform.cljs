@@ -46,7 +46,7 @@
   true)
 
 (defmulti update-node
-  (fn [node _ _]
+  (fn [node _base-name _dics]
     (try
       (ast/get-type node)
       (catch js/Error e

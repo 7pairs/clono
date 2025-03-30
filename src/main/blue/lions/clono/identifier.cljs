@@ -14,6 +14,7 @@
 
 (ns blue.lions.clono.identifier
   (:require [cljs.spec.alpha :as s]
+            [clojure.string :as str]
             ["path" :as path]
             [blue.lions.clono.spec :as spec]))
 
@@ -38,3 +39,11 @@
          (s/valid? ::spec/id id)]
    :post [(s/valid? ::spec/id %)]}
   (str base-name "|" id))
+
+(defn parse-dic-key
+  [key]
+  {:pre [(s/valid? ::spec/id key)]
+   :post [(s/valid? ::spec/anchor-info %)]}
+  (let [[value1 value2] (str/split key #"\|" 2)]
+    {:chapter (when (seq value2) value1)
+     :id (or value2 value1)}))

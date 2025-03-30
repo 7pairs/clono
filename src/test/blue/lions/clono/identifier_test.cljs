@@ -101,3 +101,10 @@
                                   (id/build-dic-key "base-name" id))
       ""
       nil)))
+
+(t/deftest parse-dic-key-test
+  (t/testing "Key has chapter."
+    (t/is (= {:chapter "chapter" :id "id"} (id/parse-dic-key "chapter|id"))))
+
+  (t/testing "Key does not have chapter."
+    (t/is (= {:chapter nil :id "id"} (id/parse-dic-key "id")))))

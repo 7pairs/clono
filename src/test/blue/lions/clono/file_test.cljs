@@ -185,7 +185,7 @@
 
   (t/testing "File is invalid as catalog file."
     (let [file-path (path/join tmp-dir "invalid.edn")]
-      (fs/writeFileSync file-path "{\"chapters\": [\"chapter.md\"]}")
+      (fs/writeFileSync file-path "{\"chapters\": [\"chapter.md\"]}" "utf8")
       (try
         (file/read-catalog-file file-path)
         (catch js/Error e
@@ -336,3 +336,95 @@
                  :data {:file-path (path/join tmp-dir "not-exists4.md")
                         :cause "Failed to read Markdown file."}}]
                @logger/entries)))))
+
+(t/deftest write-file-test
+  (t/testing "Content is not empty."
+    (let [file-path (path/join tmp-dir "text.txt")
+          file-content "I am a text file."]
+      (file/write-file file-path file-content)
+      (t/is (= file-content (fs/readFileSync file-path "utf8")))))
+
+  (t/testing "Content is empty."
+    (let [file-path (path/join tmp-dir "empty.txt")
+          file-content ""]
+      (file/write-file file-path file-content)
+      (t/is (= file-content (fs/readFileSync file-path "utf8"))))))
+
+(t/deftest write-markdown-files-test
+  (let [foreword-name "foreword.md"
+        foreword-content "# Foreword"
+        chapter-name "chapter.md"
+        chapter-content "# Chapter"
+        appendix-name "appendix.md"
+        appendix-content "# Appendix"
+        afterword-name "afterword.md"
+        afterword-content "# Afterword"
+        empty-content ""]
+    (t/testing "All files are not empty."
+      (file/write-markdown-files tmp-dir
+                                 [{:name foreword-name
+                                   :type :forewords
+                                   :markdown foreword-content}
+                                  {:name chapter-name
+                                   :type :chapters
+                                   :markdown chapter-content}
+                                  {:name appendix-name
+                                   :type :appendices
+                                   :markdown appendix-content}
+                                  {:name afterword-name
+                                   :type :afterwords
+                                   :markdown afterword-content}])
+      (t/is (= foreword-content
+               (fs/readFileSync (path/join tmp-dir foreword-name) "utf8")))
+      (t/is (= chapter-content
+               (fs/readFileSync (path/join tmp-dir chapter-name) "utf8")))
+      (t/is (= appendix-content
+               (fs/readFileSync (path/join tmp-dir appendix-name) "utf8")))
+      (t/is (= afterword-content
+               (fs/readFileSync (path/join tmp-dir afterword-name) "utf8"))))
+
+    (t/testing "Some files are empty."
+      (file/write-markdown-files tmp-dir
+                                 [{:name foreword-name
+                                   :type :forewords
+                                   :markdown foreword-content}
+                                  {:name chapter-name
+                                   :type :chapters
+                                   :markdown empty-content}
+                                  {:name appendix-name
+                                   :type :appendices
+                                   :markdown appendix-content}
+                                  {:name afterword-name
+                                   :type :afterwords
+                                   :markdown empty-content}])
+      (t/is (= foreword-content
+               (fs/readFileSync (path/join tmp-dir foreword-name) "utf8")))
+      (t/is (= empty-content
+               (fs/readFileSync (path/join tmp-dir chapter-name) "utf8")))
+      (t/is (= appendix-content
+               (fs/readFileSync (path/join tmp-dir appendix-name) "utf8")))
+      (t/is (= empty-content
+               (fs/readFileSync (path/join tmp-dir afterword-name) "utf8"))))
+
+    (t/testing "All files are empty."
+      (file/write-markdown-files tmp-dir
+                                 [{:name foreword-name
+                                   :type :forewords
+                                   :markdown empty-content}
+                                  {:name chapter-name
+                                   :type :chapters
+                                   :markdown empty-content}
+                                  {:name appendix-name
+                                   :type :appendices
+                                   :markdown empty-content}
+                                  {:name afterword-name
+                                   :type :afterwords
+                                   :markdown empty-content}])
+      (t/is (= empty-content
+               (fs/readFileSync (path/join tmp-dir foreword-name) "utf8")))
+      (t/is (= empty-content
+               (fs/readFileSync (path/join tmp-dir chapter-name) "utf8")))
+      (t/is (= empty-content
+               (fs/readFileSync (path/join tmp-dir appendix-name) "utf8")))
+      (t/is (= empty-content
+               (fs/readFileSync (path/join tmp-dir afterword-name) "utf8"))))))

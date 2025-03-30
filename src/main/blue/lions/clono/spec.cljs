@@ -15,6 +15,7 @@
 (ns blue.lions.clono.spec
   (:require [cljs.spec.alpha :as s]
             [clojure.string :as str]
+            [blue.lions.clono.spec.anchor :as anchor]
             [blue.lions.clono.spec.catalog :as catalog]
             [blue.lions.clono.spec.common :as common]
             [blue.lions.clono.spec.document :as document]
@@ -39,6 +40,24 @@
 (defn- valid-string?
   [invalid-chars value]
   (not-any? invalid-chars (seq value)))
+
+(def anchor_chapter
+  (s/or :id ::id
+        :nil nil?))
+
+(def anchor_id
+  ::id)
+
+(s/def ::anchor-info
+  (s/and (s/keys :req-un [::anchor/chapter
+                          ::anchor/id])
+         #(every? #{:chapter :id} (keys %))))
+
+(s/def ::anchor-text
+  ::common/non-nil-string)
+
+(s/def ::attributes
+  (s/map-of keyword? ::common/non-blank-string))
 
 (s/def ::caption
   ::common/non-blank-string)
@@ -95,6 +114,9 @@
                           ::document/ast])
          #(every? #{:name :type :ast} (keys %))))
 
+(s/def ::document-type
+  #{:forewords :chapters :appendices :afterwords})
+
 (s/def ::documents
   (s/coll-of ::document :kind vector?))
 
@@ -124,8 +146,15 @@
          (complement nil?)
          (s/every-kv ::id ::node)))
 
+(s/def ::formatted-attributes
+  ::common/non-nil-string)
+
 (s/def ::function
   fn?)
+
+(s/def ::function-or-nil
+  (s/or :function ::function
+        :nil nil?))
 
 (s/def ::heading/caption
   ::caption)
@@ -155,12 +184,19 @@
   (s/or :heading ::heading
         :nil nil?))
 
+(s/def ::html
+  ::common/non-nil-string)
+
 (def valid-id?
   (partial valid-string? #{"\\" "/" ":" "*" "?" "\"" ">" "<"}))
 
 (s/def ::id
   (s/and ::common/non-blank-string
          valid-id?))
+
+(s/def ::id-or-nil
+  (s/or :id ::id
+        :nil nil?))
 
 (def index_order
   ::order)
@@ -307,6 +343,15 @@
 (s/def ::url
   (s/and ::common/non-blank-string
          valid-url?))
+
+(s/def ::urls
+  (s/coll-of ::url :kind vector?))
+
+(s/def ::anchor/chapter
+  anchor_chapter)
+
+(s/def ::anchor/id
+  anchor_id)
 
 (s/def ::config
   config)
