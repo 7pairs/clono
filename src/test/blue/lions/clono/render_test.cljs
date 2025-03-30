@@ -975,3 +975,82 @@
     (t/is (thrown-with-msg? js/Error #"Assert failed:"
                             (render/render-toc
                              [{:depth 1 :caption "Item1"}])))))
+
+(t/deftest build-index-caption-html-test
+  (t/testing "Heading level is not given."
+    (t/is (= "<h2>あ行</h2>"
+             (render/build-index-caption-html {:type :caption
+                                               :text "あ行"}))))
+
+  (t/testing "Heading level is given."
+    (t/is (= "<h1>か行</h1>"
+             (render/build-index-caption-html {:type :caption
+                                               :text "か行"}
+                                               :heading-level 1)))))
+
+(t/deftest build-index-page-html-test
+  (t/testing "Single URL is given."
+    (t/is (= "<a href=\"url1\" class=\"cln-index-page\"></a>"
+             (render/build-index-page-html ["url1"]))))
+
+  (t/testing "Multiple URLs are given."
+    (t/is (= (str "<a href=\"url1\" class=\"cln-index-page\"></a>, "
+                  "<a href=\"url2\" class=\"cln-index-page\"></a>")
+             (render/build-index-page-html ["url1" "url2"]))))
+
+  (t/testing "URLa are not given."
+    (t/is (= "" (render/build-index-page-html [])))))
+
+(t/deftest build-index-item-html-test
+  (t/testing "Item has Single URL."
+    (t/is (= (str "<div class=\"cln-index-item\">"
+                  "<div class=\"cln-index-word\">索引</div>"
+                  "<div class=\"cln-index-line-area\">"
+                  "<div class=\"cln-index-line\"></div></div>"
+                  "<div class=\"cln-index-page-area\">"
+                  "<a href=\"url1\" class=\"cln-index-page\"></a></div></div>")
+             (render/build-index-item-html {:type :item
+                                            :text "索引"
+                                            :ruby "さくいん"
+                                            :urls ["url1"]}))))
+
+  (t/testing "Item has Multiple URLs."
+    (t/is (= (str "<div class=\"cln-index-item\">"
+                  "<div class=\"cln-index-word\">索引</div>"
+                  "<div class=\"cln-index-line-area\">"
+                  "<div class=\"cln-index-line\"></div></div>"
+                  "<div class=\"cln-index-page-area\">"
+                  "<a href=\"url1\" class=\"cln-index-page\"></a>, "
+                  "<a href=\"url2\" class=\"cln-index-page\"></a></div></div>")
+             (render/build-index-item-html {:type :item
+                                            :text "索引"
+                                            :ruby "さくいん"
+                                            :urls ["url1" "url2"]})))))
+
+(t/deftest render-index-page-test
+  (t/testing "All indices are valid."
+    (t/is (= (str "<div class=\"cln-index\">\n<h2>さ行</h2>\n"
+                  "<div class=\"cln-index-item\">"
+                  "<div class=\"cln-index-word\">索引</div>"
+                  "<div class=\"cln-index-line-area\">"
+                  "<div class=\"cln-index-line\"></div></div>"
+                  "<div class=\"cln-index-page-area\">"
+                  "<a href=\"url1\" class=\"cln-index-page\"></a>, "
+                  "<a href=\"url2\" class=\"cln-index-page\"></a>"
+                  "</div></div></div>")
+             (render/render-index-page
+              [{:type :caption :text "さ行"}
+               {:type :item
+                :text "索引"
+                :ruby "さくいん"
+                :urls ["url1" "url2"]}]))))
+
+  (t/testing "Some indices are invalid."
+    (t/is (thrown-with-msg? js/Error #"Assert failed:"
+                            (render/render-index-page
+                             [{:type :caption :text "さ行"}
+                              {:type :invalid}
+                              {:type :item
+                               :text "索引"
+                               :ruby "さくいん"
+                               :urls ["url1" "url2"]}])))))

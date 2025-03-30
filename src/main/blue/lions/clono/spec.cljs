@@ -344,6 +344,9 @@
   (s/and ::common/non-blank-string
          valid-url?))
 
+(s/def ::urls
+  (s/coll-of ::url :kind vector?))
+
 (s/def ::anchor/chapter
   anchor_chapter)
 

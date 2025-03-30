@@ -560,3 +560,44 @@
                                               depth)})))
              toc-items))
        "\n\n</nav>"))
+
+(defn build-index-caption-html
+  [caption & {:keys [heading-level] :or {heading-level 2}}]
+  {:pre [(s/valid? ::spec/index-caption caption)]
+   :post [(s/valid? ::spec/html %)]}
+  (gstr/format "<h%d>%s</h%d>" heading-level (:text caption) heading-level))
+
+(defn build-index-page-html
+  [urls]
+  {:pre [(s/valid? ::spec/urls urls)]
+   :post [(s/valid? ::spec/html %)]}
+  (str/join ", "
+            (map #(build-link-html % "" :attributes {:class "cln-index-page"})
+                 urls)))
+
+(defn build-index-item-html
+  [item]
+  {:pre [(s/valid? ::spec/index-item item)]
+   :post [(s/valid? ::spec/html %)]}
+  (str "<div class=\"cln-index-item\"><div class=\"cln-index-word\">"
+       (:text item)
+       "</div>"
+       "<div class=\"cln-index-line-area\"><div class=\"cln-index-line\">"
+       "</div></div><div class=\"cln-index-page-area\">"
+       (build-index-page-html (:urls item))
+       "</div></div>"))
+
+(defn render-index-page
+  [indices]
+  {:pre [(s/valid? ::spec/indices indices)]
+   :post [(s/valid? ::spec/html %)]}
+  (str "<div class=\"cln-index\">\n"
+       (str/join "\n"
+                 (map (fn [index]
+                        (case (:type index)
+                          :caption (build-index-caption-html index)
+                          :item (build-index-item-html index)
+                          (throw (ex-info "Unexpected item type."
+                                          {:index index}))))
+                      indices))
+       "</div>"))

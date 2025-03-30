@@ -1452,3 +1452,26 @@
       ""
       :not-string
       nil)))
+
+(t/deftest urls-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/urls value)
+      ["file-name.html#id"]
+      ["file-name.html#id" "日本語"]
+      []))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/urls value))
+      ["invalid\\url"]
+      ["invalid/url"]
+      ["invalid:url"]
+      ["invalid*url"]
+      ["invalid?url"]
+      ["invalid\"url"]
+      ["invalid>url"]
+      ["invalid<url"]
+      [:not-string]
+      [nil]
+      ["file-name.html#id" "invalid\\url"]
+      "not-vector"
+      nil)))
