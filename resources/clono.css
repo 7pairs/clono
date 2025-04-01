@@ -74,11 +74,11 @@ div.cln-chapter div.cln-code {
 }
 
 div.cln-chapter div.cln-code figcaption::before {
-    content: "リスト" counter(cln-chapter) "-" counter(cln-code) " ";
+    content: "リスト" counter(cln-chapter) "." counter(cln-code) " ";
 }
 
 div.cln-chapter a.cln-ref-code::before {
-    content: "リスト" target-counter(attr(href), cln-chapter) "-"
+    content: "リスト" target-counter(attr(href), cln-chapter) "."
              target-counter(attr(href), cln-code);
 }
 
@@ -87,11 +87,11 @@ div.cln-chapter figure img {
 }
 
 div.cln-chapter figure figcaption::before {
-    content: "図" counter(cln-chapter) "-" counter(cln-figure) " ";
+    content: "図" counter(cln-chapter) "." counter(cln-figure) " ";
 }
 
 div.cln-chapter a.cln-ref-figure::before {
-    content: "図" target-counter(attr(href), cln-chapter) "-"
+    content: "図" target-counter(attr(href), cln-chapter) "."
              target-counter(attr(href), cln-figure);
 }
 
@@ -100,10 +100,10 @@ div.cln-chapter div.cln-table {
 }
 
 div.cln-chapter div.cln-table figcaption::before {
-    content: "表" counter(cln-chapter) "-" counter(cln-table) " ";
+    content: "表" counter(cln-chapter) "." counter(cln-table) " ";
 }
 
 div.cln-chapter a.cln-ref-table::before {
-    content: "表" target-counter(attr(href), cln-chapter) "-"
+    content: "表" target-counter(attr(href), cln-chapter) "."
              target-counter(attr(href), cln-table);
 }
