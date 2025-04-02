@@ -216,3 +216,15 @@ div.cln-appendix a.cln-ref-table::before {
     content: "表" target-counter(attr(href), cln-appendix, upper-alpha) "."
              target-counter(attr(href), cln-table);
 }
+
+.cln-footnote {
+    float: footnote;
+}
+
+::footnote-marker {
+    content: "(*" counter(footnote) ") ";
+}
+
+::footnote-call {
+    content: "(*" counter(footnote) ")";
+}
