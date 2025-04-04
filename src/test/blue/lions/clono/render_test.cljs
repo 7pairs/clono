@@ -957,14 +957,20 @@
 
 (t/deftest render-toc-test
   (t/testing "TOC items are valid."
-    (t/is (= (str "<nav id=\"toc\" role=\"doc-toc\">\n\n"
+    (t/is (= (str "<nav id=\"cln-toc\" role=\"doc-toc\">\n\n"
                   "# 目次\n\n"
-                  "- <a href=\"url1\" class=\"cln-ref-heading-name "
-                  "cln-depth1\">Item1</a>\n"
-                  "    - <a href=\"url2\" class=\"cln-ref-heading-name "
-                  "cln-depth2\">Item2</a>\n"
-                  "        - <a href=\"url3\" class=\"cln-ref-heading-name "
-                  "cln-depth3\">Item3</a>\n\n"
+                  "- <span class=\"cln-toc-item\"><a href=\"url1\" "
+                  "class=\"cln-ref-heading-name cln-depth1\">Item1</a>"
+                  "<span class=\"cln-toc-line\"></span><a href=\"url1\" "
+                  "class=\"cln-toc-page\"></a></span>\n"
+                  "    - <span class=\"cln-toc-item\"><a href=\"url2\" "
+                  "class=\"cln-ref-heading-name cln-depth2\">Item2</a>"
+                  "<span class=\"cln-toc-line\"></span><a href=\"url2\" "
+                  "class=\"cln-toc-page\"></a></span>\n"
+                  "        - <span class=\"cln-toc-item\"><a href=\"url3\" "
+                  "class=\"cln-ref-heading-name cln-depth3\">Item3</a>"
+                  "<span class=\"cln-toc-line\"></span><a href=\"url3\" "
+                  "class=\"cln-toc-page\"></a></span>\n\n"
                   "</nav>")
              (render/render-toc
               [{:depth 1 :caption "Item1" :url "url1"}

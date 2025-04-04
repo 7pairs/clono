@@ -228,3 +228,36 @@ div.cln-appendix a.cln-ref-table::before {
 ::footnote-call {
     content: "(*" counter(footnote) ")";
 }
+
+nav#cln-toc span.cln-toc-item {
+    display: inline-flex;
+    width: 100%;
+}
+
+nav#cln-toc a.cln-ref-heading-name.cln-depth1::before {
+    content: "第" target-counter(attr(href), cln-chapter) "章 ";
+}
+
+nav#cln-toc a.cln-ref-heading-name.cln-depth2::before {
+    content: target-counter(attr(href), cln-chapter) "."
+             target-counter(attr(href), cln-section) " ";
+}
+
+nav#cln-toc a.cln-ref-heading-name.cln-depth3::before {
+    content: target-counter(attr(href), cln-chapter) "."
+             target-counter(attr(href), cln-section) "."
+             target-counter(attr(href), cln-subsection) " ";
+}
+
+nav#cln-toc span.cln-toc-line {
+    flex: auto;
+    height: 0.7em;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    border-bottom: dotted 1px;
+}
+
+nav#cln-toc a.cln-toc-page::before {
+    content: target-counter(attr(href), page);
+    margin-left: auto;
+}
