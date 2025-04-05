@@ -315,13 +315,18 @@
     {:type "html" :value value}))
 
 (defn build-index-html
-  [id content]
+  [id content strong?]
   {:pre [(s/valid? ::spec/id-or-nil id)
-         (s/valid? ::spec/markdown content)]
+         (s/valid? ::spec/markdown content)
+         (s/valid? ::spec/pred-result strong?)]
    :post [(s/valid? ::spec/html %)]}
-  (if (seq id)
-    (gstr/format "<span id=\"%s\">%s</span>" (gstr/htmlEscape id) content)
-    (gstr/format "<span>%s</span>" content)))
+  (let [content (if (seq id)
+                  (gstr/format "<span id=\"%s\">%s</span>"
+                               (gstr/htmlEscape id) content)
+                  (gstr/format "<span>%s</span>" content))]
+    (if strong?
+      (gstr/format "<strong>%s</strong>" content)
+      content)))
 
 (defmethod default-handler "index"
   [node base-name]
@@ -334,7 +339,8 @@
     (if child
       {:type "html"
        :value (build-index-html (:id node)
-                                (node->markdown child base-name))}
+                                (node->markdown child base-name)
+                                (contains? (:attributes node) :strong))}
       (do
         (logger/log :error
                     "Index node does not have children."
@@ -546,18 +552,25 @@
   [toc-items]
   {:pre [(s/valid? ::spec/toc-items toc-items)]
    :post [(s/valid? ::spec/html %)]}
-  (str "<nav id=\"toc\" role=\"doc-toc\">\n\n"
+  (str "<nav id=\"cln-toc\" role=\"doc-toc\">\n\n"
        "# 目次\n\n"
        (str/join
         "\n"
         (map (fn [{:keys [depth caption url]}]
                (str (str/join (repeat (* (- depth 1) 4) " "))
                     "- "
+                    "<span class=\"cln-toc-item\">"
                     (build-link-html
                      url
                      caption
                      :attributes {:class (str "cln-ref-heading-name cln-depth"
-                                              depth)})))
+                                              depth)})
+                    "<span class=\"cln-toc-line\"></span>"
+                    (build-link-html
+                     url
+                     ""
+                     :attributes {:class "cln-toc-page"})
+                    "</span>"))
              toc-items))
        "\n\n</nav>"))
 
@@ -579,11 +592,10 @@
   [item]
   {:pre [(s/valid? ::spec/index-item item)]
    :post [(s/valid? ::spec/html %)]}
-  (str "<div class=\"cln-index-item\"><div class=\"cln-index-word\">"
-       (:text item)
-       "</div>"
-       "<div class=\"cln-index-line-area\"><div class=\"cln-index-line\">"
-       "</div></div><div class=\"cln-index-page-area\">"
+  (str "<div class=\"cln-index-item\">"
+       "<div class=\"cln-index-word\">" (:text item) "</div>"
+       "<div class=\"cln-index-line\"></div>"
+       "<div class=\"cln-index-pages-area\">"
        (build-index-page-html (:urls item))
        "</div></div>"))
 
@@ -591,7 +603,8 @@
   [indices]
   {:pre [(s/valid? ::spec/indices indices)]
    :post [(s/valid? ::spec/html %)]}
-  (str "<div class=\"cln-index\">\n"
+  (str "<div class=\"cln-index\">\n\n"
+       "# 索引\n\n"
        (str/join "\n"
                  (map (fn [index]
                         (case (:type index)

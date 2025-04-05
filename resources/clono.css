@@ -1,0 +1,279 @@
+@page :first {
+    counter-reset: cln-chapter cln-appendix;
+}
+
+div.cln-chapter {
+    page: cln-chapter;
+}
+
+@page cln-chapter:nth(1) {
+    counter-increment: cln-chapter;
+}
+
+div.cln-chapter h1::before {
+    content: "第" counter(cln-chapter) "章 ";
+}
+
+div.cln-chapter h1 {
+    counter-reset: cln-section cln-code cln-figure cln-table;
+}
+
+div.cln-chapter section.level2 {
+    counter-increment: cln-section;
+}
+
+div.cln-chapter h2::before {
+    content: counter(cln-chapter) "." counter(cln-section) " ";
+}
+
+div.cln-chapter h2 {
+    counter-reset: cln-subsection;
+}
+
+div.cln-chapter section.level3 {
+    counter-increment: cln-subsection;
+}
+
+div.cln-chapter h3::before {
+    content: counter(cln-chapter) "." counter(cln-section) "."
+             counter(cln-subsection) " ";
+}
+
+div.cln-chapter a.cln-ref-heading.cln-depth1::before {
+    content: "第" target-counter(attr(href), cln-chapter) "章";
+}
+
+div.cln-chapter a.cln-ref-heading.cln-depth2::before {
+    content: target-counter(attr(href), cln-chapter) "."
+             target-counter(attr(href), cln-section);
+}
+
+div.cln-chapter a.cln-ref-heading.cln-depth3::before {
+    content: target-counter(attr(href), cln-chapter) "."
+             target-counter(attr(href), cln-section) "."
+             target-counter(attr(href), cln-subsection);
+}
+
+div.cln-chapter a.cln-ref-heading-name.cln-depth1::before {
+    content: "第" target-counter(attr(href), cln-chapter) "章 ";
+}
+
+div.cln-chapter a.cln-ref-heading-name.cln-depth2::before {
+    content: target-counter(attr(href), cln-chapter) "."
+             target-counter(attr(href), cln-section) " ";
+}
+
+div.cln-chapter a.cln-ref-heading-name.cln-depth3::before {
+    content: target-counter(attr(href), cln-chapter) "."
+             target-counter(attr(href), cln-section) "."
+             target-counter(attr(href), cln-subsection) " ";
+}
+
+div.cln-chapter div.cln-code {
+    counter-increment: cln-code;
+}
+
+div.cln-chapter div.cln-code figcaption::before {
+    content: "リスト" counter(cln-chapter) "." counter(cln-code) " ";
+}
+
+div.cln-chapter a.cln-ref-code::before {
+    content: "リスト" target-counter(attr(href), cln-chapter) "."
+             target-counter(attr(href), cln-code);
+}
+
+div.cln-chapter figure img {
+    counter-increment: cln-figure;
+}
+
+div.cln-chapter figure figcaption::before {
+    content: "図" counter(cln-chapter) "." counter(cln-figure) " ";
+}
+
+div.cln-chapter a.cln-ref-figure::before {
+    content: "図" target-counter(attr(href), cln-chapter) "."
+             target-counter(attr(href), cln-figure);
+}
+
+div.cln-chapter div.cln-table {
+    counter-increment: cln-table;
+}
+
+div.cln-chapter div.cln-table figcaption::before {
+    content: "表" counter(cln-chapter) "." counter(cln-table) " ";
+}
+
+div.cln-chapter a.cln-ref-table::before {
+    content: "表" target-counter(attr(href), cln-chapter) "."
+             target-counter(attr(href), cln-table);
+}
+
+div.cln-appendix {
+    page: cln-appendix;
+}
+
+@page cln-appendix:nth(1) {
+    counter-increment: cln-appendix;
+}
+
+div.cln-appendix h1::before {
+    content: "付録" counter(cln-appendix, upper-alpha) " ";
+}
+
+div.cln-appendix h1 {
+    counter-reset: cln-section cln-code cln-figure cln-table;
+}
+
+div.cln-appendix section.level2 {
+    counter-increment: cln-section;
+}
+
+div.cln-appendix h2::before {
+    content: counter(cln-appendix, upper-alpha) "." counter(cln-section) " ";
+}
+
+div.cln-appendix h2 {
+    counter-reset: cln-subsection;
+}
+
+div.cln-appendix section.level3 {
+    counter-increment: cln-subsection;
+}
+
+div.cln-appendix h3::before {
+    content: counter(cln-appendix, upper-alpha) "." counter(cln-section) "."
+             counter(cln-subsection) " ";
+}
+
+div.cln-appendix a.cln-ref-heading.cln-depth1::before {
+    content: "付録" target-counter(attr(href), cln-appendix, upper-alpha);
+}
+
+div.cln-appendix a.cln-ref-heading.cln-depth2::before {
+    content: target-counter(attr(href), cln-appendix, upper-alpha) "."
+             target-counter(attr(href), cln-section);
+}
+
+div.cln-appendix a.cln-ref-heading.cln-depth3::before {
+    content: target-counter(attr(href), cln-appendix, upper-alpha) "."
+             target-counter(attr(href), cln-section) "."
+             target-counter(attr(href), cln-subsection);
+}
+
+div.cln-appendix a.cln-ref-heading-name.cln-depth1::before {
+    content: "付録" target-counter(attr(href), cln-appendix, upper-alpha) " ";
+}
+
+div.cln-appendix a.cln-ref-heading-name.cln-depth2::before {
+    content: target-counter(attr(href), cln-appendix, upper-alpha) "."
+             target-counter(attr(href), cln-section) " ";
+}
+
+div.cln-appendix a.cln-ref-heading-name.cln-depth3::before {
+    content: target-counter(attr(href), cln-appendix, upper-alpha) "."
+             target-counter(attr(href), cln-section) "."
+             target-counter(attr(href), cln-subsection) " ";
+}
+
+div.cln-appendix div.cln-code {
+    counter-increment: cln-code;
+}
+
+div.cln-appendix div.cln-code figcaption::before {
+    content: "リスト" counter(cln-appendix, upper-alpha) "." counter(cln-code)
+             " ";
+}
+
+div.cln-appendix a.cln-ref-code::before {
+    content: "リスト" target-counter(attr(href), cln-appendix, upper-alpha) "."
+             target-counter(attr(href), cln-code);
+}
+
+div.cln-appendix figure img {
+    counter-increment: cln-figure;
+}
+
+div.cln-appendix figure figcaption::before {
+    content: "図" counter(cln-appendix, upper-alpha) "." counter(cln-figure)
+             " ";
+}
+
+div.cln-appendix a.cln-ref-figure::before {
+    content: "図" target-counter(attr(href), cln-appendix, upper-alpha) "."
+             target-counter(attr(href), cln-figure);
+}
+
+div.cln-appendix div.cln-table {
+    counter-increment: cln-table;
+}
+
+div.cln-appendix div.cln-table figcaption::before {
+    content: "表" counter(cln-appendix, upper-alpha) "." counter(cln-table)
+             " ";
+}
+
+div.cln-appendix a.cln-ref-table::before {
+    content: "表" target-counter(attr(href), cln-appendix, upper-alpha) "."
+             target-counter(attr(href), cln-table);
+}
+
+.cln-footnote {
+    float: footnote;
+}
+
+::footnote-marker {
+    content: "(*" counter(footnote) ") ";
+}
+
+::footnote-call {
+    content: "(*" counter(footnote) ")";
+}
+
+nav#cln-toc span.cln-toc-item {
+    display: inline-flex;
+    width: 100%;
+}
+
+nav#cln-toc a.cln-ref-heading-name.cln-depth1::before {
+    content: "第" target-counter(attr(href), cln-chapter) "章 ";
+}
+
+nav#cln-toc a.cln-ref-heading-name.cln-depth2::before {
+    content: target-counter(attr(href), cln-chapter) "."
+             target-counter(attr(href), cln-section) " ";
+}
+
+nav#cln-toc a.cln-ref-heading-name.cln-depth3::before {
+    content: target-counter(attr(href), cln-chapter) "."
+             target-counter(attr(href), cln-section) "."
+             target-counter(attr(href), cln-subsection) " ";
+}
+
+nav#cln-toc span.cln-toc-line {
+    flex: auto;
+    height: 0.7em;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    border-bottom: dotted 1px;
+}
+
+nav#cln-toc a.cln-toc-page::before {
+    content: target-counter(attr(href), page);
+    margin-left: auto;
+}
+
+div.cln-index div.cln-index-item {
+    display: flex;
+}
+
+div.cln-index div.cln-index-line {
+    flex: auto;
+    height: 0.7em;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    border-bottom: dotted 1px;
+}
+
+div.cln-index a::after {
+    content: target-counter(attr(href), page);
+}

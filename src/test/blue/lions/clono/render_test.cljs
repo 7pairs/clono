@@ -243,10 +243,20 @@
                (render/default-handler
                 {:type "textDirective"
                  :name "index"
-                 :attribute {:ruby "さくいん"}
+                 :attributes {:ruby "さくいん"}
                  :children [{:type "text" :value "索引"}]
                  :id "index-1"
                  :order 1}
+                "base-name")))
+      (t/is (= {:type "html"
+                :value "<strong><span id=\"index-2\">索引</span></strong>"}
+               (render/default-handler
+                {:type "textDirective"
+                 :name "index"
+                 :attributes {:ruby "さくいん" :strong nil}
+                 :children [{:type "text" :value "索引"}]
+                 :id "index-2"
+                 :order 2}
                 "base-name"))))
 
     (t/testing "Node does not have ID."
@@ -254,7 +264,7 @@
                (render/default-handler
                 {:type "textDirective"
                  :name "index"
-                 :attribute {:ruby "さくいん"}
+                 :attributes {:ruby "さくいん"}
                  :children [{:type "text" :value "索引"}]}
                 "base-name"))))
 
@@ -263,7 +273,7 @@
       (reset! logger/entries [])
       (let [node {:type "textDirective"
                   :name "index"
-                  :attribute {:ruby "さくいん"}
+                  :attributes {:ruby "さくいん"}
                   :children []
                   :id "index-1"
                   :order 1}
@@ -828,11 +838,16 @@
 
 (t/deftest build-index-html-test
   (t/testing "ID is given."
-    (t/is (= "<span id=\"index-id\">word</span>"
-             (render/build-index-html "index-id" "word"))))
+    (t/is (= "<strong><span id=\"index-id1\">word1</span></strong>"
+             (render/build-index-html "index-id1" "word1" true)))
+    (t/is (= "<span id=\"index-id2\">word2</span>"
+             (render/build-index-html "index-id2" "word2" false))))
 
   (t/testing "ID is not given."
-    (t/is (= "<span>word</span>" (render/build-index-html nil "word")))))
+    (t/is (= "<strong><span>word3</span></strong>"
+             (render/build-index-html nil "word3" true)))
+    (t/is (= "<span>word4</span>"
+             (render/build-index-html nil "word4" false)))))
 
 (t/deftest build-ref-link-test
   (t/testing "Single attribute is given."
@@ -957,14 +972,20 @@
 
 (t/deftest render-toc-test
   (t/testing "TOC items are valid."
-    (t/is (= (str "<nav id=\"toc\" role=\"doc-toc\">\n\n"
+    (t/is (= (str "<nav id=\"cln-toc\" role=\"doc-toc\">\n\n"
                   "# 目次\n\n"
-                  "- <a href=\"url1\" class=\"cln-ref-heading-name "
-                  "cln-depth1\">Item1</a>\n"
-                  "    - <a href=\"url2\" class=\"cln-ref-heading-name "
-                  "cln-depth2\">Item2</a>\n"
-                  "        - <a href=\"url3\" class=\"cln-ref-heading-name "
-                  "cln-depth3\">Item3</a>\n\n"
+                  "- <span class=\"cln-toc-item\"><a href=\"url1\" "
+                  "class=\"cln-ref-heading-name cln-depth1\">Item1</a>"
+                  "<span class=\"cln-toc-line\"></span><a href=\"url1\" "
+                  "class=\"cln-toc-page\"></a></span>\n"
+                  "    - <span class=\"cln-toc-item\"><a href=\"url2\" "
+                  "class=\"cln-ref-heading-name cln-depth2\">Item2</a>"
+                  "<span class=\"cln-toc-line\"></span><a href=\"url2\" "
+                  "class=\"cln-toc-page\"></a></span>\n"
+                  "        - <span class=\"cln-toc-item\"><a href=\"url3\" "
+                  "class=\"cln-ref-heading-name cln-depth3\">Item3</a>"
+                  "<span class=\"cln-toc-line\"></span><a href=\"url3\" "
+                  "class=\"cln-toc-page\"></a></span>\n\n"
                   "</nav>")
              (render/render-toc
               [{:depth 1 :caption "Item1" :url "url1"}
@@ -1005,9 +1026,8 @@
   (t/testing "Item has Single URL."
     (t/is (= (str "<div class=\"cln-index-item\">"
                   "<div class=\"cln-index-word\">索引</div>"
-                  "<div class=\"cln-index-line-area\">"
-                  "<div class=\"cln-index-line\"></div></div>"
-                  "<div class=\"cln-index-page-area\">"
+                  "<div class=\"cln-index-line\"></div>"
+                  "<div class=\"cln-index-pages-area\">"
                   "<a href=\"url1\" class=\"cln-index-page\"></a></div></div>")
              (render/build-index-item-html {:type :item
                                             :text "索引"
@@ -1017,9 +1037,8 @@
   (t/testing "Item has Multiple URLs."
     (t/is (= (str "<div class=\"cln-index-item\">"
                   "<div class=\"cln-index-word\">索引</div>"
-                  "<div class=\"cln-index-line-area\">"
-                  "<div class=\"cln-index-line\"></div></div>"
-                  "<div class=\"cln-index-page-area\">"
+                  "<div class=\"cln-index-line\"></div>"
+                  "<div class=\"cln-index-pages-area\">"
                   "<a href=\"url1\" class=\"cln-index-page\"></a>, "
                   "<a href=\"url2\" class=\"cln-index-page\"></a></div></div>")
              (render/build-index-item-html {:type :item
@@ -1029,12 +1048,11 @@
 
 (t/deftest render-index-page-test
   (t/testing "All indices are valid."
-    (t/is (= (str "<div class=\"cln-index\">\n<h2>さ行</h2>\n"
+    (t/is (= (str "<div class=\"cln-index\">\n\n# 索引\n\n<h2>さ行</h2>\n"
                   "<div class=\"cln-index-item\">"
                   "<div class=\"cln-index-word\">索引</div>"
-                  "<div class=\"cln-index-line-area\">"
-                  "<div class=\"cln-index-line\"></div></div>"
-                  "<div class=\"cln-index-page-area\">"
+                  "<div class=\"cln-index-line\"></div>"
+                  "<div class=\"cln-index-pages-area\">"
                   "<a href=\"url1\" class=\"cln-index-page\"></a>, "
                   "<a href=\"url2\" class=\"cln-index-page\"></a>"
                   "</div></div></div>")

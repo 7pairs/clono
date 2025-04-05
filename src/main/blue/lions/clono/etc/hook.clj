@@ -34,7 +34,9 @@
   {:shadow.build/stage :compile-finish}
   [build-state & {:keys [resources]
                   :or {resources [{:src "resources/config.edn"
-                                   :dst "config.edn"}]}}]
+                                   :dst "config.edn"}
+                                  {:src "resources/clono.css"
+                                   :dst "clono.css"}]}}]
   (let [output-file (:output-to (:node-config build-state))
         output-dir (.getParentFile output-file)]
     (doseq [{:keys [src dst]} resources]
