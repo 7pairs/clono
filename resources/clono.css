@@ -261,3 +261,19 @@ nav#cln-toc a.cln-toc-page::before {
     content: target-counter(attr(href), page);
     margin-left: auto;
 }
+
+div.cln-index div.cln-index-item {
+    display: flex;
+}
+
+div.cln-index div.cln-index-line {
+    flex: auto;
+    height: 0.7em;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    border-bottom: dotted 1px;
+}
+
+div.cln-index a::after {
+    content: target-counter(attr(href), page);
+}

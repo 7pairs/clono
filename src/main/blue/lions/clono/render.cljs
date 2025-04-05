@@ -315,13 +315,18 @@
     {:type "html" :value value}))
 
 (defn build-index-html
-  [id content]
+  [id content strong?]
   {:pre [(s/valid? ::spec/id-or-nil id)
-         (s/valid? ::spec/markdown content)]
+         (s/valid? ::spec/markdown content)
+         (s/valid? ::spec/pred-result strong?)]
    :post [(s/valid? ::spec/html %)]}
-  (if (seq id)
-    (gstr/format "<span id=\"%s\">%s</span>" (gstr/htmlEscape id) content)
-    (gstr/format "<span>%s</span>" content)))
+  (let [content (if (seq id)
+                  (gstr/format "<span id=\"%s\">%s</span>"
+                               (gstr/htmlEscape id) content)
+                  (gstr/format "<span>%s</span>" content))]
+    (if strong?
+      (gstr/format "<strong>%s</strong>" content)
+      content)))
 
 (defmethod default-handler "index"
   [node base-name]
@@ -334,7 +339,8 @@
     (if child
       {:type "html"
        :value (build-index-html (:id node)
-                                (node->markdown child base-name))}
+                                (node->markdown child base-name)
+                                (contains? (:attributes node) :strong))}
       (do
         (logger/log :error
                     "Index node does not have children."
@@ -586,11 +592,10 @@
   [item]
   {:pre [(s/valid? ::spec/index-item item)]
    :post [(s/valid? ::spec/html %)]}
-  (str "<div class=\"cln-index-item\"><div class=\"cln-index-word\">"
-       (:text item)
-       "</div>"
-       "<div class=\"cln-index-line-area\"><div class=\"cln-index-line\">"
-       "</div></div><div class=\"cln-index-page-area\">"
+  (str "<div class=\"cln-index-item\">"
+       "<div class=\"cln-index-word\">" (:text item) "</div>"
+       "<div class=\"cln-index-line\"></div>"
+       "<div class=\"cln-index-pages-area\">"
        (build-index-page-html (:urls item))
        "</div></div>"))
 
@@ -598,7 +603,8 @@
   [indices]
   {:pre [(s/valid? ::spec/indices indices)]
    :post [(s/valid? ::spec/html %)]}
-  (str "<div class=\"cln-index\">\n"
+  (str "<div class=\"cln-index\">\n\n"
+       "# 索引\n\n"
        (str/join "\n"
                  (map (fn [index]
                         (case (:type index)
