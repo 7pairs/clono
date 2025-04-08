@@ -26,12 +26,12 @@
     "github-slugger": "^2.0.0",
     "mdast-util-directive": "^3.1.0",
     "mdast-util-from-markdown": "^2.0.2",
-    "mdast-util-gfm-footnote": "^2.0.0",
+    "mdast-util-gfm-footnote": "^2.1.0",
     "mdast-util-to-markdown": "^2.1.2",
-    "micromark-extension-directive": "^3.0.2",
+    "micromark-extension-directive": "^4.0.0",
     "micromark-extension-gfm-footnote": "^2.1.0"
   },
   "devDependencies": {
-    "shadow-cljs": "2.28.20"
+    "shadow-cljs": "^2.28.22"
   }
 }
