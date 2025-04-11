@@ -20,15 +20,24 @@
   (try
     (io/make-parents dst)
     (if (.exists src)
-      (io/copy src dst)
-      (throw (ex-info "Source file is not found."
-                      {:src-path (.getAbsolutePath src)
-                       :dst-path (.getAbsolutePath dst)})))
+      (do
+        (when (and (.exists dst) (not (.isDirectory dst)))
+          (println (str "⚠ Warning: Overwriting existing file: "
+                        (.getAbsolutePath dst))))
+        (io/copy src dst)
+        (println (str "✓ Copied: " (.getName src) " → " (.getName dst))))
+      (let [err-msg (str "Source file is not found: " (.getAbsolutePath src))]
+        (println (str "✗ Error: " err-msg))
+        (throw (ex-info err-msg
+                        {:src-path (.getAbsolutePath src)
+                         :dst-path (.getAbsolutePath dst)}))))
     (catch Exception e
-      (throw (ex-info "Failed to copy file."
-                      {:src-path (.getAbsolutePath src)
-                       :dst-path (.getAbsolutePath dst)
-                       :cause e})))))
+      (let [err-msg (str "Failed to copy file: " (.getName src))]
+        (println (str "✗ Error: " err-msg))
+        (throw (ex-info err-msg
+                        {:src-path (.getAbsolutePath src)
+                         :dst-path (.getAbsolutePath dst)
+                         :cause e}))))))
 
 (defn copy-resources
   {:shadow.build/stage :compile-finish}
