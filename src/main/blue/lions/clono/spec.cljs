@@ -250,7 +250,11 @@
                :nil nil?)))
 
 (s/def ::log-level
-  #{:info :warn :error})
+  #{:debug :info :warn :error})
+
+(s/def ::log-level-value
+  (s/and integer?
+         #(<= 0 % 3)))
 
 (s/def ::log-message
   ::common/non-nil-string)

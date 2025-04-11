@@ -1012,6 +1012,7 @@
 (t/deftest log-level-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/log-level value)
+      :debug
       :info
       :warn
       :error))
@@ -1020,6 +1021,22 @@
     (t/are [value] (not (s/valid? ::spec/log-level value))
       :invalid
       "info"
+      nil)))
+
+(t/deftest log-level-value-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/log-level-value value)
+      0
+      1
+      2
+      3))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/log-level-value value))
+      -1
+      4
+      2.5
+      "1"
       nil)))
 
 (t/deftest log-message-test
