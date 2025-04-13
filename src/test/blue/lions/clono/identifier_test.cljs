@@ -14,7 +14,9 @@
 
 (ns blue.lions.clono.identifier-test
   (:require [cljs.test :as t]
-            [blue.lions.clono.identifier :as id]))
+            [clojure.string :as str]
+            [blue.lions.clono.identifier :as id]
+            [blue.lions.clono.log :as logger]))
 
 (t/deftest extract-base-name-test
   (t/testing "File path has directories."
@@ -46,12 +48,16 @@
     (t/is (= ".markdown21" (id/extract-base-name "../.markdown21"))))
 
   (t/testing "File path is invalid."
-    (t/are [file-path] (thrown-with-msg? js/Error #"Assert failed:"
-                                         (id/extract-base-name file-path))
-      "invalid*file-path"
-      ""
-      :not-string
-      nil)))
+    (let [file-paths ["invalid*file-path"
+                      ""
+                      :not-string
+                      nil]]
+      (doseq [file-path file-paths]
+        (try
+          (id/extract-base-name file-path)
+          (catch js/Error e
+            (t/is (= "Invalid file path." (ex-message e)))
+            (t/is (= {:file-path file-path} (ex-data e)))))))))
 
 (t/deftest build-url-test
   (t/testing "Base name and ID are valid."
@@ -62,16 +68,24 @@
     (t/is (= "base-name.html#%40id" (id/build-url "base-name" "@id"))))
 
   (t/testing "Base name is invalid."
-    (t/are [base-name] (thrown-with-msg? js/Error #"Assert failed:"
-                                         (id/build-url base-name "id"))
-      ""
-      nil))
+    (let [base-names [""
+                      nil]]
+      (doseq [base-name base-names]
+        (try
+          (id/build-url base-name "id")
+          (catch js/Error e
+            (t/is (= "Invalid base name." (ex-message e)))
+            (t/is (= {:base-name base-name} (ex-data e))))))))
 
   (t/testing "ID is invalid."
-    (t/are [id] (thrown-with-msg? js/Error #"Assert failed:"
-                                  (id/build-url "base-name" id))
-      ""
-      nil))
+    (let [ids [""
+               nil]]
+      (doseq [id ids]
+        (try
+          (id/build-url "base-name" id)
+          (catch js/Error e
+            (t/is (= "Invalid ID." (ex-message e)))
+            (t/is (= {:id id} (ex-data e))))))))
 
   (t/testing "Extension is given."
     (t/is (= "base-name.htm#id"
@@ -90,21 +104,51 @@
   (t/testing "Base name and ID are valid."
     (t/is (= "base-name|id" (id/build-dic-key "base-name" "id"))))
 
+  (t/testing "Generated key is very long."
+    (let [base-name (str/join (repeat 50 "b"))
+          id (str/join (repeat 50 "i"))]
+      (reset! logger/enabled? false)
+      (reset! logger/entries [])
+      (t/is (= (str base-name "|" id)
+               (id/build-dic-key base-name id)))
+      (t/is (= [{:level :debug
+                 :message "Generated very long dictionary key."
+                 :data {:base-name base-name :id id}}]
+             @logger/entries))))
+
   (t/testing "Base name is invalid."
-    (t/are [base-name] (thrown-with-msg? js/Error #"Assert failed:"
-                                         (id/build-dic-key base-name "id"))
-      ""
-      nil))
+    (let [base-names [""
+                      nil]]
+      (doseq [base-name base-names]
+        (try
+          (id/build-dic-key base-name "id")
+          (catch js/Error e
+            (t/is (= "Invalid base name." (ex-message e)))
+            (t/is (= {:base-name base-name} (ex-data e))))))))
 
   (t/testing "ID is invalid."
-    (t/are [id] (thrown-with-msg? js/Error #"Assert failed:"
-                                  (id/build-dic-key "base-name" id))
-      ""
-      nil)))
+    (let [ids [""
+               nil]]
+      (doseq [id ids]
+        (try
+          (id/build-dic-key "base-name" id)
+          (catch js/Error e
+            (t/is (= "Invalid ID." (ex-message e)))
+            (t/is (= {:id id} (ex-data e)))))))))
 
 (t/deftest parse-dic-key-test
   (t/testing "Key has chapter."
     (t/is (= {:chapter "chapter" :id "id"} (id/parse-dic-key "chapter|id"))))
 
   (t/testing "Key does not have chapter."
-    (t/is (= {:chapter nil :id "id"} (id/parse-dic-key "id")))))
+    (t/is (= {:chapter nil :id "id"} (id/parse-dic-key "id"))))
+
+  (t/testing "Key is invalid."
+    (let [keys [""
+                nil]]
+      (doseq [key keys]
+        (try
+          (id/parse-dic-key key)
+          (catch js/Error e
+            (t/is (= "Invalid dictionary key." (ex-message e)))
+            (t/is (= {:key key} (ex-data e)))))))))

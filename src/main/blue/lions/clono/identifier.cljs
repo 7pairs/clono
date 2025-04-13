@@ -16,34 +16,45 @@
   (:require [cljs.spec.alpha :as s]
             [clojure.string :as str]
             ["path" :as path]
+            [blue.lions.clono.log :as logger]
             [blue.lions.clono.spec :as spec]))
 
 (defn extract-base-name
   [file-path]
-  {:pre [(s/valid? ::spec/file-path file-path)]
+  {:pre [(or (s/valid? ::spec/file-path file-path)
+             (throw (ex-info "Invalid file path." {:file-path file-path})))]
    :post [(s/valid? ::spec/file-name %)]}
-  (let [ext (path/extname file-path)]
-    (path/basename file-path ext)))
+  (let [ext (path/posix.extname file-path)]
+    (path/posix.basename file-path ext)))
 
 (defn build-url
   [base-name id & {:keys [extension separator]
                    :or {extension ".html" separator "#"}}]
-  {:pre [(s/valid? ::spec/file-name base-name)
-         (s/valid? ::spec/id id)]
+  {:pre [(or (s/valid? ::spec/file-name base-name)
+             (throw (ex-info "Invalid base name." {:base-name base-name})))
+         (or (s/valid? ::spec/id id)
+             (throw (ex-info "Invalid ID." {:id id})))]
    :post [(s/valid? ::spec/url %)]}
   (str base-name extension separator (js/encodeURIComponent id)))
 
 (defn build-dic-key
   [base-name id]
-  {:pre [(s/valid? ::spec/file-name base-name)
-         (s/valid? ::spec/id id)]
+  {:pre [(or (s/valid? ::spec/file-name base-name)
+             (throw (ex-info "Invalid base name." {:base-name base-name})))
+         (or (s/valid? ::spec/id id)
+             (throw (ex-info "Invalid ID." {:id id})))]
    :post [(s/valid? ::spec/id %)]}
-  (str base-name "|" id))
+  (let [key (str base-name "|" id)]
+    (when (> (count key) 100)
+      (logger/debug "Generated very long dictionary key."
+                    {:base-name base-name :id id}))
+    key))
 
 (defn parse-dic-key
   [key]
-  {:pre [(s/valid? ::spec/id key)]
+  {:pre [(or (s/valid? ::spec/id key)
+             (throw (ex-info "Invalid dictionary key." {:key key})))]
    :post [(s/valid? ::spec/anchor-info %)]}
   (let [[value1 value2] (str/split key #"\|" 2)]
-    {:chapter (when (seq value2) value1)
-     :id (or value2 value1)}))
+    {:chapter (when (and (seq value1) (seq value2)) value1)
+     :id (if (seq value2) value2 value1)}))
