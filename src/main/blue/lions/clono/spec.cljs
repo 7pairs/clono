@@ -18,6 +18,7 @@
             [blue.lions.clono.spec.anchor :as anchor]
             [blue.lions.clono.spec.catalog :as catalog]
             [blue.lions.clono.spec.common :as common]
+            [blue.lions.clono.spec.directive :as directive]
             [blue.lions.clono.spec.document :as document]
             [blue.lions.clono.spec.heading :as heading]
             [blue.lions.clono.spec.index :as index]
@@ -95,6 +96,17 @@
 
 (s/def ::dics
   (s/map-of keyword? ::dic))
+
+(def directive_name
+  ::directive-name)
+
+(s/def ::directive/type
+  #{"textDirective" "containerDirective"})
+
+(s/def ::directive-node
+  (s/and ::node
+         (s/keys :req-un [::directive/type
+                          ::directive/name])))
 
 (s/def ::directive-name
   ::common/alphabet-string)
@@ -359,6 +371,9 @@
 
 (s/def ::config
   config)
+
+(s/def ::directive/name
+  directive_name)
 
 (s/def ::document/ast
   document_ast)

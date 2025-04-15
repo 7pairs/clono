@@ -19,6 +19,7 @@
             [blue.lions.clono.spec :as spec]
             [blue.lions.clono.spec.catalog :as catalog]
             [blue.lions.clono.spec.common :as common]
+            [blue.lions.clono.spec.directive :as directive]
             [blue.lions.clono.spec.document :as document]
             [blue.lions.clono.spec.heading :as heading]
             [blue.lions.clono.spec.index :as index]
@@ -308,6 +309,61 @@
       {"key1" {"key2" "value2"}}
       {:key "not-map"}
       {:key1 {"key2" "value2"} "key3" {"key4" "value4"}}
+      "not-map"
+      nil)))
+
+(t/deftest directive_name-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::directive/name value)
+      "directivename"
+      "DIRECTIVENAME"
+      "DirectiveName"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::directive/name value))
+      "1nvalid"
+      "invalid directive name"
+      ""
+      :not-string
+      nil)))
+
+(t/deftest directive_type-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::directive/type value)
+      "textDirective"
+      "containerDirective"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::directive/type value))
+      "invalid"
+      ""
+      :not-string
+      nil)))
+
+(t/deftest directive-node-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/directive-node value)
+      {:type "textDirective" :name "name" :attributes {:key "value"}}
+      {:type "containerDirective" :name "name" :attributes {:key "value"}}))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/directive-node value))
+      {:type "invalid" :name "name" :attributes {:key "value"}}
+      {:type "" :name "name" :attributes {:key "value"}}
+      {:type :not-string :name "name" :attributes {:key "value"}}
+      {:type nil :name "name" :attributes {:key "value"}}
+      {:type "textDirective" :name "1nvalid" :attributes {:key "value"}}
+      {:type "textDirective" :name "" :attributes {:key "value"}}
+      {:type "textDirective" :name :not-string :attributes {:key "value"}}
+      {:type "textDirective" :name :nil :attributes {:key "value"}}
+      {:type "containerDirective" :name "1nvalid" :attributes {:key "value"}}
+      {:type "containerDirective" :name "" :attributes {:key "value"}}
+      {:type "containerDirective" :name :not-string :attributes {:key "value"}}
+      {:type "containerDirective" :name :nil :attributes {:key "value"}}
+      {:name "name" :attributes {:key "value"}}
+      {:type "textDirective" :attributes {:key "value"}}
+      {:type "containerDirective" :attributes {:key "value"}}
+      {}
       "not-map"
       nil)))
 

@@ -16,6 +16,12 @@
   (:require [cljs.spec.alpha :as s]
             [blue.lions.clono.spec :as spec]))
 
+; HTML comments must:
+; 1. Start with <!--
+; 2. Not contain -- within the comment
+; 3. End with -->
+(def html-comment-regex #"(?s)<!--(?!>)[^-]*(-[^-][^-]*)*-->")
+
 (defn comment?
   [node]
   {:pre [(s/valid? ::spec/node node)]
@@ -24,12 +30,14 @@
     (boolean
      (and (some? value)
           (string? value)
-          (re-matches #"(?s)<!--(?!>)[^-]*(-[^-][^-]*)*-->" value)))))
+          (re-matches html-comment-regex value)))))
 
 (defn node-type?
   [type node]
-  {:pre [(s/valid? ::spec/node-type type)
-         (s/valid? ::spec/node node)]
+  {:pre [(or (s/valid? ::spec/node-type type)
+             (throw (ex-info "Invalid node type." {:type type})))
+         (or (s/valid? ::spec/node node)
+             (throw (ex-info "Invalid node." {:node node})))]
    :post [(s/valid? ::spec/pred-result %)]}
   (= (:type node) type))
 
@@ -41,8 +49,10 @@
 
 (defn text-directive?
   [name node]
-  {:pre [(s/valid? ::spec/directive-name name)
-         (s/valid? ::spec/node node)]
+  {:pre [(or (s/valid? ::spec/directive-name name)
+             (throw (ex-info "Invalid directive name." {:name name})))
+         (or (s/valid? ::spec/node node)
+             (throw (ex-info "Invalid node." {:node node})))]
    :post [(s/valid? ::spec/pred-result %)]}
   (and (= (:type node) "textDirective")
        (= (:name node) name)))
@@ -53,8 +63,10 @@
 
 (defn extract-nodes
   [pred node]
-  {:pre [(s/valid? ::spec/function pred)
-         (s/valid? ::spec/node node)]
+  {:pre [(or (s/valid? ::spec/function pred)
+             (throw (ex-info "Invalid predicate function." {:pred pred})))
+         (or (s/valid? ::spec/node node)
+             (throw (ex-info "Invalid node." {:node node})))]
    :post [(s/valid? ::spec/nodes %)]}
   (vec
    (concat (if (pred node) [node] [])
@@ -83,12 +95,10 @@
 
 (defn directive-type
   [node]
-  {:pre [(s/valid? ::spec/node node)]
+  {:pre [(or (s/valid? ::spec/directive-node node)
+             (throw (ex-info "Invalid directive node." {:node node})))]
    :post [(s/valid? ::spec/node-type %)]}
-  (let [name (:name node)]
-    (if name
-      name
-      (throw (ex-info "Node does not have name." {:node node})))))
+  (:name node))
 
 (defmethod get-type "textDirective"
   [node]
