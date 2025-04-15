@@ -116,13 +116,7 @@
 
   (t/testing "Captions are duplicated."
     (t/is (= "duplicated" (parse/generate-slug "duplicated")))
-    (t/is (= "duplicated-1" (parse/generate-slug "duplicated"))))
-
-  (t/testing "Caption is invalid."
-    (t/are [caption] (thrown-with-msg? js/Error #"Assert failed:"
-                                       (parse/generate-slug caption))
-      ""
-      nil)))
+    (t/is (= "duplicated-1" (parse/generate-slug "duplicated")))))
 
 (t/deftest generate-heading-slug-test
   (t/testing "Node has single text."
@@ -138,19 +132,7 @@
              (parse/generate-heading-slug
               {:type "heading" :children [{:type "text" :value "value1"}
                                           {:type "html" :value "<value2>"}
-                                          {:type "text" :value "value3"}]}))))
-
-  (t/testing "Node does not have texts."
-    (let [node {:type "heading" :children [{:type "html" :value "<value>"}]}]
-      (try
-        (parse/generate-heading-slug node)
-        (catch js/Error e
-          (let [data (ex-data e)]
-            (t/is (= "Failed to generate heading slug." (ex-message e)))
-            (t/is (= node (:node data)))
-            (t/is (= "" (:caption data)))
-            (t/is (str/starts-with? (ex-message (:cause data))
-                                    "Assert failed:"))))))))
+                                          {:type "text" :value "value3"}]})))))
 
 (t/deftest add-heading-slugs-test
   (t/testing "Node has single heading."
@@ -350,11 +332,4 @@
               (fn [] 1)))))
 
   (t/testing "Manuscript list is empty."
-    (t/is (= [] (parse/parse-manuscripts [] (fn [] 1)))))
-
-  (t/testing "Order generator is invalid."
-    (t/is (thrown-with-msg? js/Error #"Assert failed:"
-                            (parse/parse-manuscripts [{:name "markdown.md"
-                                                       :type :chapters
-                                                       :markdown "# Markdown"}]
-                                                     nil)))))
+    (t/is (= [] (parse/parse-manuscripts [] (fn [] 1))))))

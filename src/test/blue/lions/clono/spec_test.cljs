@@ -27,6 +27,37 @@
             [blue.lions.clono.spec.node :as node]
             [blue.lions.clono.spec.toc :as toc]))
 
+(t/deftest validate-test
+  (t/testing "Succeeds to verify."
+    (t/is (spec/validate ::common/alphabet-string
+                         "alphabet"
+                         "Invalid alphabet string."))
+    (t/is (spec/validate ::common/alphabet-string
+                         "alphabet"
+                         "Invalid alphabet string."
+                         :string)))
+
+  (t/testing "Key is given."
+    (try
+      (spec/validate ::common/alphabet-string
+                     "12345"
+                     "Invalid alphabet string."
+                     :string)
+      (catch js/Error e
+        (t/is (= "Invalid alphabet string." (ex-message e)))
+        (t/is (= {:string "12345" :spec ::common/alphabet-string}
+                 (ex-data e))))))
+
+  (t/testing "Key is not given."
+    (try
+      (spec/validate ::common/alphabet-string
+                     "12345"
+                     "Invalid alphabet string.")
+      (catch js/Error e
+        (t/is (= "Invalid alphabet string." (ex-message e)))
+        (t/is (= {:value "12345" :spec ::common/alphabet-string}
+                 (ex-data e)))))))
+
 (t/deftest common_alphabet-string-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::common/alphabet-string value)

@@ -26,6 +26,13 @@
             [blue.lions.clono.spec.node :as node]
             [blue.lions.clono.spec.toc :as toc]))
 
+(defn validate
+  ([spec value message]
+   (validate spec value message :value))
+  ([spec value message key]
+   (or (s/valid? spec value)
+       (throw (ex-info message {key value :spec spec})))))
+
 (s/def ::common/alphabet-string
   (s/and string?
          #(re-matches #"[a-zA-Z]+" %)))
