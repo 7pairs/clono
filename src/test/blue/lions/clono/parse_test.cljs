@@ -14,8 +14,8 @@
 
 (ns blue.lions.clono.parse-test
   (:require [cljs.test :as t]
-            [clojure.string :as str]
-            [blue.lions.clono.parse :as parse]))
+            [blue.lions.clono.parse :as parse]
+            [blue.lions.clono.spec :as spec]))
 
 (t/deftest remove-comments-test
   (t/testing "Target is single node."
@@ -116,7 +116,17 @@
 
   (t/testing "Captions are duplicated."
     (t/is (= "duplicated" (parse/generate-slug "duplicated")))
-    (t/is (= "duplicated-1" (parse/generate-slug "duplicated")))))
+    (t/is (= "duplicated-1" (parse/generate-slug "duplicated"))))
+
+ (t/testing "Caption is invalid."
+   (let [captions [""
+                   nil]]
+     (doseq [caption captions]
+       (try
+         (parse/generate-slug caption)
+         (catch js/Error e
+           (t/is (= "Invalid caption is given." (ex-message e)))
+           (t/is (= {:value caption :spec ::spec/caption} (ex-data e)))))))))
 
 (t/deftest generate-heading-slug-test
   (t/testing "Node has single text."
@@ -132,7 +142,20 @@
              (parse/generate-heading-slug
               {:type "heading" :children [{:type "text" :value "value1"}
                                           {:type "html" :value "<value2>"}
-                                          {:type "text" :value "value3"}]})))))
+                                          {:type "text" :value "value3"}]}))))
+
+  (t/testing "Node does not have texts."
+    (let [node {:type "heading" :children [{:type "html" :value "<value>"}]}]
+      (try
+        (parse/generate-heading-slug node)
+        (catch js/Error e
+          (let [data (ex-data e)
+                cause (:cause data)]
+            (t/is (= "Failed to generate heading slug." (ex-message e)))
+            (t/is (= node (:node data)))
+            (t/is (= "" (:caption data)))
+            (t/is (= "Invalid caption is given." (ex-message cause)))
+            (t/is (= {:value "" :spec ::spec/caption} (ex-data cause)))))))))
 
 (t/deftest add-heading-slugs-test
   (t/testing "Node has single heading."
@@ -332,4 +355,14 @@
               (fn [] 1)))))
 
   (t/testing "Manuscript list is empty."
-    (t/is (= [] (parse/parse-manuscripts [] (fn [] 1))))))
+    (t/is (= [] (parse/parse-manuscripts [] (fn [] 1)))))
+
+  (t/testing "Order generator is invalid."
+    (try
+      (parse/parse-manuscripts [{:name "markdown.md"
+                                 :type :chapters
+                                 :markdown "# Markdown"}]
+                               nil)
+      (catch js/Error e
+        (t/is (= "Invalid generator is given." (ex-message e)))
+        (t/is (= {:value nil :spec ::spec/function} (ex-data e)))))))
