@@ -14,7 +14,8 @@
 
 (ns blue.lions.clono.analyze-test
   (:require [cljs.test :as t]
-            [blue.lions.clono.analyze :as analyze]))
+            [blue.lions.clono.analyze :as analyze]
+            [blue.lions.clono.spec :as spec]))
 
 (t/deftest create-toc-item-test
   (t/testing "Node has single text."
@@ -96,11 +97,15 @@
                       :children [{:type "text" :value "value"}]}}]))))
 
   (t/testing "Documents have invalid AST."
-    (t/are [documents] (thrown-with-msg?
-                        js/Error #"Assert failed:"
-                        (analyze/create-toc-items documents))
-      [{:name "markdown.md" :type :chapters :ast "not-map"}]
-      [{:name "markdown.md" :type :chapters :ast nil}])))
+    (let [documents-list [{:name "markdown.md" :type :chapters :ast "not-map"}
+                          {:name "markdown.md" :type :chapters :ast nil}]]
+      (doseq [documents documents-list]
+        (try
+          (analyze/create-toc-items documents)
+          (catch js/Error e
+            (t/is (= "Invalid documents are given." (ex-message e)))
+            (t/is (= {:value documents :spec ::spec/documents}
+                     (ex-data e)))))))))
 
 (t/deftest has-valid-id-or-root-depth?-test
   (t/testing "Node has valid ID."
@@ -224,12 +229,15 @@
             (t/is (= node (:node data))))))))
 
   (t/testing "File name is invalid."
-    (t/are [file-name] (thrown-with-msg?
-                        js/Error #"Assert failed:"
-                        (analyze/create-heading-info file-name
-                                                     {:type "heading"}))
-      ""
-      nil)))
+    (let [file-names [""
+                      nil]]
+      (doseq [file-name file-names]
+        (try
+          (analyze/create-heading-info file-name {:type "heading"})
+          (catch js/Error e
+            (t/is (= "Invalid file name is given." (ex-message e)))
+            (t/is (= {:value file-name :spec ::spec/file-name}
+                     (ex-data e)))))))))
 
 (t/deftest create-heading-dic-test
   (t/testing "Documents have headings."
@@ -283,11 +291,15 @@
                       :children [{:type "text" :value "value"}]}}]))))
 
   (t/testing "Documents have invalid AST."
-    (t/are [documents] (thrown-with-msg?
-                        js/Error #"Assert failed:"
-                        (analyze/create-heading-dic documents))
-      {:name "markdown.md" :type :chapters :ast "not-map"}
-      {:name "markdown.md" :type :chapters :ast nil}))
+    (let [documents-list [{:name "markdown.md" :type :chapters :ast "not-map"}
+                          {:name "markdown.md" :type :chapters :ast nil}]]
+      (doseq [documents documents-list]
+        (try
+          (analyze/create-heading-dic documents)
+          (catch js/Error e
+            (t/is (= "Invalid documents are given." (ex-message e)))
+            (t/is (= {:value documents :spec ::spec/documents}
+                     (ex-data e))))))))
 
   (t/testing "Documents have headings without slug."
     (t/is (thrown-with-msg?

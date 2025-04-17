@@ -13,17 +13,17 @@
 ; limitations under the License.
 
 (ns blue.lions.clono.analyze
-  (:require [cljs.spec.alpha :as s]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [blue.lions.clono.ast :as ast]
             [blue.lions.clono.identifier :as id]
             [blue.lions.clono.spec :as spec]))
 
 (defn create-toc-item
   [file-name node]
-  {:pre [(s/valid? ::spec/file-name file-name)
-         (s/valid? ::spec/node node)]
-   :post [(s/valid? ::spec/toc-item %)]}
+  {:pre [(spec/validate ::spec/file-name file-name
+                        "Invalid file name is given.")
+         (spec/validate ::spec/node node "Invalid node is given.")]
+   :post [(spec/validate ::spec/toc-item % "Invalid item is returned.")]}
   (let [depth (:depth node)
         caption (->> node
                      ast/extract-texts
@@ -42,8 +42,9 @@
 
 (defn create-toc-items
   [documents]
-  {:pre [(s/valid? ::spec/documents documents)]
-   :post [(s/valid? ::spec/toc-items %)]}
+  {:pre [(spec/validate ::spec/documents documents
+                        "Invalid documents are given.")]
+   :post [(spec/validate ::spec/toc-items % "Invalid items are returned.")]}
   (vec
    (mapcat (fn [{:keys [name ast]}]
              (map #(create-toc-item name %)
@@ -52,8 +53,8 @@
 
 (defn has-valid-id-or-root-depth?
   [node]
-  {:pre [(s/valid? ::spec/node node)]
-   :post [(s/valid? ::spec/pred-result %)]}
+  {:pre [(spec/validate ::spec/node node "Invalid node is given.")]
+   :post [(spec/validate ::spec/pred-result % "Invalid result is returned.")]}
   (or (-> (ast/extract-labels node)
           first
           :attributes
@@ -63,9 +64,11 @@
 
 (defn create-heading-info
   [file-name node]
-  {:pre [(s/valid? ::spec/file-name file-name)
-         (s/valid? ::spec/node node)]
-   :post [(s/valid? ::spec/heading-or-nil %)]}
+  {:pre [(spec/validate ::spec/file-name file-name
+                        "Invalid file name is given.")
+         (spec/validate ::spec/node node "Invalid node is given.")]
+   :post [(spec/validate ::spec/heading-or-nil %
+                         "Invalid heading information is returned.")]}
   (when (has-valid-id-or-root-depth? node)
     (let [{:keys [depth caption url]} (create-toc-item file-name node)
           base-name (id/extract-base-name file-name)
@@ -81,8 +84,10 @@
 
 (defn create-heading-dic
   [documents]
-  {:pre [(s/valid? ::spec/documents documents)]
-   :post [(s/valid? ::spec/heading-dic %)]}
+  {:pre [(spec/validate ::spec/documents documents
+                        "Invalid documents are given.")]
+   :post [(spec/validate ::spec/heading-dic %
+                         "Invalid heading dictionary is returned.")]}
   (->> (for [{:keys [name ast]} documents
              nodes (ast/extract-headings ast)
              :let [{:keys [id] :as heading-info}
@@ -93,8 +98,10 @@
 
 (defn create-footnote-dic
   [documents]
-  {:pre [(s/valid? ::spec/documents documents)]
-   :post [(s/valid? ::spec/footnote-dic %)]}
+  {:pre [(spec/validate ::spec/documents documents
+                        "Invalid documents are given.")]
+   :post [(spec/validate ::spec/footnote-dic %
+                         "Invalid footnote dictionary is returned.")]}
   (->> (for [{:keys [name ast]} documents
              footnote (ast/extract-footnote-definition ast)
              :let [base-name (id/extract-base-name name)
@@ -106,9 +113,10 @@
 
 (defn build-index-entry
   [base-name node]
-  {:pre [(s/valid? ::spec/file-name base-name)
-         (s/valid? ::spec/node node)]
-   :post [(s/valid? ::spec/index-entry %)]}
+  {:pre [(spec/validate ::spec/file-name base-name
+                        "Invalid base name is given.")
+         (spec/validate ::spec/node node "Invalid node is given.")]
+   :post [(spec/validate ::spec/index-entry % "Invalid entry is returned.")]}
   (let [{:keys [order id attributes]} node]
     (when (or (nil? order) (nil? id))
       (throw (ex-info "Node is invalid."
@@ -127,8 +135,8 @@
 
 (defn english-ruby?
   [ruby]
-  {:pre [(s/valid? ::spec/ruby ruby)]
-   :post [(s/valid? ::spec/pred-result %)]}
+  {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
+   :post [(spec/validate ::spec/pred-result % "Invalid result is returned.")]}
   (boolean (re-matches #"^[ -~].*" ruby)))
 
 (def vowel-map
@@ -157,8 +165,8 @@
 
 (defn normalize-hiragana
   [ruby]
-  {:pre [(s/valid? ::spec/ruby ruby)]
-   :post [(s/valid? ::spec/ruby %)]}
+  {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
+   :post [(spec/validate ::spec/ruby % "Invalid ruby is returned.")]}
   (let [chars (seq ruby)]
     (apply str
            (loop [result []
@@ -176,8 +184,8 @@
 
 (defn ruby->caption
   [ruby]
-  {:pre [(s/valid? ::spec/ruby ruby)]
-   :post [(s/valid? ::spec/caption %)]}
+  {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
+   :post [(spec/validate ::spec/caption % "Invalid caption is returned.")]}
   (cond
     (english-ruby? ruby) "英数字"
     (#{"あ" "い" "う" "え" "お"} (subs (normalize-hiragana ruby) 0 1)) "あ行"
@@ -194,8 +202,8 @@
 
 (defn insert-row-captions
   [indices]
-  {:pre [(s/valid? ::spec/indices indices)]
-   :post [(s/valid? ::spec/indices %)]}
+  {:pre [(spec/validate ::spec/indices indices "Invalid indices are given.")]
+   :post [(spec/validate ::spec/indices % "Invalid indices are returned.")]}
   (loop [result []
          current-caption nil
          rest-items indices]
@@ -212,8 +220,9 @@
 
 (defn create-indices
   [documents]
-  {:pre [(s/valid? ::spec/documents documents)]
-   :post [(s/valid? ::spec/indices %)]}
+  {:pre [(spec/validate ::spec/documents documents
+                        "Invalid documents are given.")]
+   :post [(spec/validate ::spec/indices % "Invalid indices are returned.")]}
   (->> (for [{:keys [name ast]} documents
              index (ast/extract-indices ast)]
          (let [base-name (id/extract-base-name name)]
