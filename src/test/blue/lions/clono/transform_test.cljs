@@ -369,9 +369,9 @@
         (t/is (= :error level))
         (t/is (= "Failed to transform AST." message))
         (t/is (= "markdown2.md" (:file-name data)))
-        (t/is (str/starts-with? (:cause data) "Assert failed:")))))
+        (t/is (= "Invalid node is given." (:cause data))))))
 
-  (t/testing "All documents are invalid"
+  (t/testing "All documents are invalid."
     (reset! logger/enabled? false)
     (reset! logger/entries [])
     (t/is (= []
@@ -390,9 +390,9 @@
         (t/is (= :error level))
         (t/is (= "Failed to transform AST." message))
         (t/is (= "markdown1.md" (:file-name data)))
-        (t/is (str/starts-with? (:cause data) "Assert failed:")))
+        (t/is (= "Invalid node is given." (:cause data))))
       (let [{:keys [level message data]} (second entries)]
         (t/is (= :error level))
         (t/is (= "Failed to transform AST." message))
         (t/is (= "markdown2.md" (:file-name data)))
-        (t/is (str/starts-with? (:cause data) "Assert failed:"))))))
+        (t/is (= "Invalid node is given." (:cause data)))))))
