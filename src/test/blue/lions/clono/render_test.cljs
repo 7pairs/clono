@@ -18,7 +18,8 @@
             ["os" :as os]
             ["path" :as path]
             [blue.lions.clono.log :as logger]
-            [blue.lions.clono.render :as render]))
+            [blue.lions.clono.render :as render]
+            [blue.lions.clono.spec :as spec]))
 
 (defn- setup-tmp-dir
   []
@@ -716,19 +717,6 @@
             (t/is (= "Failed to convert AST to Markdown."
                      (ex-message (:cause cause-data))))))))))
 
-(t/deftest format-attributes-for-markdown-test
-  (t/testing "Single attribute is given."
-    (t/is (= "class=class1"
-             (render/format-attributes-for-markdown {:class "class1"}))))
-
-  (t/testing "Multiple attributes are given."
-    (t/is (= "class=class2 id=id2"
-             (render/format-attributes-for-markdown {:class "class2"
-                                                     :id "id2"}))))
-
-  (t/testing "Empty map are given."
-    (t/is (= "" (render/format-attributes-for-markdown {})))))
-
 (t/deftest format-attributes-for-html-test
   (t/testing "Single attribute is given."
     (t/is (= "class=\"class1\""
@@ -738,6 +726,19 @@
     (t/is (= "class=\"class2\" id=\"id2\""
              (render/format-attributes-for-html {:class "class2"
                                                  :id "id2"}))))
+
+  (t/testing "Empty map are given."
+    (t/is (= "" (render/format-attributes-for-markdown {})))))
+
+(t/deftest format-attributes-for-markdown-test
+  (t/testing "Single attribute is given."
+    (t/is (= "class=class1"
+             (render/format-attributes-for-markdown {:class "class1"}))))
+
+  (t/testing "Multiple attributes are given."
+    (t/is (= "class=class2 id=id2"
+             (render/format-attributes-for-markdown {:class "class2"
+                                                     :id "id2"}))))
 
   (t/testing "Empty map are given."
     (t/is (= "" (render/format-attributes-for-markdown {})))))
@@ -875,22 +876,25 @@
              (render/build-table-html "id1" "Caption1" "Table1"))))
 
   (t/testing "ID is not given."
-    (t/is (thrown-with-msg? js/Error #"Assert failed:"
-                            (render/build-table-html nil
-                                                     "Caption2"
-                                                     "Table2"))))
+    (try
+      (render/build-table-html nil "Caption2" "Table2")
+      (catch js/Error e
+        (t/is (= "Invalid ID is given." (ex-message e)))
+        (t/is (= {:value nil :spec ::spec/id} (ex-data e))))))
 
   (t/testing "Caption is not given."
-    (t/is (thrown-with-msg? js/Error #"Assert failed:"
-                            (render/build-table-html "id3"
-                                                     nil
-                                                     "Table3"))))
+    (try
+      (render/build-table-html "id3" nil "Table3")
+      (catch js/Error e
+        (t/is (= "Invalid caption is given." (ex-message e)))
+        (t/is (= {:value nil :spec ::spec/caption} (ex-data e))))))
 
   (t/testing "Table is not given."
-    (t/is (thrown-with-msg? js/Error #"Assert failed:"
-                            (render/build-table-html "id4"
-                                                     "Caption4"
-                                                     nil)))))
+    (try
+      (render/build-table-html "id4" "Caption4" nil)
+      (catch js/Error e
+        (t/is (= "Invalid Markdown is given." (ex-message e)))
+        (t/is (= {:value nil :spec ::spec/markdown} (ex-data e)))))))
 
 (t/deftest append-outer-div-test
   (t/testing "Type is forewords."
@@ -910,8 +914,11 @@
              (render/append-outer-div :afterwords "# Markdown"))))
 
   (t/testing "Type is invalid."
-    (t/is (thrown-with-msg? js/Error #"Assert failed:"
-                            (render/append-outer-div :invalid "# Markdown")))))
+    (try
+      (render/append-outer-div :invalid "# Markdown")
+      (catch js/Error e
+        (t/is (= "Invalid document type is given." (ex-message e)))
+        (t/is (= {:value :invalid :spec ::spec/document-type} (ex-data e)))))))
 
 (t/deftest render-documents-test
   (t/testing "All ASTs are valid."
@@ -993,9 +1000,12 @@
                {:depth 3 :caption "Item3" :url "url3"}]))))
 
   (t/testing "TOC items are invalid."
-    (t/is (thrown-with-msg? js/Error #"Assert failed:"
-                            (render/render-toc
-                             [{:depth 1 :caption "Item1"}])))))
+    (let [items [{:depth 1 :caption "Item1"}]]
+      (try
+        (render/render-toc items)
+        (catch js/Error e
+          (t/is (= "Invalid items are given." (ex-message e)))
+          (t/is (= {:value items :spec ::spec/toc-items} (ex-data e))))))))
 
 (t/deftest build-index-caption-html-test
   (t/testing "Heading level is not given."
@@ -1064,11 +1074,14 @@
                 :urls ["url1" "url2"]}]))))
 
   (t/testing "Some indices are invalid."
-    (t/is (thrown-with-msg? js/Error #"Assert failed:"
-                            (render/render-index-page
-                             [{:type :caption :text "さ行"}
-                              {:type :invalid}
-                              {:type :item
-                               :text "索引"
-                               :ruby "さくいん"
-                               :urls ["url1" "url2"]}])))))
+    (let [indices [{:type :caption :text "さ行"}
+                   {:type :invalid}
+                   {:type :item
+                    :text "索引"
+                    :ruby "さくいん"
+                    :urls ["url1" "url2"]}]]
+      (try
+        (render/render-index-page indices)
+        (catch js/Error e
+          (t/is (= "Invalid indices are given." (ex-message e)))
+          (t/is (= {:value indices :spec ::spec/indices} (ex-data e))))))))
