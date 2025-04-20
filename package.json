@@ -2,7 +2,7 @@
   "name": "clono",
   "version": "1.0.0",
   "private": true,
-  "description": "Extends Vivliostyle Flavored Markdown with cross-references, index generation, and other features essential for professional document authoring.",
+  "description": "An extension tool for Vivliostyle Flavored Markdown that adds powerful features for technical book writing, including cross-references to headings, figures, tables and code blocks, footnotes, and automatic index generation for CSS typesetting with Vivliostyle.",
   "main": "out/clono.js",
   "scripts": {
     "compile": "npx shadow-cljs compile app",
