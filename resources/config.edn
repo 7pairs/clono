@@ -1,3 +1,3 @@
 {:catalog "<YOUR CATALOG FILE PATH>"
- :manuscripts "<YOUR MANUSCRIPTS DIR PATH>"
- :output "<YOUR OUTPUT DIR PATH>"}
+ :input "<YOUR INPUT DIRECTORY PATH>"
+ :output "<YOUR OUTPUT DIRECTORY PATH>"}

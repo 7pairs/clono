@@ -11,7 +11,11 @@
  {:app {:target :node-script
         :main blue.lions.clono.core/-main
         :output-to "out/clono.js"
-        :build-hooks [(blue.lions.clono.etc.hook/copy-resources)]}
+        :build-hooks [(blue.lions.clono.etc.hook/copy-resources)]
+        :clono/resources [{:src "resources/config.edn"
+                           :dst "config.edn"}
+                          {:src "resources/clono.css"
+                           :dst "clono.css"}]}
   :test {:target :node-test
          :output-to "out/test.js"
          :build-hooks [(blue.lions.clono.etc.hook/copy-resources)]}}}

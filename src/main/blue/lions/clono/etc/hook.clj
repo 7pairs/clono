@@ -15,6 +15,17 @@
 (ns blue.lions.clono.etc.hook
   (:require [clojure.java.io :as io]))
 
+(defn- validate-resources
+  [resources]
+  (doseq [{:keys [src]} resources]
+    (let [src-file (io/file src)]
+      (when-not (.exists src-file)
+        (let [err-msg (str "Source resource file is not found: "
+                           (.getAbsolutePath src-file))]
+          (println (str "✗ Error: " err-msg))
+          (throw (ex-info err-msg {:src-path (.getAbsolutePath src-file)}))))))
+  resources)
+
 (defn- safe-copy-file
   [src dst]
   (try
@@ -41,13 +52,12 @@
 
 (defn copy-resources
   {:shadow.build/stage :compile-finish}
-  [build-state & {:keys [resources]
-                  :or {resources [{:src "resources/config.edn"
-                                   :dst "config.edn"}
-                                  {:src "resources/clono.css"
-                                   :dst "clono.css"}]}}]
+  [build-state]
   (let [output-file (:output-to (:node-config build-state))
-        output-dir (.getParentFile output-file)]
-    (doseq [{:keys [src dst]} resources]
+        output-dir (.getParentFile output-file)
+        build-config (:shadow.build/config build-state)
+        resources (get build-config :clono/resources [])
+        validated-resources (validate-resources resources)]
+    (doseq [{:keys [src dst]} validated-resources]
       (safe-copy-file (io/file src) (io/file output-dir dst)))
     build-state))
