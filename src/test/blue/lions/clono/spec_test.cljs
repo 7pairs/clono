@@ -23,6 +23,7 @@
             [blue.lions.clono.spec.document :as document]
             [blue.lions.clono.spec.heading :as heading]
             [blue.lions.clono.spec.index :as index]
+            [blue.lions.clono.spec.log :as log]
             [blue.lions.clono.spec.manuscript :as manuscript]
             [blue.lions.clono.spec.node :as node]
             [blue.lions.clono.spec.toc :as toc]))
@@ -1082,6 +1083,45 @@
        {:type :caption :text "text"}]
       nil)))
 
+(t/deftest log_data-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::log/data value)
+      {:key "value"}
+      {:key1 1 :key2 ["vector"]}
+      {}
+      nil))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::log/data value))
+      {"not-keyword" "value"}
+      {:key "value1" "not-keyword" "value2"}
+      "not-map")))
+
+(t/deftest log_level-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::log/level value)
+      :debug
+      :info
+      :warn
+      :error))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::log/level value))
+      :invalid
+      "info"
+      nil)))
+
+(t/deftest log_message-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::log/message value)
+      "message"
+      ""))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::log/message value))
+      :not-string
+      nil)))
+
 (t/deftest log-data-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/log-data value)
@@ -1095,6 +1135,55 @@
       {"not-keyword" "value"}
       {:key "value1" "not-keyword" "value2"}
       "not-map")))
+
+(t/deftest log-entries-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/log-entries value)
+      [{:level :info :message "message" :data {:key "value"}}]
+      [{:level :info :message "message1" :data {:key "value1"}}
+       {:level :error :message "message2" :data {:key "value2"}}]
+      []))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/log-entries value))
+      [{:level :invalid :message "message" :data {:key "value"}}]
+      [{:level :info :message :not-string :data {:key "value"}}]
+      [{:level :info :message "message" :data "not-map"}]
+      [{:message "message" :data {:key "value"}}]
+      [{:level :info :data {:key "value"}}]
+      [{:level :info :message "message"}]
+      [{:level :info
+        :message "message"
+        :data {:key "value"}
+        :extra-key "extra-value"}]
+      [{:extra-key "extra-value"}]
+      [{:level :info :message "message" :data {:key "value"}}
+       {:level :invalid :message "message" :data {:key "value"}}]
+      "not-vector"
+      nil)))
+
+(t/deftest log-entry-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::spec/log-entry {:level :info
+                                      :message "message"
+                                      :data {:key "value"}})))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/log-entry value))
+      {:level :invalid :message "message" :data {:key "value"}}
+      {:level :info :message :not-string :data {:key "value"}}
+      {:level :info :message "message" :data "not-map"}
+      {:message "message" :data {:key "value"}}
+      {:level :info :data {:key "value"}}
+      {:level :info :message "message"}
+      {:level :info
+       :message "message"
+       :data {:key "value"}
+       :extra-key "extra-value"}
+      {:extra-key "extra-value"}
+      {}
+      "not-map"
+      nil)))
 
 (t/deftest log-level-test
   (t/testing "Succeeds to verify."

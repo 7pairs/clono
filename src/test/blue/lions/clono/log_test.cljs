@@ -20,15 +20,87 @@
 (defn- dummy-log-fn
   [& _])
 
-(t/deftest set-min-level-test
-  (t/testing "Update minimum log level."
-    (let [org-min-level @logger/min-level]
+(t/deftest set-enabled!-test
+  (t/testing "enabled? is set to true."
+    (let [org-info js/console.info
+          spy-info (spy/spy dummy-log-fn)]
       (try
-        (reset! logger/min-level :info)
-        (logger/set-min-level! :warn)
-        (t/is (= :warn @logger/min-level))
+        (set! js/console.info spy-info)
+        (logger/set-enabled! true)
+        (logger/info "Info message.")
+        (t/is (spy/called-once? spy-info))
         (finally
-          (reset! logger/min-level org-min-level))))))
+          (set! js/console.info org-info)
+          (logger/set-enabled! true)))))
+
+  (t/testing "enabled? is set to false."
+    (let [org-info js/console.info
+          spy-info (spy/spy dummy-log-fn)]
+      (try
+        (set! js/console.info spy-info)
+        (logger/set-enabled! false)
+        (logger/info "Info message.")
+        (t/is (spy/not-called? spy-info))
+        (finally
+          (set! js/console.info org-info)
+          (logger/set-enabled! true))))))
+
+(t/deftest get-entries-test
+  (t/testing "Entries do not have data."
+    (logger/reset-entries!)
+    (t/is (= [] (logger/get-entries))))
+
+  (t/testing "Entries have data."
+    (try
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
+      (logger/info "Info message." {:code 100})
+      (t/is (= [{:level :info
+                 :message "Info message."
+                 :data {:code 100}}]
+               (logger/get-entries)))
+      (finally
+        (logger/set-enabled! true)))))
+
+(t/deftest reset-entries!-test
+  (t/testing "Entries are reset."
+    (try
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
+      (logger/info "Info message." {:code 100})
+      (t/is (= [{:level :info
+                 :message "Info message."
+                 :data {:code 100}}]
+               (logger/get-entries)))
+      (logger/reset-entries!)
+      (t/is (= [] (logger/get-entries)))
+      (finally
+        (logger/set-enabled! true)))))
+
+(t/deftest set-min-level!-test
+  (t/testing "min-level is set to :info."
+    (let [org-info js/console.info
+          spy-info (spy/spy dummy-log-fn)]
+      (try
+        (set! js/console.info spy-info)
+        (logger/set-min-level! :info)
+        (logger/info "Info message.")
+        (t/is (spy/called-once? spy-info))
+        (finally
+          (set! js/console.info org-info)
+          (logger/set-min-level! :info)))))
+
+  (t/testing "min-level is set to :warn."
+    (let [org-info js/console.info
+          spy-info (spy/spy dummy-log-fn)]
+      (try
+        (set! js/console.info spy-info)
+        (logger/set-min-level! :warn)
+        (logger/info "Info message.")
+        (t/is (spy/not-called? spy-info))
+        (finally
+          (set! js/console.info org-info)
+          (logger/set-min-level! :info))))))
 
 (t/deftest log-test
   (t/testing "enabled? is true and message has data."
@@ -46,8 +118,8 @@
         (set! js/console.info spy-info)
         (set! js/console.warn spy-warn)
         (set! js/console.error spy-error)
-        (reset! logger/enabled? true)
-        (reset! logger/entries [])
+        (logger/set-enabled! true)
+        (logger/reset-entries!)
         (logger/log :debug "Debug message." {:code 100})
         (logger/log :info "Info message." {:code 200})
         (logger/log :warn "Warning message." {:code 300})
@@ -88,7 +160,7 @@
                     {:level :error
                      :message "Error message."
                      :data {:code 400}}]
-                   @logger/entries)))
+                   (logger/get-entries))))
         (finally
           (set! js/console.debug org-debug)
           (set! js/console.info org-info)
@@ -111,8 +183,8 @@
         (set! js/console.info spy-info)
         (set! js/console.warn spy-warn)
         (set! js/console.error spy-error)
-        (reset! logger/enabled? true)
-        (reset! logger/entries [])
+        (logger/set-enabled! true)
+        (logger/reset-entries!)
         (logger/log :debug "Debug message.")
         (logger/log :info "Info message.")
         (logger/log :warn "Warning message.")
@@ -129,7 +201,7 @@
                   {:level :info :message "Info message." :data nil}
                   {:level :warn :message "Warning message." :data nil}
                   {:level :error :message "Error message." :data nil}]
-                 @logger/entries))
+                 (logger/get-entries)))
         (finally
           (set! js/console.debug org-debug)
           (set! js/console.info org-info)
@@ -152,8 +224,8 @@
         (set! js/console.info spy-info)
         (set! js/console.warn spy-warn)
         (set! js/console.error spy-error)
-        (reset! logger/enabled? false)
-        (reset! logger/entries [])
+        (logger/set-enabled! false)
+        (logger/reset-entries!)
         (logger/log :debug "Debug message." {:code 100})
         (logger/log :info "Info message." {:code 200})
         (logger/log :warn "Warning message." {:code 300})
@@ -166,7 +238,7 @@
                   {:level :info :message "Info message." :data {:code 200}}
                   {:level :warn :message "Warning message." :data {:code 300}}
                   {:level :error :message "Error message." :data {:code 400}}]
-                 @logger/entries))
+                 (logger/get-entries)))
         (finally
           (set! js/console.debug org-debug)
           (set! js/console.info org-info)
@@ -189,8 +261,8 @@
         (set! js/console.info spy-info)
         (set! js/console.warn spy-warn)
         (set! js/console.error spy-error)
-        (reset! logger/enabled? false)
-        (reset! logger/entries [])
+        (logger/set-enabled! false)
+        (logger/reset-entries!)
         (logger/log :debug "Debug message.")
         (logger/log :info "Info message.")
         (logger/log :warn "Warning message.")
@@ -203,7 +275,7 @@
                   {:level :info :message "Info message." :data nil}
                   {:level :warn :message "Warning message." :data nil}
                   {:level :error :message "Error message." :data nil}]
-                 @logger/entries))
+                 (logger/get-entries)))
         (finally
           (set! js/console.debug org-debug)
           (set! js/console.info org-info)
@@ -226,8 +298,8 @@
         (set! js/console.info spy-info)
         (set! js/console.warn spy-warn)
         (set! js/console.error spy-error)
-        (reset! logger/enabled? true)
-        (reset! logger/entries [])
+        (logger/set-enabled! true)
+        (logger/reset-entries!)
         (logger/log :debug "Debug message.")
         (logger/log :info "Info message.")
         (logger/log :warn "Warning message.")
@@ -242,7 +314,7 @@
                   {:level :info :message "Info message." :data nil}
                   {:level :warn :message "Warning message." :data nil}
                   {:level :error :message "Error message." :data nil}]
-                 @logger/entries))
+                 (logger/get-entries)))
         (finally
           (set! js/console.debug org-debug)
           (set! js/console.info org-info)
@@ -254,8 +326,8 @@
   (t/testing "Debug is called."
     (let [spy-log (spy/spy logger/log)]
       (with-redefs [logger/log spy-log]
-        (reset! logger/enabled? false)
-        (reset! logger/entries [])
+        (logger/set-enabled! false)
+        (logger/reset-entries!)
         (logger/debug "Debug message." {:data 100})
         (t/is (spy/called-once? spy-log))
         (t/is (spy/called-with? spy-log
@@ -265,8 +337,8 @@
   (t/testing "Info is called."
     (let [spy-log (spy/spy logger/log)]
       (with-redefs [logger/log spy-log]
-        (reset! logger/enabled? false)
-        (reset! logger/entries [])
+        (logger/set-enabled! false)
+        (logger/reset-entries!)
         (logger/info "Info message." {:data 200})
         (t/is (spy/called-once? spy-log))
         (t/is (spy/called-with? spy-log
@@ -276,8 +348,8 @@
   (t/testing "Warn is called."
     (let [spy-log (spy/spy logger/log)]
       (with-redefs [logger/log spy-log]
-        (reset! logger/enabled? false)
-        (reset! logger/entries [])
+        (logger/set-enabled! false)
+        (logger/reset-entries!)
         (logger/warn "Warning message." {:data 300})
         (t/is (spy/called-once? spy-log))
         (t/is (spy/called-with? spy-log
@@ -287,8 +359,8 @@
   (t/testing "Error is called."
     (let [spy-log (spy/spy logger/log)]
       (with-redefs [logger/log spy-log]
-        (reset! logger/enabled? false)
-        (reset! logger/entries [])
+        (logger/set-enabled! false)
+        (logger/reset-entries!)
         (logger/error "Error message." {:data 400})
         (t/is (spy/called-once? spy-log))
         (t/is (spy/called-with? spy-log

@@ -22,6 +22,7 @@
             [blue.lions.clono.spec.document :as document]
             [blue.lions.clono.spec.heading :as heading]
             [blue.lions.clono.spec.index :as index]
+            [blue.lions.clono.spec.log :as log]
             [blue.lions.clono.spec.manuscript :as manuscript]
             [blue.lions.clono.spec.node :as node]
             [blue.lions.clono.spec.toc :as toc]))
@@ -263,10 +264,31 @@
 (s/def ::indices
   (s/coll-of ::index :kind vector?))
 
+(def log_data
+  ::log-data)
+
+(def log_level
+  ::log-level)
+
+(def log_message
+  ::log-message)
+
+(s/def ::log-enabled
+  boolean?)
+
 (s/def ::log-data
   (s/and (s/or :map (s/and map?
                            (s/every-kv keyword? any?))
                :nil nil?)))
+
+(s/def ::log-entries
+  (s/coll-of ::log-entry :kind vector?))
+
+(s/def ::log-entry
+  (s/and (s/keys :req-un [::log/level
+                          ::log/message
+                          ::log/data])
+         #(every? #{:level :message :data} (keys %))))
 
 (s/def ::log-level
   #{:debug :info :warn :error})
@@ -402,6 +424,15 @@
 
 (s/def ::index/url
   index_url)
+
+(s/def ::log/data
+  log_data)
+
+(s/def ::log/level
+  log_level)
+
+(s/def ::log/message
+  log_message)
 
 (s/def ::manuscript/markdown
   manuscript_markdown)
