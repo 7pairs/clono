@@ -56,6 +56,7 @@
       (doseq [file-path file-paths]
         (try
           (id/extract-base-name file-path)
+          (t/is false "Exception should be thrown.")
           (catch js/Error e
             (t/is (= "Invalid file path is given." (ex-message e)))
             (t/is (= {:value file-path :spec ::spec/file-path}
@@ -78,6 +79,7 @@
       (doseq [base-name base-names]
         (try
           (id/build-url base-name "id")
+          (t/is false "Exception should be thrown.")
           (catch js/Error e
             (t/is (= "Invalid base name is given." (ex-message e)))
             (t/is (= {:value base-name :spec ::spec/file-name}
@@ -89,6 +91,7 @@
       (doseq [id ids]
         (try
           (id/build-url "base-name" id)
+          (t/is false "Exception should be thrown.")
           (catch js/Error e
             (t/is (= "Invalid ID is given." (ex-message e)))
             (t/is (= {:value id :spec ::spec/id} (ex-data e))))))))
@@ -128,6 +131,7 @@
       (doseq [base-name base-names]
         (try
           (id/build-dic-key base-name "id")
+          (t/is false "Exception should be thrown.")
           (catch js/Error e
             (t/is (= "Invalid base name is given." (ex-message e)))
             (t/is (= {:value base-name :spec ::spec/file-name}
@@ -139,6 +143,7 @@
       (doseq [id ids]
         (try
           (id/build-dic-key "base-name" id)
+          (t/is false "Exception should be thrown.")
           (catch js/Error e
             (t/is (= "Invalid ID is given." (ex-message e)))
             (t/is (= {:value id :spec ::spec/id} (ex-data e))))))))
@@ -160,6 +165,7 @@
       (doseq [key keys]
         (try
           (id/parse-dic-key key)
+          (t/is false "Exception should be thrown.")
           (catch js/Error e
             (t/is (= "Invalid dictionary key is given." (ex-message e)))
             (t/is (= {:value key :spec ::spec/id} (ex-data e))))))))
