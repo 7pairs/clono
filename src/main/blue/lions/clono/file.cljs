@@ -23,8 +23,10 @@
 (defn read-file
   [file-path & {:keys [threshold]
                 :or {threshold (* 10 1024 1024)}}]
-  {:pre [(s/valid? ::spec/file-path file-path)]
-   :post [(s/valid? ::spec/file-content %)]}
+  {:pre [(spec/validate ::spec/file-path file-path
+                        "Invalid file path is given.")]
+   :post [(spec/validate ::spec/file-content %
+                         "Invalid file content is returned.")]}
   (try
     (when-not (fs/existsSync file-path)
       (throw (ex-info "File does not exist." {:file-path file-path})))
@@ -40,8 +42,9 @@
 
 (defn read-edn-file
   [file-path & {:keys [threshold required-keys]}]
-  {:pre [(s/valid? ::spec/file-path file-path)]
-   :post [(s/valid? ::spec/edn %)]}
+  {:pre [(spec/validate ::spec/file-path file-path
+                        "Invalid file path is given.")]
+   :post [(spec/validate ::spec/edn % "Invalid EDN is returned.")]}
   (try
     (let [opts (cond-> {}
                  threshold (assoc :threshold threshold))
@@ -64,8 +67,10 @@
 
 (defn read-config-file
   [file-path]
-  {:pre [(s/valid? ::spec/file-path file-path)]
-   :post [(s/valid? ::spec/config %)]}
+  {:pre [(spec/validate ::spec/file-path file-path
+                        "Invalid file path is given.")]
+   :post [(spec/validate ::spec/config %
+                         "Invalid configuration is returned.")]}
   (try
     (let [config (read-edn-file file-path
                                 :required-keys [:catalog :input :output])]
@@ -80,8 +85,9 @@
 
 (defn read-catalog-file
   [file-path]
-  {:pre [(s/valid? ::spec/file-path file-path)]
-   :post [(s/valid? ::spec/catalog %)]}
+  {:pre [(spec/validate ::spec/file-path file-path
+                        "Invalid file path is given.")]
+   :post [(spec/validate ::spec/catalog % "Invalid catalog is returned.")]}
   (try
     (let [catalog (read-edn-file file-path :required-keys [:chapters])]
       (doseq [[key file-names] catalog]
@@ -95,8 +101,9 @@
 
 (defn read-markdown-file
   [file-path & {:keys [threshold]}]
-  {:pre [(s/valid? ::spec/file-path file-path)]
-   :post [(s/valid? ::spec/markdown %)]}
+  {:pre [(spec/validate ::spec/file-path file-path
+                        "Invalid file path is given.")]
+   :post [(spec/validate ::spec/markdown % "Invalid Markdown is returned.")]}
   (try
     (let [opts (cond-> {}
                  threshold (assoc :threshold threshold))]
@@ -105,17 +112,17 @@
       (throw (ex-info "Failed to read Markdown file."
                       {:file-path file-path :cause e})))))
 
-(def valid-manuscript-types #{:forewords :chapters :appendices :afterwords})
-
 (defn read-markdown-files
   [dir-path catalog]
-  {:pre [(s/valid? ::spec/file-path dir-path)
-         (s/valid? ::spec/catalog catalog)]
-   :post [(s/valid? ::spec/manuscripts %)]}
+  {:pre [(spec/validate ::spec/file-path dir-path
+                        "Invalid file path is given.")
+         (spec/validate ::spec/catalog catalog "Invalid catalog is given.")]
+   :post [(spec/validate ::spec/manuscripts %
+                         "Invalid manuscripts are returned.")]}
   (vec
    (mapcat
     (fn [[type file-names]]
-      (if (valid-manuscript-types type)
+      (if (s/valid? ::spec/document-type type)
         (keep (fn [file-name]
                 (let [file-path (path/join dir-path file-name)]
                   (try
@@ -136,8 +143,10 @@
 (defn write-file
   [file-path content & {:keys [force?]
                         :or {force? false}}]
-  {:pre [(s/valid? ::spec/file-path file-path)
-         (s/valid? ::spec/file-content content)]}
+  {:pre [(spec/validate ::spec/file-path file-path
+                        "Invalid file path is given.")
+         (spec/validate ::spec/file-content content
+                        "Invalid file content is given.")]}
   (try
     (when (and (fs/existsSync file-path)
                (not force?))
@@ -151,8 +160,10 @@
 
 (defn write-markdown-files
   [dir-path manuscripts & {:keys [force?]}]
-  {:pre [(s/valid? ::spec/file-path dir-path)
-         (s/valid? ::spec/manuscripts manuscripts)]}
+  {:pre [(spec/validate ::spec/file-path dir-path
+                        "Invalid file path is given.")
+         (spec/validate ::spec/manuscripts manuscripts
+                        "Invalid manuscripts are given.")]}
   (let [total (count manuscripts)
         counter (atom 0)]
    (doseq [{:keys [name markdown]} manuscripts]

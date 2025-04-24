@@ -53,6 +53,7 @@
     (let [file-path (path/join tmp-dir "not-exists.txt")]
       (try
         (file/read-file file-path)
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
           (let [data (ex-data e)
                 cause (:cause data)]
@@ -64,8 +65,8 @@
   (t/testing "File size is very large."
     (let [file-path (path/join tmp-dir "large.txt")
           file-content (apply str (repeat 100 "X"))]
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (fs/writeFileSync file-path file-content "utf8")
       (t/is (= file-content
                (file/read-file file-path :threshold 99)))
@@ -73,7 +74,7 @@
                  :message "Reading very large file."
                  :data {:file-path file-path
                         :size (/ 100 1024 1024)}}]
-               @logger/entries)))))
+               (logger/get-entries))))))
 
 (t/deftest read-edn-file-test
   (t/testing "File is valid as EDN file."
@@ -86,6 +87,7 @@
       (fs/writeFileSync file-path "" "utf8")
       (try
         (file/read-edn-file file-path)
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
           (let [data (ex-data e)
                 cause (:cause data)
@@ -100,6 +102,7 @@
     (let [file-path (path/join tmp-dir "not-exists.edn")]
       (try
         (file/read-edn-file file-path)
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
           (let [data (ex-data e)
                 cause (:cause data)]
@@ -113,6 +116,7 @@
       (fs/writeFileSync file-path "{\"key\": \"value\"}" "utf8")
       (try
         (file/read-edn-file file-path)
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
           (let [data (ex-data e)]
             (t/is (= "Failed to read or parse EDN file." (ex-message e)))
@@ -124,8 +128,8 @@
   (t/testing "File size is very large."
     (let [file-path (path/join tmp-dir "large.edn")
           file-content (str "{:key \"" (apply str (repeat 100 "X")) "\"}")]
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (fs/writeFileSync file-path file-content "utf8")
       (t/is (= {:key (apply str (repeat 100 "X"))}
                (file/read-edn-file file-path :threshold 100)))
@@ -133,13 +137,14 @@
                  :message "Reading very large file."
                  :data {:file-path file-path
                         :size (/ (.-length file-content) 1024 1024)}}]
-               @logger/entries))))
+               (logger/get-entries)))))
 
   (t/testing "File does not have required keys."
     (let [file-path (path/join tmp-dir "invalid-key.edn")]
       (fs/writeFileSync file-path "{:required1 \"value\"}" "utf8")
       (try
         (file/read-edn-file file-path :required-keys [:required1 :required2])
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
           (let [data (ex-data e)
                 cause (:cause data)
@@ -173,6 +178,7 @@
       (fs/writeFileSync file-path "" "utf8")
       (try
         (file/read-config-file file-path)
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
           (let [data (ex-data e)
                 cause (:cause data)]
@@ -185,6 +191,7 @@
     (let [file-path (path/join tmp-dir "not-exists.edn")]
       (try
         (file/read-config-file file-path)
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
           (let [data (ex-data e)
                 cause (:cause data)]
@@ -198,6 +205,7 @@
       (fs/writeFileSync file-path "{\"key\": \"value\"}" "utf8")
       (try
         (file/read-config-file file-path)
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
           (let [data (ex-data e)
                 cause (:cause data)]
@@ -213,6 +221,7 @@
                         "utf8")
       (try
         (file/read-config-file file-path)
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
           (let [data (ex-data e)
                 cause (:cause data)
@@ -241,14 +250,14 @@
                              "not-exists-path"
                              "\"}")
                         "utf8")
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (file/read-config-file file-path)
       (t/is (= [{:level :warn
                  :message "Path does not exist."
                  :data {:key :output
                         :path "not-exists-path"}}]
-               @logger/entries)))))
+               (logger/get-entries))))))
 
 (t/deftest read-catalog-file-test
   (t/testing "File is valid as catalog file."
@@ -256,21 +265,22 @@
       (fs/writeFileSync file-path
                         "{:chapters [\"chapter1.md\" \"chapter2.md\"]}"
                         "utf8")
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (t/is (= {:chapters ["chapter1.md" "chapter2.md"]}
                (file/read-catalog-file file-path)))
       (t/is (= [{:level :debug
                  :message "Catalog has 2 files."
                  :data {:type "chapters"
                         :files ["chapter1.md" "chapter2.md"]}}]
-               @logger/entries))))
+               (logger/get-entries)))))
 
   (t/testing "File is empty."
     (let [file-path (path/join tmp-dir "empty.edn")]
       (fs/writeFileSync file-path "" "utf8")
       (try
         (file/read-catalog-file file-path)
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
           (let [data (ex-data e)
                 cause (:cause data)]
@@ -283,6 +293,7 @@
     (let [file-path (path/join tmp-dir "not-exists.edn")]
       (try
         (file/read-catalog-file file-path)
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
           (let [data (ex-data e)
                 cause (:cause data)]
@@ -296,6 +307,7 @@
       (fs/writeFileSync file-path "{\"chapters\": [\"chapter.md\"]}" "utf8")
       (try
         (file/read-catalog-file file-path)
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
           (let [data (ex-data e)
                 cause (:cause data)]
@@ -309,6 +321,7 @@
       (fs/writeFileSync file-path "{:forewords \"foreword.md\"}" "utf8")
       (try
         (file/read-catalog-file file-path)
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
           (let [data (ex-data e)
                 cause (:cause data)
@@ -343,6 +356,7 @@
     (let [file-path (path/join tmp-dir "not-exists.md")]
       (try
         (file/read-markdown-file file-path)
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
           (let [data (ex-data e)
                 cause (:cause data)]
@@ -354,8 +368,8 @@
   (t/testing "File size is very large."
     (let [file-path (path/join tmp-dir "large.md")
           file-content (apply str (repeat 100 "X"))]
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (fs/writeFileSync file-path file-content "utf8")
       (t/is (= file-content
                (file/read-markdown-file file-path :threshold 99)))
@@ -363,7 +377,7 @@
                  :message "Reading very large file."
                  :data {:file-path file-path
                         :size (/ 100 1024 1024)}}]
-               @logger/entries)))))
+               (logger/get-entries))))))
 
 (t/deftest read-markdown-files-test
   (let [foreword-name "foreword.md"
@@ -431,8 +445,8 @@
                                           :afterwords [empty-name]}))))
 
     (t/testing "Some files do not exist."
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (t/is (= [{:name chapter-name
                  :type :chapters
                  :markdown chapter-content}
@@ -454,11 +468,11 @@
                  :data {:file-path (path/join tmp-dir "not-exists2.md")
                         :type :appendices
                         :cause "Failed to read Markdown file."}}]
-               @logger/entries)))
+               (logger/get-entries))))
 
     (t/testing "All files do not exist."
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (t/is (= []
                (file/read-markdown-files tmp-dir
                                          {:forewords ["not-exists1.md"]
@@ -485,7 +499,7 @@
                  :data {:file-path (path/join tmp-dir "not-exists4.md")
                         :type :afterwords
                         :cause "Failed to read Markdown file."}}]
-               @logger/entries)))))
+               (logger/get-entries))))))
 
 (t/deftest write-file-test
   (t/testing "Content is not empty."
@@ -504,13 +518,13 @@
     (let [file-path (path/join tmp-dir "exists.txt")
           file-content "I am a text file."]
       (fs/writeFileSync file-path file-content "utf8")
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (file/write-file file-path file-content)
       (t/is (= [{:level :warn
                  :message "File already exists and will be overwritten."
                  :data {:file-path file-path}}]
-               @logger/entries)))))
+               (logger/get-entries))))))
 
 (t/deftest write-markdown-files-test
   (let [foreword-name "foreword.md"
@@ -523,8 +537,8 @@
         afterword-content "# Afterword"
         empty-content ""]
     (t/testing "All files are not empty."
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (file/write-markdown-files tmp-dir
                                  [{:name foreword-name
                                    :type :forewords
@@ -559,11 +573,11 @@
                 {:level :info
                  :message (str "Wrote Markdown file (4/4): " afterword-name)
                  :data nil}]
-               @logger/entries)))
+               (logger/get-entries))))
 
     (t/testing "Some files are empty."
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (file/write-markdown-files tmp-dir
                                  [{:name foreword-name
                                    :type :forewords
@@ -598,11 +612,11 @@
                 {:level :info
                  :message (str "Wrote Markdown file (4/4): " afterword-name)
                  :data nil}]
-               @logger/entries)))
+               (logger/get-entries))))
 
     (t/testing "All files are empty."
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (file/write-markdown-files tmp-dir
                                  [{:name foreword-name
                                    :type :forewords
@@ -637,7 +651,7 @@
                 {:level :info
                  :message (str "Wrote Markdown file (4/4): " afterword-name)
                  :data nil}]
-               @logger/entries)))
+               (logger/get-entries))))
 
     (t/testing "Files already exist."
       (let [exists-name "exists.md"
@@ -645,8 +659,8 @@
             not-exists-name "not-exists.md"
             not-exists-content "# Not exists"]
         (fs/writeFileSync (path/join tmp-dir exists-name) "I exist." "utf8")
-        (reset! logger/enabled? false)
-        (reset! logger/entries [])
+        (logger/set-enabled! false)
+        (logger/reset-entries!)
         (file/write-markdown-files tmp-dir
                                    [{:name exists-name
                                      :type :chapters
@@ -668,4 +682,4 @@
                   {:level :info
                    :message (str "Wrote Markdown file (2/2): " not-exists-name)
                    :data nil}]
-                 @logger/entries))))))
+                 (logger/get-entries)))))))
