@@ -13,8 +13,7 @@
 ; limitations under the License.
 
 (ns blue.lions.clono.ast
-  (:require [cljs.spec.alpha :as s]
-            [blue.lions.clono.spec :as spec]))
+  (:require [blue.lions.clono.spec :as spec]))
 
 ; HTML comments must:
 ; 1. Start with <!--
@@ -24,8 +23,8 @@
 
 (defn comment?
   [node]
-  {:pre [(s/valid? ::spec/node node)]
-   :post [(s/valid? ::spec/pred-result %)]}
+  {:pre [(spec/validate ::spec/node node "Invalid node is given.")]
+   :post [(spec/validate ::spec/pred-result % "Invalid result is returned.")]}
   (let [value (when (= (:type node) "html") (:value node))]
     (boolean
      (and (some? value)
@@ -34,11 +33,9 @@
 
 (defn node-type?
   [type node]
-  {:pre [(or (s/valid? ::spec/node-type type)
-             (throw (ex-info "Invalid node type." {:type type})))
-         (or (s/valid? ::spec/node node)
-             (throw (ex-info "Invalid node." {:node node})))]
-   :post [(s/valid? ::spec/pred-result %)]}
+  {:pre [(spec/validate ::spec/node-type type "Invalid node type is given.")
+         (spec/validate ::spec/node node "Invalid node is given.")]
+   :post [(spec/validate ::spec/pred-result % "Invalid result is returned.")]}
   (= (:type node) type))
 
 (def footnote-definition? (partial node-type? "footnoteDefinition"))
@@ -49,11 +46,10 @@
 
 (defn text-directive?
   [name node]
-  {:pre [(or (s/valid? ::spec/directive-name name)
-             (throw (ex-info "Invalid directive name." {:name name})))
-         (or (s/valid? ::spec/node node)
-             (throw (ex-info "Invalid node." {:node node})))]
-   :post [(s/valid? ::spec/pred-result %)]}
+  {:pre [(spec/validate ::spec/directive-name name
+                        "Invalid directive name is given.")
+         (spec/validate ::spec/node node "Invalid node is given.")]
+   :post [(spec/validate ::spec/pred-result % "Invalid result is returned.")]}
   (and (= (:type node) "textDirective")
        (= (:name node) name)))
 
@@ -63,14 +59,18 @@
 
 (defn extract-nodes
   [pred node]
-  {:pre [(or (s/valid? ::spec/function pred)
-             (throw (ex-info "Invalid predicate function." {:pred pred})))
-         (or (s/valid? ::spec/node node)
-             (throw (ex-info "Invalid node." {:node node})))]
-   :post [(s/valid? ::spec/nodes %)]}
-  (vec
-   (concat (if (pred node) [node] [])
-           (mapcat #(extract-nodes pred %) (get node :children [])))))
+  {:pre [(spec/validate ::spec/function pred
+                        "Invalid predicate function is given.")
+         (spec/validate ::spec/node node "Invalid node is given.")]
+   :post [(spec/validate ::spec/nodes % "Invalid nodes are returned.")]}
+  (loop [targets [node]
+         result []]
+    (if (empty? targets)
+      result
+      (let [current (first targets)
+            children (get current :children [])
+            matched (if (pred current) [current] [])]
+        (recur (into children (rest targets)) (into result matched))))))
 
 (def extract-footnote-definition
   (partial extract-nodes footnote-definition?))
@@ -89,25 +89,25 @@
 
 (defmethod get-type :default
   [node]
-  {:pre [(s/valid? ::spec/node node)]
-   :post [(s/valid? ::spec/node-type %)]}
+  {:pre [(spec/validate ::spec/node node "Invalid node is given.")]
+   :post [(spec/validate ::spec/node-type % "Invalid node type is returned.")]}
   (:type node))
 
 (defn directive-type
   [node]
-  {:pre [(or (s/valid? ::spec/directive-node node)
-             (throw (ex-info "Invalid directive node." {:node node})))]
-   :post [(s/valid? ::spec/node-type %)]}
+  {:pre [(spec/validate ::spec/directive-node node
+                        "Invalid directive node is given.")]
+   :post [(spec/validate ::spec/node-type % "Invalid node type is returned.")]}
   (:name node))
 
 (defmethod get-type "textDirective"
   [node]
-  {:pre [(s/valid? ::spec/node node)]
-   :post [(s/valid? ::spec/node-type %)]}
+  {:pre [(spec/validate ::spec/node node "Invalid node is given.")]
+   :post [(spec/validate ::spec/node-type % "Invalid node type is returned.")]}
   (directive-type node))
 
 (defmethod get-type "containerDirective"
   [node]
-  {:pre [(s/valid? ::spec/node node)]
-   :post [(s/valid? ::spec/node-type %)]}
+  {:pre [(spec/validate ::spec/node node "Invalid node is given.")]
+   :post [(spec/validate ::spec/node-type % "Invalid node type is returned.")]}
   (directive-type node))

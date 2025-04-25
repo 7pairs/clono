@@ -14,7 +14,8 @@
 
 (ns blue.lions.clono.ast-test
   (:require [cljs.test :as t]
-            [blue.lions.clono.ast :as ast]))
+            [blue.lions.clono.ast :as ast]
+            [blue.lions.clono.spec :as spec]))
 
 (t/deftest comment?-test
   (t/testing "Node is comment."
@@ -44,9 +45,10 @@
       (doseq [type types]
         (try
           (ast/node-type? type {:type "text" :value "value"})
+          (t/is false "Exception should be thrown.")
           (catch js/Error e
-            (t/is (= "Invalid node type." (ex-message e)))
-            (t/is (= type (:type (ex-data e)))))))))
+            (t/is (= "Invalid node type is given." (ex-message e)))
+            (t/is (= {:value type :spec ::spec/node-type} (ex-data e))))))))
 
   (t/testing "Node is invalid."
     (let [nodes [{:value "value"}
@@ -55,9 +57,10 @@
       (doseq [node nodes]
         (try
           (ast/node-type? "text" node)
+          (t/is false "Exception should be thrown.")
           (catch js/Error e
-            (t/is (= "Invalid node." (ex-message e)))
-            (t/is (= node (:node (ex-data e))))))))))
+            (t/is (= "Invalid node is given." (ex-message e)))
+            (t/is (= {:value node :spec ::spec/node} (ex-data e)))))))))
 
 (t/deftest text-directive?-test
   (t/testing "Node is text directive."
@@ -75,9 +78,11 @@
       (doseq [directive directives]
         (try
           (ast/text-directive? directive {:type "textDirective" :name "name"})
+          (t/is false "Exception should be thrown.")
           (catch js/Error e
-            (t/is (= "Invalid directive name." (ex-message e)))
-            (t/is (= directive (:name (ex-data e)))))))))
+            (t/is (= "Invalid directive name is given." (ex-message e)))
+            (t/is (= {:value directive :spec ::spec/directive-name}
+                     (ex-data e))))))))
 
   (t/testing "Node is invalid."
     (let [nodes [{:name "directive"}
@@ -86,9 +91,10 @@
       (doseq [node nodes]
         (try
           (ast/text-directive? "directive" node)
+          (t/is false "Exception should be thrown.")
           (catch js/Error e
-            (t/is (= "Invalid node." (ex-message e)))
-            (t/is (= node (:node (ex-data e))))))))))
+            (t/is (= "Invalid node is given." (ex-message e)))
+            (t/is (= {:value node :spec ::spec/node} (ex-data e)))))))))
 
 (t/deftest extract-nodes-test
   (t/testing "Node itself is target."
@@ -134,9 +140,10 @@
       (doseq [pred preds]
         (try
           (ast/extract-nodes pred {:type "text" :value "value"})
+          (t/is false "Exception should be thrown.")
           (catch js/Error e
-            (t/is (= "Invalid predicate function." (ex-message e)))
-            (t/is (= pred (:pred (ex-data e)))))))))
+            (t/is (= "Invalid predicate function is given." (ex-message e)))
+            (t/is (= {:value pred :spec ::spec/function} (ex-data e))))))))
 
   (t/testing "Node is invalid."
     (let [nodes ["not-node"
@@ -144,9 +151,10 @@
       (doseq [node nodes]
         (try
           (ast/extract-nodes #(= (:type %) "text") node)
+          (t/is false "Exception should be thrown.")
           (catch js/Error e
-            (t/is (= "Invalid node." (ex-message e)))
-            (t/is (= node (:node (ex-data e))))))))))
+            (t/is (= "Invalid node is given." (ex-message e)))
+            (t/is (= {:value node :spec ::spec/node} (ex-data e)))))))))
 
 (t/deftest get-type-test
   (t/testing "Node is text directive."
@@ -164,17 +172,19 @@
     (let [node {:type "textDirective"}]
       (try
         (ast/get-type node)
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
-          (t/is (= "Invalid directive node." (ex-message e)))
-          (t/is (= node (:node (ex-data e))))))))
+          (t/is (= "Invalid directive node is given." (ex-message e)))
+          (t/is (= {:value node :spec ::spec/directive-node} (ex-data e)))))))
 
   (t/testing "Node is container directive without name."
     (let [node {:type "containerDirective"}]
       (try
         (ast/get-type node)
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
-          (t/is (= "Invalid directive node." (ex-message e)))
-          (t/is (= node (:node (ex-data e)))))))))
+          (t/is (= "Invalid directive node is given." (ex-message e)))
+          (t/is (= {:value node :spec ::spec/directive-node} (ex-data e))))))))
 
 (t/deftest directive-type-test
   (t/testing "Node is text directive."
@@ -193,6 +203,8 @@
       (doseq [node nodes]
         (try
           (ast/directive-type node)
+          (t/is false "Exception should be thrown.")
           (catch js/Error e
-            (t/is (= "Invalid directive node." (ex-message e)))
-            (t/is (= node (:node (ex-data e))))))))))
+            (t/is (= "Invalid directive node is given." (ex-message e)))
+            (t/is (= {:value node :spec ::spec/directive-node}
+                     (ex-data e)))))))))
