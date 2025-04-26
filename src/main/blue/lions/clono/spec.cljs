@@ -176,6 +176,13 @@
   (s/or :function ::function
         :nil nil?))
 
+(s/def ::github-slugger
+  (fn [value]
+    (and (some? value)
+         (not (nil? value))
+         (fn? (.-slug ^js value))
+         (fn? (.-reset ^js value)))))
+
 (s/def ::heading/caption
   ::caption)
 

@@ -668,6 +668,22 @@
   (t/testing "Fails to verify."
     (t/is (not (s/valid? ::spec/function-or-nil "not-function")))))
 
+(t/deftest github-slugger-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::spec/github-slugger
+                    #js {:slug (fn [text] (str "slug-" text))
+                         :reset (fn [] nil)})))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/github-slugger value))
+      #js {:slug (fn [text] (str "slug-" text))}
+      #js {:reset (fn [] nil)}
+      #js {:slug "not-function" :reset (fn [] nil)}
+      #js {:slug (fn [text] (str "slug-" text)) :reset "not-function"}
+      #js {}
+      "not-object"
+      nil)))
+
 (t/deftest heading_caption-test
   (t/testing "Succeeds to verify."
     (t/is (s/valid? ::heading/caption "caption")))
