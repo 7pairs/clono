@@ -38,18 +38,6 @@
       (assoc updated-node :children (mapv remove-positions children))
       updated-node)))
 
-(defonce slugger-instance (new esm/github-slugger))
-
-(defn generate-slug
-  [caption]
-  {:pre [(spec/validate ::spec/caption caption "Invalid caption is given.")]
-   :post [(spec/validate ::spec/slug % "Invalid slug is returned.")]}
-  (try
-    (.slug slugger-instance caption)
-    (catch js/Error e
-      (throw (ex-info "Failed to generate slug."
-                      {:caption caption :cause e})))))
-
 (defn generate-heading-slug
   [node]
   {:pre [(spec/validate ::spec/node node "Invalid node is given.")]
@@ -59,7 +47,7 @@
                      (map :value)
                      str/join)]
     (try
-      (generate-slug caption)
+      (esm/generate-slug caption)
       (catch js/Error e
         (throw (ex-info "Failed to generate heading slug."
                         {:node node :caption caption :cause e}))))))
@@ -147,11 +135,9 @@
          :type type
          :ast (markdown->ast markdown order-generator)}
         (catch js/Error e
-          (logger/log :error
-                      "Failed to parse markdown."
-                      {:name name
-                       :type type
-                       :markdown markdown
-                       :cause (ex-message e)})
+          (logger/error "Failed to parse markdown."
+                        {:name name
+                         :type type
+                         :cause (ex-message e)})
           nil)))
     manuscripts)))

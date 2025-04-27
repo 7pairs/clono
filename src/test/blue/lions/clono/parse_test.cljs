@@ -94,40 +94,6 @@
              (parse/remove-positions
               {:type "root" :children []})))))
 
-(t/deftest generate-slug-test
-  (t/testing "Caption contains upper case letters."
-    (t/is (= "pascalcase" (parse/generate-slug "PascalCase")))
-    (t/is (= "uppercase" (parse/generate-slug "UPPERCASE"))))
-
-  (t/testing "Caption does not contain upper case letters."
-    (t/is (= "lowercase" (parse/generate-slug "lowercase"))))
-
-  (t/testing "Caption contains symbols."
-    (t/is (= "helloworld" (parse/generate-slug "Hello,World!!")))
-    (t/is (= "334" (parse/generate-slug "33:4"))))
-
-  (t/testing "Caption contains spaces."
-    (t/is (= "1-2-3" (parse/generate-slug "1 2 3"))))
-
-  (t/testing "Caption contains Japanese letters."
-    (t/is (= "日本語" (parse/generate-slug "日本語")))
-    (t/is (= "ａｎｄｒｏｉｄ" (parse/generate-slug "Ａｎｄｒｏｉｄ")))
-    (t/is (= "こんにちは世界" (parse/generate-slug "こんにちは、世界！"))))
-
-  (t/testing "Captions are duplicated."
-    (t/is (= "duplicated" (parse/generate-slug "duplicated")))
-    (t/is (= "duplicated-1" (parse/generate-slug "duplicated"))))
-
- (t/testing "Caption is invalid."
-   (let [captions [""
-                   nil]]
-     (doseq [caption captions]
-       (try
-         (parse/generate-slug caption)
-         (catch js/Error e
-           (t/is (= "Invalid caption is given." (ex-message e)))
-           (t/is (= {:value caption :spec ::spec/caption} (ex-data e)))))))))
-
 (t/deftest generate-heading-slug-test
   (t/testing "Node has single text."
     (t/is (= "value2"
@@ -148,6 +114,7 @@
     (let [node {:type "heading" :children [{:type "html" :value "<value>"}]}]
       (try
         (parse/generate-heading-slug node)
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
           (let [data (ex-data e)
                 cause (:cause data)]
@@ -363,6 +330,7 @@
                                  :type :chapters
                                  :markdown "# Markdown"}]
                                nil)
+      (t/is false "Exception should be thrown.")
       (catch js/Error e
         (t/is (= "Invalid generator is given." (ex-message e)))
         (t/is (= {:value nil :spec ::spec/function} (ex-data e)))))))
