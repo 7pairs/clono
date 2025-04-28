@@ -47,6 +47,7 @@
                 :children [{:type "text" :value "text4"}]}]
       (try
         (analyze/create-toc-item "markdown.md" node)
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
           (let [data (ex-data e)]
             (t/is (= "Node does not have slug." (ex-message e)))
@@ -102,6 +103,7 @@
       (doseq [documents documents-list]
         (try
           (analyze/create-toc-items documents)
+          (t/is false "Exception should be thrown.")
           (catch js/Error e
             (t/is (= "Invalid documents are given." (ex-message e)))
             (t/is (= {:value documents :spec ::spec/documents}
@@ -222,6 +224,7 @@
                            {:type "text" :value "text5"}]}]
       (try
         (analyze/create-heading-info "markdown.md" node)
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
           (let [data (ex-data e)]
             (t/is (= "Node does not have slug." (ex-message e)))
@@ -234,6 +237,7 @@
       (doseq [file-name file-names]
         (try
           (analyze/create-heading-info file-name {:type "heading"})
+          (t/is false "Exception should be thrown.")
           (catch js/Error e
             (t/is (= "Invalid file name is given." (ex-message e)))
             (t/is (= {:value file-name :spec ::spec/file-name}
@@ -296,6 +300,7 @@
       (doseq [documents documents-list]
         (try
           (analyze/create-heading-dic documents)
+          (t/is false "Exception should be thrown.")
           (catch js/Error e
             (t/is (= "Invalid documents are given." (ex-message e)))
             (t/is (= {:value documents :spec ::spec/documents}
@@ -379,6 +384,7 @@
                 :id "index-1"}]
       (try
         (analyze/build-index-entry "markdown" node)
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
           (let [data (ex-data e)]
             (t/is (= "Node is invalid." (ex-message e)))
@@ -394,6 +400,7 @@
                 :order 1}]
       (try
         (analyze/build-index-entry "markdown" node)
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
           (let [data (ex-data e)]
             (t/is (= "Node is invalid." (ex-message e)))
@@ -413,6 +420,39 @@
     (t/are [ruby] (false? (analyze/english-ruby? ruby))
       "ルビ"
       "ルビruby"))
+
+(t/deftest non-seion->seion-test
+  (t/testing "Seion is given."
+    (t/is (= "あいうえお" (analyze/non-seion->seion "あいうえお"))))
+
+  (t/testing "Dakuon is given."
+    (t/is (= "あいうえお" (analyze/non-seion->seion "あいゔえお")))
+    (t/is (= "かきくけこ" (analyze/non-seion->seion "がぎぐげご")))
+    (t/is (= "さしすせそ" (analyze/non-seion->seion "ざじずぜぞ")))
+    (t/is (= "たちつてと" (analyze/non-seion->seion "だぢづでど")))
+    (t/is (= "はひふへほ" (analyze/non-seion->seion "ばびぶべぼ"))))
+
+  (t/testing "Handakuon is given."
+    (t/is (= "はひふへほ" (analyze/non-seion->seion "ぱぴぷぺぽ"))))
+
+  (t/testing "Youon is given."
+    (t/is (= "やゆよ" (analyze/non-seion->seion "ゃゅょ")))
+    (t/is (= "わをん" (analyze/non-seion->seion "ゎをん"))))
+
+  (t/testing "Sokuon is given."
+    (t/is (= "たちつてと" (analyze/non-seion->seion "たちってと"))))
+
+  (t/testing "Kogakimoji is given."
+    (t/is (= "あいうえお" (analyze/non-seion->seion "ぁぃぅぇぉ")))))
+
+(t/deftest onbiki->vowel-test
+  (t/testing "Onbiki is given."
+    (t/is (= "ああ" (analyze/onbiki->vowel "あー")))
+    (t/is (= "きい" (analyze/onbiki->vowel "きー")))
+    (t/is (= "くう" (analyze/onbiki->vowel "ぐー"))))
+
+  (t/testing "Onbiki is not given."
+    (t/is (= "あいうえお" (analyze/onbiki->vowel "あいうえお")))))
 
 (t/deftest normalize-hiragana-test
   (t/testing "Seion is given."
@@ -2583,6 +2623,7 @@
                  :children [{:type "text" :value "value1"}
                             node
                             {:type "text" :value "value2"}]}}])
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
           (let [data (ex-data e)]
             (t/is (= "Node is invalid." (ex-message e)))
@@ -2604,6 +2645,7 @@
                  :children [{:type "text" :value "value1"}
                             node
                             {:type "text" :value "value2"}]}}])
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
           (let [data (ex-data e)]
             (t/is (= "Node is invalid." (ex-message e)))

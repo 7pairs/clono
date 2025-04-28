@@ -139,19 +139,7 @@
    :post [(spec/validate ::spec/pred-result % "Invalid result is returned.")]}
   (boolean (re-matches #"^[ -~].*" ruby)))
 
-(def vowel-map
-  {"あ" "あ" "か" "あ" "さ" "あ" "た" "あ" "な" "あ" "は" "あ" "ま" "あ"
-   "や" "あ" "ら" "あ" "わ" "あ"
-   "い" "い" "き" "い" "し" "い" "ち" "い" "に" "い" "ひ" "い" "み" "い"
-   "り" "い"
-   "う" "う" "く" "う" "す" "う" "つ" "う" "ぬ" "う" "ふ" "う" "む" "う"
-   "ゆ" "う" "る" "う"
-   "え" "え" "け" "え" "せ" "え" "て" "え" "ね" "え" "へ" "え" "め" "え"
-   "れ" "え"
-   "お" "お" "こ" "お" "そ" "お" "と" "お" "の" "お" "ほ" "お" "も" "お"
-   "よ" "お" "ろ" "お" "を" "お"})
-
-(def seion-map
+(def ^:private seion-map
   {"ゔ" "う"
    "ぁ" "あ" "ぃ" "い" "ぅ" "う" "ぇ" "え" "ぉ" "お"
    "が" "か" "ぎ" "き" "ぐ" "く" "げ" "け" "ご" "こ"
@@ -163,7 +151,30 @@
    "ゃ" "や" "ゅ" "ゆ" "ょ" "よ"
    "ゎ" "わ"})
 
-(defn normalize-hiragana
+(def non-seion-pattern
+  (re-pattern (str "[" (str/join (keys seion-map)) "]")))
+
+(defn non-seion->seion
+  [ruby]
+  {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
+   :post [(spec/validate ::spec/ruby % "Invalid ruby is returned.")]}
+  (str/replace ruby
+               non-seion-pattern
+               (fn [match] (get seion-map match))))
+
+(def ^:private vowel-map
+  {"あ" "あ" "か" "あ" "さ" "あ" "た" "あ" "な" "あ" "は" "あ" "ま" "あ"
+   "や" "あ" "ら" "あ" "わ" "あ"
+   "い" "い" "き" "い" "し" "い" "ち" "い" "に" "い" "ひ" "い" "み" "い"
+   "り" "い"
+   "う" "う" "く" "う" "す" "う" "つ" "う" "ぬ" "う" "ふ" "う" "む" "う"
+   "ゆ" "う" "る" "う"
+   "え" "え" "け" "え" "せ" "え" "て" "え" "ね" "え" "へ" "え" "め" "え"
+   "れ" "え"
+   "お" "お" "こ" "お" "そ" "お" "と" "お" "の" "お" "ほ" "お" "も" "お"
+   "よ" "お" "ろ" "お" "を" "お"})
+
+(defn onbiki->vowel
   [ruby]
   {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
    :post [(spec/validate ::spec/ruby % "Invalid ruby is returned.")]}
@@ -176,11 +187,24 @@
                (let [current (str (first rest-chars))
                      next-chars (rest rest-chars)]
                  (if (= current "ー")
-                   (if-let [vowel (some vowel-map (take-last 1 result))]
-                     (recur (conj result vowel) next-chars)
-                     (recur (conj result current) next-chars))
+                   (let [has-previous-char (seq result)
+                         previous-vowel (when has-previous-char
+                                          (some vowel-map
+                                                (take-last 1 result)))]
+                     (if previous-vowel
+                       (recur (conj result previous-vowel) next-chars)
+                       (recur (conj result current) next-chars)))
                    (let [normalized (get seion-map current current)]
                      (recur (conj result normalized) next-chars)))))))))
+
+(defn normalize-hiragana
+  [ruby]
+  {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
+   :post [(spec/validate ::spec/ruby % "Invalid ruby is returned.")]}
+  (let [normalized (.normalize ruby "NFKC")]
+    (-> normalized
+        non-seion->seion
+        onbiki->vowel)))
 
 (defn ruby->caption
   [ruby]
@@ -223,22 +247,30 @@
   {:pre [(spec/validate ::spec/documents documents
                         "Invalid documents are given.")]
    :post [(spec/validate ::spec/indices % "Invalid indices are returned.")]}
-  (->> (for [{:keys [name ast]} documents
-             index (ast/extract-indices ast)]
-         (let [base-name (id/extract-base-name name)]
-           (build-index-entry base-name index)))
-       (group-by :text)
-       (map (fn [[text entries]]
-              (let [{:keys [ruby]} (first entries)]
-                {:type :item
-                 :text text
-                 :ruby ruby
-                 :urls (->> entries
-                            (sort-by :order)
-                            (mapv :url))})))
-       (sort-by (fn [{:keys [ruby]}]
-                  (if (english-ruby? ruby)
-                    ["" ruby]
-                    [(normalize-hiragana ruby) ruby])))
-       vec
-       insert-row-captions))
+  (let [entries (for [{:keys [name ast]} documents
+                           index (ast/extract-indices ast)]
+                       (let [base-name (id/extract-base-name name)]
+                         (build-index-entry base-name index)))
+        ruby-cache (reduce (fn [cache {:keys [ruby]}]
+                             (assoc cache ruby
+                                    {:normalized (normalize-hiragana ruby)
+                                     :is-english (english-ruby? ruby)}))
+                           {}
+                           entries)]
+    (->> entries
+         (group-by :text)
+         (map (fn [[text entries]]
+                (let [{:keys [ruby]} (first entries)]
+                  {:type :item
+                   :text text
+                   :ruby ruby
+                   :urls (->> entries
+                              (sort-by :order)
+                              (mapv :url))})))
+         (sort-by (fn [{:keys [ruby]}]
+                    (let [cache-entry (get ruby-cache ruby)]
+                      (if (:is-english cache-entry)
+                        ["" ruby]
+                        [(:normalized cache-entry) ruby]))))
+         vec
+         insert-row-captions)))
