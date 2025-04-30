@@ -36,8 +36,6 @@
    :post [(spec/validate ::spec/node % "Invalid node is returned.")]}
   node)
 
-(def plugin-cache (atom {}))
-
 (defn load-plugin
   [plugin-dir type]
   {:pre [(spec/validate ::spec/file-path plugin-dir
@@ -45,22 +43,20 @@
          (spec/validate ::spec/node-type type "Invalid node type is given.")]
    :post [(spec/validate ::spec/function-or-nil %
                          "Invalid function is returned.")]}
-  (or (@plugin-cache type)
-      (let [plugin-path (path/join plugin-dir (str type ".js"))]
-        (try
-          (let [plugin (js/require plugin-path)]
-            (if (and (object? plugin) (empty? (js/Object.keys plugin)))
-              (do
-                (logger/warn "Invalid JavaScript file is detected."
-                             {:plugin-path plugin-path :type type})
-                nil)
-              (do
-                (swap! plugin-cache assoc type plugin)
-                (logger/info "Plugin is successfully loaded."
-                             {:plugin-dir plugin-dir :type type})
-                plugin)))
-          (catch js/Error _
-            nil)))))
+  (let [plugin-path (path/join plugin-dir (str type ".js"))]
+    (try
+      ; Node.js's require function has its own internal caching mechanism.
+      ; Subsequent calls with the same path will return the cached module 
+      ; instead of reading the file again, improving performance.
+      (let [plugin (js/require plugin-path)]
+        (if (and (object? plugin) (empty? (js/Object.keys plugin)))
+          (do
+            (logger/warn "Invalid JavaScript file is detected."
+                         {:plugin-path plugin-path :type type})
+            nil)
+          plugin))
+      (catch js/Error _
+        nil))))
 
 (defn apply-plugin-or-default
   [node base-name & {:keys [plugin-dir]
@@ -79,9 +75,31 @@
                                 {:type type :result result}))))
             (catch js/Error e
               (logger/warn "Plugin execution failed, using default logic."
-                           {:type type :node node :cause (.-message e)})
+                           {:type type :node node :cause (ex-message e)})
               nil)))
         (default-handler node base-name))))
+
+(defn- finalize-node-with-depth
+  [node base-name depth]
+  {:pre [(spec/validate ::spec/node node "Invalid node is given.")
+         (spec/validate ::spec/file-name base-name
+                        "Invalid base name is given.")
+         (spec/validate ::spec/order depth "Invalid depth is given.")]
+   :post [(spec/validate ::spec/node % "Invalid node is returned.")]}
+  (when-let [updated-node (apply-plugin-or-default node base-name)]
+    (if (> depth 1000)
+      (do
+        (logger/warn "Maximum recursion depth reached in finalize-node."
+                     {:node-type (:type node) :depth depth})
+        updated-node)
+      (let [new-children (->> (:children updated-node)
+                              (keep #(finalize-node-with-depth %
+                                                               base-name
+                                                               (inc depth)))
+                              vec)]
+        (if (seq new-children)
+          (assoc updated-node :children new-children)
+          (dissoc updated-node :children))))))
 
 (defn finalize-node
   [node base-name]
@@ -89,13 +107,7 @@
          (spec/validate ::spec/file-name base-name
                         "Invalid base name is given.")]
    :post [(spec/validate ::spec/node % "Invalid node is returned.")]}
-  (when-let [updated-node (apply-plugin-or-default node base-name)]
-    (let [new-children (->> (:children updated-node)
-                            (keep #(finalize-node % base-name))
-                            vec)]
-      (if (seq new-children)
-        (assoc updated-node :children new-children)
-        (dissoc updated-node :children)))))
+  (finalize-node-with-depth node base-name 0))
 
 (defn ast->markdown
   [ast]
@@ -372,7 +384,7 @@
                     {:href href
                      :text text
                      :attributes attributes
-                     :cause (.-message e)})
+                     :cause (ex-message e)})
       {:type "html" :value ""})))
 
 (defmethod default-handler "refCode"
@@ -418,7 +430,7 @@
   (if-let [href (:url node)]
     (build-ref-link href
                     ""
-                    {:class (str "cln-ref-heading cln-depth" (:depth node))})
+                    {:class (str "cln-ref-heading cln-level" (:depth node))})
     (do
       (logger/error "RefHeading node does not have URL."
                     {:node node :base-name base-name})
@@ -433,7 +445,7 @@
   (if-let [href (:url node)]
     (build-ref-link href
                     (:caption node)
-                    {:class (str "cln-ref-heading-name cln-depth"
+                    {:class (str "cln-ref-heading-name cln-level"
                                  (:depth node))})
     (do
       (logger/error "RefHeadingName node does not have URL."
@@ -510,7 +522,8 @@
          (spec/validate ::spec/markdown markdown "Invalid Markdown is given.")]
    :post [(spec/validate ::spec/markdown % "Invalid Markdown is returned.")]}
   (throw (ex-info "Unknown type in append-div."
-                  {:type type :markdown markdown})))
+                  {:type type :markdown (subs markdown
+                                              0 (min (count markdown) 30))})))
 
 (defmethod append-outer-div :forewords
   [type markdown]
@@ -579,7 +592,7 @@
                     (build-link-html
                      url
                      caption
-                     :attributes {:class (str "cln-ref-heading-name cln-depth"
+                     :attributes {:class (str "cln-ref-heading-name cln-level"
                                               depth)})
                     "<span class=\"cln-toc-line\"></span>"
                     (build-link-html
