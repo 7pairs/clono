@@ -18,7 +18,8 @@
             ["os" :as os]
             ["path" :as path]
             [blue.lions.clono.log :as logger]
-            [blue.lions.clono.render :as render]))
+            [blue.lions.clono.render :as render]
+            [blue.lions.clono.spec :as spec]))
 
 (defn- setup-tmp-dir
   []
@@ -113,8 +114,8 @@
                 "base-name"))))
 
     (t/testing "Node does not have caption."
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (let [node {:type "containerDirective"
                   :name "column"
                   :children [{:type "paragraph"
@@ -129,11 +130,11 @@
         (t/is (= [{:level :error
                    :message "Column node does not have caption."
                    :data {:node node :base-name base-name}}]
-                 @logger/entries))))
+                 (logger/get-entries)))))
 
     (t/testing "Node does not have children."
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (let [node {:type "containerDirective" :name "column" :children []}
             base-name "base-name"]
         (t/is (= {:type "html" :value ""}
@@ -141,7 +142,7 @@
         (t/is (= [{:level :error
                    :message "Column node does not have children."
                    :data {:node node :base-name base-name}}]
-                 @logger/entries)))))
+                 (logger/get-entries))))))
 
   (t/testing "Node is figure."
     (t/testing "Node has attributes."
@@ -175,8 +176,8 @@
                 "base-name"))))
 
     (t/testing "Node does not have children."
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (let [node {:type "textDirective"
                   :name "figure"
                   :attributes {:src "image.jpg"}
@@ -189,11 +190,11 @@
                          :data {:node node
                                 :base-name base-name
                                 :missing :children}}]
-                       @logger/entries)))))
+                       (logger/get-entries))))))
 
     (t/testing "Node does not have src."
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (let [node {:type "textDirective"
                   :name "figure"
                   :attributes {}
@@ -206,7 +207,7 @@
                          :data {:node node
                                 :base-name base-name
                                 :missing :src}}]
-                       @logger/entries))))))
+                       (logger/get-entries)))))))
 
   (t/testing "Node is footnoteReference."
     (t/testing "Node has children."
@@ -222,8 +223,8 @@
                 "base-name"))))
 
     (t/testing "Node does not have children."
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (let [node {:type "footnoteReference"
                   :identifier "fn"
                   :label "fn"
@@ -235,7 +236,7 @@
                          :message (str "FootnoteReference node "
                                        "does not have children.")
                          :data {:node node :base-name base-name}}]
-                       @logger/entries))))))
+                       (logger/get-entries)))))))
 
   (t/testing "Node is index."
     (t/testing "Node has ID."
@@ -269,8 +270,8 @@
                 "base-name"))))
 
     (t/testing "Node does not have children."
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (let [node {:type "textDirective"
                   :name "index"
                   :attributes {:ruby "さくいん"}
@@ -283,7 +284,7 @@
         (t/is (= [{:level :error
                    :message "Index node does not have children."
                    :data {:node node :base-name base-name}}]
-                 @logger/entries)))))
+                 (logger/get-entries))))))
 
   (t/testing "Node is refCode."
     (t/testing "Target ID has chapter."
@@ -308,8 +309,8 @@
                 "base-name"))))
 
     (t/testing "Node does not have ID."
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (let [node {:type "textDirective"
                   :name "refCode"
                   :attributes {}
@@ -320,7 +321,7 @@
               (t/is (= [{:level :error
                          :message "RefCode node does not have ID."
                          :data {:node node :base-name base-name}}]
-                       @logger/entries))))))
+                       (logger/get-entries)))))))
 
   (t/testing "Node is refFigure."
     (t/testing "Target ID has chapter."
@@ -345,8 +346,8 @@
                 "base-name"))))
 
     (t/testing "Node does not have ID."
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (let [node {:type "textDirective"
                   :name "refFigure"
                   :attributes {}
@@ -357,13 +358,13 @@
               (t/is (= [{:level :error
                          :message "RefFigure node does not have ID."
                          :data {:node node :base-name base-name}}]
-                       @logger/entries))))))
+                       (logger/get-entries)))))))
 
   (t/testing "Node is refHeading."
     (t/testing "Node has URL."
       (t/is (= {:type "html"
                 :value (str "<a href=\"url1\" "
-                            "class=\"cln-ref-heading cln-depth1\"></a>")}
+                            "class=\"cln-ref-heading cln-level1\"></a>")}
                (render/default-handler
                 {:type "textDirective"
                  :name "refHeading"
@@ -374,8 +375,8 @@
                 "base-name"))))
 
     (t/testing "Node does not have URL."
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (let [node {:type "textDirective"
                   :name "refHeading"
                   :attributes {:id "chapter2|id2"}
@@ -387,13 +388,13 @@
               (t/is (= [{:level :error
                          :message "RefHeading node does not have URL."
                          :data {:node node :base-name base-name}}]
-                       @logger/entries))))))
+                       (logger/get-entries)))))))
 
   (t/testing "Node is refHeadingName."
     (t/testing "Node has URL."
       (t/is (= {:type "html"
                 :value (str "<a href=\"url1\" class=\"cln-ref-heading-name "
-                            "cln-depth1\">Caption1</a>")}
+                            "cln-level1\">Caption1</a>")}
                (render/default-handler
                 {:type "textDirective"
                  :name "refHeadingName"
@@ -405,8 +406,8 @@
                 "base-name"))))
 
     (t/testing "Node does not have URL."
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (let [node {:type "textDirective"
                   :name "refHeadingName"
                   :attributes {:id "chapter2|id2"}
@@ -419,7 +420,7 @@
               (t/is (= [{:level :error
                          :message "RefHeadingName node does not have URL."
                          :data {:node node :base-name base-name}}]
-                       @logger/entries))))))
+                       (logger/get-entries)))))))
 
   (t/testing "Node is refTable."
     (t/testing "Target ID has cahpter."
@@ -442,8 +443,8 @@
                  :children []}
                 "base-name"))))
     (t/testing "Node does not have ID."
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (let [node {:type "textDirective"
                   :name "refTable"
                   :attributes {}
@@ -454,7 +455,7 @@
               (t/is (= [{:level :error
                          :message "RefTable node does not have ID."
                          :data {:node node :base-name base-name}}]
-                       @logger/entries))))))
+                       (logger/get-entries)))))))
 
   (t/testing "Node is table."
     (t/testing "Node is valid."
@@ -475,8 +476,8 @@
                 "base-name"))))
 
     (t/testing "Node does not have caption."
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (let [node {:type "containerDirective"
                   :name "table"
                   :attributes {:id "id2"}
@@ -491,11 +492,11 @@
               (t/is (= [{:level :error
                          :message "Table node does not have caption."
                          :data {:node node :base-name base-name}}]
-                       @logger/entries)))))
+                       (logger/get-entries))))))
 
     (t/testing "Node does not have ID."
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (let [node {:type "containerDirective"
                   :name "table"
                   :attributes {}
@@ -510,11 +511,11 @@
               (t/is (= [{:level :error
                          :message "Table node is invalid."
                          :data {:node node :base-name base-name :missing :id}}]
-                       @logger/entries)))))
+                       (logger/get-entries))))))
 
     (t/testing "Node does not have children."
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (let [node {:type "containerDirective"
                   :name "table"
                   :attributes {:id "id4"}
@@ -527,7 +528,7 @@
                          :data {:node node
                                 :base-name base-name
                                 :missing :children}}]
-                       @logger/entries))))))
+                       (logger/get-entries)))))))
 
   (t/testing "Node does not to be updated."
     (let [node {:type "notExists"}]
@@ -537,45 +538,28 @@
   (let [plugin-dir (path/join tmp-dir "load-plugin")]
     (fs/mkdirSync plugin-dir)
     (fs/writeFileSync (path/join plugin-dir "valid.js")
-                      "module.exports = function(n, b) { return n; };"
+                      "module.exports = function(n, b) { return 'done'; };"
                       "utf8")
     (fs/writeFileSync (path/join plugin-dir "invalid.js") "" "utf8")
 
     (t/testing "Plugin is valid."
-      (reset! render/plugin-cache {})
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
-      (t/is (fn? (render/load-plugin plugin-dir "valid")))
-      (t/is (= [{:level :info
-                 :message "Plugin is successfully loaded."
-                 :data {:plugin-dir plugin-dir :type "valid"}}]
-               @logger/entries)))
-
-    (t/testing "Plugin is already loaded."
-      (reset! render/plugin-cache {})
-      (reset! logger/enabled? false)
-      (let [plugin (render/load-plugin plugin-dir "valid")]
-        (reset! logger/entries [])
-        (t/is (= plugin (render/load-plugin plugin-dir "valid")))
-        (t/is (= [] @logger/entries))))
+      (t/is (fn? (render/load-plugin plugin-dir "valid"))))
 
     (t/testing "Plugin is invalid."
-      (reset! render/plugin-cache {})
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (t/is (nil? (render/load-plugin plugin-dir "invalid")))
       (t/is (= [{:level :warn
                  :message "Invalid JavaScript file is detected."
                  :data {:plugin-path (path/join plugin-dir "invalid.js")
                         :type "invalid"}}]
-               @logger/entries)))
+               (logger/get-entries))))
 
     (t/testing "Plugin does not exist."
-      (reset! render/plugin-cache {})
-      (reset! logger/enabled? false)
-      (reset! logger/entries [])
+      (logger/set-enabled! false)
+      (logger/reset-entries!)
       (t/is (nil? (render/load-plugin plugin-dir "notExists")))
-      (t/is (= [] @logger/entries)))))
+      (t/is (= [] (logger/get-entries))))))
 
 (t/deftest apply-plugin-or-default-test
   (let [plugin-dir (path/join tmp-dir "apply-plugin-or-default")]
@@ -597,21 +581,18 @@
 
     (t/testing "Plugin is invalid."
       (let [node {:type "invalid"}]
-        (reset! logger/enabled? false)
-        (reset! logger/entries [])
+        (logger/set-enabled! false)
+        (logger/reset-entries!)
         (t/is (= {:type "invalid"}
                  (render/apply-plugin-or-default node
                                                  "base-name"
                                                  :plugin-dir plugin-dir)))
-        (t/is (= [{:level :info
-                   :message "Plugin is successfully loaded."
-                   :data {:plugin-dir plugin-dir :type "invalid"}}
-                  {:level :warn
+        (t/is (= [{:level :warn
                    :message "Plugin execution failed, using default logic."
                    :data {:type "invalid"
                           :node node
                           :cause "Plugin returns invalid value."}}]
-                 @logger/entries)))))
+                 (logger/get-entries))))))
 
     (t/testing "Plugin does not exist."
       (let [node {:type "notExists"}]
@@ -716,19 +697,6 @@
             (t/is (= "Failed to convert AST to Markdown."
                      (ex-message (:cause cause-data))))))))))
 
-(t/deftest format-attributes-for-markdown-test
-  (t/testing "Single attribute is given."
-    (t/is (= "class=class1"
-             (render/format-attributes-for-markdown {:class "class1"}))))
-
-  (t/testing "Multiple attributes are given."
-    (t/is (= "class=class2 id=id2"
-             (render/format-attributes-for-markdown {:class "class2"
-                                                     :id "id2"}))))
-
-  (t/testing "Empty map are given."
-    (t/is (= "" (render/format-attributes-for-markdown {})))))
-
 (t/deftest format-attributes-for-html-test
   (t/testing "Single attribute is given."
     (t/is (= "class=\"class1\""
@@ -738,6 +706,19 @@
     (t/is (= "class=\"class2\" id=\"id2\""
              (render/format-attributes-for-html {:class "class2"
                                                  :id "id2"}))))
+
+  (t/testing "Empty map are given."
+    (t/is (= "" (render/format-attributes-for-markdown {})))))
+
+(t/deftest format-attributes-for-markdown-test
+  (t/testing "Single attribute is given."
+    (t/is (= "class=class1"
+             (render/format-attributes-for-markdown {:class "class1"}))))
+
+  (t/testing "Multiple attributes are given."
+    (t/is (= "class=class2 id=id2"
+             (render/format-attributes-for-markdown {:class "class2"
+                                                     :id "id2"}))))
 
   (t/testing "Empty map are given."
     (t/is (= "" (render/format-attributes-for-markdown {})))))
@@ -875,22 +856,25 @@
              (render/build-table-html "id1" "Caption1" "Table1"))))
 
   (t/testing "ID is not given."
-    (t/is (thrown-with-msg? js/Error #"Assert failed:"
-                            (render/build-table-html nil
-                                                     "Caption2"
-                                                     "Table2"))))
+    (try
+      (render/build-table-html nil "Caption2" "Table2")
+      (catch js/Error e
+        (t/is (= "Invalid ID is given." (ex-message e)))
+        (t/is (= {:value nil :spec ::spec/id} (ex-data e))))))
 
   (t/testing "Caption is not given."
-    (t/is (thrown-with-msg? js/Error #"Assert failed:"
-                            (render/build-table-html "id3"
-                                                     nil
-                                                     "Table3"))))
+    (try
+      (render/build-table-html "id3" nil "Table3")
+      (catch js/Error e
+        (t/is (= "Invalid caption is given." (ex-message e)))
+        (t/is (= {:value nil :spec ::spec/caption} (ex-data e))))))
 
   (t/testing "Table is not given."
-    (t/is (thrown-with-msg? js/Error #"Assert failed:"
-                            (render/build-table-html "id4"
-                                                     "Caption4"
-                                                     nil)))))
+    (try
+      (render/build-table-html "id4" "Caption4" nil)
+      (catch js/Error e
+        (t/is (= "Invalid Markdown is given." (ex-message e)))
+        (t/is (= {:value nil :spec ::spec/markdown} (ex-data e)))))))
 
 (t/deftest append-outer-div-test
   (t/testing "Type is forewords."
@@ -910,8 +894,11 @@
              (render/append-outer-div :afterwords "# Markdown"))))
 
   (t/testing "Type is invalid."
-    (t/is (thrown-with-msg? js/Error #"Assert failed:"
-                            (render/append-outer-div :invalid "# Markdown")))))
+    (try
+      (render/append-outer-div :invalid "# Markdown")
+      (catch js/Error e
+        (t/is (= "Invalid document type is given." (ex-message e)))
+        (t/is (= {:value :invalid :spec ::spec/document-type} (ex-data e)))))))
 
 (t/deftest render-documents-test
   (t/testing "All ASTs are valid."
@@ -975,15 +962,15 @@
     (t/is (= (str "<nav id=\"cln-toc\" role=\"doc-toc\">\n\n"
                   "# 目次\n\n"
                   "- <span class=\"cln-toc-item\"><a href=\"url1\" "
-                  "class=\"cln-ref-heading-name cln-depth1\">Item1</a>"
+                  "class=\"cln-ref-heading-name cln-level1\">Item1</a>"
                   "<span class=\"cln-toc-line\"></span><a href=\"url1\" "
                   "class=\"cln-toc-page\"></a></span>\n"
                   "    - <span class=\"cln-toc-item\"><a href=\"url2\" "
-                  "class=\"cln-ref-heading-name cln-depth2\">Item2</a>"
+                  "class=\"cln-ref-heading-name cln-level2\">Item2</a>"
                   "<span class=\"cln-toc-line\"></span><a href=\"url2\" "
                   "class=\"cln-toc-page\"></a></span>\n"
                   "        - <span class=\"cln-toc-item\"><a href=\"url3\" "
-                  "class=\"cln-ref-heading-name cln-depth3\">Item3</a>"
+                  "class=\"cln-ref-heading-name cln-level3\">Item3</a>"
                   "<span class=\"cln-toc-line\"></span><a href=\"url3\" "
                   "class=\"cln-toc-page\"></a></span>\n\n"
                   "</nav>")
@@ -993,9 +980,12 @@
                {:depth 3 :caption "Item3" :url "url3"}]))))
 
   (t/testing "TOC items are invalid."
-    (t/is (thrown-with-msg? js/Error #"Assert failed:"
-                            (render/render-toc
-                             [{:depth 1 :caption "Item1"}])))))
+    (let [items [{:depth 1 :caption "Item1"}]]
+      (try
+        (render/render-toc items)
+        (catch js/Error e
+          (t/is (= "Invalid items are given." (ex-message e)))
+          (t/is (= {:value items :spec ::spec/toc-items} (ex-data e))))))))
 
 (t/deftest build-index-caption-html-test
   (t/testing "Heading level is not given."
@@ -1064,11 +1054,14 @@
                 :urls ["url1" "url2"]}]))))
 
   (t/testing "Some indices are invalid."
-    (t/is (thrown-with-msg? js/Error #"Assert failed:"
-                            (render/render-index-page
-                             [{:type :caption :text "さ行"}
-                              {:type :invalid}
-                              {:type :item
-                               :text "索引"
-                               :ruby "さくいん"
-                               :urls ["url1" "url2"]}])))))
+    (let [indices [{:type :caption :text "さ行"}
+                   {:type :invalid}
+                   {:type :item
+                    :text "索引"
+                    :ruby "さくいん"
+                    :urls ["url1" "url2"]}]]
+      (try
+        (render/render-index-page indices)
+        (catch js/Error e
+          (t/is (= "Invalid indices are given." (ex-message e)))
+          (t/is (= {:value indices :spec ::spec/indices} (ex-data e))))))))

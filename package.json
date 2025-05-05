@@ -2,7 +2,7 @@
   "name": "clono",
   "version": "1.0.0",
   "private": true,
-  "description": "A CLI tool that processes Markdown with custom notation, transforming it into a format suitable for Vivliostyle-based publishing.",
+  "description": "An extension tool for Vivliostyle Flavored Markdown that adds powerful features for technical book writing, including cross-references to headings, figures, tables and code blocks, footnotes, and automatic index generation for CSS typesetting with Vivliostyle.",
   "main": "out/clono.js",
   "scripts": {
     "compile": "npx shadow-cljs compile app",
@@ -32,6 +32,6 @@
     "micromark-extension-gfm-footnote": "^2.1.0"
   },
   "devDependencies": {
-    "shadow-cljs": "^2.28.22"
+    "shadow-cljs": "^2.28.23"
   }
 }

@@ -13,17 +13,17 @@
 ; limitations under the License.
 
 (ns blue.lions.clono.analyze
-  (:require [cljs.spec.alpha :as s]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [blue.lions.clono.ast :as ast]
             [blue.lions.clono.identifier :as id]
             [blue.lions.clono.spec :as spec]))
 
 (defn create-toc-item
   [file-name node]
-  {:pre [(s/valid? ::spec/file-name file-name)
-         (s/valid? ::spec/node node)]
-   :post [(s/valid? ::spec/toc-item %)]}
+  {:pre [(spec/validate ::spec/file-name file-name
+                        "Invalid file name is given.")
+         (spec/validate ::spec/node node "Invalid node is given.")]
+   :post [(spec/validate ::spec/toc-item % "Invalid item is returned.")]}
   (let [depth (:depth node)
         caption (->> node
                      ast/extract-texts
@@ -42,8 +42,9 @@
 
 (defn create-toc-items
   [documents]
-  {:pre [(s/valid? ::spec/documents documents)]
-   :post [(s/valid? ::spec/toc-items %)]}
+  {:pre [(spec/validate ::spec/documents documents
+                        "Invalid documents are given.")]
+   :post [(spec/validate ::spec/toc-items % "Invalid items are returned.")]}
   (vec
    (mapcat (fn [{:keys [name ast]}]
              (map #(create-toc-item name %)
@@ -52,8 +53,8 @@
 
 (defn has-valid-id-or-root-depth?
   [node]
-  {:pre [(s/valid? ::spec/node node)]
-   :post [(s/valid? ::spec/pred-result %)]}
+  {:pre [(spec/validate ::spec/node node "Invalid node is given.")]
+   :post [(spec/validate ::spec/pred-result % "Invalid result is returned.")]}
   (or (-> (ast/extract-labels node)
           first
           :attributes
@@ -63,9 +64,11 @@
 
 (defn create-heading-info
   [file-name node]
-  {:pre [(s/valid? ::spec/file-name file-name)
-         (s/valid? ::spec/node node)]
-   :post [(s/valid? ::spec/heading-or-nil %)]}
+  {:pre [(spec/validate ::spec/file-name file-name
+                        "Invalid file name is given.")
+         (spec/validate ::spec/node node "Invalid node is given.")]
+   :post [(spec/validate ::spec/heading-or-nil %
+                         "Invalid heading information is returned.")]}
   (when (has-valid-id-or-root-depth? node)
     (let [{:keys [depth caption url]} (create-toc-item file-name node)
           base-name (id/extract-base-name file-name)
@@ -81,8 +84,10 @@
 
 (defn create-heading-dic
   [documents]
-  {:pre [(s/valid? ::spec/documents documents)]
-   :post [(s/valid? ::spec/heading-dic %)]}
+  {:pre [(spec/validate ::spec/documents documents
+                        "Invalid documents are given.")]
+   :post [(spec/validate ::spec/heading-dic %
+                         "Invalid heading dictionary is returned.")]}
   (->> (for [{:keys [name ast]} documents
              nodes (ast/extract-headings ast)
              :let [{:keys [id] :as heading-info}
@@ -93,8 +98,10 @@
 
 (defn create-footnote-dic
   [documents]
-  {:pre [(s/valid? ::spec/documents documents)]
-   :post [(s/valid? ::spec/footnote-dic %)]}
+  {:pre [(spec/validate ::spec/documents documents
+                        "Invalid documents are given.")]
+   :post [(spec/validate ::spec/footnote-dic %
+                         "Invalid footnote dictionary is returned.")]}
   (->> (for [{:keys [name ast]} documents
              footnote (ast/extract-footnote-definition ast)
              :let [base-name (id/extract-base-name name)
@@ -106,9 +113,10 @@
 
 (defn build-index-entry
   [base-name node]
-  {:pre [(s/valid? ::spec/file-name base-name)
-         (s/valid? ::spec/node node)]
-   :post [(s/valid? ::spec/index-entry %)]}
+  {:pre [(spec/validate ::spec/file-name base-name
+                        "Invalid base name is given.")
+         (spec/validate ::spec/node node "Invalid node is given.")]
+   :post [(spec/validate ::spec/index-entry % "Invalid entry is returned.")]}
   (let [{:keys [order id attributes]} node]
     (when (or (nil? order) (nil? id))
       (throw (ex-info "Node is invalid."
@@ -127,23 +135,11 @@
 
 (defn english-ruby?
   [ruby]
-  {:pre [(s/valid? ::spec/ruby ruby)]
-   :post [(s/valid? ::spec/pred-result %)]}
+  {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
+   :post [(spec/validate ::spec/pred-result % "Invalid result is returned.")]}
   (boolean (re-matches #"^[ -~].*" ruby)))
 
-(def vowel-map
-  {"あ" "あ" "か" "あ" "さ" "あ" "た" "あ" "な" "あ" "は" "あ" "ま" "あ"
-   "や" "あ" "ら" "あ" "わ" "あ"
-   "い" "い" "き" "い" "し" "い" "ち" "い" "に" "い" "ひ" "い" "み" "い"
-   "り" "い"
-   "う" "う" "く" "う" "す" "う" "つ" "う" "ぬ" "う" "ふ" "う" "む" "う"
-   "ゆ" "う" "る" "う"
-   "え" "え" "け" "え" "せ" "え" "て" "え" "ね" "え" "へ" "え" "め" "え"
-   "れ" "え"
-   "お" "お" "こ" "お" "そ" "お" "と" "お" "の" "お" "ほ" "お" "も" "お"
-   "よ" "お" "ろ" "お" "を" "お"})
-
-(def seion-map
+(def ^:private seion-map
   {"ゔ" "う"
    "ぁ" "あ" "ぃ" "い" "ぅ" "う" "ぇ" "え" "ぉ" "お"
    "が" "か" "ぎ" "き" "ぐ" "く" "げ" "け" "ご" "こ"
@@ -155,10 +151,33 @@
    "ゃ" "や" "ゅ" "ゆ" "ょ" "よ"
    "ゎ" "わ"})
 
-(defn normalize-hiragana
+(def non-seion-pattern
+  (re-pattern (str "[" (str/join (keys seion-map)) "]")))
+
+(defn non-seion->seion
   [ruby]
-  {:pre [(s/valid? ::spec/ruby ruby)]
-   :post [(s/valid? ::spec/ruby %)]}
+  {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
+   :post [(spec/validate ::spec/ruby % "Invalid ruby is returned.")]}
+  (str/replace ruby
+               non-seion-pattern
+               (fn [match] (get seion-map match))))
+
+(def ^:private vowel-map
+  {"あ" "あ" "か" "あ" "さ" "あ" "た" "あ" "な" "あ" "は" "あ" "ま" "あ"
+   "や" "あ" "ら" "あ" "わ" "あ"
+   "い" "い" "き" "い" "し" "い" "ち" "い" "に" "い" "ひ" "い" "み" "い"
+   "り" "い"
+   "う" "う" "く" "う" "す" "う" "つ" "う" "ぬ" "う" "ふ" "う" "む" "う"
+   "ゆ" "う" "る" "う"
+   "え" "え" "け" "え" "せ" "え" "て" "え" "ね" "え" "へ" "え" "め" "え"
+   "れ" "え"
+   "お" "お" "こ" "お" "そ" "お" "と" "お" "の" "お" "ほ" "お" "も" "お"
+   "よ" "お" "ろ" "お" "を" "お"})
+
+(defn onbiki->vowel
+  [ruby]
+  {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
+   :post [(spec/validate ::spec/ruby % "Invalid ruby is returned.")]}
   (let [chars (seq ruby)]
     (apply str
            (loop [result []
@@ -168,16 +187,29 @@
                (let [current (str (first rest-chars))
                      next-chars (rest rest-chars)]
                  (if (= current "ー")
-                   (if-let [vowel (some vowel-map (take-last 1 result))]
-                     (recur (conj result vowel) next-chars)
-                     (recur (conj result current) next-chars))
+                   (let [has-previous-char (seq result)
+                         previous-vowel (when has-previous-char
+                                          (some vowel-map
+                                                (take-last 1 result)))]
+                     (if previous-vowel
+                       (recur (conj result previous-vowel) next-chars)
+                       (recur (conj result current) next-chars)))
                    (let [normalized (get seion-map current current)]
                      (recur (conj result normalized) next-chars)))))))))
 
+(defn normalize-hiragana
+  [ruby]
+  {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
+   :post [(spec/validate ::spec/ruby % "Invalid ruby is returned.")]}
+  (let [normalized (.normalize ruby "NFKC")]
+    (-> normalized
+        non-seion->seion
+        onbiki->vowel)))
+
 (defn ruby->caption
   [ruby]
-  {:pre [(s/valid? ::spec/ruby ruby)]
-   :post [(s/valid? ::spec/caption %)]}
+  {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
+   :post [(spec/validate ::spec/caption % "Invalid caption is returned.")]}
   (cond
     (english-ruby? ruby) "英数字"
     (#{"あ" "い" "う" "え" "お"} (subs (normalize-hiragana ruby) 0 1)) "あ行"
@@ -194,8 +226,8 @@
 
 (defn insert-row-captions
   [indices]
-  {:pre [(s/valid? ::spec/indices indices)]
-   :post [(s/valid? ::spec/indices %)]}
+  {:pre [(spec/validate ::spec/indices indices "Invalid indices are given.")]
+   :post [(spec/validate ::spec/indices % "Invalid indices are returned.")]}
   (loop [result []
          current-caption nil
          rest-items indices]
@@ -212,24 +244,33 @@
 
 (defn create-indices
   [documents]
-  {:pre [(s/valid? ::spec/documents documents)]
-   :post [(s/valid? ::spec/indices %)]}
-  (->> (for [{:keys [name ast]} documents
-             index (ast/extract-indices ast)]
-         (let [base-name (id/extract-base-name name)]
-           (build-index-entry base-name index)))
-       (group-by :text)
-       (map (fn [[text entries]]
-              (let [{:keys [ruby]} (first entries)]
-                {:type :item
-                 :text text
-                 :ruby ruby
-                 :urls (->> entries
-                            (sort-by :order)
-                            (mapv :url))})))
-       (sort-by (fn [{:keys [ruby]}]
-                  (if (english-ruby? ruby)
-                    ["" ruby]
-                    [(normalize-hiragana ruby) ruby])))
-       vec
-       insert-row-captions))
+  {:pre [(spec/validate ::spec/documents documents
+                        "Invalid documents are given.")]
+   :post [(spec/validate ::spec/indices % "Invalid indices are returned.")]}
+  (let [entries (for [{:keys [name ast]} documents
+                           index (ast/extract-indices ast)]
+                       (let [base-name (id/extract-base-name name)]
+                         (build-index-entry base-name index)))
+        ruby-cache (reduce (fn [cache {:keys [ruby]}]
+                             (assoc cache ruby
+                                    {:normalized (normalize-hiragana ruby)
+                                     :is-english (english-ruby? ruby)}))
+                           {}
+                           entries)]
+    (->> entries
+         (group-by :text)
+         (map (fn [[text entries]]
+                (let [{:keys [ruby]} (first entries)]
+                  {:type :item
+                   :text text
+                   :ruby ruby
+                   :urls (->> entries
+                              (sort-by :order)
+                              (mapv :url))})))
+         (sort-by (fn [{:keys [ruby]}]
+                    (let [cache-entry (get ruby-cache ruby)]
+                      (if (:is-english cache-entry)
+                        ["" ruby]
+                        [(:normalized cache-entry) ruby]))))
+         vec
+         insert-row-captions)))

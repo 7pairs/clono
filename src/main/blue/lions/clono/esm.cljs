@@ -13,21 +13,22 @@
 ; limitations under the License.
 
 (ns blue.lions.clono.esm
-  (:require [cljs.spec.alpha :as s]
-            ["fix-esm" :as fix-esm]
+  (:require ["fix-esm" :as fix-esm]
             [blue.lions.clono.spec :as spec]))
 
 (defn load-esm
   [module-name property-name]
-  {:pre [(s/valid? ::spec/module-name module-name)
-         (s/valid? ::spec/property-name property-name)]
-   :post [(s/valid? ::spec/function %)]}
+  {:pre [(spec/validate ::spec/module-name module-name
+                        "Invalid module name is given.")
+         (spec/validate ::spec/property-name property-name
+                        "Invalid property name is given.")]
+   :post [(spec/validate ::spec/function % "Invalid function is returned.")]}
   (try
     (let [module (.require fix-esm module-name)
           property (aget module property-name)]
       (if (some? property)
         property
-        (throw (ex-info "Property is not found."
+        (throw (ex-info (str "Cannot find property '" property-name "'.")
                         {:module-name module-name
                          :property-name property-name}))))
     (catch js/Error e
@@ -38,23 +39,81 @@
     (finally
       (.unregister fix-esm))))
 
-(def from-markdown
-  (load-esm "mdast-util-from-markdown" "fromMarkdown"))
+(def ^:private from-markdown-fn
+  (delay (load-esm "mdast-util-from-markdown" "fromMarkdown")))
 
-(def to-markdown
-  (load-esm "mdast-util-to-markdown" "toMarkdown"))
+(defn from-markdown
+  [& args]
+  (apply @from-markdown-fn args))
 
-(def gfm-footnote
-  (load-esm "micromark-extension-gfm-footnote" "gfmFootnote"))
+(def ^:private to-markdown-fn
+  (delay (load-esm "mdast-util-to-markdown" "toMarkdown")))
 
-(def gfm-footnote-from-markdown
-  (load-esm "mdast-util-gfm-footnote" "gfmFootnoteFromMarkdown"))
+(defn to-markdown
+  [& args]
+  (apply @to-markdown-fn args))
 
-(def directive
-  (load-esm "micromark-extension-directive" "directive"))
+(def ^:private gfm-footnote-fn
+  (delay (load-esm "micromark-extension-gfm-footnote" "gfmFootnote")))
 
-(def directive-from-markdown
-  (load-esm "mdast-util-directive" "directiveFromMarkdown"))
+(defn gfm-footnote
+  [& args]
+  (apply @gfm-footnote-fn args))
 
-(def github-slugger
-  (load-esm "github-slugger" "default"))
+(def ^:private gfm-footnote-from-markdown-fn
+  (delay (load-esm "mdast-util-gfm-footnote" "gfmFootnoteFromMarkdown")))
+
+(defn gfm-footnote-from-markdown
+  [& args]
+  (apply @gfm-footnote-from-markdown-fn args))
+
+(def ^:private directive-fn
+  (delay (load-esm "micromark-extension-directive" "directive")))
+
+(defn directive
+  [& args]
+  (apply @directive-fn args))
+
+(def ^:private directive-from-markdown-fn
+  (delay (load-esm "mdast-util-directive" "directiveFromMarkdown")))
+
+(defn directive-from-markdown
+  [& args]
+  (apply @directive-from-markdown-fn args))
+
+(def ^:private github-slugger-class
+  (delay (load-esm "github-slugger" "default")))
+
+(def ^:private github-slugger-instance (atom nil))
+
+(defn- create-github-slugger
+  []
+  {:post [(spec/validate ::spec/github-slugger %
+                         "Invalid slugger is returned.")]}
+  (let [slugger @github-slugger-class]
+    (new slugger)))
+
+(defn- get-github-slugger
+  []
+  {:post [(spec/validate ::spec/github-slugger %
+                         "Invalid slugger is returned.")]}
+  (when (nil? @github-slugger-instance)
+    (reset! github-slugger-instance (create-github-slugger)))
+  @github-slugger-instance)
+
+(defn generate-slug
+  [caption]
+  {:pre [(spec/validate ::spec/caption caption "Invalid caption is given.")]
+   :post [(spec/validate ::spec/slug % "Invalid slug is returned.")]}
+  (try
+    (.slug ^js (get-github-slugger) caption)
+    (catch js/Error e
+      (throw (ex-info "Failed to generate slug."
+                      {:caption caption :cause e})))))
+
+(defn reset-slugger!
+  []
+  (if-let [instance @github-slugger-instance]
+    (.reset instance)
+    (reset! github-slugger-instance (create-github-slugger)))
+  nil)

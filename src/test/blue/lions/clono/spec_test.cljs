@@ -19,12 +19,45 @@
             [blue.lions.clono.spec :as spec]
             [blue.lions.clono.spec.catalog :as catalog]
             [blue.lions.clono.spec.common :as common]
+            [blue.lions.clono.spec.directive :as directive]
             [blue.lions.clono.spec.document :as document]
             [blue.lions.clono.spec.heading :as heading]
             [blue.lions.clono.spec.index :as index]
+            [blue.lions.clono.spec.log :as log]
             [blue.lions.clono.spec.manuscript :as manuscript]
             [blue.lions.clono.spec.node :as node]
             [blue.lions.clono.spec.toc :as toc]))
+
+(t/deftest validate-test
+  (t/testing "Succeeds to verify."
+    (t/is (spec/validate ::common/alphabet-string
+                         "alphabet"
+                         "Invalid alphabet string."))
+    (t/is (spec/validate ::common/alphabet-string
+                         "alphabet"
+                         "Invalid alphabet string."
+                         :string)))
+
+  (t/testing "Key is given."
+    (try
+      (spec/validate ::common/alphabet-string
+                     "12345"
+                     "Invalid alphabet string."
+                     :string)
+      (catch js/Error e
+        (t/is (= "Invalid alphabet string." (ex-message e)))
+        (t/is (= {:string "12345" :spec ::common/alphabet-string}
+                 (ex-data e))))))
+
+  (t/testing "Key is not given."
+    (try
+      (spec/validate ::common/alphabet-string
+                     "12345"
+                     "Invalid alphabet string.")
+      (catch js/Error e
+        (t/is (= "Invalid alphabet string." (ex-message e)))
+        (t/is (= {:value "12345" :spec ::common/alphabet-string}
+                 (ex-data e)))))))
 
 (t/deftest common_alphabet-string-test
   (t/testing "Succeeds to verify."
@@ -311,6 +344,61 @@
       "not-map"
       nil)))
 
+(t/deftest directive_name-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::directive/name value)
+      "directivename"
+      "DIRECTIVENAME"
+      "DirectiveName"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::directive/name value))
+      "1nvalid"
+      "invalid directive name"
+      ""
+      :not-string
+      nil)))
+
+(t/deftest directive_type-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::directive/type value)
+      "textDirective"
+      "containerDirective"))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::directive/type value))
+      "invalid"
+      ""
+      :not-string
+      nil)))
+
+(t/deftest directive-node-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/directive-node value)
+      {:type "textDirective" :name "name" :attributes {:key "value"}}
+      {:type "containerDirective" :name "name" :attributes {:key "value"}}))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/directive-node value))
+      {:type "invalid" :name "name" :attributes {:key "value"}}
+      {:type "" :name "name" :attributes {:key "value"}}
+      {:type :not-string :name "name" :attributes {:key "value"}}
+      {:type nil :name "name" :attributes {:key "value"}}
+      {:type "textDirective" :name "1nvalid" :attributes {:key "value"}}
+      {:type "textDirective" :name "" :attributes {:key "value"}}
+      {:type "textDirective" :name :not-string :attributes {:key "value"}}
+      {:type "textDirective" :name :nil :attributes {:key "value"}}
+      {:type "containerDirective" :name "1nvalid" :attributes {:key "value"}}
+      {:type "containerDirective" :name "" :attributes {:key "value"}}
+      {:type "containerDirective" :name :not-string :attributes {:key "value"}}
+      {:type "containerDirective" :name :nil :attributes {:key "value"}}
+      {:name "name" :attributes {:key "value"}}
+      {:type "textDirective" :attributes {:key "value"}}
+      {:type "containerDirective" :attributes {:key "value"}}
+      {}
+      "not-map"
+      nil)))
+
 (t/deftest directive-name-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/directive-name value)
@@ -579,6 +667,22 @@
 
   (t/testing "Fails to verify."
     (t/is (not (s/valid? ::spec/function-or-nil "not-function")))))
+
+(t/deftest github-slugger-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::spec/github-slugger
+                    #js {:slug (fn [text] (str "slug-" text))
+                         :reset (fn [] nil)})))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/github-slugger value))
+      #js {:slug (fn [text] (str "slug-" text))}
+      #js {:reset (fn [] nil)}
+      #js {:slug "not-function" :reset (fn [] nil)}
+      #js {:slug (fn [text] (str "slug-" text)) :reset "not-function"}
+      #js {}
+      "not-object"
+      nil)))
 
 (t/deftest heading_caption-test
   (t/testing "Succeeds to verify."
@@ -995,6 +1099,45 @@
        {:type :caption :text "text"}]
       nil)))
 
+(t/deftest log_data-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::log/data value)
+      {:key "value"}
+      {:key1 1 :key2 ["vector"]}
+      {}
+      nil))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::log/data value))
+      {"not-keyword" "value"}
+      {:key "value1" "not-keyword" "value2"}
+      "not-map")))
+
+(t/deftest log_level-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::log/level value)
+      :debug
+      :info
+      :warn
+      :error))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::log/level value))
+      :invalid
+      "info"
+      nil)))
+
+(t/deftest log_message-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::log/message value)
+      "message"
+      ""))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::log/message value))
+      :not-string
+      nil)))
+
 (t/deftest log-data-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/log-data value)
@@ -1009,9 +1152,59 @@
       {:key "value1" "not-keyword" "value2"}
       "not-map")))
 
+(t/deftest log-entries-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/log-entries value)
+      [{:level :info :message "message" :data {:key "value"}}]
+      [{:level :info :message "message1" :data {:key "value1"}}
+       {:level :error :message "message2" :data {:key "value2"}}]
+      []))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/log-entries value))
+      [{:level :invalid :message "message" :data {:key "value"}}]
+      [{:level :info :message :not-string :data {:key "value"}}]
+      [{:level :info :message "message" :data "not-map"}]
+      [{:message "message" :data {:key "value"}}]
+      [{:level :info :data {:key "value"}}]
+      [{:level :info :message "message"}]
+      [{:level :info
+        :message "message"
+        :data {:key "value"}
+        :extra-key "extra-value"}]
+      [{:extra-key "extra-value"}]
+      [{:level :info :message "message" :data {:key "value"}}
+       {:level :invalid :message "message" :data {:key "value"}}]
+      "not-vector"
+      nil)))
+
+(t/deftest log-entry-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::spec/log-entry {:level :info
+                                      :message "message"
+                                      :data {:key "value"}})))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/log-entry value))
+      {:level :invalid :message "message" :data {:key "value"}}
+      {:level :info :message :not-string :data {:key "value"}}
+      {:level :info :message "message" :data "not-map"}
+      {:message "message" :data {:key "value"}}
+      {:level :info :data {:key "value"}}
+      {:level :info :message "message"}
+      {:level :info
+       :message "message"
+       :data {:key "value"}
+       :extra-key "extra-value"}
+      {:extra-key "extra-value"}
+      {}
+      "not-map"
+      nil)))
+
 (t/deftest log-level-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/log-level value)
+      :debug
       :info
       :warn
       :error))
@@ -1020,6 +1213,22 @@
     (t/are [value] (not (s/valid? ::spec/log-level value))
       :invalid
       "info"
+      nil)))
+
+(t/deftest log-level-value-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/log-level-value value)
+      0
+      1
+      2
+      3))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/log-level-value value))
+      -1
+      4
+      2.5
+      "1"
       nil)))
 
 (t/deftest log-message-test

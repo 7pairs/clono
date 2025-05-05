@@ -13,8 +13,7 @@
 ; limitations under the License.
 
 (ns blue.lions.clono.parse
-  (:require [cljs.spec.alpha :as s]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [blue.lions.clono.ast :as ast]
             [blue.lions.clono.esm :as esm]
             [blue.lions.clono.log :as logger]
@@ -22,8 +21,8 @@
 
 (defn remove-comments
   [node]
-  {:pre [(s/valid? ::spec/node node)]
-   :post [(s/valid? ::spec/node %)]}
+  {:pre [(spec/validate ::spec/node node "Invalid node is given.")]
+   :post [(spec/validate ::spec/node % "Invalid node is returned.")]}
   (if-let [children (:children node)]
     (let [updated-children (mapv #(remove-comments %)
                                  (remove ast/comment? children))]
@@ -32,59 +31,48 @@
 
 (defn remove-positions
   [node]
-  {:pre [(s/valid? ::spec/node node)]
-   :post [(s/valid? ::spec/node %)]}
+  {:pre [(spec/validate ::spec/node node "Invalid node is given.")]
+   :post [(spec/validate ::spec/node % "Invalid node is returned.")]}
   (let [updated-node (dissoc node :position)]
     (if-let [children (seq (:children node))]
       (assoc updated-node :children (mapv remove-positions children))
       updated-node)))
 
-(defonce slugger-instance (new esm/github-slugger))
-
-(defn generate-slug
-  [caption]
-  {:pre [(s/valid? ::spec/caption caption)]
-   :post [(s/valid? ::spec/slug %)]}
-  (try
-    (.slug slugger-instance caption)
-    (catch js/Error e
-      (throw (ex-info "Failed to generate slug."
-                      {:caption caption :cause e})))))
-
 (defn generate-heading-slug
   [node]
-  {:pre [(s/valid? ::spec/node node)]
-   :post [(s/valid? ::spec/slug %)]}
+  {:pre [(spec/validate ::spec/node node "Invalid node is given.")]
+   :post [(spec/validate ::spec/slug % "Invalid slug is returned.")]}
   (let [caption (->> node
-                  ast/extract-texts
-                  (map :value)
-                  str/join)]
+                     ast/extract-texts
+                     (map :value)
+                     str/join)]
     (try
-      (generate-slug caption)
+      (esm/generate-slug caption)
       (catch js/Error e
         (throw (ex-info "Failed to generate heading slug."
                         {:node node :caption caption :cause e}))))))
 
 (defn add-heading-slugs
   [node]
-  {:pre [(s/valid? ::spec/node node)]
-   :post [(s/valid? ::spec/node %)]}
+  {:pre [(spec/validate ::spec/node node "Invalid node is given.")]
+   :post [(spec/validate ::spec/node % "Invalid node is returned.")]}
   (letfn [(update-node
-            [target]
-            (let [updated-node (if (ast/heading? target)
-                                 (assoc target
-                                        :slug (generate-heading-slug target))
-                                 target)]
-              (if (seq (:children target))
-                (update updated-node :children #(mapv update-node %))
-                updated-node)))]
+           [target]
+           (let [updated-node (if (ast/heading? target)
+                                (assoc target
+                                       :slug (generate-heading-slug target))
+                                target)]
+             (if (seq (:children target))
+               (update updated-node :children #(mapv update-node %))
+               updated-node)))]
     (update-node node)))
 
 (defn add-index-ids
   [node generate-order]
-  {:pre [(s/valid? ::spec/node node)
-         (s/valid? ::spec/function generate-order)]
-   :post [(s/valid? ::spec/node %)]}
+  {:pre [(spec/validate ::spec/node node "Invalid node is given.")
+         (spec/validate ::spec/function generate-order
+                        "Invalid generator is given.")]
+   :post [(spec/validate ::spec/node % "Invalid node is returned.")]}
   (letfn [(update-node
            [target]
            (let [updated-node (if (ast/index? target)
@@ -100,19 +88,20 @@
 
 (defn create-order-generator
   ([]
-   {:post [(s/valid? ::spec/function %)]}
+   {:post [(spec/validate ::spec/function % "Invalid generator is returned.")]}
    (create-order-generator 0))
   ([initial-order]
-   {:pre [(s/valid? ::spec/order initial-order)]
-    :post [(s/valid? ::spec/function %)]}
+   {:pre [(spec/validate ::spec/order initial-order "Invalid order is given.")]
+    :post [(spec/validate ::spec/function % "Invalid generator is returned.")]}
    (let [counter (atom initial-order)]
      #(swap! counter inc))))
 
 (defn markdown->ast
   [markdown order-generator]
-  {:pre [(s/valid? ::spec/markdown markdown)
-         (s/valid? ::spec/function order-generator)]
-   :post [(s/valid? ::spec/node %)]}
+  {:pre [(spec/validate ::spec/markdown markdown "Invalid Markdown is given.")
+         (spec/validate ::spec/function order-generator
+                        "Invalid generator is given.")]
+   :post [(spec/validate ::spec/node % "Invalid node is returned.")]}
   (try
     (let [js-ast (esm/from-markdown
                   markdown
@@ -132,9 +121,12 @@
 
 (defn parse-manuscripts
   [manuscripts order-generator]
-  {:pre [(s/valid? ::spec/manuscripts manuscripts)
-         (s/valid? ::spec/function order-generator)]
-   :post [(s/valid? ::spec/documents %)]}
+  {:pre [(spec/validate ::spec/manuscripts manuscripts
+                        "Invalid manuscripts are given.")
+         (spec/validate ::spec/function order-generator
+                        "Invalid generator is given.")]
+   :post [(spec/validate ::spec/documents %
+                         "Invalid documents are returned.")]}
   (vec
    (keep
     (fn [{:keys [name type markdown]}]
@@ -143,11 +135,9 @@
          :type type
          :ast (markdown->ast markdown order-generator)}
         (catch js/Error e
-          (logger/log :error
-                      "Failed to parse markdown."
-                      {:name name
-                       :type type
-                       :markdown markdown
-                       :cause (ex-message e)})
+          (logger/error "Failed to parse markdown."
+                        {:name name
+                         :type type
+                         :cause (ex-message e)})
           nil)))
     manuscripts)))

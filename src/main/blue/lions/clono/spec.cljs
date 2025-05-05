@@ -18,12 +18,21 @@
             [blue.lions.clono.spec.anchor :as anchor]
             [blue.lions.clono.spec.catalog :as catalog]
             [blue.lions.clono.spec.common :as common]
+            [blue.lions.clono.spec.directive :as directive]
             [blue.lions.clono.spec.document :as document]
             [blue.lions.clono.spec.heading :as heading]
             [blue.lions.clono.spec.index :as index]
+            [blue.lions.clono.spec.log :as log]
             [blue.lions.clono.spec.manuscript :as manuscript]
             [blue.lions.clono.spec.node :as node]
             [blue.lions.clono.spec.toc :as toc]))
+
+(defn validate
+  ([spec value message]
+   (validate spec value message :value))
+  ([spec value message key]
+   (or (s/valid? spec value)
+       (throw (ex-info message {key value :spec spec})))))
 
 (s/def ::common/alphabet-string
   (s/and string?
@@ -96,6 +105,17 @@
 (s/def ::dics
   (s/map-of keyword? ::dic))
 
+(def directive_name
+  ::directive-name)
+
+(s/def ::directive/type
+  #{"textDirective" "containerDirective"})
+
+(s/def ::directive-node
+  (s/and ::node
+         (s/keys :req-un [::directive/type
+                          ::directive/name])))
+
 (s/def ::directive-name
   ::common/alphabet-string)
 
@@ -155,6 +175,13 @@
 (s/def ::function-or-nil
   (s/or :function ::function
         :nil nil?))
+
+(s/def ::github-slugger
+  (fn [value]
+    (and (some? value)
+         (not (nil? value))
+         (fn? (.-slug ^js value))
+         (fn? (.-reset ^js value)))))
 
 (s/def ::heading/caption
   ::caption)
@@ -244,13 +271,38 @@
 (s/def ::indices
   (s/coll-of ::index :kind vector?))
 
+(def log_data
+  ::log-data)
+
+(def log_level
+  ::log-level)
+
+(def log_message
+  ::log-message)
+
+(s/def ::log-enabled
+  boolean?)
+
 (s/def ::log-data
   (s/and (s/or :map (s/and map?
                            (s/every-kv keyword? any?))
                :nil nil?)))
 
+(s/def ::log-entries
+  (s/coll-of ::log-entry :kind vector?))
+
+(s/def ::log-entry
+  (s/and (s/keys :req-un [::log/level
+                          ::log/message
+                          ::log/data])
+         #(every? #{:level :message :data} (keys %))))
+
 (s/def ::log-level
-  #{:info :warn :error})
+  #{:debug :info :warn :error})
+
+(s/def ::log-level-value
+  (s/and integer?
+         #(<= 0 % 3)))
 
 (s/def ::log-message
   ::common/non-nil-string)
@@ -356,6 +408,9 @@
 (s/def ::config
   config)
 
+(s/def ::directive/name
+  directive_name)
+
 (s/def ::document/ast
   document_ast)
 
@@ -376,6 +431,15 @@
 
 (s/def ::index/url
   index_url)
+
+(s/def ::log/data
+  log_data)
+
+(s/def ::log/level
+  log_level)
+
+(s/def ::log/message
+  log_message)
 
 (s/def ::manuscript/markdown
   manuscript_markdown)
