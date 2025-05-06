@@ -14,8 +14,8 @@
 
 (ns blue.lions.clono.parse-test
   (:require [cljs.test :as t]
-            [clojure.string :as str]
-            [blue.lions.clono.parse :as parse]))
+            [blue.lions.clono.parse :as parse]
+            [blue.lions.clono.spec :as spec]))
 
 (t/deftest remove-comments-test
   (t/testing "Target is single node."
@@ -94,36 +94,6 @@
              (parse/remove-positions
               {:type "root" :children []})))))
 
-(t/deftest generate-slug-test
-  (t/testing "Caption contains upper case letters."
-    (t/is (= "pascalcase" (parse/generate-slug "PascalCase")))
-    (t/is (= "uppercase" (parse/generate-slug "UPPERCASE"))))
-
-  (t/testing "Caption does not contain upper case letters."
-    (t/is (= "lowercase" (parse/generate-slug "lowercase"))))
-
-  (t/testing "Caption contains symbols."
-    (t/is (= "helloworld" (parse/generate-slug "Hello,World!!")))
-    (t/is (= "334" (parse/generate-slug "33:4"))))
-
-  (t/testing "Caption contains spaces."
-    (t/is (= "1-2-3" (parse/generate-slug "1 2 3"))))
-
-  (t/testing "Caption contains Japanese letters."
-    (t/is (= "日本語" (parse/generate-slug "日本語")))
-    (t/is (= "ａｎｄｒｏｉｄ" (parse/generate-slug "Ａｎｄｒｏｉｄ")))
-    (t/is (= "こんにちは世界" (parse/generate-slug "こんにちは、世界！"))))
-
-  (t/testing "Captions are duplicated."
-    (t/is (= "duplicated" (parse/generate-slug "duplicated")))
-    (t/is (= "duplicated-1" (parse/generate-slug "duplicated"))))
-
-  (t/testing "Caption is invalid."
-    (t/are [caption] (thrown-with-msg? js/Error #"Assert failed:"
-                                       (parse/generate-slug caption))
-      ""
-      nil)))
-
 (t/deftest generate-heading-slug-test
   (t/testing "Node has single text."
     (t/is (= "value2"
@@ -144,13 +114,15 @@
     (let [node {:type "heading" :children [{:type "html" :value "<value>"}]}]
       (try
         (parse/generate-heading-slug node)
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
-          (let [data (ex-data e)]
+          (let [data (ex-data e)
+                cause (:cause data)]
             (t/is (= "Failed to generate heading slug." (ex-message e)))
             (t/is (= node (:node data)))
             (t/is (= "" (:caption data)))
-            (t/is (str/starts-with? (ex-message (:cause data))
-                                    "Assert failed:"))))))))
+            (t/is (= "Invalid caption is given." (ex-message cause)))
+            (t/is (= {:value "" :spec ::spec/caption} (ex-data cause)))))))))
 
 (t/deftest add-heading-slugs-test
   (t/testing "Node has single heading."
@@ -353,8 +325,12 @@
     (t/is (= [] (parse/parse-manuscripts [] (fn [] 1)))))
 
   (t/testing "Order generator is invalid."
-    (t/is (thrown-with-msg? js/Error #"Assert failed:"
-                            (parse/parse-manuscripts [{:name "markdown.md"
-                                                       :type :chapters
-                                                       :markdown "# Markdown"}]
-                                                     nil)))))
+    (try
+      (parse/parse-manuscripts [{:name "markdown.md"
+                                 :type :chapters
+                                 :markdown "# Markdown"}]
+                               nil)
+      (t/is false "Exception should be thrown.")
+      (catch js/Error e
+        (t/is (= "Invalid generator is given." (ex-message e)))
+        (t/is (= {:value nil :spec ::spec/function} (ex-data e)))))))

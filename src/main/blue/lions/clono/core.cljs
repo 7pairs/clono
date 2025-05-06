@@ -16,27 +16,46 @@
   (:require ["path" :as path]
             [blue.lions.clono.analyze :as analyze]
             [blue.lions.clono.file :as file]
+            [blue.lions.clono.log :as logger]
             [blue.lions.clono.parse :as parse]
             [blue.lions.clono.render :as render]
             [blue.lions.clono.transform :as transform]))
 
 (defn -main
   [& args]
-  (let [config (file/read-config-file (path/join js/__dirname "./config.edn"))
-        catalog (file/read-catalog-file (:catalog config))
-        manuscripts (file/read-markdown-files (:manuscripts config) catalog)
-        documents (parse/parse-manuscripts manuscripts
-                                           (parse/create-order-generator))
-        toc-items (analyze/create-toc-items documents)
-        heading-dic (analyze/create-heading-dic documents)
-        footnote-dic (analyze/create-footnote-dic documents)
-        indices (analyze/create-indices documents)
-        updated-documents (transform/transform-documents
-                           documents
-                           {:heading heading-dic :footnote footnote-dic})
-        updated-manuscripts (render/render-documents updated-documents)]
-    (file/write-markdown-files (:output config) updated-manuscripts)
-    (file/write-file (path/join (:output config) "toc.md")
-                     (render/render-toc toc-items))
-    (file/write-file (path/join (:output config) "index.md")
-                     (render/render-index-page indices))))
+  (try
+    (logger/info "Starting document processing...")
+    (logger/info "Reading configuration...")
+    (let [config (file/read-config-file (path/join js/__dirname
+                                                   "./config.edn"))]
+      (logger/info "Reading catalog and markdown files...")
+      (let [catalog (file/read-catalog-file (:catalog config))
+            manuscripts (file/read-markdown-files (:input config) catalog)]
+        (logger/info "Parsing manuscripts...")
+        (let [documents (parse/parse-manuscripts
+                         manuscripts
+                         (parse/create-order-generator))]
+          (logger/info "Analyzing documents...")
+          (let [toc-items (analyze/create-toc-items documents)
+                heading-dic (analyze/create-heading-dic documents)
+                footnote-dic (analyze/create-footnote-dic documents)
+                indices (analyze/create-indices documents)]
+            (logger/info "Transforming documents...")
+            (let [transformed-documents (transform/transform-documents
+                                         documents
+                                         {:heading heading-dic
+                                          :footnote footnote-dic})]
+              (logger/info "Rendering documents...")
+              (let [rendered-documents (render/render-documents
+                                        transformed-documents)]
+                (logger/info "Writing output files...")
+                (file/write-markdown-files (:output config) rendered-documents)
+                (file/write-file (path/join (:output config) "toc.md")
+                                 (render/render-toc toc-items))
+                (file/write-file (path/join (:output config) "index.md")
+                                 (render/render-index-page indices))
+                0))))))
+    (catch js/Error e
+      (logger/error "Error occurred during processing:")
+      (logger/error (ex-message e) (ex-data e))
+      1)))

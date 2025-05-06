@@ -15,30 +15,49 @@
 (ns blue.lions.clono.etc.hook
   (:require [clojure.java.io :as io]))
 
+(defn- validate-resources
+  [resources]
+  (doseq [{:keys [src]} resources]
+    (let [src-file (io/file src)]
+      (when-not (.exists src-file)
+        (let [err-msg (str "Source resource file is not found: "
+                           (.getAbsolutePath src-file))]
+          (println (str "✗ Error: " err-msg))
+          (throw (ex-info err-msg {:src-path (.getAbsolutePath src-file)}))))))
+  resources)
+
 (defn- safe-copy-file
   [src dst]
   (try
     (io/make-parents dst)
     (if (.exists src)
-      (io/copy src dst)
-      (throw (ex-info "Source file is not found."
-                      {:src-path (.getAbsolutePath src)
-                       :dst-path (.getAbsolutePath dst)})))
+      (do
+        (when (and (.exists dst) (not (.isDirectory dst)))
+          (println (str "⚠ Warning: Overwriting existing file: "
+                        (.getAbsolutePath dst))))
+        (io/copy src dst)
+        (println (str "✓ Copied: " (.getName src) " → " (.getName dst))))
+      (let [err-msg (str "Source file is not found: " (.getAbsolutePath src))]
+        (println (str "✗ Error: " err-msg))
+        (throw (ex-info err-msg
+                        {:src-path (.getAbsolutePath src)
+                         :dst-path (.getAbsolutePath dst)}))))
     (catch Exception e
-      (throw (ex-info "Failed to copy file."
-                      {:src-path (.getAbsolutePath src)
-                       :dst-path (.getAbsolutePath dst)
-                       :cause e})))))
+      (let [err-msg (str "Failed to copy file: " (.getName src))]
+        (println (str "✗ Error: " err-msg))
+        (throw (ex-info err-msg
+                        {:src-path (.getAbsolutePath src)
+                         :dst-path (.getAbsolutePath dst)
+                         :cause e}))))))
 
 (defn copy-resources
   {:shadow.build/stage :compile-finish}
-  [build-state & {:keys [resources]
-                  :or {resources [{:src "resources/config.edn"
-                                   :dst "config.edn"}
-                                  {:src "resources/clono.css"
-                                   :dst "clono.css"}]}}]
+  [build-state]
   (let [output-file (:output-to (:node-config build-state))
-        output-dir (.getParentFile output-file)]
-    (doseq [{:keys [src dst]} resources]
+        output-dir (.getParentFile output-file)
+        build-config (:shadow.build/config build-state)
+        resources (get build-config :clono/resources [])
+        validated-resources (validate-resources resources)]
+    (doseq [{:keys [src dst]} validated-resources]
       (safe-copy-file (io/file src) (io/file output-dir dst)))
     build-state))

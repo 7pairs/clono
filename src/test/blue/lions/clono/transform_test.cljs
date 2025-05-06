@@ -14,8 +14,8 @@
 
 (ns blue.lions.clono.transform-test
   (:require [cljs.test :as t]
-            [clojure.string :as str]
             [blue.lions.clono.log :as logger]
+            [blue.lions.clono.spec :as spec]
             [blue.lions.clono.transform :as transform]))
 
 (t/deftest deletable-node?-test
@@ -31,23 +31,27 @@
     (let [node {:value "value"}]
       (try
         (transform/deletable-node? node)
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
-          (let [data (ex-data e)]
+          (let [data (ex-data e)
+                cause (:cause data)]
             (t/is (= "Failed to determine node type." (ex-message e)))
             (t/is (= node (:node data)))
-            (t/is (str/starts-with? (ex-message (:cause data))
-                                    "Assert failed:")))))))
+            (t/is (= "Invalid node is given." (ex-message cause)))
+            (t/is (= {:value node :spec ::spec/node} (ex-data cause))))))))
 
   (t/testing "Node has invalid type."
     (let [node {:type :not-string :value "value"}]
       (try
         (transform/deletable-node? node)
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
-          (let [data (ex-data e)]
+          (let [data (ex-data e)
+                cause (:cause data)]
             (t/is (= "Failed to determine node type." (ex-message e)))
             (t/is (= node (:node data)))
-            (t/is (str/starts-with? (ex-message (:cause data))
-                                    "Assert failed:"))))))))
+            (t/is (= "Invalid node is given." (ex-message cause)))
+            (t/is (= {:value node :spec ::spec/node} (ex-data cause)))))))))
 
 (t/deftest update-node-test
   (t/testing "Node is footnoteReference."
@@ -64,8 +68,8 @@
 
     (t/testing "ID is not found."
       (let [node {:type "footnoteReference" :identifier "id1"}]
-        (reset! logger/enabled? false)
-        (reset! logger/entries [])
+        (logger/set-enabled! false)
+        (logger/reset-entries!)
         (t/is (= {:type "footnoteReference" :identifier "id1" :children []}
                  (transform/update-node
                   node
@@ -74,13 +78,14 @@
         (t/is (= [{:level :error
                    :message "Footnote is not found in dictionary."
                    :data {:key "name1|id1" :node node}}]
-                 @logger/entries))))
+                 (logger/get-entries)))))
 
     (t/testing "Footnote dictionary is not found."
       (let [node {:type "footnoteReference" :identifier "id1"}
             dics {:not-footnote {"key" "value"}}]
         (try
           (transform/update-node node "name" dics)
+          (t/is false "Exception should be thrown.")
           (catch js/Error e
             (let [data (ex-data e)]
               (t/is (= "Footnote dictionary is not found." (ex-message e)))
@@ -96,25 +101,29 @@
     (let [node {:value "value"}]
       (try
         (transform/update-node node "name" {})
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
-          (let [data (ex-data e)]
+          (let [data (ex-data e)
+                cause (:cause data)]
             (t/is (= "Failed to determine node type for update."
                      (ex-message e)))
             (t/is (= node (:node data)))
-            (t/is (str/starts-with? (ex-message (:cause data))
-                                    "Assert failed:")))))))
+            (t/is (= "Invalid node is given." (ex-message cause)))
+            (t/is (= {:value node :spec ::spec/node} (ex-data cause))))))))
 
   (t/testing "Node has invalid type."
     (let [node {:type :not-string :value "value"}]
       (try
         (transform/update-node node "name" {})
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
-          (let [data (ex-data e)]
+          (let [data (ex-data e)
+                cause (:cause data)]
             (t/is (= "Failed to determine node type for update."
                      (ex-message e)))
             (t/is (= node (:node data)))
-            (t/is (str/starts-with? (ex-message (:cause data))
-                                    "Assert failed:"))))))))
+            (t/is (= "Invalid node is given." (ex-message cause)))
+            (t/is (= {:value node :spec ::spec/node} (ex-data cause)))))))))
 
 (t/deftest update-ref-heading-node-test
   (t/testing "Node is refHeading."
@@ -216,8 +225,8 @@
               "refHeadingName"))))
 
   (t/testing "ID is not found."
-    (reset! logger/enabled? false)
-    (reset! logger/entries [])
+    (logger/set-enabled! false)
+    (logger/reset-entries!)
     (t/is (= {:type "textDirective" :name "refHeading" :attributes {:id "id1"}}
              (transform/update-ref-heading-node
               {:type "textDirective"
@@ -237,11 +246,11 @@
                                               :depth 1
                                               :caption "caption1"
                                               :url "url1"}}}}}]
-             @logger/entries)))
+             (logger/get-entries))))
 
   (t/testing "Node does not have ID."
-    (reset! logger/enabled? false)
-    (reset! logger/entries [])
+    (logger/set-enabled! false)
+    (logger/reset-entries!)
     (t/is (= {:type "textDirective" :name "refHeading" :attributes {}}
              (transform/update-ref-heading-node
               {:type "textDirective" :name "refHeading" :attributes {}}
@@ -261,13 +270,14 @@
                                               :depth 1
                                               :caption "caption1"
                                               :url "url1"}}}}}]
-             @logger/entries)))
+             (logger/get-entries))))
 
   (t/testing "Heading dictionary is not found."
     (let [node {:type "refHeading" :attributes {:id "id1"}}
           dics {:not-heading {"key" "value"}}]
       (try
         (transform/update-ref-heading-node node "base-name1" dics "refHeading")
+        (t/is false "Exception should be thrown.")
         (catch js/Error e
           (let [data (ex-data e)]
             (t/is (= "Heading dictionary is not found." (ex-message e)))
@@ -345,8 +355,8 @@
               {}))))
 
   (t/testing "Some documents are invalid."
-    (reset! logger/enabled? false)
-    (reset! logger/entries [])
+    (logger/set-enabled! false)
+    (logger/reset-entries!)
     (t/is (= [{:name "markdown1.md"
                :type :chapters
                :ast {:type "root"
@@ -363,17 +373,17 @@
                 :type :appendices
                 :ast {:type "root" :children ["not-node"]}}]
               {})))
-    (let [entries @logger/entries]
+    (let [entries (logger/get-entries)]
       (t/is (= 1 (count entries)))
       (let [{:keys [level message data]} (first entries)]
         (t/is (= :error level))
         (t/is (= "Failed to transform AST." message))
         (t/is (= "markdown2.md" (:file-name data)))
-        (t/is (str/starts-with? (:cause data) "Assert failed:")))))
+        (t/is (= "Invalid node is given." (:cause data))))))
 
-  (t/testing "All documents are invalid"
-    (reset! logger/enabled? false)
-    (reset! logger/entries [])
+  (t/testing "All documents are invalid."
+    (logger/set-enabled! false)
+    (logger/reset-entries!)
     (t/is (= []
              (transform/transform-documents
               [{:name "markdown1.md"
@@ -384,15 +394,15 @@
                 :ast {:type "root"
                       :children ["not-node"]}}]
               {})))
-    (let [entries @logger/entries]
+    (let [entries (logger/get-entries)]
       (t/is (= 2 (count entries)))
       (let [{:keys [level message data]} (first entries)]
         (t/is (= :error level))
         (t/is (= "Failed to transform AST." message))
         (t/is (= "markdown1.md" (:file-name data)))
-        (t/is (str/starts-with? (:cause data) "Assert failed:")))
+        (t/is (= "Invalid node is given." (:cause data))))
       (let [{:keys [level message data]} (second entries)]
         (t/is (= :error level))
         (t/is (= "Failed to transform AST." message))
         (t/is (= "markdown2.md" (:file-name data)))
-        (t/is (str/starts-with? (:cause data) "Assert failed:"))))))
+        (t/is (= "Invalid node is given." (:cause data)))))))
