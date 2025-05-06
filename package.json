@@ -1,6 +1,6 @@
 {
   "name": "clono",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "An extension tool for Vivliostyle Flavored Markdown that adds powerful features for technical book writing, including cross-references to headings, figures, tables and code blocks, footnotes, and automatic index generation for CSS typesetting with Vivliostyle.",
   "main": "out/clono.js",
@@ -32,6 +32,6 @@
     "micromark-extension-gfm-footnote": "^2.1.0"
   },
   "devDependencies": {
-    "shadow-cljs": "^2.28.23"
+    "shadow-cljs": "^3.0.4"
   }
 }
