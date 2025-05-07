@@ -139,6 +139,14 @@
    :post [(spec/validate ::spec/pred-result % "Invalid result is returned.")]}
   (boolean (re-matches #"^[ -~].*" ruby)))
 
+(defn lowercase->uppercase
+  [ruby]
+  {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
+   :post [(spec/validate ::spec/ruby % "Invalid ruby is returned.")]}
+  ; Convert lowercase Latin characters to uppercase while preserving uppercase
+  ; letters, symbols, and non-Latin characters such as Japanese.
+  (str/replace ruby #"[a-z]" #(.toUpperCase %)))
+
 (def ^:private seion-map
   {"ゔ" "う"
    "ぁ" "あ" "ぃ" "い" "ぅ" "う" "ぇ" "え" "ぉ" "お"

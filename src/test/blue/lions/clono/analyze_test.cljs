@@ -421,6 +421,18 @@
       "ルビ"
       "ルビruby"))
 
+(t/deftest lowercase->uppercase-test
+  (t/testing "Lowercase is given."
+    (t/is (= "RUBY" (analyze/lowercase->uppercase "ruby")))
+    (t/is (= "RUBY" (analyze/lowercase->uppercase "Ruby")))
+    (t/is (= "RUBYルビ" (analyze/lowercase->uppercase "rubyルビ")))
+    (t/is (= "ルビRUBY" (analyze/lowercase->uppercase "ルビruby"))))
+
+  (t/testing "Lowercase is not given."
+    (t/is (= "RUBY" (analyze/lowercase->uppercase "RUBY")))
+    (t/is (= "RUBYルビ" (analyze/lowercase->uppercase "RUBYルビ")))
+    (t/is (= "ルビRUBY" (analyze/lowercase->uppercase "ルビRUBY")))))
+
 (t/deftest non-seion->seion-test
   (t/testing "Seion is given."
     (t/is (= "あいうえお" (analyze/non-seion->seion "あいうえお"))))
