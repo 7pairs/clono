@@ -433,6 +433,31 @@
     (t/is (= "RUBYルビ" (analyze/lowercase->uppercase "RUBYルビ")))
     (t/is (= "ルビRUBY" (analyze/lowercase->uppercase "ルビRUBY")))))
 
+(t/deftest katakana->hiragana-test
+  (t/testing "Katakana is given."
+    (t/is (= "あいゔえお" (analyze/katakana->hiragana "アイヴエオ")))
+    (t/is (= "がぎぐげご" (analyze/katakana->hiragana "ガギグゲゴ")))
+    (t/is (= "ざじずぜぞ" (analyze/katakana->hiragana "ザジズゼゾ")))
+    (t/is (= "だぢづでど" (analyze/katakana->hiragana "ダヂヅデド")))
+    (t/is (= "ばびぶべぼ" (analyze/katakana->hiragana "バビブベボ")))
+    (t/is (= "ぱぴぷぺぽ" (analyze/katakana->hiragana "パピプペポ")))
+    (t/is (= "ゃゅょ" (analyze/katakana->hiragana "ャュョ")))
+    (t/is (= "ゎをん" (analyze/katakana->hiragana "ヮヲン")))
+    (t/is (= "たちってと" (analyze/katakana->hiragana "タチッテト")))
+    (t/is (= "ぁぃぅぇぉ" (analyze/katakana->hiragana "ァィゥェォ"))))
+
+  (t/testing "Katakana and hiragana are given."
+    (t/is (= "あいうえお" (analyze/katakana->hiragana "アいウえオ"))))
+
+  (t/testing "Katakana and English are given."
+    (t/is (= "あいうえおruby" (analyze/katakana->hiragana "アイウエオruby")))
+    (t/is (= "rubyあいうえお" (analyze/katakana->hiragana "rubyアいウえオ"))))
+
+  (t/testing "Katakana is not given."
+    (t/is (= "あいうえお" (analyze/katakana->hiragana "あいうえお")))
+    (t/is (= "あいうえおruby" (analyze/katakana->hiragana "あいうえおruby")))
+    (t/is (= "rubyあいうえお" (analyze/katakana->hiragana "rubyあいうえお")))))
+
 (t/deftest non-seion->seion-test
   (t/testing "Seion is given."
     (t/is (= "あいうえお" (analyze/non-seion->seion "あいうえお"))))

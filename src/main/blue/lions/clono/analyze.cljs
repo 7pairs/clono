@@ -147,6 +147,23 @@
   ; letters, symbols, and non-Latin characters such as Japanese.
   (str/replace ruby #"[a-z]" #(.toUpperCase %)))
 
+(defn katakana->hiragana
+  [ruby]
+  {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
+   :post [(spec/validate ::spec/ruby % "Invalid ruby is returned.")]}
+  ; Converts Katakana characters to their Hiragana equivalents while preserving
+  ; other characters (hiragana, Latin characters, symbols, etc.)
+  ; Uses Unicode code point mapping (U+30A1-U+30F6 -> U+3041-U+3096)
+  (let [katakana-range #js [0x30A1 0x30F6]
+        hiragana-range #js [0x3041 0x3096]
+        offset (- (aget hiragana-range 0) (aget katakana-range 0))]
+    (str/replace ruby
+                 #"[\u30A1-\u30F6]"
+                 (fn [ch]
+                   (let [code (.charCodeAt ch 0)
+                         new-code (+ code offset)]
+                     (.fromCharCode js/String new-code))))))
+
 (def ^:private seion-map
   {"ゔ" "う"
    "ぁ" "あ" "ぃ" "い" "ぅ" "う" "ぇ" "え" "ぉ" "お"
