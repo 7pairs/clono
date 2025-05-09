@@ -243,22 +243,33 @@
                     {:ruby ruby :cause (ex-message e)})
       ruby)))
 
+(defn normalize-ruby
+  [ruby]
+  {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
+   :post [(spec/validate ::spec/ruby % "Invalid ruby is returned.")]}
+  ; Normalizes ruby string by:
+  ; 1. Converting lowercase letters to uppercase
+  ; 2. Applying Japanese normalization (katakana to hiragana, etc.)
+  (-> ruby
+      lowercase->uppercase
+      normalize-japanese-ruby))
+
 (defn ruby->caption
   [ruby]
   {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
    :post [(spec/validate ::spec/caption % "Invalid caption is returned.")]}
   (cond
     (english-ruby? ruby) "英数字"
-    (#{"あ" "い" "う" "え" "お"} (subs (normalize-hiragana ruby) 0 1)) "あ行"
-    (#{"か" "き" "く" "け" "こ"} (subs (normalize-hiragana ruby) 0 1)) "か行"
-    (#{"さ" "し" "す" "せ" "そ"} (subs (normalize-hiragana ruby) 0 1)) "さ行"
-    (#{"た" "ち" "つ" "て" "と"} (subs (normalize-hiragana ruby) 0 1)) "た行"
-    (#{"な" "に" "ぬ" "ね" "の"} (subs (normalize-hiragana ruby) 0 1)) "な行"
-    (#{"は" "ひ" "ふ" "へ" "ほ"} (subs (normalize-hiragana ruby) 0 1)) "は行"
-    (#{"ま" "み" "む" "め" "も"} (subs (normalize-hiragana ruby) 0 1)) "ま行"
-    (#{"や" "ゆ" "よ"} (subs (normalize-hiragana ruby) 0 1)) "や行"
-    (#{"ら" "り" "る" "れ" "ろ"} (subs (normalize-hiragana ruby) 0 1)) "ら行"
-    (#{"わ" "を" "ん"} (subs (normalize-hiragana ruby) 0 1)) "わ行"
+    (#{"あ" "い" "う" "え" "お"} (subs (normalize-ruby ruby) 0 1)) "あ行"
+    (#{"か" "き" "く" "け" "こ"} (subs (normalize-ruby ruby) 0 1)) "か行"
+    (#{"さ" "し" "す" "せ" "そ"} (subs (normalize-ruby ruby) 0 1)) "さ行"
+    (#{"た" "ち" "つ" "て" "と"} (subs (normalize-ruby ruby) 0 1)) "た行"
+    (#{"な" "に" "ぬ" "ね" "の"} (subs (normalize-ruby ruby) 0 1)) "な行"
+    (#{"は" "ひ" "ふ" "へ" "ほ"} (subs (normalize-ruby ruby) 0 1)) "は行"
+    (#{"ま" "み" "む" "め" "も"} (subs (normalize-ruby ruby) 0 1)) "ま行"
+    (#{"や" "ゆ" "よ"} (subs (normalize-ruby ruby) 0 1)) "や行"
+    (#{"ら" "り" "る" "れ" "ろ"} (subs (normalize-ruby ruby) 0 1)) "ら行"
+    (#{"わ" "を" "ん"} (subs (normalize-ruby ruby) 0 1)) "わ行"
     :else "その他"))
 
 (defn insert-row-captions
@@ -290,7 +301,7 @@
                          (build-index-entry base-name index)))
         ruby-cache (reduce (fn [cache {:keys [ruby]}]
                              (assoc cache ruby
-                                    {:normalized (normalize-hiragana ruby)
+                                    {:normalized (normalize-ruby ruby)
                                      :is-english (english-ruby? ruby)}))
                            {}
                            entries)]

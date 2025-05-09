@@ -534,6 +534,25 @@
     (t/is (= "ああ" (analyze/normalize-japanese-ruby "アー")))
     (t/is (= "あいうえお" (analyze/normalize-japanese-ruby "アいウえオ")))))
 
+(t/deftest normalize-ruby-test
+  (t/testing "Lowercase is given."
+    (t/is (= "RUBY" (analyze/normalize-ruby "ruby"))))
+
+  (t/testing "Uppercase is given."
+    (t/is (= "RUBY" (analyze/normalize-ruby "RUBY"))))
+
+  (t/testing "Katakana is given."
+    (t/is (= "るひ" (analyze/normalize-ruby "ルビ"))))
+
+  (t/testing "Hiragana is given."
+    (t/is (= "かき" (analyze/normalize-ruby "がぎ"))))
+
+  (t/testing "English and Japanese are given."
+    (t/is (= "RUBYかき" (analyze/normalize-ruby "rubyガギ")))
+    (t/is (= "RUBYかき" (analyze/normalize-ruby "RUBYかき")))
+    (t/is (= "RUBYかあ" (analyze/normalize-ruby "rubyかー")))
+    (t/is (= "RUBYかつ" (analyze/normalize-ruby "rubyかっ")))))
+
 (t/deftest ruby->caption-test
   (t/testing "Ruby is English."
     (t/is (= "英数字" (analyze/ruby->caption "ruby"))))
