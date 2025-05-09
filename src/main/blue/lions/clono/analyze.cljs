@@ -16,6 +16,7 @@
   (:require [clojure.string :as str]
             [blue.lions.clono.ast :as ast]
             [blue.lions.clono.identifier :as id]
+            [blue.lions.clono.log :as logger]
             [blue.lions.clono.spec :as spec]))
 
 (defn create-toc-item
@@ -222,14 +223,25 @@
                    (let [normalized (get seion-map current current)]
                      (recur (conj result normalized) next-chars)))))))))
 
-(defn normalize-hiragana
+(defn normalize-japanese-ruby
   [ruby]
   {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
    :post [(spec/validate ::spec/ruby % "Invalid ruby is returned.")]}
-  (let [normalized (.normalize ruby "NFKC")]
-    (-> normalized
-        non-seion->seion
-        onbiki->vowel)))
+  ; Normalizes Japanese ruby by:
+  ; 1. Normalizing Unicode characters (NFKC)
+  ; 2. Converting katakana to hiragana
+  ; 3. Converting non-seion characters (dakuon, handakuon, etc.) to seion
+  ; 4. Converting prolonged sound marks (onbiki) to appropriate vowels
+  (try
+    (let [normalized (.normalize ruby "NFKC")]
+      (-> normalized
+          katakana->hiragana
+          non-seion->seion
+          onbiki->vowel))
+    (catch js/Error e
+      (logger/error "Failed to normalize ruby."
+                    {:ruby ruby :cause (ex-message e)})
+      ruby)))
 
 (defn ruby->caption
   [ruby]
