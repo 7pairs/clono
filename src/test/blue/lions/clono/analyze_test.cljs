@@ -421,6 +421,44 @@
       "ルビ"
       "ルビruby"))
 
+(t/deftest lowercase->uppercase-test
+  (t/testing "Lowercase is given."
+    (t/is (= "RUBY" (analyze/lowercase->uppercase "ruby")))
+    (t/is (= "RUBY" (analyze/lowercase->uppercase "Ruby")))
+    (t/is (= "RUBYルビ" (analyze/lowercase->uppercase "rubyルビ")))
+    (t/is (= "ルビRUBY" (analyze/lowercase->uppercase "ルビruby"))))
+
+  (t/testing "Lowercase is not given."
+    (t/is (= "RUBY" (analyze/lowercase->uppercase "RUBY")))
+    (t/is (= "RUBYルビ" (analyze/lowercase->uppercase "RUBYルビ")))
+    (t/is (= "ルビRUBY" (analyze/lowercase->uppercase "ルビRUBY")))))
+
+(t/deftest katakana->hiragana-test
+  (t/testing "Katakana is given."
+    (t/is (= "あいゔえお" (analyze/katakana->hiragana "アイヴエオ")))
+    (t/is (= "がぎぐげご" (analyze/katakana->hiragana "ガギグゲゴ")))
+    (t/is (= "ざじずぜぞ" (analyze/katakana->hiragana "ザジズゼゾ")))
+    (t/is (= "だぢづでど" (analyze/katakana->hiragana "ダヂヅデド")))
+    (t/is (= "ばびぶべぼ" (analyze/katakana->hiragana "バビブベボ")))
+    (t/is (= "ぱぴぷぺぽ" (analyze/katakana->hiragana "パピプペポ")))
+    (t/is (= "ゃゅょ" (analyze/katakana->hiragana "ャュョ")))
+    (t/is (= "ゎをん" (analyze/katakana->hiragana "ヮヲン")))
+    (t/is (= "たちってと" (analyze/katakana->hiragana "タチッテト")))
+    (t/is (= "ぁぃぅぇぉ" (analyze/katakana->hiragana "ァィゥェォ")))
+    (t/is (= "あー" (analyze/katakana->hiragana "アー"))))
+
+  (t/testing "Katakana and hiragana are given."
+    (t/is (= "あいうえお" (analyze/katakana->hiragana "アいウえオ"))))
+
+  (t/testing "Katakana and English are given."
+    (t/is (= "あいうえおruby" (analyze/katakana->hiragana "アイウエオruby")))
+    (t/is (= "rubyあいうえお" (analyze/katakana->hiragana "rubyアいウえオ"))))
+
+  (t/testing "Katakana is not given."
+    (t/is (= "あいうえお" (analyze/katakana->hiragana "あいうえお")))
+    (t/is (= "あいうえおruby" (analyze/katakana->hiragana "あいうえおruby")))
+    (t/is (= "rubyあいうえお" (analyze/katakana->hiragana "rubyあいうえお")))))
+
 (t/deftest non-seion->seion-test
   (t/testing "Seion is given."
     (t/is (= "あいうえお" (analyze/non-seion->seion "あいうえお"))))
@@ -454,34 +492,67 @@
   (t/testing "Onbiki is not given."
     (t/is (= "あいうえお" (analyze/onbiki->vowel "あいうえお")))))
 
-(t/deftest normalize-hiragana-test
+(t/deftest normalize-japanese-ruby-test
   (t/testing "Seion is given."
-    (t/is (= "あいうえお" (analyze/normalize-hiragana "あいうえお"))))
+    (t/is (= "あいうえお" (analyze/normalize-japanese-ruby "あいうえお"))))
 
   (t/testing "Dakuon is given."
-    (t/is (= "あいうえお" (analyze/normalize-hiragana "あいゔえお")))
-    (t/is (= "かきくけこ" (analyze/normalize-hiragana "がぎぐげご")))
-    (t/is (= "さしすせそ" (analyze/normalize-hiragana "ざじずぜぞ")))
-    (t/is (= "たちつてと" (analyze/normalize-hiragana "だぢづでど")))
-    (t/is (= "はひふへほ" (analyze/normalize-hiragana "ばびぶべぼ"))))
+    (t/is (= "あいうえお" (analyze/normalize-japanese-ruby "あいゔえお")))
+    (t/is (= "かきくけこ" (analyze/normalize-japanese-ruby "がぎぐげご")))
+    (t/is (= "さしすせそ" (analyze/normalize-japanese-ruby "ざじずぜぞ")))
+    (t/is (= "たちつてと" (analyze/normalize-japanese-ruby "だぢづでど")))
+    (t/is (= "はひふへほ" (analyze/normalize-japanese-ruby "ばびぶべぼ"))))
 
   (t/testing "Handakuon is given."
-    (t/is (= "はひふへほ" (analyze/normalize-hiragana "ぱぴぷぺぽ"))))
+    (t/is (= "はひふへほ" (analyze/normalize-japanese-ruby "ぱぴぷぺぽ"))))
 
   (t/testing "Youon is given."
-    (t/is (= "やゆよ" (analyze/normalize-hiragana "ゃゅょ")))
-    (t/is (= "わをん" (analyze/normalize-hiragana "ゎをん"))))
+    (t/is (= "やゆよ" (analyze/normalize-japanese-ruby "ゃゅょ")))
+    (t/is (= "わをん" (analyze/normalize-japanese-ruby "ゎをん"))))
 
   (t/testing "Sokuon is given."
-    (t/is (= "たちつてと" (analyze/normalize-hiragana "たちってと"))))
+    (t/is (= "たちつてと" (analyze/normalize-japanese-ruby "たちってと"))))
 
   (t/testing "Kogakimoji is given."
-    (t/is (= "あいうえお" (analyze/normalize-hiragana "ぁぃぅぇぉ"))))
+    (t/is (= "あいうえお" (analyze/normalize-japanese-ruby "ぁぃぅぇぉ"))))
 
   (t/testing "Onbiki is given."
-    (t/is (= "ああ" (analyze/normalize-hiragana "あー")))
-    (t/is (= "きい" (analyze/normalize-hiragana "きー")))
-    (t/is (= "くう" (analyze/normalize-hiragana "ぐー")))))
+    (t/is (= "ああ" (analyze/normalize-japanese-ruby "あー")))
+    (t/is (= "きい" (analyze/normalize-japanese-ruby "きー")))
+    (t/is (= "くう" (analyze/normalize-japanese-ruby "ぐー"))))
+
+  (t/testing "Katakana is given."
+    (t/is (= "あいうえお" (analyze/normalize-japanese-ruby "アイヴエオ")))
+    (t/is (= "かきくけこ" (analyze/normalize-japanese-ruby "ガギグゲゴ")))
+    (t/is (= "さしすせそ" (analyze/normalize-japanese-ruby "ザジズゼゾ")))
+    (t/is (= "たちつてと" (analyze/normalize-japanese-ruby "ダヂヅデド")))
+    (t/is (= "はひふへほ" (analyze/normalize-japanese-ruby "バビブベボ")))
+    (t/is (= "はひふへほ" (analyze/normalize-japanese-ruby "パピプペポ")))
+    (t/is (= "やゆよ" (analyze/normalize-japanese-ruby "ャュョ")))
+    (t/is (= "わをん" (analyze/normalize-japanese-ruby "ヮヲン")))
+    (t/is (= "たちつてと" (analyze/normalize-japanese-ruby "タチッテト")))
+    (t/is (= "あいうえお" (analyze/normalize-japanese-ruby "ァィゥェォ")))
+    (t/is (= "ああ" (analyze/normalize-japanese-ruby "アー")))
+    (t/is (= "あいうえお" (analyze/normalize-japanese-ruby "アいウえオ")))))
+
+(t/deftest normalize-ruby-test
+  (t/testing "Lowercase is given."
+    (t/is (= "RUBY" (analyze/normalize-ruby "ruby"))))
+
+  (t/testing "Uppercase is given."
+    (t/is (= "RUBY" (analyze/normalize-ruby "RUBY"))))
+
+  (t/testing "Katakana is given."
+    (t/is (= "るひ" (analyze/normalize-ruby "ルビ"))))
+
+  (t/testing "Hiragana is given."
+    (t/is (= "かき" (analyze/normalize-ruby "がぎ"))))
+
+  (t/testing "English and Japanese are given."
+    (t/is (= "RUBYかき" (analyze/normalize-ruby "rubyガギ")))
+    (t/is (= "RUBYかき" (analyze/normalize-ruby "RUBYかき")))
+    (t/is (= "RUBYかあ" (analyze/normalize-ruby "rubyかー")))
+    (t/is (= "RUBYかつ" (analyze/normalize-ruby "rubyかっ")))))
 
 (t/deftest ruby->caption-test
   (t/testing "Ruby is English."

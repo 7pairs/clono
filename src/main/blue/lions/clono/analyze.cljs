@@ -16,6 +16,7 @@
   (:require [clojure.string :as str]
             [blue.lions.clono.ast :as ast]
             [blue.lions.clono.identifier :as id]
+            [blue.lions.clono.log :as logger]
             [blue.lions.clono.spec :as spec]))
 
 (defn create-toc-item
@@ -139,6 +140,31 @@
    :post [(spec/validate ::spec/pred-result % "Invalid result is returned.")]}
   (boolean (re-matches #"^[ -~].*" ruby)))
 
+(defn lowercase->uppercase
+  [ruby]
+  {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
+   :post [(spec/validate ::spec/ruby % "Invalid ruby is returned.")]}
+  ; Convert lowercase Latin characters to uppercase while preserving uppercase
+  ; letters, symbols, and non-Latin characters such as Japanese.
+  (str/replace ruby #"[a-z]" #(.toUpperCase %)))
+
+(defn katakana->hiragana
+  [ruby]
+  {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
+   :post [(spec/validate ::spec/ruby % "Invalid ruby is returned.")]}
+  ; Converts Katakana characters to their Hiragana equivalents while preserving
+  ; other characters (hiragana, Latin characters, symbols, etc.)
+  ; Uses Unicode code point mapping (U+30A1-U+30F6 -> U+3041-U+3096)
+  (let [katakana-range #js [0x30A1 0x30F6]
+        hiragana-range #js [0x3041 0x3096]
+        offset (- (aget hiragana-range 0) (aget katakana-range 0))]
+    (str/replace ruby
+                 #"[\u30A1-\u30F6]"
+                 (fn [ch]
+                   (let [code (.charCodeAt ch 0)
+                         new-code (+ code offset)]
+                     (.fromCharCode js/String new-code))))))
+
 (def ^:private seion-map
   {"ゔ" "う"
    "ぁ" "あ" "ぃ" "い" "ぅ" "う" "ぇ" "え" "ぉ" "お"
@@ -197,14 +223,40 @@
                    (let [normalized (get seion-map current current)]
                      (recur (conj result normalized) next-chars)))))))))
 
-(defn normalize-hiragana
+(defn normalize-japanese-ruby
   [ruby]
   {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
    :post [(spec/validate ::spec/ruby % "Invalid ruby is returned.")]}
-  (let [normalized (.normalize ruby "NFKC")]
-    (-> normalized
-        non-seion->seion
-        onbiki->vowel)))
+  ; Normalizes Japanese ruby by:
+  ; 1. Normalizing Unicode characters (NFKC)
+  ; 2. Converting katakana to hiragana
+  ; 3. Converting non-seion characters (dakuon, handakuon, etc.) to seion
+  ; 4. Converting prolonged sound marks (onbiki) to appropriate vowels
+  (try
+    (let [normalized (.normalize ruby "NFKC")]
+      (-> normalized
+          katakana->hiragana
+          non-seion->seion
+          onbiki->vowel))
+    (catch js/Error e
+      (logger/error "Failed to normalize ruby."
+                    {:ruby ruby :cause (ex-message e)})
+      ruby)))
+
+(defn normalize-ruby
+  [ruby]
+  {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
+   :post [(spec/validate ::spec/ruby % "Invalid ruby is returned.")]}
+  ; Normalizes ruby string by:
+  ; 1. Converting lowercase letters to uppercase
+  ; 2. Applying Japanese normalization (katakana to hiragana, etc.)
+  ; Note: The order of these operations is arbitrary and could be reversed
+  ; without affecting the end result, as they operate on different character
+  ; sets.
+  ; Example: "rubyルビ" -> "RUBYるび" -> "RUBYるひ"
+  (-> ruby
+      lowercase->uppercase
+      normalize-japanese-ruby))
 
 (defn ruby->caption
   [ruby]
@@ -212,16 +264,16 @@
    :post [(spec/validate ::spec/caption % "Invalid caption is returned.")]}
   (cond
     (english-ruby? ruby) "英数字"
-    (#{"あ" "い" "う" "え" "お"} (subs (normalize-hiragana ruby) 0 1)) "あ行"
-    (#{"か" "き" "く" "け" "こ"} (subs (normalize-hiragana ruby) 0 1)) "か行"
-    (#{"さ" "し" "す" "せ" "そ"} (subs (normalize-hiragana ruby) 0 1)) "さ行"
-    (#{"た" "ち" "つ" "て" "と"} (subs (normalize-hiragana ruby) 0 1)) "た行"
-    (#{"な" "に" "ぬ" "ね" "の"} (subs (normalize-hiragana ruby) 0 1)) "な行"
-    (#{"は" "ひ" "ふ" "へ" "ほ"} (subs (normalize-hiragana ruby) 0 1)) "は行"
-    (#{"ま" "み" "む" "め" "も"} (subs (normalize-hiragana ruby) 0 1)) "ま行"
-    (#{"や" "ゆ" "よ"} (subs (normalize-hiragana ruby) 0 1)) "や行"
-    (#{"ら" "り" "る" "れ" "ろ"} (subs (normalize-hiragana ruby) 0 1)) "ら行"
-    (#{"わ" "を" "ん"} (subs (normalize-hiragana ruby) 0 1)) "わ行"
+    (#{"あ" "い" "う" "え" "お"} (subs (normalize-ruby ruby) 0 1)) "あ行"
+    (#{"か" "き" "く" "け" "こ"} (subs (normalize-ruby ruby) 0 1)) "か行"
+    (#{"さ" "し" "す" "せ" "そ"} (subs (normalize-ruby ruby) 0 1)) "さ行"
+    (#{"た" "ち" "つ" "て" "と"} (subs (normalize-ruby ruby) 0 1)) "た行"
+    (#{"な" "に" "ぬ" "ね" "の"} (subs (normalize-ruby ruby) 0 1)) "な行"
+    (#{"は" "ひ" "ふ" "へ" "ほ"} (subs (normalize-ruby ruby) 0 1)) "は行"
+    (#{"ま" "み" "む" "め" "も"} (subs (normalize-ruby ruby) 0 1)) "ま行"
+    (#{"や" "ゆ" "よ"} (subs (normalize-ruby ruby) 0 1)) "や行"
+    (#{"ら" "り" "る" "れ" "ろ"} (subs (normalize-ruby ruby) 0 1)) "ら行"
+    (#{"わ" "を" "ん"} (subs (normalize-ruby ruby) 0 1)) "わ行"
     :else "その他"))
 
 (defn insert-row-captions
@@ -253,7 +305,7 @@
                          (build-index-entry base-name index)))
         ruby-cache (reduce (fn [cache {:keys [ruby]}]
                              (assoc cache ruby
-                                    {:normalized (normalize-hiragana ruby)
+                                    {:normalized (normalize-ruby ruby)
                                      :is-english (english-ruby? ruby)}))
                            {}
                            entries)]
