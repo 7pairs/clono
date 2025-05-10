@@ -444,7 +444,8 @@
     (t/is (= "ゃゅょ" (analyze/katakana->hiragana "ャュョ")))
     (t/is (= "ゎをん" (analyze/katakana->hiragana "ヮヲン")))
     (t/is (= "たちってと" (analyze/katakana->hiragana "タチッテト")))
-    (t/is (= "ぁぃぅぇぉ" (analyze/katakana->hiragana "ァィゥェォ"))))
+    (t/is (= "ぁぃぅぇぉ" (analyze/katakana->hiragana "ァィゥェォ")))
+    (t/is (= "あー" (analyze/katakana->hiragana "アー"))))
 
   (t/testing "Katakana and hiragana are given."
     (t/is (= "あいうえお" (analyze/katakana->hiragana "アいウえオ"))))

@@ -250,6 +250,10 @@
   ; Normalizes ruby string by:
   ; 1. Converting lowercase letters to uppercase
   ; 2. Applying Japanese normalization (katakana to hiragana, etc.)
+  ; Note: The order of these operations is arbitrary and could be reversed
+  ; without affecting the end result, as they operate on different character
+  ; sets.
+  ; Example: "rubyルビ" -> "RUBYるび" -> "RUBYるひ"
   (-> ruby
       lowercase->uppercase
       normalize-japanese-ruby))
