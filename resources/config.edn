@@ -1,3 +1,38 @@
 {:catalog "<YOUR CATALOG FILE PATH>"
  :input "<YOUR INPUT DIRECTORY PATH>"
- :output "<YOUR OUTPUT DIRECTORY PATH>"}
+ :output "<YOUR OUTPUT DIRECTORY PATH>"
+ :index-groups [{:caption "英数字"
+                 :pattern "^[ -~].*"
+                 :type :english}
+                {:caption "あ行"
+                 :pattern "^[あいうえお].*"
+                 :type :japanese}
+                {:caption "か行"
+                 :pattern "^[かきくけこ].*"
+                 :type :japanese}
+                {:caption "さ行"
+                 :pattern "^[さしすせそ].*"
+                 :type :japanese}
+                {:caption "た行"
+                 :pattern "^[たちつてと].*"
+                 :type :japanese}
+                {:caption "な行"
+                 :pattern "^[なにぬねの].*"
+                 :type :japanese}
+                {:caption "は行"
+                 :pattern "^[はひふへほ].*"
+                 :type :japanese}
+                {:caption "ま行"
+                 :pattern "^[まみむめも].*"
+                 :type :japanese}
+                {:caption "や行"
+                 :pattern "^[やゆよ].*"
+                 :type :japanese}
+                {:caption "ら行"
+                 :pattern "^[らりるれろ].*"
+                 :type :japanese}
+                {:caption "わ行"
+                 :pattern "^[わをん].*"
+                 :type :japanese}
+                {:caption "その他"
+                 :default true}]}
