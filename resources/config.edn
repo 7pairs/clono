@@ -3,36 +3,36 @@
  :output "<YOUR OUTPUT DIRECTORY PATH>"
  :index-groups [{:caption "英数字"
                  :pattern "^[ -~].*"
-                 :type :english}
+                 :language :english}
                 {:caption "あ行"
                  :pattern "^[あいうえお].*"
-                 :type :japanese}
+                 :language :japanese}
                 {:caption "か行"
                  :pattern "^[かきくけこ].*"
-                 :type :japanese}
+                 :language :japanese}
                 {:caption "さ行"
                  :pattern "^[さしすせそ].*"
-                 :type :japanese}
+                 :language :japanese}
                 {:caption "た行"
                  :pattern "^[たちつてと].*"
-                 :type :japanese}
+                 :language :japanese}
                 {:caption "な行"
                  :pattern "^[なにぬねの].*"
-                 :type :japanese}
+                 :language :japanese}
                 {:caption "は行"
                  :pattern "^[はひふへほ].*"
-                 :type :japanese}
+                 :language :japanese}
                 {:caption "ま行"
                  :pattern "^[まみむめも].*"
-                 :type :japanese}
+                 :language :japanese}
                 {:caption "や行"
                  :pattern "^[やゆよ].*"
-                 :type :japanese}
+                 :language :japanese}
                 {:caption "ら行"
                  :pattern "^[らりるれろ].*"
-                 :type :japanese}
+                 :language :japanese}
                 {:caption "わ行"
                  :pattern "^[わをん].*"
-                 :type :japanese}
+                 :language :japanese}
                 {:caption "その他"
                  :default true}]}
