@@ -225,8 +225,20 @@
   (s/or :id ::id
         :nil nil?))
 
+(s/def ::index/caption
+  ::caption)
+
+(s/def ::index/default
+  boolean?)
+
+(s/def ::index/language
+  #{:english :japanese})
+
 (def index_order
   ::order)
+
+(s/def ::index/pattern
+  #(instance? js/RegExp %))
 
 (def index_ruby
   ::ruby)
@@ -259,6 +271,17 @@
                           ::index/ruby
                           ::index/url])
          #(every? #{:order :text :ruby :url} (keys %))))
+
+(s/def ::index-group
+  (s/and (s/keys :req-un [::index/caption]
+                 :opt-un [::index/pattern
+                          ::index/language
+                          ::index/default])
+         #(or (:pattern %) (:default %))
+         #(every? #{:caption :pattern :language :default} (keys %))))
+
+(s/def ::index-groups
+  (s/coll-of ::index-group :kind vector?))
 
 (s/def ::index-item
   (s/and (s/keys :req-un [::index/type

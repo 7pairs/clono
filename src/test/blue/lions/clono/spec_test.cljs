@@ -880,6 +880,40 @@
       ""
       :not-string)))
 
+(t/deftest index_caption-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::index/caption "caption")))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::index/caption value))
+      ""
+      :not-string
+      nil)))
+
+(t/deftest index_default-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::index/default value)
+      true
+      false))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::index/default value))
+      "true"
+      :false
+      nil)))
+
+(t/deftest index_language-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::index/language value)
+      :english
+      :japanese))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::index/language value))
+      :invalid
+      "english"
+      nil)))
+
 (t/deftest index_order-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::index/order value)
@@ -892,6 +926,17 @@
       -1
       2.5
       "1"
+      nil)))
+
+(t/deftest index_pattern-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::index/pattern value)
+      #"pattern"
+      (re-pattern "pattern")))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::index/pattern value))
+      "pattern"
       nil)))
 
 (t/deftest index_ruby-test
@@ -1031,6 +1076,89 @@
        :extra-key "extra-value"}
       {:extra-key "extra-value"}
       "not-map"
+      nil)))
+
+(t/deftest index-group-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/index-group value)
+      {:caption "caption"
+       :pattern #"pattern"
+       :language :english
+       :default true}
+      {:caption "caption" :language :english :default true}
+      {:caption "caption" :pattern #"pattern" :default true}
+      {:caption "caption" :pattern #"pattern" :language :english}
+      {:caption "caption" :pattern #"pattern"}
+      {:caption "caption" :default true}))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/index-group value))
+      {:caption :not-string
+       :pattern #"pattern"
+       :language :english
+       :default true}
+      {:caption "caption"
+       :pattern "pattern"
+       :language :english
+       :default true}
+      {:caption "caption"
+       :pattern #"pattern"
+       :language "english"
+       :default true}
+      {:caption "caption"
+       :pattern #"pattern"
+       :language :english
+       :default "true"}
+      {:caption "caption" :language :english}
+      {:pattern #"pattern" :language :english :default true}
+      {:caption "caption"
+       :pattern #"pattern"
+       :language :english
+       :default true
+       :extra-key "extra-value"}
+      {:extra-key "extra-value"}
+      {}
+      "not-map"
+      nil)))
+
+(t/deftest index-groups-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/index-groups value)
+      [{:caption "caption"
+        :pattern #"pattern"
+        :language :english
+        :default true}]
+      [{:caption "caption" :language :english :default true}
+       {:caption "caption" :pattern #"pattern" :default true}]
+      []))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/index-groups value))
+      [{:caption :not-string
+        :pattern #"pattern"
+        :language :english
+        :default true}]
+      [{:caption "caption"
+        :pattern "pattern"
+        :language :english
+        :default true}]
+      [{:caption "caption"
+        :pattern #"pattern"
+        :language "english"
+        :default true}]
+      [{:caption "caption"
+        :pattern #"pattern"
+        :language :english
+        :default "true"}]
+      [{:caption "caption"
+        :pattern #"pattern"
+        :language :english
+        :default true}
+       {:caption :not-string
+        :pattern #"pattern"
+        :language :english
+        :default true}]
+      "not-vector"
       nil)))
 
 (t/deftest index-item-test
