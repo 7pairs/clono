@@ -1589,6 +1589,27 @@
       "1"
       nil)))
 
+(t/deftest pattern-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/pattern value)
+      #"pattern"
+      (re-pattern "pattern")))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/pattern value))
+      "pattern"
+      nil)))
+
+(t/deftest pattern-string-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::spec/pattern-string "pattern")))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/pattern-string value))
+      ""
+      :not-string
+      nil)))
+
 (t/deftest pred-result-test
   (t/testing "Succeeds to verify."
     (t/are [value] (s/valid? ::spec/pred-result value)

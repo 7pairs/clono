@@ -237,8 +237,8 @@
 (def index_order
   ::order)
 
-(s/def ::index/pattern
-  #(instance? js/RegExp %))
+(def index_pattern
+  ::pattern)
 
 (def index_ruby
   ::ruby)
@@ -375,6 +375,12 @@
   (s/and integer?
          #(>= % 0)))
 
+(s/def ::pattern
+  #(instance? js/RegExp %))
+
+(s/def ::pattern-string
+  ::common/non-blank-string)
+
 (s/def ::pred-result
   boolean?)
 
@@ -448,6 +454,9 @@
 
 (s/def ::index/order
   index_order)
+
+(s/def ::index/pattern
+  index_pattern)
 
 (s/def ::index/ruby
   index_ruby)
