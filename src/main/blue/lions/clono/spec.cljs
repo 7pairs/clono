@@ -18,6 +18,7 @@
             [blue.lions.clono.spec.anchor :as anchor]
             [blue.lions.clono.spec.catalog :as catalog]
             [blue.lions.clono.spec.common :as common]
+            [blue.lions.clono.spec.custom :as custom]
             [blue.lions.clono.spec.directive :as directive]
             [blue.lions.clono.spec.document :as document]
             [blue.lions.clono.spec.heading :as heading]
@@ -94,6 +95,29 @@
 
 (def config
   ::edn)
+
+(s/def ::custom/caption
+  ::caption)
+
+(s/def ::custom/default
+  boolean?)
+
+(s/def ::custom/language
+  #{:english :japanese})
+
+(def custom_pattern
+  ::pattern-string)
+
+(s/def ::custom-group
+  (s/and (s/keys :req-un [::custom/caption]
+                 :opt-un [::custom/pattern
+                          ::custom/language
+                          ::custom/default])
+         #(or (:pattern %) (:default %))
+         #(every? #{:caption :pattern :language :default} (keys %))))
+
+(s/def ::custom-groups
+  (s/coll-of ::custom-group :kind vector?))
 
 (s/def ::depth
   (s/and integer?
@@ -436,6 +460,9 @@
 
 (s/def ::config
   config)
+
+(s/def ::custom/pattern
+  custom_pattern)
 
 (s/def ::directive/name
   directive_name)

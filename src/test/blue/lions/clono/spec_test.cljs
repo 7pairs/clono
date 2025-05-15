@@ -19,6 +19,7 @@
             [blue.lions.clono.spec :as spec]
             [blue.lions.clono.spec.catalog :as catalog]
             [blue.lions.clono.spec.common :as common]
+            [blue.lions.clono.spec.custom :as custom]
             [blue.lions.clono.spec.directive :as directive]
             [blue.lions.clono.spec.document :as document]
             [blue.lions.clono.spec.heading :as heading]
@@ -293,6 +294,133 @@
       {"not-keyword" "value"}
       {:key "value1" "not-keyword" "value2"}
       "not-map"
+      nil)))
+
+(t/deftest custom_caption-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::custom/caption "caption")))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::custom/caption value))
+      ""
+      :not-string
+      nil)))
+
+(t/deftest custom_default-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::custom/default value)
+      true
+      false))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::custom/default value))
+      "true"
+      :false
+      nil)))
+
+(t/deftest custom_language-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::custom/language value)
+      :english
+      :japanese))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::custom/language value))
+      :invalid
+      "english"
+      nil)))
+
+(t/deftest custom_pattern-test
+  (t/testing "Succeeds to verify."
+    (t/is (s/valid? ::custom/pattern "pattern")))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::custom/pattern value))
+      #"pattern"
+      ""
+      nil)))
+
+(t/deftest custom-group-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/custom-group value)
+      {:caption "caption"
+       :pattern "pattern"
+       :language :english
+       :default true}
+      {:caption "caption" :language :english :default true}
+      {:caption "caption" :pattern "pattern" :default true}
+      {:caption "caption" :pattern "pattern" :language :english}
+      {:caption "caption" :pattern "pattern"}
+      {:caption "caption" :default true}))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/custom-group value))
+      {:caption :not-string
+       :pattern "pattern"
+       :language :english
+       :default true}
+      {:caption "caption"
+       :pattern #"pattern"
+       :language :english
+       :default true}
+      {:caption "caption"
+       :pattern "pattern"
+       :language "english"
+       :default true}
+      {:caption "caption"
+       :pattern "pattern"
+       :language :english
+       :default "true"}
+      {:caption "caption" :language :english}
+      {:pattern "pattern" :language :english :default true}
+      {:caption "caption"
+       :pattern "pattern"
+       :language :english
+       :default true
+       :extra-key "extra-value"}
+      {:extra-key "extra-value"}
+      {}
+      "not-map"
+      nil)))
+
+(t/deftest custom-groups-test
+  (t/testing "Succeeds to verify."
+    (t/are [value] (s/valid? ::spec/custom-groups value)
+      [{:caption "caption"
+        :pattern "pattern"
+        :language :english
+        :default true}]
+      [{:caption "caption" :language :english :default true}
+       {:caption "caption" :pattern "pattern" :default true}]
+      []))
+
+  (t/testing "Fails to verify."
+    (t/are [value] (not (s/valid? ::spec/custom-groups value))
+      [{:caption :not-string
+        :pattern "pattern"
+        :language :english
+        :default true}]
+      [{:caption "caption"
+        :pattern #"pattern"
+        :language :english
+        :default true}]
+      [{:caption "caption"
+        :pattern "pattern"
+        :language "english"
+        :default true}]
+      [{:caption "caption"
+        :pattern "pattern"
+        :language :english
+        :default "true"}]
+      [{:caption "caption"
+        :pattern "pattern"
+        :language :english
+        :default true}
+       {:caption :not-string
+        :pattern "pattern"
+        :language :english
+        :default true}]
+      "not-vector"
       nil)))
 
 (t/deftest depth-test
