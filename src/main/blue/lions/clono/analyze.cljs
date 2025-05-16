@@ -112,6 +112,17 @@
          [(id/build-dic-key base-name id) child])
        (into {})))
 
+(defn safe-re-pattern
+  [pattern-str]
+  {:pre [(spec/validate ::spec/pattern-string pattern-str
+                        "Invalid pattern string is given.")]
+   :post [(spec/validate ::spec/pattern % "Invalid pattern is returned.")]}
+  (try
+    (re-pattern pattern-str)
+    (catch js/Error e
+      (throw (ex-info "Invalid regular expression pattern."
+                      {:pattern pattern-str :cause e})))))
+
 (defn build-index-entry
   [base-name node]
   {:pre [(spec/validate ::spec/file-name base-name

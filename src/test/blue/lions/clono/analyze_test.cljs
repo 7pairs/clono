@@ -361,6 +361,24 @@
                       :children [{:type "footnoteDefinition"
                                   :identifier "footnote"}]}}])))))
 
+(t/deftest safe-re-pattern-test
+  (t/testing "Pattern is valid."
+    (let [pattern "^[A-Z].*$"
+          result (analyze/safe-re-pattern pattern)]
+      (t/is (= (type result) js/RegExp))
+      (t/is (= (.-source result) pattern))))
+
+  (t/testing "Pattern is invalid."
+    (let [pattern "(invalid"]
+      (try
+        (analyze/safe-re-pattern pattern)
+        (t/is false "Invalid regular expression pattern.")
+        (catch js/Error e
+          (let [data (ex-data e)]
+            (t/is (= pattern (:pattern data)))
+            (t/is (str/starts-with? (ex-message (:cause data))
+                                    "Invalid regular expression:"))))))))
+
 (t/deftest build-index-entry-test
   (t/testing "Node is valid."
     (t/is (= {:order 1
