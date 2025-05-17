@@ -14,6 +14,7 @@
 
 (ns blue.lions.clono.analyze-test
   (:require [cljs.test :as t]
+            [clojure.string :as str]
             [blue.lions.clono.analyze :as analyze]
             [blue.lions.clono.spec :as spec]))
 
