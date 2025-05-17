@@ -123,6 +123,17 @@
       (throw (ex-info "Invalid regular expression pattern."
                       {:pattern pattern-str :cause e})))))
 
+(defn validate-captions
+  [groups]
+  {:pre [(spec/validate ::spec/custom-groups groups
+                        "Invalid custom groups are given.")]}
+  (let [captions (map :caption groups)
+        duplicates (filterv #(> (count (filter #{%} captions)) 1)
+                            (distinct captions))]
+    (when (seq duplicates)
+      (throw (ex-info "Duplicate captions are found in index groups."
+                      {:duplicates duplicates})))))
+
 (defn build-index-entry
   [base-name node]
   {:pre [(spec/validate ::spec/file-name base-name

@@ -380,6 +380,50 @@
             (t/is (str/starts-with? (ex-message (:cause data))
                                     "Invalid regular expression:"))))))))
 
+(t/deftest validate-captions-test
+  (t/testing "Captions are not duplicated."
+    (try
+      (analyze/validate-captions
+       [{:caption "A-M" :pattern "^[A-M].*" :language :english}
+        {:caption "N-Z" :pattern "^[N-Z].*" :language :english}
+        {:caption "あ-な行" :pattern "^[あ-の].*" :language :japanese}
+        {:caption "は-わ行" :pattern "^[は-ん].*" :language :japanese}
+        {:caption "その他" :default true}])
+      (catch js/Error _
+        (t/is false "Exception should not be thrown."))))
+
+  (t/testing "One caption is duplicated."
+    (try
+      (analyze/validate-captions
+       [{:caption "A-M" :pattern "^[A-M].*" :language :english}
+        {:caption "N-Z" :pattern "^[N-Z].*" :language :english}
+        {:caption "A-M" :pattern "^[A-M].*" :language :english}
+        {:caption "あ-な行" :pattern "^[あ-の].*" :language :japanese}
+        {:caption "は-わ行" :pattern "^[は-ん].*" :language :japanese}
+        {:caption "その他" :default true}])
+      (t/is false "Exception should be thrown.")
+      (catch js/Error e
+        (t/is (= ["A-M"] (:duplicates (ex-data e))))
+        (t/is (= "Duplicate captions are found in index groups."
+                 (ex-message e))))))
+
+  (t/testing "Multiple captions are duplicated."
+    (try
+      (analyze/validate-captions
+       [{:caption "A-M" :pattern "^[A-M].*" :language :english}
+        {:caption "N-Z" :pattern "^[N-Z].*" :language :english}
+        {:caption "A-M" :pattern "^[A-M].*" :language :english}
+        {:caption "あ-な行" :pattern "^[あ-の].*" :language :japanese}
+        {:caption "A-M" :pattern "^[A-M].*" :language :english}
+        {:caption "は-わ行" :pattern "^[は-ん].*" :language :japanese}
+        {:caption "あ-な行" :pattern "^[あ-の].*" :language :japanese}
+        {:caption "その他" :default true}])
+      (t/is false "Exception should be thrown.")
+      (catch js/Error e
+        (t/is (= ["A-M" "あ-な行"] (:duplicates (ex-data e))))
+        (t/is (= "Duplicate captions are found in index groups."
+                 (ex-message e)))))))
+
 (t/deftest build-index-entry-test
   (t/testing "Node is valid."
     (t/is (= {:order 1
