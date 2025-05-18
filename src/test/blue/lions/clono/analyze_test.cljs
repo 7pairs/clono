@@ -424,6 +424,35 @@
         (t/is (= "Duplicate captions are found in index groups."
                  (ex-message e)))))))
 
+(t/deftest validate-defaults-test
+  (t/testing "Default is not duplicated."
+    (try
+      (analyze/validate-defaults
+       [{:caption "A-M" :pattern "^[A-M].*" :language :english}
+        {:caption "N-Z" :pattern "^[N-Z].*" :language :english}
+        {:caption "あ-な行" :pattern "^[あ-の].*" :language :japanese}
+        {:caption "は-わ行" :pattern "^[は-ん].*" :language :japanese}
+        {:caption "その他" :default true}])
+      (catch js/Error _
+        (t/is false "Exception should not be thrown."))))
+
+  (t/testing "Default is duplicated."
+    (try
+      (analyze/validate-defaults
+       [{:caption "A-M" :pattern "^[A-M].*" :language :english}
+        {:caption "N-Z" :pattern "^[N-Z].*" :language :english}
+        {:caption "その他1" :default true}
+        {:caption "あ-な行" :pattern "^[あ-の].*" :language :japanese}
+        {:caption "は-わ行" :pattern "^[は-ん].*" :language :japanese}
+        {:caption "その他2" :default true}])
+      (t/is false "Exception should be thrown.")
+      (catch js/Error e
+        (t/is (= "Multiple default groups are found."
+                 (ex-message e)))
+        (t/is (= [{:caption "その他1" :default true}
+                  {:caption "その他2" :default true}]
+                 (:defaults (ex-data e))))))))
+
 (t/deftest build-index-entry-test
   (t/testing "Node is valid."
     (t/is (= {:order 1

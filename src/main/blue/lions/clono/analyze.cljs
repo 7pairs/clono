@@ -134,6 +134,15 @@
       (throw (ex-info "Duplicate captions are found in index groups."
                       {:duplicates duplicates})))))
 
+(defn validate-defaults
+  [groups]
+  {:pre [(spec/validate ::spec/custom-groups groups
+                        "Invalid custom groups are given.")]}
+  (let [defaults (filter :default groups)]
+    (when (> (count defaults) 1)
+      (throw (ex-info "Multiple default groups are found."
+                      {:defaults defaults})))))
+
 (defn build-index-entry
   [base-name node]
   {:pre [(spec/validate ::spec/file-name base-name
