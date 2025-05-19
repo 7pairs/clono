@@ -453,6 +453,88 @@
                   {:caption "その他2" :default true}]
                  (:defaults (ex-data e))))))))
 
+(defn- compare-index-group
+  [index-group1 index-group2]
+  (let [regex1 (:pattern index-group1)
+        regex2 (:pattern index-group2)]
+    (t/is (= (:caption index-group1) (:caption index-group2)))
+    (t/is (= (instance? js/RegExp regex1) (instance? js/RegExp regex2)))
+    (t/is (or (and (nil? regex1) (nil? regex2))
+              (= (.-source regex1) (.-source regex2))))
+    (t/is (= (:language index-group1) (:language index-group2)))
+    (t/is (= (:default index-group1) (:default index-group2)))))
+
+(t/deftest load-index-groups-test
+  (t/testing "Config has index-groups."
+    (let [expected [{:caption "A-M" :pattern #"^[A-M].*" :language :english}
+                    {:caption "N-Z" :pattern #"^[N-Z].*" :language :english}
+                    {:caption "あ-な行"
+                     :pattern #"^[あ-の].*"
+                     :language :japanese}
+                    {:caption "は-わ行"
+                     :pattern #"^[は-ん].*"
+                     :language :japanese}
+                    {:caption "その他" :default true}]
+          result (analyze/load-index-groups
+                  {:catalog "catalog.edn"
+                   :input "input"
+                   :output "ouptput"
+                   :index-groups [{:caption "A-M"
+                                   :pattern "^[A-M].*"
+                                   :language :english}
+                                  {:caption "N-Z"
+                                   :pattern "^[N-Z].*"
+                                   :language :english}
+                                  {:caption "あ-な行"
+                                   :pattern "^[あ-の].*"
+                                   :language :japanese}
+                                  {:caption "は-わ行"
+                                   :pattern "^[は-ん].*"
+                                   :language :japanese}
+                                  {:caption "その他" :default true}]})]
+      (doseq [[idx expected-group] (map-indexed vector expected)]
+        (compare-index-group expected-group (nth result idx)))))
+
+  (t/testing "Config does not have index-groups."
+    (let [expected [{:caption "英数字" :pattern #"^[ -~].*" :language :english}
+                    {:caption "あ行"
+                     :pattern #"^[あいうえお].*"
+                     :language :japanese}
+                    {:caption "か行"
+                     :pattern #"^[かきくけこ].*"
+                     :language :japanese}
+                    {:caption "さ行"
+                     :pattern #"^[さしすせそ].*"
+                     :language :japanese}
+                    {:caption "た行"
+                     :pattern #"^[たちつてと].*"
+                     :language :japanese}
+                    {:caption "な行"
+                     :pattern #"^[なにぬねの].*"
+                     :language :japanese}
+                    {:caption "は行"
+                     :pattern #"^[はひふへほ].*"
+                     :language :japanese}
+                    {:caption "ま行"
+                     :pattern #"^[まみむめも].*"
+                     :language :japanese}
+                    {:caption "や行"
+                     :pattern #"^[やゆよ].*"
+                     :language :japanese}
+                    {:caption "ら行"
+                     :pattern #"^[らりるれろ].*"
+                     :language :japanese}
+                    {:caption "わ行"
+                     :pattern #"^[わをん].*"
+                     :language :japanese}
+                    {:caption "その他" :default true}]
+          result (analyze/load-index-groups
+                  {:catalog "catalog.edn"
+                   :input "input"
+                   :output "ouptput"})]
+      (doseq [[idx expected-group] (map-indexed vector expected)]
+        (compare-index-group expected-group (nth result idx))))))
+
 (t/deftest build-index-entry-test
   (t/testing "Node is valid."
     (t/is (= {:order 1

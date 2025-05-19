@@ -143,6 +143,50 @@
       (throw (ex-info "Multiple default groups are found."
                       {:defaults defaults})))))
 
+(defn load-index-groups
+  [config]
+  {:pre [(spec/validate ::spec/config config "Invalid config is given.")]
+   :post [(spec/validate ::spec/index-groups %
+                         "Invalid index groups are returned.")]}
+  ; Loads index group settings from configuration.
+  ; Index groups define how index entries are categorized into sections in the
+  ; final output.
+  ; 
+  ; If custom index groups are specified in the config, converts string
+  ; patterns to RegExp objects.
+  ; Otherwise, returns default groups that categorize by:
+  ; - English characters and numbers ("英数字")
+  ; - Japanese kana by row ("あ行", "か行", etc.)
+  ; - A catch-all "その他" (Others) group
+  ;
+  ; Each group contains:
+  ; - caption: Section heading text
+  ; - pattern: RegExp for matching normalized ruby strings (or nil if default)
+  ; - language: :english or :japanese to specify character set rules
+  ; - default: true for the catch-all group
+  (let [custom-groups (:index-groups config)]
+    (if (seq custom-groups)
+      (do
+        (validate-captions custom-groups)
+        (validate-defaults custom-groups)
+        (mapv (fn [group]
+                (if (:pattern group)
+                  (update group :pattern safe-re-pattern)
+                  group))
+              custom-groups))
+      [{:caption "英数字" :pattern #"^[ -~].*" :language :english}
+       {:caption "あ行" :pattern #"^[あいうえお].*" :language :japanese}
+       {:caption "か行" :pattern #"^[かきくけこ].*" :language :japanese}
+       {:caption "さ行" :pattern #"^[さしすせそ].*" :language :japanese}
+       {:caption "た行" :pattern #"^[たちつてと].*" :language :japanese}
+       {:caption "な行" :pattern #"^[なにぬねの].*" :language :japanese}
+       {:caption "は行" :pattern #"^[はひふへほ].*" :language :japanese}
+       {:caption "ま行" :pattern #"^[まみむめも].*" :language :japanese}
+       {:caption "や行" :pattern #"^[やゆよ].*" :language :japanese}
+       {:caption "ら行" :pattern #"^[らりるれろ].*" :language :japanese}
+       {:caption "わ行" :pattern #"^[わをん].*" :language :japanese}
+       {:caption "その他" :default true}])))
+
 (defn build-index-entry
   [base-name node]
   {:pre [(spec/validate ::spec/file-name base-name
