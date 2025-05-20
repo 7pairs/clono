@@ -729,28 +729,43 @@
     (t/is (= "RUBYかつ" (analyze/normalize-ruby "rubyかっ")))))
 
 (t/deftest ruby->caption-test
-  (t/testing "Ruby is English."
-    (t/is (= "英数字" (analyze/ruby->caption "ruby"))))
+  (let [index-groups
+        [{:caption "英数字" :pattern #"^[ -~].*" :language :english}
+         {:caption "あ行" :pattern #"^[あいうえお].*" :language :japanese}
+         {:caption "か行" :pattern #"^[かきくけこ].*" :language :japanese}
+         {:caption "さ行" :pattern #"^[さしすせそ].*" :language :japanese}
+         {:caption "た行" :pattern #"^[たちつてと].*" :language :japanese}
+         {:caption "な行" :pattern #"^[なにぬねの].*" :language :japanese}
+         {:caption "は行" :pattern #"^[はひふへほ].*" :language :japanese}
+         {:caption "ま行" :pattern #"^[まみむめも].*" :language :japanese}
+         {:caption "や行" :pattern #"^[やゆよ].*" :language :japanese}
+         {:caption "ら行" :pattern #"^[らりるれろ].*" :language :japanese}
+         {:caption "わ行" :pattern #"^[わをん].*" :language :japanese}
+         {:caption "その他" :default true}]]
+    (t/testing "Ruby is English."
+      (t/is (= "英数字" (analyze/ruby->caption "ruby" index-groups)))
+      (t/is (= "英数字" (analyze/ruby->caption "12345" index-groups)))
+      (t/is (= "英数字" (analyze/ruby->caption "!!!!!" index-groups))))
 
-  (t/testing "Ruby is Hiragana."
-    (t/is (= "あ行" (analyze/ruby->caption "あかさたな")))
-    (t/is (= "か行" (analyze/ruby->caption "きしちにひ")))
-    (t/is (= "か行" (analyze/ruby->caption "ぐずづぬぶ")))
-    (t/is (= "さ行" (analyze/ruby->caption "せてねへめ")))
-    (t/is (= "さ行" (analyze/ruby->caption "ぞどのぼも")))
-    (t/is (= "た行" (analyze/ruby->caption "たなはまや")))
-    (t/is (= "た行" (analyze/ruby->caption "ぢにびみり")))
-    (t/is (= "な行" (analyze/ruby->caption "ぬふむゆる")))
-    (t/is (= "は行" (analyze/ruby->caption "へめれえけ")))
-    (t/is (= "は行" (analyze/ruby->caption "ぼもよろを")))
-    (t/is (= "は行" (analyze/ruby->caption "ぱまやらわ")))
-    (t/is (= "ま行" (analyze/ruby->caption "みりいきし")))
-    (t/is (= "や行" (analyze/ruby->caption "ゆるうくす")))
-    (t/is (= "ら行" (analyze/ruby->caption "ろをおこそ")))
-    (t/is (= "わ行" (analyze/ruby->caption "わあかさた"))))
+    (t/testing "Ruby is Hiragana."
+      (t/is (= "あ行" (analyze/ruby->caption "あかさたな" index-groups)))
+      (t/is (= "か行" (analyze/ruby->caption "きしちにひ" index-groups)))
+      (t/is (= "か行" (analyze/ruby->caption "ぐずづぬぶ" index-groups)))
+      (t/is (= "さ行" (analyze/ruby->caption "せてねへめ" index-groups)))
+      (t/is (= "さ行" (analyze/ruby->caption "ぞどのぼも" index-groups)))
+      (t/is (= "た行" (analyze/ruby->caption "たなはまや" index-groups)))
+      (t/is (= "た行" (analyze/ruby->caption "ぢにびみり" index-groups)))
+      (t/is (= "な行" (analyze/ruby->caption "ぬふむゆる" index-groups)))
+      (t/is (= "は行" (analyze/ruby->caption "へめれえけ" index-groups)))
+      (t/is (= "は行" (analyze/ruby->caption "ぼもよろを" index-groups)))
+      (t/is (= "は行" (analyze/ruby->caption "ぱまやらわ" index-groups)))
+      (t/is (= "ま行" (analyze/ruby->caption "みりいきし" index-groups)))
+      (t/is (= "や行" (analyze/ruby->caption "ゆるうくす" index-groups)))
+      (t/is (= "ら行" (analyze/ruby->caption "ろをおこそ" index-groups)))
+      (t/is (= "わ行" (analyze/ruby->caption "わあかさた" index-groups))))
 
-  (t/testing "Ruby is invalid."
-    (t/is (= "その他" (analyze/ruby->caption "！あかさた")))))
+    (t/testing "Ruby is invalid."
+      (t/is (= "その他" (analyze/ruby->caption "！あかさた" index-groups))))))
 
 (t/deftest insert-row-captions-test
   (t/testing "All captions are required."

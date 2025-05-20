@@ -334,22 +334,36 @@
       normalize-japanese-ruby))
 
 (defn ruby->caption
-  [ruby]
-  {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
+  [ruby index-groups]
+  {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")
+         (spec/validate ::spec/index-groups index-groups
+                        "Invalid index groups are given.")]
    :post [(spec/validate ::spec/caption % "Invalid caption is returned.")]}
-  (cond
-    (english-ruby? ruby) "英数字"
-    (#{"あ" "い" "う" "え" "お"} (subs (normalize-ruby ruby) 0 1)) "あ行"
-    (#{"か" "き" "く" "け" "こ"} (subs (normalize-ruby ruby) 0 1)) "か行"
-    (#{"さ" "し" "す" "せ" "そ"} (subs (normalize-ruby ruby) 0 1)) "さ行"
-    (#{"た" "ち" "つ" "て" "と"} (subs (normalize-ruby ruby) 0 1)) "た行"
-    (#{"な" "に" "ぬ" "ね" "の"} (subs (normalize-ruby ruby) 0 1)) "な行"
-    (#{"は" "ひ" "ふ" "へ" "ほ"} (subs (normalize-ruby ruby) 0 1)) "は行"
-    (#{"ま" "み" "む" "め" "も"} (subs (normalize-ruby ruby) 0 1)) "ま行"
-    (#{"や" "ゆ" "よ"} (subs (normalize-ruby ruby) 0 1)) "や行"
-    (#{"ら" "り" "る" "れ" "ろ"} (subs (normalize-ruby ruby) 0 1)) "ら行"
-    (#{"わ" "を" "ん"} (subs (normalize-ruby ruby) 0 1)) "わ行"
-    :else "その他"))
+   ; Determines the index caption (section heading) for a given ruby string
+   ; based on specified index groups.
+   ; 
+   ; The function first normalizes the ruby, then identifies if it's English
+   ; or Japanese.
+   ; It then checks each index group and returns the matching caption when:
+   ; - The group is marked as default, or
+   ; - For English text: language is :english and pattern matches the
+   ;   normalized ruby, or
+   ; - For Japanese text: language is :japanese and pattern matches the
+   ;   normalized ruby
+   ; 
+   ; If no match is found, returns "その他" (Others) as fallback.
+  (let [normalized-ruby (normalize-ruby ruby)
+        english? (english-ruby? ruby)]
+    (or
+     (some (fn [{:keys [caption pattern language default]}]
+             (when (or default
+                       (and (= language :english) english?
+                            (re-matches pattern normalized-ruby))
+                       (and (= language :japanese) (not english?)
+                            (re-matches pattern normalized-ruby)))
+               caption))
+           index-groups)
+     "その他")))
 
 (defn insert-row-captions
   [indices]
