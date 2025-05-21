@@ -768,62 +768,77 @@
       (t/is (= "その他" (analyze/ruby->caption "！あかさた" index-groups))))))
 
 (t/deftest insert-row-captions-test
-  (t/testing "All captions are required."
-    (t/is (= [{:type :caption :text "英数字"}
-              {:type :item :text "ABC" :ruby "abc" :urls ["url01"]}
-              {:type :caption :text "あ行"}
-              {:type :item :text "あいう" :ruby "あいう" :urls ["url02"]}
-              {:type :caption :text "か行"}
-              {:type :item :text "かきく" :ruby "かきく" :urls ["url03"]}
-              {:type :caption :text "さ行"}
-              {:type :item :text "さしす" :ruby "さしす" :urls ["url04"]}
-              {:type :caption :text "た行"}
-              {:type :item :text "たちつ" :ruby "たちつ" :urls ["url05"]}
-              {:type :caption :text "な行"}
-              {:type :item :text "なにぬ" :ruby "なにぬ" :urls ["url06"]}
-              {:type :caption :text "は行"}
-              {:type :item :text "はひふ" :ruby "はひふ" :urls ["url07"]}
-              {:type :caption :text "ま行"}
-              {:type :item :text "まみむ" :ruby "まみむ" :urls ["url08"]}
-              {:type :caption :text "や行"}
-              {:type :item :text "やゆよ" :ruby "やゆよ" :urls ["url09"]}
-              {:type :caption :text "ら行"}
-              {:type :item :text "らりる" :ruby "らりる" :urls ["url10"]}
-              {:type :caption :text "わ行"}
-              {:type :item :text "わをん" :ruby "わをん" :urls ["url11"]}]
-             (analyze/insert-row-captions
-              [{:type :item :text "ABC" :ruby "abc" :urls ["url01"]}
-               {:type :item :text "あいう" :ruby "あいう" :urls ["url02"]}
-               {:type :item :text "かきく" :ruby "かきく" :urls ["url03"]}
-               {:type :item :text "さしす" :ruby "さしす" :urls ["url04"]}
-               {:type :item :text "たちつ" :ruby "たちつ" :urls ["url05"]}
-               {:type :item :text "なにぬ" :ruby "なにぬ" :urls ["url06"]}
-               {:type :item :text "はひふ" :ruby "はひふ" :urls ["url07"]}
-               {:type :item :text "まみむ" :ruby "まみむ" :urls ["url08"]}
-               {:type :item :text "やゆよ" :ruby "やゆよ" :urls ["url09"]}
-               {:type :item :text "らりる" :ruby "らりる" :urls ["url10"]}
-               {:type :item :text "わをん" :ruby "わをん" :urls ["url11"]}]))))
+  (let [index-groups
+        [{:caption "英数字" :pattern #"^[ -~].*" :language :english}
+         {:caption "あ行" :pattern #"^[あいうえお].*" :language :japanese}
+         {:caption "か行" :pattern #"^[かきくけこ].*" :language :japanese}
+         {:caption "さ行" :pattern #"^[さしすせそ].*" :language :japanese}
+         {:caption "た行" :pattern #"^[たちつてと].*" :language :japanese}
+         {:caption "な行" :pattern #"^[なにぬねの].*" :language :japanese}
+         {:caption "は行" :pattern #"^[はひふへほ].*" :language :japanese}
+         {:caption "ま行" :pattern #"^[まみむめも].*" :language :japanese}
+         {:caption "や行" :pattern #"^[やゆよ].*" :language :japanese}
+         {:caption "ら行" :pattern #"^[らりるれろ].*" :language :japanese}
+         {:caption "わ行" :pattern #"^[わをん].*" :language :japanese}
+         {:caption "その他" :default true}]]
+    (t/testing "All captions are required."
+      (t/is (= [{:type :caption :text "英数字"}
+                {:type :item :text "ABC" :ruby "abc" :urls ["url01"]}
+                {:type :caption :text "あ行"}
+                {:type :item :text "あいう" :ruby "あいう" :urls ["url02"]}
+                {:type :caption :text "か行"}
+                {:type :item :text "かきく" :ruby "かきく" :urls ["url03"]}
+                {:type :caption :text "さ行"}
+                {:type :item :text "さしす" :ruby "さしす" :urls ["url04"]}
+                {:type :caption :text "た行"}
+                {:type :item :text "たちつ" :ruby "たちつ" :urls ["url05"]}
+                {:type :caption :text "な行"}
+                {:type :item :text "なにぬ" :ruby "なにぬ" :urls ["url06"]}
+                {:type :caption :text "は行"}
+                {:type :item :text "はひふ" :ruby "はひふ" :urls ["url07"]}
+                {:type :caption :text "ま行"}
+                {:type :item :text "まみむ" :ruby "まみむ" :urls ["url08"]}
+                {:type :caption :text "や行"}
+                {:type :item :text "やゆよ" :ruby "やゆよ" :urls ["url09"]}
+                {:type :caption :text "ら行"}
+                {:type :item :text "らりる" :ruby "らりる" :urls ["url10"]}
+                {:type :caption :text "わ行"}
+                {:type :item :text "わをん" :ruby "わをん" :urls ["url11"]}]
+               (analyze/insert-row-captions
+                [{:type :item :text "ABC" :ruby "abc" :urls ["url01"]}
+                 {:type :item :text "あいう" :ruby "あいう" :urls ["url02"]}
+                 {:type :item :text "かきく" :ruby "かきく" :urls ["url03"]}
+                 {:type :item :text "さしす" :ruby "さしす" :urls ["url04"]}
+                 {:type :item :text "たちつ" :ruby "たちつ" :urls ["url05"]}
+                 {:type :item :text "なにぬ" :ruby "なにぬ" :urls ["url06"]}
+                 {:type :item :text "はひふ" :ruby "はひふ" :urls ["url07"]}
+                 {:type :item :text "まみむ" :ruby "まみむ" :urls ["url08"]}
+                 {:type :item :text "やゆよ" :ruby "やゆよ" :urls ["url09"]}
+                 {:type :item :text "らりる" :ruby "らりる" :urls ["url10"]}
+                 {:type :item :text "わをん" :ruby "わをん" :urls ["url11"]}]
+                index-groups))))
 
-  (t/testing "Groups have multiple items."
-    (t/is (= [{:type :caption :text "英数字"}
-              {:type :item :text "ABC" :ruby "abc" :urls ["url01"]}
-              {:type :caption :text "か行"}
-              {:type :item :text "かきく" :ruby "かきく" :urls ["url02"]}
-              {:type :item :text "きくけ" :ruby "きくけ" :urls ["url03"]}
-              {:type :caption :text "た行"}
-              {:type :item :text "たちつ" :ruby "たちつ" :urls ["url04"]}
-              {:type :item :text "ちつて" :ruby "ちつて" :urls ["url05"]}
-              {:type :item :text "つてと" :ruby "つてと" :urls ["url06"]}]
-             (analyze/insert-row-captions
-              [{:type :item :text "ABC" :ruby "abc" :urls ["url01"]}
-               {:type :item :text "かきく" :ruby "かきく" :urls ["url02"]}
-               {:type :item :text "きくけ" :ruby "きくけ" :urls ["url03"]}
-               {:type :item :text "たちつ" :ruby "たちつ" :urls ["url04"]}
-               {:type :item :text "ちつて" :ruby "ちつて" :urls ["url05"]}
-               {:type :item :text "つてと" :ruby "つてと" :urls ["url06"]}]))))
+    (t/testing "Groups have multiple items."
+      (t/is (= [{:type :caption :text "英数字"}
+                {:type :item :text "ABC" :ruby "abc" :urls ["url01"]}
+                {:type :caption :text "か行"}
+                {:type :item :text "かきく" :ruby "かきく" :urls ["url02"]}
+                {:type :item :text "きくけ" :ruby "きくけ" :urls ["url03"]}
+                {:type :caption :text "た行"}
+                {:type :item :text "たちつ" :ruby "たちつ" :urls ["url04"]}
+                {:type :item :text "ちつて" :ruby "ちつて" :urls ["url05"]}
+                {:type :item :text "つてと" :ruby "つてと" :urls ["url06"]}]
+               (analyze/insert-row-captions
+                [{:type :item :text "ABC" :ruby "abc" :urls ["url01"]}
+                 {:type :item :text "かきく" :ruby "かきく" :urls ["url02"]}
+                 {:type :item :text "きくけ" :ruby "きくけ" :urls ["url03"]}
+                 {:type :item :text "たちつ" :ruby "たちつ" :urls ["url04"]}
+                 {:type :item :text "ちつて" :ruby "ちつて" :urls ["url05"]}
+                 {:type :item :text "つてと" :ruby "つてと" :urls ["url06"]}]
+                index-groups))))
 
-  (t/testing "Items are empty."
-    (t/is (= [] (analyze/insert-row-captions [])))))
+    (t/testing "Items are empty."
+      (t/is (= [] (analyze/insert-row-captions [] index-groups))))))
 
 (t/deftest create-indices-test
   (t/testing "Indices are not duplicated."

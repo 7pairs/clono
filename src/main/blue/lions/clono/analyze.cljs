@@ -366,16 +366,22 @@
      "その他")))
 
 (defn insert-row-captions
-  [indices]
-  {:pre [(spec/validate ::spec/indices indices "Invalid indices are given.")]
+  [indices index-groups]
+  {:pre [(spec/validate ::spec/indices indices "Invalid indices are given.")
+         (spec/validate ::spec/index-groups index-groups
+                        "Invalid index groups are given.")]
    :post [(spec/validate ::spec/indices % "Invalid indices are returned.")]}
+   ; Inserts row captions (section headers) into the index list based on ruby
+   ; readings.
+   ; For each index item, determines the appropriate caption using
+   ; ruby->caption, and inserts a caption entry whenever the category changes.
   (loop [result []
          current-caption nil
          rest-items indices]
     (if (empty? rest-items)
       result
       (let [{:keys [ruby] :as item} (first rest-items)
-            next-caption (ruby->caption ruby)
+            next-caption (ruby->caption ruby index-groups)
             add-header? (not= current-caption next-caption)]
         (recur (cond-> result
                  add-header? (conj {:type :caption :text next-caption})
