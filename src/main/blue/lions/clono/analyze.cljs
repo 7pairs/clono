@@ -390,20 +390,43 @@
                (rest rest-items))))))
 
 (defn create-indices
-  [documents]
+  [documents config]
   {:pre [(spec/validate ::spec/documents documents
-                        "Invalid documents are given.")]
+                        "Invalid documents are given.")
+         (spec/validate ::spec/config config "Invalid config is given.")]
    :post [(spec/validate ::spec/indices % "Invalid indices are returned.")]}
+  ; Creates a structured index from document ASTs with configurable grouping.
+  ;
+  ; The process:
+  ; 1. Extracts all index entries from the documents
+  ; 2. Creates a normalization cache for performance optimization
+  ; 3. Loads index groups from configuration
+  ; 4. Groups entries with identical text content
+  ; 5. Creates index items with sorted URL lists
+  ; 6. Sorts items based on normalized ruby values
+  ; 7. Inserts section captions based on the index groups
+  ;
+  ; The resulting structure contains both section headers and index items
+  ; in proper display order, ready for rendering in the output.
   (let [entries (for [{:keys [name ast]} documents
-                           index (ast/extract-indices ast)]
-                       (let [base-name (id/extract-base-name name)]
-                         (build-index-entry base-name index)))
+                      index (ast/extract-indices ast)]
+                  (let [base-name (id/extract-base-name name)]
+                    (build-index-entry base-name index)))
         ruby-cache (reduce (fn [cache {:keys [ruby]}]
-                             (assoc cache ruby
-                                    {:normalized (normalize-ruby ruby)
-                                     :is-english (english-ruby? ruby)}))
+                             (try
+                               (assoc cache ruby
+                                      {:normalized (normalize-ruby ruby)
+                                       :is-english (english-ruby? ruby)})
+                               (catch js/Error e
+                                 (logger/warn
+                                  "Failed to cache ruby. Using original value."
+                                  {:ruby ruby :cause (ex-message e)})
+                                 (assoc cache ruby
+                                        {:normalized ruby
+                                         :is-english (english-ruby? ruby)}))))
                            {}
-                           entries)]
+                           entries)
+        index-groups (load-index-groups config)]
     (->> entries
          (group-by :text)
          (map (fn [[text entries]]
@@ -415,9 +438,15 @@
                               (sort-by :order)
                               (mapv :url))})))
          (sort-by (fn [{:keys [ruby]}]
-                    (let [cache-entry (get ruby-cache ruby)]
-                      (if (:is-english cache-entry)
-                        ["" ruby]
-                        [(:normalized cache-entry) ruby]))))
+                    (try
+                      (let [cache-entry (get ruby-cache ruby)]
+                        (if (:is-english cache-entry)
+                          ["" ruby]
+                          [(:normalized cache-entry) ruby]))
+                      (catch js/Error e
+                        (logger/warn
+                         "Failed to get sort key. Using ruby as is."
+                         {:ruby ruby :cause (ex-message e)})
+                        [ruby ruby]))))
          vec
-         insert-row-captions)))
+         (#(insert-row-captions % index-groups)))))
