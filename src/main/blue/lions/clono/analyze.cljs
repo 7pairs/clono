@@ -143,6 +143,20 @@
       (throw (ex-info "Multiple default groups are found."
                       {:defaults defaults})))))
 
+(def ^:private default-index-groups
+  [{:caption "英数字" :pattern #"^[ -~].*" :language :english}
+   {:caption "あ行" :pattern #"^[あいうえお].*" :language :japanese}
+   {:caption "か行" :pattern #"^[かきくけこ].*" :language :japanese}
+   {:caption "さ行" :pattern #"^[さしすせそ].*" :language :japanese}
+   {:caption "た行" :pattern #"^[たちつてと].*" :language :japanese}
+   {:caption "な行" :pattern #"^[なにぬねの].*" :language :japanese}
+   {:caption "は行" :pattern #"^[はひふへほ].*" :language :japanese}
+   {:caption "ま行" :pattern #"^[まみむめも].*" :language :japanese}
+   {:caption "や行" :pattern #"^[やゆよ].*" :language :japanese}
+   {:caption "ら行" :pattern #"^[らりるれろ].*" :language :japanese}
+   {:caption "わ行" :pattern #"^[わをん].*" :language :japanese}
+   {:caption "その他"  :default true}])
+
 (defn load-index-groups
   [config]
   {:pre [(spec/validate ::spec/config config "Invalid config is given.")]
@@ -174,18 +188,7 @@
                   (update group :pattern safe-re-pattern)
                   group))
               custom-groups))
-      [{:caption "英数字" :pattern #"^[ -~].*" :language :english}
-       {:caption "あ行" :pattern #"^[あいうえお].*" :language :japanese}
-       {:caption "か行" :pattern #"^[かきくけこ].*" :language :japanese}
-       {:caption "さ行" :pattern #"^[さしすせそ].*" :language :japanese}
-       {:caption "た行" :pattern #"^[たちつてと].*" :language :japanese}
-       {:caption "な行" :pattern #"^[なにぬねの].*" :language :japanese}
-       {:caption "は行" :pattern #"^[はひふへほ].*" :language :japanese}
-       {:caption "ま行" :pattern #"^[まみむめも].*" :language :japanese}
-       {:caption "や行" :pattern #"^[やゆよ].*" :language :japanese}
-       {:caption "ら行" :pattern #"^[らりるれろ].*" :language :japanese}
-       {:caption "わ行" :pattern #"^[わをん].*" :language :japanese}
-       {:caption "その他" :default true}])))
+      default-index-groups)))
 
 (defn build-index-entry
   [base-name node]
