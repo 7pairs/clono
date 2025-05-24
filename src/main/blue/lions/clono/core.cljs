@@ -39,7 +39,7 @@
           (let [toc-items (analyze/create-toc-items documents)
                 heading-dic (analyze/create-heading-dic documents)
                 footnote-dic (analyze/create-footnote-dic documents)
-                indices (analyze/create-indices documents)]
+                indices (analyze/create-indices documents config)]
             (logger/info "Transforming documents...")
             (let [transformed-documents (transform/transform-documents
                                          documents
