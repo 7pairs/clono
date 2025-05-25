@@ -1,6 +1,6 @@
 # clono
 
-**clono**は、CSS組版システムの**[Vivliostyle](https://vivliostyle.org/ja/)**で利用されている[Vivliostyle Flavored Markdown](https://vivliostyle.github.io/vfm/#/vfm)（以下VFMと略します）に機能を追加するツールです。見出しの参照など、もともとのVFMには存在しない機能をMarkdown内で実現できるようになります。
+**clono**は、CSS組版システムの[Vivliostyle](https://vivliostyle.org/ja/)で利用されている[Vivliostyle Flavored Markdown](https://vivliostyle.github.io/vfm/#/vfm)（以下VFMと略します）に機能を追加するツールです。見出しの参照など、もともとのVFMには存在しない機能をMarkdown内で実現できるようになります。
 
 ## 導入
 
@@ -33,11 +33,12 @@ clonoは以下のnodeライブラリに依存しています。npmなどを利�
  :output "<YOUR OUTPUT DIRECTORY PATH>"}
 ```
 
-| キー       | 値                                             |
-| ---------- | ---------------------------------------------- |
-| `:catalog` | カタログファイル（後述）のパス                 |
-| `:input`   | 変換対象のMarkdownを配置するディレクトリのパス |
-| `:output`  | 変換後のMarkdownを出力するディレクトリのパス   |
+| キー            | 値                                             | 必須 |
+| --------------- | ---------------------------------------------- | ---- |
+| `:catalog`      | カタログファイル（後述）のパス                 |  ○  |
+| `:input`        | 変換対象のMarkdownを配置するディレクトリのパス |  ○  |
+| `:output`       | 変換後のMarkdownを出力するディレクトリのパス   |  ○  |
+| `:index-groups` | 索引見出しのカスタマイズ（後述）               |      |
 
 `vivliostyle.config.js`の`entry`で参照するVFMファイルのディレクトリを`:output`に指定すれば、clonoとVivliostyleをシームレスに接続することができます。
 
@@ -392,13 +393,43 @@ VFMの後注（章の末尾に説明文が出力される）の機能を脚注�
 
 ### 索引
 
-`:index[単語]{ruby=読み}`で索引項目を作成します。「読み」は日本語の場合はひらがなで、英数字の場合は大文字で記述してください。
+`:index[単語]{ruby=読み}`で索引項目を作成します。「読み」はひらがなとカタカナ、大文字と小文字を区別しません。
 
 索引項目を文章中で強調したい場合は、`:index[単語]{ruby=読み strong}`と記述してください。`**:index[単語]{ruby=読み}**`と書くと正確に展開されません。
 
 ```markdown
-:index[clono]{ruby=CLONO strong}は:index[原稿]{ruby=げんこう}内のVFM記法を拡張します。
+:index[clono]{ruby=clono strong}は:index[原稿]{ruby=げんこう}内のVFM記法を拡張します。
 ```
+
+#### 索引見出しのカスタマイズ
+
+`config.edn`に`index-groups`キーを追加することで、索引の見出し（行見出し）の区切り方を自由にカスタマイズできます。 
+たとえば、デフォルトでは「あ行」「か行」や「英数字」などで自動的にグループ分けされますが、自分で任意のグループやパターンを設定したい場合は、以下のように記述します。
+
+```clojure
+{:catalog "catalog.edn"
+ :input "src"
+ :output "dist"
+ :index-groups
+ [{:caption "A〜F" :pattern "^[A-Fa-f].*" :language :english}
+  {:caption "G〜Z" :pattern "^[G-Zg-z].*" :language :english}
+  {:caption "あ行" :pattern "^[あいうえお].*" :language :japanese}
+  {:caption "か行" :pattern "^[かきくけこ].*" :language :japanese}
+  {:caption "その他" :default true}]}
+```
+
+- `:caption` - 見出しとして表示されるテキストです。
+- `:pattern` - ruby（読み仮名）に対する正規表現（文字列で記述）。`language`で指定した言語の項目に適用されます。
+- `:language` - `:english`または`:japanese`。パターンの適用対象を指定します。
+- `:default` - どのパターンにも当てはまらなかった場合に入るグループ。必ず1つだけ指定してください。
+
+**注意点**
+
+- `:pattern`は正規表現文字列で記述します（例: `"^[A-Fa-f].*"`）。
+- `:default true`のグループは必ず1つだけにしてください。
+- `:caption`が重複しないようにしてください。
+
+この設定により、索引の見出しやグループ分けを本の内容や用途に合わせて柔軟に変更できます。
 
 ### コラム
 
@@ -487,6 +518,10 @@ module.exports = function(node, baseName) {
 clonoというツール名は、開発言語であるClojureScriptに由来していますが、VTuberの[千羽黒乃さん](https://www.youtube.com/@senba_crow)に（勝手に）あやかったものでもあります。千羽師匠の今後のますますのご活躍を祈念しておりますのじゃ。
 
 ## 変更ログ
+
+### v1.2.0 (2025-05-25)
+
+- 索引機能の強化
 
 ### v1.1.0 (2025-05-06)
 

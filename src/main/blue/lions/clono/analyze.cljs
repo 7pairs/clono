@@ -16,6 +16,7 @@
   (:require [clojure.string :as str]
             [blue.lions.clono.ast :as ast]
             [blue.lions.clono.identifier :as id]
+            [blue.lions.clono.log :as logger]
             [blue.lions.clono.spec :as spec]))
 
 (defn create-toc-item
@@ -111,6 +112,84 @@
          [(id/build-dic-key base-name id) child])
        (into {})))
 
+(defn safe-re-pattern
+  [pattern-str]
+  {:pre [(spec/validate ::spec/pattern-string pattern-str
+                        "Invalid pattern string is given.")]
+   :post [(spec/validate ::spec/pattern % "Invalid pattern is returned.")]}
+  (try
+    (re-pattern pattern-str)
+    (catch js/Error e
+      (throw (ex-info "Invalid regular expression pattern."
+                      {:pattern pattern-str :cause e})))))
+
+(defn validate-captions
+  [groups]
+  {:pre [(spec/validate ::spec/custom-groups groups
+                        "Invalid custom groups are given.")]}
+  (let [captions (map :caption groups)
+        duplicates (filterv #(> (count (filter #{%} captions)) 1)
+                            (distinct captions))]
+    (when (seq duplicates)
+      (throw (ex-info "Duplicate captions are found in index groups."
+                      {:duplicates duplicates})))))
+
+(defn validate-defaults
+  [groups]
+  {:pre [(spec/validate ::spec/custom-groups groups
+                        "Invalid custom groups are given.")]}
+  (let [defaults (filter :default groups)]
+    (when (> (count defaults) 1)
+      (throw (ex-info "Multiple default groups are found."
+                      {:defaults defaults})))))
+
+(def ^:private default-index-groups
+  [{:caption "英数字" :pattern #"^[ -~].*" :language :english}
+   {:caption "あ行" :pattern #"^[あいうえお].*" :language :japanese}
+   {:caption "か行" :pattern #"^[かきくけこ].*" :language :japanese}
+   {:caption "さ行" :pattern #"^[さしすせそ].*" :language :japanese}
+   {:caption "た行" :pattern #"^[たちつてと].*" :language :japanese}
+   {:caption "な行" :pattern #"^[なにぬねの].*" :language :japanese}
+   {:caption "は行" :pattern #"^[はひふへほ].*" :language :japanese}
+   {:caption "ま行" :pattern #"^[まみむめも].*" :language :japanese}
+   {:caption "や行" :pattern #"^[やゆよ].*" :language :japanese}
+   {:caption "ら行" :pattern #"^[らりるれろ].*" :language :japanese}
+   {:caption "わ行" :pattern #"^[わをん].*" :language :japanese}
+   {:caption "その他"  :default true}])
+
+(defn load-index-groups
+  [config]
+  {:pre [(spec/validate ::spec/config config "Invalid config is given.")]
+   :post [(spec/validate ::spec/index-groups %
+                         "Invalid index groups are returned.")]}
+  ; Loads index group settings from configuration.
+  ; Index groups define how index entries are categorized into sections in the
+  ; final output.
+  ; 
+  ; If custom index groups are specified in the config, converts string
+  ; patterns to RegExp objects.
+  ; Otherwise, returns default groups that categorize by:
+  ; - English characters and numbers ("英数字")
+  ; - Japanese kana by row ("あ行", "か行", etc.)
+  ; - A catch-all "その他" (Others) group
+  ;
+  ; Each group contains:
+  ; - caption: Section heading text
+  ; - pattern: RegExp for matching normalized ruby strings (or nil if default)
+  ; - language: :english or :japanese to specify character set rules
+  ; - default: true for the catch-all group
+  (let [custom-groups (:index-groups config)]
+    (if (seq custom-groups)
+      (do
+        (validate-captions custom-groups)
+        (validate-defaults custom-groups)
+        (mapv (fn [group]
+                (if (:pattern group)
+                  (update group :pattern safe-re-pattern)
+                  group))
+              custom-groups))
+      default-index-groups)))
+
 (defn build-index-entry
   [base-name node]
   {:pre [(spec/validate ::spec/file-name base-name
@@ -138,6 +217,31 @@
   {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
    :post [(spec/validate ::spec/pred-result % "Invalid result is returned.")]}
   (boolean (re-matches #"^[ -~].*" ruby)))
+
+(defn lowercase->uppercase
+  [ruby]
+  {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
+   :post [(spec/validate ::spec/ruby % "Invalid ruby is returned.")]}
+  ; Convert lowercase Latin characters to uppercase while preserving uppercase
+  ; letters, symbols, and non-Latin characters such as Japanese.
+  (str/replace ruby #"[a-z]" #(.toUpperCase %)))
+
+(defn katakana->hiragana
+  [ruby]
+  {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
+   :post [(spec/validate ::spec/ruby % "Invalid ruby is returned.")]}
+  ; Converts Katakana characters to their Hiragana equivalents while preserving
+  ; other characters (hiragana, Latin characters, symbols, etc.)
+  ; Uses Unicode code point mapping (U+30A1-U+30F6 -> U+3041-U+3096)
+  (let [katakana-range #js [0x30A1 0x30F6]
+        hiragana-range #js [0x3041 0x3096]
+        offset (- (aget hiragana-range 0) (aget katakana-range 0))]
+    (str/replace ruby
+                 #"[\u30A1-\u30F6]"
+                 (fn [ch]
+                   (let [code (.charCodeAt ch 0)
+                         new-code (+ code offset)]
+                     (.fromCharCode js/String new-code))))))
 
 (def ^:private seion-map
   {"ゔ" "う"
@@ -197,44 +301,90 @@
                    (let [normalized (get seion-map current current)]
                      (recur (conj result normalized) next-chars)))))))))
 
-(defn normalize-hiragana
+(defn normalize-japanese-ruby
   [ruby]
   {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
    :post [(spec/validate ::spec/ruby % "Invalid ruby is returned.")]}
-  (let [normalized (.normalize ruby "NFKC")]
-    (-> normalized
-        non-seion->seion
-        onbiki->vowel)))
+  ; Normalizes Japanese ruby by:
+  ; 1. Normalizing Unicode characters (NFKC)
+  ; 2. Converting katakana to hiragana
+  ; 3. Converting non-seion characters (dakuon, handakuon, etc.) to seion
+  ; 4. Converting prolonged sound marks (onbiki) to appropriate vowels
+  (try
+    (let [normalized (.normalize ruby "NFKC")]
+      (-> normalized
+          katakana->hiragana
+          non-seion->seion
+          onbiki->vowel))
+    (catch js/Error e
+      (logger/error "Failed to normalize ruby."
+                    {:ruby ruby :cause (ex-message e)})
+      ruby)))
 
-(defn ruby->caption
+(defn normalize-ruby
   [ruby]
   {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")]
+   :post [(spec/validate ::spec/ruby % "Invalid ruby is returned.")]}
+  ; Normalizes ruby string by:
+  ; 1. Converting lowercase letters to uppercase
+  ; 2. Applying Japanese normalization (katakana to hiragana, etc.)
+  ; Note: The order of these operations is arbitrary and could be reversed
+  ; without affecting the end result, as they operate on different character
+  ; sets.
+  ; Example: "rubyルビ" -> "RUBYるび" -> "RUBYるひ"
+  (-> ruby
+      lowercase->uppercase
+      normalize-japanese-ruby))
+
+(defn ruby->caption
+  [ruby index-groups]
+  {:pre [(spec/validate ::spec/ruby ruby "Invalid ruby is given.")
+         (spec/validate ::spec/index-groups index-groups
+                        "Invalid index groups are given.")]
    :post [(spec/validate ::spec/caption % "Invalid caption is returned.")]}
-  (cond
-    (english-ruby? ruby) "英数字"
-    (#{"あ" "い" "う" "え" "お"} (subs (normalize-hiragana ruby) 0 1)) "あ行"
-    (#{"か" "き" "く" "け" "こ"} (subs (normalize-hiragana ruby) 0 1)) "か行"
-    (#{"さ" "し" "す" "せ" "そ"} (subs (normalize-hiragana ruby) 0 1)) "さ行"
-    (#{"た" "ち" "つ" "て" "と"} (subs (normalize-hiragana ruby) 0 1)) "た行"
-    (#{"な" "に" "ぬ" "ね" "の"} (subs (normalize-hiragana ruby) 0 1)) "な行"
-    (#{"は" "ひ" "ふ" "へ" "ほ"} (subs (normalize-hiragana ruby) 0 1)) "は行"
-    (#{"ま" "み" "む" "め" "も"} (subs (normalize-hiragana ruby) 0 1)) "ま行"
-    (#{"や" "ゆ" "よ"} (subs (normalize-hiragana ruby) 0 1)) "や行"
-    (#{"ら" "り" "る" "れ" "ろ"} (subs (normalize-hiragana ruby) 0 1)) "ら行"
-    (#{"わ" "を" "ん"} (subs (normalize-hiragana ruby) 0 1)) "わ行"
-    :else "その他"))
+   ; Determines the index caption (section heading) for a given ruby string
+   ; based on specified index groups.
+   ; 
+   ; The function first normalizes the ruby, then identifies if it's English
+   ; or Japanese.
+   ; It then checks each index group and returns the matching caption when:
+   ; - The group is marked as default, or
+   ; - For English text: language is :english and pattern matches the
+   ;   normalized ruby, or
+   ; - For Japanese text: language is :japanese and pattern matches the
+   ;   normalized ruby
+   ; 
+   ; If no match is found, returns "その他" (Others) as fallback.
+  (let [normalized-ruby (normalize-ruby ruby)
+        english? (english-ruby? ruby)]
+    (or
+     (some (fn [{:keys [caption pattern language default]}]
+             (when (or default
+                       (and (= language :english) english?
+                            (re-matches pattern normalized-ruby))
+                       (and (= language :japanese) (not english?)
+                            (re-matches pattern normalized-ruby)))
+               caption))
+           index-groups)
+     "その他")))
 
 (defn insert-row-captions
-  [indices]
-  {:pre [(spec/validate ::spec/indices indices "Invalid indices are given.")]
+  [indices index-groups]
+  {:pre [(spec/validate ::spec/indices indices "Invalid indices are given.")
+         (spec/validate ::spec/index-groups index-groups
+                        "Invalid index groups are given.")]
    :post [(spec/validate ::spec/indices % "Invalid indices are returned.")]}
+   ; Inserts row captions (section headers) into the index list based on ruby
+   ; readings.
+   ; For each index item, determines the appropriate caption using
+   ; ruby->caption, and inserts a caption entry whenever the category changes.
   (loop [result []
          current-caption nil
          rest-items indices]
     (if (empty? rest-items)
       result
       (let [{:keys [ruby] :as item} (first rest-items)
-            next-caption (ruby->caption ruby)
+            next-caption (ruby->caption ruby index-groups)
             add-header? (not= current-caption next-caption)]
         (recur (cond-> result
                  add-header? (conj {:type :caption :text next-caption})
@@ -243,20 +393,43 @@
                (rest rest-items))))))
 
 (defn create-indices
-  [documents]
+  [documents config]
   {:pre [(spec/validate ::spec/documents documents
-                        "Invalid documents are given.")]
+                        "Invalid documents are given.")
+         (spec/validate ::spec/config config "Invalid config is given.")]
    :post [(spec/validate ::spec/indices % "Invalid indices are returned.")]}
+  ; Creates a structured index from document ASTs with configurable grouping.
+  ;
+  ; The process:
+  ; 1. Extracts all index entries from the documents
+  ; 2. Creates a normalization cache for performance optimization
+  ; 3. Loads index groups from configuration
+  ; 4. Groups entries with identical text content
+  ; 5. Creates index items with sorted URL lists
+  ; 6. Sorts items based on normalized ruby values
+  ; 7. Inserts section captions based on the index groups
+  ;
+  ; The resulting structure contains both section headers and index items
+  ; in proper display order, ready for rendering in the output.
   (let [entries (for [{:keys [name ast]} documents
-                           index (ast/extract-indices ast)]
-                       (let [base-name (id/extract-base-name name)]
-                         (build-index-entry base-name index)))
+                      index (ast/extract-indices ast)]
+                  (let [base-name (id/extract-base-name name)]
+                    (build-index-entry base-name index)))
         ruby-cache (reduce (fn [cache {:keys [ruby]}]
-                             (assoc cache ruby
-                                    {:normalized (normalize-hiragana ruby)
-                                     :is-english (english-ruby? ruby)}))
+                             (try
+                               (assoc cache ruby
+                                      {:normalized (normalize-ruby ruby)
+                                       :is-english (english-ruby? ruby)})
+                               (catch js/Error e
+                                 (logger/warn
+                                  "Failed to cache ruby. Using original value."
+                                  {:ruby ruby :cause (ex-message e)})
+                                 (assoc cache ruby
+                                        {:normalized ruby
+                                         :is-english (english-ruby? ruby)}))))
                            {}
-                           entries)]
+                           entries)
+        index-groups (load-index-groups config)]
     (->> entries
          (group-by :text)
          (map (fn [[text entries]]
@@ -268,9 +441,15 @@
                               (sort-by :order)
                               (mapv :url))})))
          (sort-by (fn [{:keys [ruby]}]
-                    (let [cache-entry (get ruby-cache ruby)]
-                      (if (:is-english cache-entry)
-                        ["" ruby]
-                        [(:normalized cache-entry) ruby]))))
+                    (try
+                      (let [cache-entry (get ruby-cache ruby)]
+                        (if (:is-english cache-entry)
+                          ["" ruby]
+                          [(:normalized cache-entry) ruby]))
+                      (catch js/Error e
+                        (logger/warn
+                         "Failed to get sort key. Using ruby as is."
+                         {:ruby ruby :cause (ex-message e)})
+                        [ruby ruby]))))
          vec
-         insert-row-captions)))
+         (#(insert-row-captions % index-groups)))))

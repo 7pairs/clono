@@ -18,6 +18,7 @@
             [blue.lions.clono.spec.anchor :as anchor]
             [blue.lions.clono.spec.catalog :as catalog]
             [blue.lions.clono.spec.common :as common]
+            [blue.lions.clono.spec.custom :as custom]
             [blue.lions.clono.spec.directive :as directive]
             [blue.lions.clono.spec.document :as document]
             [blue.lions.clono.spec.heading :as heading]
@@ -94,6 +95,29 @@
 
 (def config
   ::edn)
+
+(s/def ::custom/caption
+  ::caption)
+
+(s/def ::custom/default
+  boolean?)
+
+(s/def ::custom/language
+  #{:english :japanese})
+
+(def custom_pattern
+  ::pattern-string)
+
+(s/def ::custom-group
+  (s/and (s/keys :req-un [::custom/caption]
+                 :opt-un [::custom/pattern
+                          ::custom/language
+                          ::custom/default])
+         #(or (:pattern %) (:default %))
+         #(every? #{:caption :pattern :language :default} (keys %))))
+
+(s/def ::custom-groups
+  (s/coll-of ::custom-group :kind vector?))
 
 (s/def ::depth
   (s/and integer?
@@ -225,8 +249,20 @@
   (s/or :id ::id
         :nil nil?))
 
+(s/def ::index/caption
+  ::caption)
+
+(s/def ::index/default
+  boolean?)
+
+(s/def ::index/language
+  #{:english :japanese})
+
 (def index_order
   ::order)
+
+(def index_pattern
+  ::pattern)
 
 (def index_ruby
   ::ruby)
@@ -259,6 +295,17 @@
                           ::index/ruby
                           ::index/url])
          #(every? #{:order :text :ruby :url} (keys %))))
+
+(s/def ::index-group
+  (s/and (s/keys :req-un [::index/caption]
+                 :opt-un [::index/pattern
+                          ::index/language
+                          ::index/default])
+         #(or (:pattern %) (:default %))
+         #(every? #{:caption :pattern :language :default} (keys %))))
+
+(s/def ::index-groups
+  (s/coll-of ::index-group :kind vector?))
 
 (s/def ::index-item
   (s/and (s/keys :req-un [::index/type
@@ -352,6 +399,12 @@
   (s/and integer?
          #(>= % 0)))
 
+(s/def ::pattern
+  #(instance? js/RegExp %))
+
+(s/def ::pattern-string
+  ::common/non-blank-string)
+
 (s/def ::pred-result
   boolean?)
 
@@ -408,6 +461,9 @@
 (s/def ::config
   config)
 
+(s/def ::custom/pattern
+  custom_pattern)
+
 (s/def ::directive/name
   directive_name)
 
@@ -425,6 +481,9 @@
 
 (s/def ::index/order
   index_order)
+
+(s/def ::index/pattern
+  index_pattern)
 
 (s/def ::index/ruby
   index_ruby)
