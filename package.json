@@ -7,7 +7,9 @@
     "clono": "dist/clono.js"
   },
   "scripts": {
-    "build": "shadow-cljs release cli"
+    "build": "shadow-cljs release cli",
+    "test": "shadow-cljs compile test",
+    "test:watch": "shadow-cljs watch test"
   },
   "engines": {
     "node": ">=22"

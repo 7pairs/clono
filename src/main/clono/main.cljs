@@ -1,31 +1,17 @@
 (ns clono.main
-  (:require [clojure.string :as string]))
+  (:require [clono.cli :as cli]))
 
 (def ^:private package-json
   (js/require "../package.json"))
 
-(def ^:private help-text
-  (str "Usage: clono [options]\n"
-       "\n"
-       "Options:\n"
-       "  --help     Show help\n"
-       "  --version  Show version"))
-
-(defn- print-help []
-  (println help-text))
-
-(defn- print-version []
-  (println (str "clono " (aget package-json "version"))))
-
-(defn- print-unknown-arguments [arguments]
-  (.error js/console (str "Unknown argument(s): " (string/join " " arguments)))
-  (.error js/console "Run 'clono --help' for usage.")
-  (set! (.-exitCode js/process) 1))
+(defn- print-result [{:keys [stdout stderr exit-code]}]
+  (when stdout
+    (println stdout))
+  (when stderr
+    (.error js/console stderr))
+  (set! (.-exitCode js/process) exit-code))
 
 (defn main []
-  (let [arguments (vec (.slice js/process.argv 2))]
-    (cond
-      (empty? arguments) (print-help)
-      (= ["--help"] arguments) (print-help)
-      (= ["--version"] arguments) (print-version)
-      :else (print-unknown-arguments arguments))))
+  (let [arguments (vec (.slice js/process.argv 2))
+        version (aget package-json "version")]
+    (print-result (cli/evaluate-arguments arguments version))))
