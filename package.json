@@ -3,6 +3,12 @@
   "version": "0.0.1",
   "private": true,
   "license": "Apache-2.0",
+  "bin": {
+    "clono": "dist/clono.js"
+  },
+  "scripts": {
+    "build": "shadow-cljs release cli"
+  },
   "engines": {
     "node": ">=22"
   },

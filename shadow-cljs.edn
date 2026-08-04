@@ -8,4 +8,7 @@
  []
 
  :builds
- {}}
+ {:cli
+  {:target :node-script
+   :output-to "dist/clono.js"
+   :main clono.main/main}}}
