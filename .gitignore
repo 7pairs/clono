@@ -1,0 +1,24 @@
+# Node.js
+/node_modules/
+
+# shadow-cljs
+/.shadow-cljs/
+/target/
+
+# Build outputs
+/dist/
+
+# Clojure tooling
+/.clj-kondo/.cache/
+/.lsp/.cache/
+.nrepl-*
+
+# Editors
+/.idea/
+*.iml
+
+# Logs
+*.log
+
+# macOS
+.DS_Store
