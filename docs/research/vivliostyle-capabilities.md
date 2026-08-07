@@ -1,6 +1,6 @@
 # VivliostyleおよびVFMの機能調査計画
 
-- 状態: 計画
+- 状態: 調査中
 - 作成日: 2026-08-07
 
 ## 1. 背景
@@ -369,3 +369,24 @@ Generic Directives Proposalおよび関連実装について、次の点を確�
 - `AGENTS.md`は、調査用生成物や作業手順に関する恒久的な規則が増える場合に更新する
 
 調査結果を既存文書へ重複して転載せず、本調査文書を正本としてリンクする。
+
+## 13. 調査結果
+
+### 13.1 ページ脚注: 最小ケース
+
+[最小の脚注サンプル](../../research/vivliostyle-capabilities/cases/footnotes/minimal/README.md)で、同一のGFM風脚注一件をVFMの未指定、`pandoc`、`dpub`および`gcpm`モードで比較した。
+
+| モード | HTML | PDF |
+|---|---|---|
+| 未指定 | `pandoc`とバイト単位で一致 | 重複するため生成しなかった |
+| `pandoc` | 文書末の`section[role="doc-endnotes"]`に脚注を集約し、参照と戻りリンクを出力 | 本文の直後に文末脚注として配置 |
+| `dpub` | `aside.footnote[role="doc-footnote"]`と参照および戻りリンクを出力 | `float: footnote`によりページ下部へ配置 |
+| `gcpm` | 参照位置へ`span.footnote[role="doc-footnote"]`を出力 | `float: footnote`によりページ下部へ配置し、番号はVivliostyleが生成 |
+
+この最小ケースでは、VFM 2.7.2とVivliostyle CLI内蔵VFM 2.7.0の脚注に関係するHTML構造に差は確認できなかった。三つのPDFはいずれもA5の一ページとして生成され、紙面上の欠落、文字化け、重なりおよび切れはなかった。
+
+単純なページ脚注は、clonoによる独自記法やHTML変換を行わず、VFMの`dpub`または`gcpm`モードとCSSで実現できる。最小ケースだけを対象とした暫定分類は「clono不要」、確信度は高とする。
+
+ページ脚注全体の分類は「追加検証」、確信度は高とする。複数脚注、長い脚注、複数参照、脚注内のMarkdown、各種ブロック内からの参照、番号制御およびリンクの違いを確認してから採用方式を判断する。
+
+また、PopplerによるPDF検査では`pandoc`と`dpub`にname tokenの長さに関する警告が出た。紙面とテキスト抽出への影響は確認できなかったが、リンクまたは名前付き遷移先との関係を追加確認する。

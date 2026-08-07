@@ -11,6 +11,9 @@
     "build:baseline": "npm run build:baseline:html && npm run build:baseline:pdf",
     "build:baseline:html": "mkdir -p output/baseline && vfm cases/baseline/manuscript.md --title Baseline --language ja --style ../../styles/base.css > output/baseline/baseline.html",
     "build:baseline:pdf": "mkdir -p output/baseline && vivliostyle build -c cases/baseline/vivliostyle.config.mjs",
+    "build:footnotes:minimal": "npm run build:footnotes:minimal:html && npm run build:footnotes:minimal:pdf",
+    "build:footnotes:minimal:html": "mkdir -p output/footnotes/minimal && vfm cases/footnotes/minimal/manuscript.md --title 'Minimal Footnote' --language ja --style ../../../cases/footnotes/minimal/footnotes.css > output/footnotes/minimal/default.html && vfm cases/footnotes/minimal/manuscript.md --title 'Minimal Footnote' --language ja --style ../../../cases/footnotes/minimal/footnotes.css --footnote pandoc > output/footnotes/minimal/pandoc.html && vfm cases/footnotes/minimal/manuscript.md --title 'Minimal Footnote' --language ja --style ../../../cases/footnotes/minimal/footnotes.css --footnote dpub > output/footnotes/minimal/dpub.html && vfm cases/footnotes/minimal/manuscript.md --title 'Minimal Footnote' --language ja --style ../../../cases/footnotes/minimal/footnotes.css --footnote gcpm > output/footnotes/minimal/gcpm.html",
+    "build:footnotes:minimal:pdf": "mkdir -p output/footnotes/minimal && vivliostyle build -c cases/footnotes/minimal/vivliostyle.config.mjs",
     "check": "vivliostyle --version && vfm --version",
     "vivliostyle": "vivliostyle",
     "vfm": "vfm"
