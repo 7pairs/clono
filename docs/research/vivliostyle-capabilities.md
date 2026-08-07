@@ -89,14 +89,14 @@ clonoとVivliostyleの責務分担は、[ADR 0001](../decisions/0001-distributio
 
 | 項目 | バージョンまたは値 |
 |---|---|
-| 調査開始日 | 未記入 |
-| macOS | 未記入 |
+| 調査開始日 | 2026-08-07 |
+| macOS | 26.5.2（Apple Silicon） |
 | Node.js | 24.19.0 |
-| npm | 未記入 |
-| `@vivliostyle/vfm` | 未記入 |
-| Vivliostyle CLI | 未記入 |
-| Vivliostyle Core | 未記入 |
-| PDF生成環境 | 未記入 |
+| npm | 11.17.0 |
+| `@vivliostyle/vfm` | 2.7.2 |
+| Vivliostyle CLI | 11.1.0（内蔵VFM 2.7.0） |
+| Vivliostyle Core | 2.44.1 |
+| PDF生成環境 | ベースラインサンプル作成時に記録 |
 
 ## 6. 調査方法
 

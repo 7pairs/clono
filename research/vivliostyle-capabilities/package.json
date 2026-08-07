@@ -1,0 +1,19 @@
+{
+  "name": "clono-vivliostyle-capabilities-research",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Reproducible samples for researching Vivliostyle and VFM capabilities for clono",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": "24.19.0"
+  },
+  "scripts": {
+    "check": "vivliostyle --version && vfm --version",
+    "vivliostyle": "vivliostyle",
+    "vfm": "vfm"
+  },
+  "devDependencies": {
+    "@vivliostyle/cli": "11.1.0",
+    "@vivliostyle/vfm": "2.7.2"
+  }
+}

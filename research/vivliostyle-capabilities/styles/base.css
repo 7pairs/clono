@@ -1,0 +1,14 @@
+@page {
+  size: A5;
+  margin: 18mm;
+}
+
+:root {
+  writing-mode: horizontal-tb;
+}
+
+body {
+  margin: 0;
+  font-family: serif;
+  line-height: 1.7;
+}
