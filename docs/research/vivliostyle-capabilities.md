@@ -96,7 +96,7 @@ clonoとVivliostyleの責務分担は、[ADR 0001](../decisions/0001-distributio
 | `@vivliostyle/vfm` | 2.7.2 |
 | Vivliostyle CLI | 11.1.0（内蔵VFM 2.7.0） |
 | Vivliostyle Core | 2.44.1 |
-| PDF生成環境 | ベースラインサンプル作成時に記録 |
+| PDF生成環境 | ローカル実行、Chrome 150.0.7871.115 |
 
 ## 6. 調査方法
 

@@ -8,6 +8,9 @@
     "node": "24.19.0"
   },
   "scripts": {
+    "build:baseline": "npm run build:baseline:html && npm run build:baseline:pdf",
+    "build:baseline:html": "mkdir -p output/baseline && vfm cases/baseline/manuscript.md --title Baseline --language ja --style ../../styles/base.css > output/baseline/baseline.html",
+    "build:baseline:pdf": "mkdir -p output/baseline && vivliostyle build -c cases/baseline/vivliostyle.config.mjs",
     "check": "vivliostyle --version && vfm --version",
     "vivliostyle": "vivliostyle",
     "vfm": "vfm"
