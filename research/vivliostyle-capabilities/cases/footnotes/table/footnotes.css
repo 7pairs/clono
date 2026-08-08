@@ -1,0 +1,16 @@
+@import "../../../styles/base.css";
+
+.footnote {
+  float: footnote;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th,
+td {
+  border: 1px solid;
+  padding: 0.4em;
+}

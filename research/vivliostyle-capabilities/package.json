@@ -23,6 +23,9 @@
     "build:footnotes:long": "npm run build:footnotes:long:html && npm run build:footnotes:long:pdf",
     "build:footnotes:long:html": "mkdir -p output/footnotes/long && vfm cases/footnotes/long/manuscript.md --title 'Long Footnote' --language ja --style ../../../cases/footnotes/long/footnotes.css --footnote dpub > output/footnotes/long/dpub.html && vfm cases/footnotes/long/manuscript.md --title 'Long Footnote' --language ja --style ../../../cases/footnotes/long/footnotes.css --footnote gcpm > output/footnotes/long/gcpm.html",
     "build:footnotes:long:pdf": "mkdir -p output/footnotes/long && vivliostyle build -c cases/footnotes/long/vivliostyle.config.mjs",
+    "build:footnotes:table": "npm run build:footnotes:table:html && npm run build:footnotes:table:pdf",
+    "build:footnotes:table:html": "mkdir -p output/footnotes/table && vfm cases/footnotes/table/manuscript.md --title 'Footnote in Table' --language ja --style ../../../cases/footnotes/table/footnotes.css --footnote dpub > output/footnotes/table/dpub.html && vfm cases/footnotes/table/manuscript.md --title 'Footnote in Table' --language ja --style ../../../cases/footnotes/table/footnotes.css --footnote gcpm > output/footnotes/table/gcpm.html",
+    "build:footnotes:table:pdf": "mkdir -p output/footnotes/table && vivliostyle build -c cases/footnotes/table/vivliostyle.config.mjs",
     "check": "vivliostyle --version && vfm --version",
     "vivliostyle": "vivliostyle",
     "vfm": "vfm"
