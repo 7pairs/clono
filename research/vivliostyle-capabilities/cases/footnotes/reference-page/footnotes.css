@@ -1,0 +1,9 @@
+@import "../../../styles/base.css";
+
+.footnote {
+  float: footnote;
+}
+
+h2 {
+  break-before: page;
+}
