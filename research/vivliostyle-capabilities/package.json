@@ -20,6 +20,9 @@
     "build:footnotes:reference-page": "npm run build:footnotes:reference-page:html && npm run build:footnotes:reference-page:pdf",
     "build:footnotes:reference-page:html": "mkdir -p output/footnotes/reference-page && vfm cases/footnotes/reference-page/manuscript.md --title 'Footnote Reference Page' --language ja --style ../../../cases/footnotes/reference-page/footnotes.css --footnote dpub > output/footnotes/reference-page/dpub.html && vfm cases/footnotes/reference-page/manuscript.md --title 'Footnote Reference Page' --language ja --style ../../../cases/footnotes/reference-page/footnotes.css --footnote gcpm > output/footnotes/reference-page/gcpm.html",
     "build:footnotes:reference-page:pdf": "mkdir -p output/footnotes/reference-page && vivliostyle build -c cases/footnotes/reference-page/vivliostyle.config.mjs",
+    "build:footnotes:long": "npm run build:footnotes:long:html && npm run build:footnotes:long:pdf",
+    "build:footnotes:long:html": "mkdir -p output/footnotes/long && vfm cases/footnotes/long/manuscript.md --title 'Long Footnote' --language ja --style ../../../cases/footnotes/long/footnotes.css --footnote dpub > output/footnotes/long/dpub.html && vfm cases/footnotes/long/manuscript.md --title 'Long Footnote' --language ja --style ../../../cases/footnotes/long/footnotes.css --footnote gcpm > output/footnotes/long/gcpm.html",
+    "build:footnotes:long:pdf": "mkdir -p output/footnotes/long && vivliostyle build -c cases/footnotes/long/vivliostyle.config.mjs",
     "check": "vivliostyle --version && vfm --version",
     "vivliostyle": "vivliostyle",
     "vfm": "vfm"

@@ -4,6 +4,9 @@ const common = {
   size: "A5",
   theme: "cases/footnotes/minimal/footnotes.css",
   entry: ["cases/footnotes/minimal/manuscript.md"],
+  copyAsset: {
+    excludes: ["output/**"],
+  },
 };
 
 export default ["pandoc", "dpub", "gcpm"].map((mode) => ({
