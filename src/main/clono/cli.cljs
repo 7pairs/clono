@@ -2,13 +2,18 @@
 
 (def usage "Usage: clono")
 
-(defn- print-usage []
-  (println usage))
+(defn command-result [arguments]
+  (let [show-help? (or (empty? arguments)
+                       (#{"-h" "--help"} (first arguments)))]
+    {:exit-code (if show-help? 0 1)
+     :output usage
+     :stream (if show-help? :stdout :stderr)}))
+
+(defn- write-result! [{:keys [exit-code output stream]}]
+  (case stream
+    :stdout (println output)
+    :stderr (js/console.error output))
+  (set! (.-exitCode js/process) exit-code))
 
 (defn main [& arguments]
-  (if (or (empty? arguments)
-          (#{"-h" "--help"} (first arguments)))
-    (print-usage)
-    (do
-      (js/console.error usage)
-      (set! (.-exitCode js/process) 1))))
+  (write-result! (command-result arguments)))
