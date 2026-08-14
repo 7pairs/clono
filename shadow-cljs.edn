@@ -1,11 +1,13 @@
 ;; shadow-cljs configuration
 {:source-paths
- ["src/dev"
-  "src/main"
+ ["src/main"
   "src/test"]
 
  :dependencies
  []
 
  :builds
- {}}
+ {:cli
+  {:target :node-script
+   :output-to "dist/clono.js"
+   :main clono.cli/main}}}
