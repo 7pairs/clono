@@ -1,0 +1,66 @@
+name: CI
+
+"on":
+  pull_request:
+    branches:
+      - develop
+      - main
+  push:
+    branches:
+      - develop
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: "Test (${{ matrix.os }}, Node.js ${{ matrix.node }})"
+    runs-on: "${{ matrix.os }}"
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            node: "22.13.0"
+          - os: ubuntu-latest
+            node: "24"
+          - os: macos-latest
+            node: "24"
+          - os: windows-latest
+            node: "24"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "${{ matrix.node }}"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build release
+        run: npm run build:release
+
+      - name: Verify CLI startup
+        run: node dist/clono.js --help
