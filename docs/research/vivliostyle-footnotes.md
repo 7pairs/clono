@@ -1,11 +1,13 @@
 # Vivliostyleの脚注機能に関する調査
 
-- 状態: 完了
-- 調査日: 2026-08-15
-- 確認対象:
-  - `@vivliostyle/vfm` 2.7.2
-  - `@vivliostyle/cli` 11.1.0
-  - Vivliostyle.js 2.44.1
+- 状態: 調査中
+- 初回調査日: 2026-08-15
+- 最終更新日: 2026-08-16
+- 確認工程:
+  - HTML変換: `@vivliostyle/vfm` 2.7.0および2.7.2
+  - PDF生成: `@vivliostyle/cli` 11.1.0
+    - CLIが依存する`@vivliostyle/vfm` 2.7.0
+    - CLIが使用するVivliostyle.js 2.44.1
 
 ## 背景
 
@@ -66,9 +68,13 @@ vfm:
 
 ## 技術検証
 
-リポジトリ外の一時プロジェクトで、同じPandoc風脚注を`pandoc`、`gcpm`、`dpub`の各モードによってHTMLへ変換した。また、`dpub`を指定したMarkdownからVivliostyle CLIでPDFを生成し、ページ上の配置とPDF内のリンクを確認した。
+リポジトリ外の一時プロジェクトで、直接インストールした`@vivliostyle/vfm` 2.7.2を使用し、同じPandoc風脚注を`pandoc`、`gcpm`、`dpub`の各モードによってHTMLへ変換した。
 
-検証用の原稿、生成したHTML、PDF、画像、依存関係はリポジトリへ追加していない。
+PDFの検証には`@vivliostyle/cli` 11.1.0を使用した。このCLIは`@vivliostyle/vfm` 2.7.0とVivliostyle.js 2.44.1を使用するため、HTML変換とPDF生成は同一バージョンのVFMによる一つの工程ではない。
+
+依存関係の差を確認した後、CLIが依存する`@vivliostyle/vfm` 2.7.0でも、インラインコード、リンク、10行程度の脚注を含む同じ検証原稿を`dpub`モードでHTMLへ変換した。検証した原稿では、VFM 2.7.0と2.7.2の出力が一致することを確認した。
+
+最小の検証用原稿、Vivliostyle設定、再現手順、期待結果は[検証用fixture](fixtures/vivliostyle-footnotes/)に保存する。生成したHTML、PDF、画像、インストールした依存関係はリポジトリへ追加しない。
 
 ### ページ下部への配置
 
@@ -115,16 +121,20 @@ export default {
 
 複数の章を一つのMarkdownファイルへ記述する構成は検証していない。Vivliostyle.js 2.41以降では、名前付きページと`counter-reset`を使用してページグループ単位で脚注番号をリセットできる。
 
-## 責務判断
+## 再現方法
 
-脚注はThunder Clawの書籍制作に必須だが、現在のVFMとVivliostyleで要件を満たせるため、clonoでは独自の脚注記法や`span.footnote`への変換を実装しない。
+検証に使用する入力と、HTMLおよびPDFの確認手順は、[検証用fixtureのREADME](fixtures/vivliostyle-footnotes/README.md)を参照する。
+
+## 暫定的な責務判断
+
+コラム内の脚注を除く基本要件は、現在のVFMとVivliostyleで満たせる。この範囲では、clonoに独自の脚注記法や`span.footnote`への変換を実装しない方針とする。
 
 - 原稿にはVFMのPandoc風脚注記法を使用する
 - Vivliostyleの設定で`footnote: 'dpub'`を明示する
 - 一章を一つのMarkdownファイルとして構成し、章ごとに脚注番号を振り直す
 - clonoは、入力された脚注の参照、定義、インラインコード、リンクを壊さずに後段へ渡す
 
-脚注は、clonoが変換する独自機能ではなく、clonoが壊してはならないVFMの機能として扱う。
+コラム内から参照した脚注については、コラムの構文と出力HTMLが未決定のため、まだ要件を満たすことを確認できない。脚注全体の責務判断は暫定とし、コラムとの結合テストが完了した後に確定する。
 
 ## 未確認事項
 
@@ -132,7 +142,7 @@ export default {
 - 表内で脚注が必要になった場合に、期待する配置になるか
 - 複数の章を一つのMarkdownファイルへ記述した場合の番号リセット
 
-コラム内の脚注は、コラムの構文と出力HTMLを決定した後に結合テストで確認する。表内の脚注と一つのMarkdownファイルに複数章を含める構成は、具体的な必要性が生じた場合に調査する。
+コラム内の脚注は必須要件であるため、コラムの構文と出力HTMLを決定した後に結合テストで確認する。表内の脚注と一つのMarkdownファイルに複数章を含める構成は、具体的な必要性が生じた場合に調査する。
 
 ## 再調査する条件
 
