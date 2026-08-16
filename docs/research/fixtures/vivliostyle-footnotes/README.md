@@ -18,9 +18,15 @@ PDF生成には`@vivliostyle/cli` 11.1.0を使用する。このCLIは`@vivliost
 このディレクトリで次のコマンドを実行する。
 
 ```shell
+set -eu
+
 mkdir -p output
 npx --yes --package=@vivliostyle/vfm@2.7.0 vfm --partial --footnote dpub basic.md > output/vfm-2.7.0.html
+test -s output/vfm-2.7.0.html
+
 npx --yes --package=@vivliostyle/vfm@2.7.2 vfm --partial --footnote dpub basic.md > output/vfm-2.7.2.html
+test -s output/vfm-2.7.2.html
+
 diff -u output/vfm-2.7.0.html output/vfm-2.7.2.html
 ```
 
