@@ -22,15 +22,48 @@ const expectedNumberedCaptions = [
   '図1.2 処理フロー',
   '図2.1 配置構成',
 ];
-const expectedReferenceTexts = [
-  '同一文書内の番号は図1.1を期待する。',
-  '番号なしの画像を挟んだ後の番号とタイトルは図1.2 処理フローを期待する。',
-  '別文書の番号とタイトルは図2.1 配置構成を期待する。',
-  '前の文書の番号とタイトルは図1.1 全体構成を期待する。',
+const expectedFigureReferences = [
+  {
+    text: '同一文書内の番号は図1.1を期待する。',
+    targetId: 'figure-architecture',
+    destinationPageText: '画像の検証',
+  },
+  {
+    text: '番号なしの画像を挟んだ後の番号とタイトルは図1.2 処理フローを期待する。',
+    targetId: 'figure-workflow',
+    destinationPageText: '画像の検証',
+  },
+  {
+    text: '別文書の番号とタイトルは図2.1 配置構成を期待する。',
+    targetId: 'figure-layout',
+    destinationPageText: '別文書の画像',
+  },
+  {
+    text: '前の文書の番号とタイトルは図1.1 全体構成を期待する。',
+    targetId: 'figure-architecture',
+    destinationPageText: '画像の検証',
+  },
 ];
 
 function normalizeText(text) {
   return text.replace(/\s+/g, ' ').trim();
+}
+
+function compactText(text) {
+  return text.replace(/\s+/g, '');
+}
+
+function blockBounds({ x, y, w, h }) {
+  return [x, y, x + w, y + h];
+}
+
+function rectanglesIntersect(first, second) {
+  return (
+    first[0] < second[2] &&
+    first[2] > second[0] &&
+    first[1] < second[3] &&
+    first[3] > second[1]
+  );
 }
 
 await mkdir(outputDirectory, { recursive: true });
@@ -58,14 +91,22 @@ assert.ok(outputStat.size > 0, 'Vivliostyle CLI must produce a non-empty PDF');
 const document = mupdf.Document.openDocument(outputPath);
 const pages = Array.from({ length: document.countPages() }, (_, pageNumber) => {
   const page = document.loadPage(pageNumber);
+  const structuredText = page.toStructuredText();
+  const structuredTextJson = JSON.parse(structuredText.asJSON());
   return {
     pageNumber,
-    text: normalizeText(page.toStructuredText().asText()),
+    text: normalizeText(structuredText.asText()),
+    textBlocks: structuredTextJson.blocks
+      .filter(({ type }) => type === 'text')
+      .map((block) => ({
+        bounds: blockBounds(block.bbox),
+        text: block.lines.map(({ text }) => text).join(''),
+      })),
     links: page.getLinks(),
   };
 });
 const publicationText = pages.map(({ text }) => text).join(' ');
-const compactPublicationText = publicationText.replace(/\s+/g, '');
+const compactPublicationText = compactText(publicationText);
 
 for (const expectedText of expectedNumberedCaptions) {
   assert.ok(
@@ -74,9 +115,9 @@ for (const expectedText of expectedNumberedCaptions) {
   );
 }
 
-for (const expectedText of expectedReferenceTexts) {
+for (const { text: expectedText } of expectedFigureReferences) {
   assert.ok(
-    compactPublicationText.includes(expectedText.replace(/\s+/g, '')),
+    compactPublicationText.includes(compactText(expectedText)),
     `PDF must include ${JSON.stringify(expectedText)}`,
   );
 }
@@ -102,36 +143,95 @@ assert.notEqual(
 
 const internalLinks = pages.flatMap(({ pageNumber, links }) =>
   links
-    .filter((link) => !link.isExternal())
-    .map((link) => ({
-      sourcePage: pageNumber,
+    .map((link, linkIndex) => ({ link, linkIndex }))
+    .filter(({ link }) => !link.isExternal())
+    .map(({ link, linkIndex }) => ({
+      bounds: link.getBounds(),
       destinationPage: document.resolveLink(link),
+      key: `${pageNumber}:${linkIndex}`,
+      sourcePage: pageNumber,
+      uri: link.getURI(),
     })),
 );
 
 assert.ok(
-  internalLinks.length >= 4,
-  'PDF must contain link annotations for every figure reference',
-);
-assert.ok(
   internalLinks.every(({ destinationPage }) => destinationPage >= 0),
   'Every figure reference must resolve to a PDF page',
 );
-assert.ok(
-  internalLinks.some(
-    ({ sourcePage, destinationPage }) =>
-      sourcePage < chapterTwoPage.pageNumber &&
-      destinationPage === chapterTwoPage.pageNumber,
-  ),
-  'PDF must link from the first chapter to the second chapter',
+
+const figureReferences = expectedFigureReferences.map((expectedReference) => {
+  const matchingBlocks = pages.flatMap(({ pageNumber, textBlocks }) =>
+    textBlocks
+      .filter(
+        ({ text }) => compactText(text) === compactText(expectedReference.text),
+      )
+      .map((block) => ({ ...block, pageNumber })),
+  );
+  assert.equal(
+    matchingBlocks.length,
+    1,
+    `PDF must contain one text block for ${JSON.stringify(expectedReference.text)}`,
+  );
+
+  const [matchingBlock] = matchingBlocks;
+  const matchingLinks = internalLinks.filter(
+    ({ bounds, sourcePage }) =>
+      sourcePage === matchingBlock.pageNumber &&
+      rectanglesIntersect(bounds, matchingBlock.bounds),
+  );
+  assert.ok(
+    matchingLinks.length > 0,
+    `${JSON.stringify(expectedReference.text)} must contain link annotations`,
+  );
+
+  const destinationPage = pages.find(({ text }) =>
+    text.includes(expectedReference.destinationPageText),
+  );
+  assert.ok(
+    destinationPage,
+    `PDF must contain the destination for ${expectedReference.targetId}`,
+  );
+
+  assert.ok(
+    matchingLinks.every(({ uri }) => uri.endsWith(expectedReference.targetId)),
+    `${JSON.stringify(expectedReference.text)} must target ${expectedReference.targetId}`,
+  );
+  assert.ok(
+    matchingLinks.every(
+      ({ destinationPage: actualPage }) =>
+        actualPage === destinationPage.pageNumber,
+    ),
+    `${JSON.stringify(expectedReference.text)} must resolve to the expected page`,
+  );
+
+  return {
+    annotationKeys: matchingLinks.map(({ key }) => key),
+    ...expectedReference,
+  };
+});
+
+assert.equal(
+  figureReferences.length,
+  4,
+  'PDF must contain exactly four logical figure references',
 );
-assert.ok(
-  internalLinks.some(
-    ({ sourcePage, destinationPage }) =>
-      sourcePage === chapterTwoPage.pageNumber &&
-      destinationPage === chapterOneFigurePage.pageNumber,
-  ),
-  'PDF must link from the second chapter to the first chapter',
+
+const matchedAnnotationKeys = new Set(
+  figureReferences.flatMap(({ annotationKeys }) => annotationKeys),
+);
+const matchedAnnotationCount = figureReferences.reduce(
+  (count, { annotationKeys }) => count + annotationKeys.length,
+  0,
+);
+assert.equal(
+  matchedAnnotationKeys.size,
+  matchedAnnotationCount,
+  'Each internal link annotation must belong to only one figure reference',
+);
+assert.equal(
+  matchedAnnotationKeys.size,
+  internalLinks.length,
+  'Every internal link annotation must belong to a verified figure reference',
 );
 
 console.log(`Verified figure numbers and references in ${outputPath}`);
