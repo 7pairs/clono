@@ -3,7 +3,8 @@
 - 状態: 調査中
 - 初回調査日: 2026-08-15
 - 最終更新日: 2026-08-16
-- 確認工程:
+- 検証環境:
+  - 実行環境: macOS、Node.js 24.19.0
   - HTML変換: `@vivliostyle/vfm` 2.7.0および2.7.2
   - PDF生成: `@vivliostyle/cli` 11.1.0
     - CLIが依存する`@vivliostyle/vfm` 2.7.0
@@ -68,39 +69,37 @@ vfm:
 
 ## 技術検証
 
-リポジトリ外の一時プロジェクトで、直接インストールした`@vivliostyle/vfm` 2.7.2を使用し、同じPandoc風脚注を`pandoc`、`gcpm`、`dpub`の各モードによってHTMLへ変換した。
+調査結果を再検証できるように、[検証用fixture](fixtures/vivliostyle-footnotes/)をリポジトリ内へ保存している。このfixtureは`clono`本体から独立したnpmプロジェクトであり、`package.json`と`package-lock.json`によって次の依存関係を固定する。
 
-PDFの検証には`@vivliostyle/cli` 11.1.0を使用した。このCLIは`@vivliostyle/vfm` 2.7.0とVivliostyle.js 2.44.1を使用するため、HTML変換とPDF生成は同一バージョンのVFMによる一つの工程ではない。
+- `@vivliostyle/vfm` 2.7.0: PDF生成に使用するCLIが依存するバージョン
+- `@vivliostyle/vfm` 2.7.2: 初回調査時に直接使用したバージョン
+- `@vivliostyle/cli` 11.1.0
 
-依存関係の差を確認した後、CLIが依存する`@vivliostyle/vfm` 2.7.0でも、インラインコード、リンク、10行程度の脚注を含む同じ検証原稿を`dpub`モードでHTMLへ変換した。検証した原稿では、VFM 2.7.0と2.7.2の出力が一致することを確認した。
+HTMLの検証プログラムは、VFM 2.7.0と2.7.2をnpm aliasによって同じ環境へインストールし、インラインコード、リンク、10行程度の脚注を含む同じ原稿を`dpub`モードで変換する。両方の出力が空でないこと、必要なHTML要素と内容を含むこと、および出力全体が一致することを自動で確認する。
 
-最小の検証用原稿、Vivliostyle設定、再現手順、期待結果は[検証用fixture](fixtures/vivliostyle-footnotes/)に保存する。生成したHTML、PDF、画像、インストールした依存関係はリポジトリへ追加しない。
+PDFの検証プログラムは`@vivliostyle/cli` 11.1.0を使用する。このCLIは`@vivliostyle/vfm` 2.7.0とVivliostyle.js 2.44.1を使用する。既存のPDFを削除してからビルドを実行し、終了コードが0であることと、生成されたPDFが空でないことを自動で確認する。ページ下部への配置、表示、リンク、内容の欠落、章ごとの番号は、生成されたPDFをPDFビューアーで確認する。
+
+初回調査では、直接実行したVFM 2.7.2によるHTML変換と、VFM 2.7.0へ依存するCLIによるPDF生成との間に、VFMのバージョン差があった。現在のfixtureでは両方のVFMを明示的に固定して比較し、検証原稿に対する出力が一致することを確認している。PDF生成は、CLIが依存するVFM 2.7.0を使用する工程として扱う。
+
+最小の検証用原稿、Vivliostyle設定、検証プログラム、再現手順、期待結果、`package.json`と`package-lock.json`はfixtureへ保存している。生成したHTMLとPDF、`node_modules/`およびVivliostyleの一時ファイルはリポジトリへ追加しない。
 
 ### ページ下部への配置
 
-次の原稿を`dpub`モードでPDFへ変換した。
-
-```markdown
-This is the body text[^note].
-
-[^note]: This is the footnote at the bottom of the page.
-```
-
-本文中に脚注番号が表示され、脚注本文が同じページの下部へ配置されることを目視で確認した。
+[検証原稿](fixtures/vivliostyle-footnotes/basic.md)を`dpub`モードでPDFへ変換した。本文中に脚注番号が表示され、脚注本文が同じページの下部へ配置されることを目視で確認した。
 
 ### インラインコードとリンク
 
 脚注内にインラインコードとリンクを記述した。
 
 ```markdown
-[^note]: The variable `footnoteMode` is described in the [Vivliostyle footnotes guide](https://docs.vivliostyle.org/en/cookbook/footnotes/).
+[^note]: The variable `footnoteMode` is described in the [Vivliostyle footnotes guide](https://docs.vivliostyle.org/ja/cookbook/footnotes/).
 ```
 
-VFMがインラインコードを`code`要素、リンクを`a`要素として出力することを確認した。生成したPDFではインラインコードの表示が維持され、URLがリンク注釈として含まれることも確認した。
+検証プログラムによって、VFMがインラインコードを`code`要素、リンクを`a`要素として出力することを確認した。生成したPDFではインラインコードの表示が維持され、PDFビューアーからリンクを開けることも確認した。
 
 ### 10行程度の脚注
 
-脚注定義を10行に分け、各行に説明文を含む原稿をPDFへ変換した。脚注全体がページ下部の脚注領域へ配置され、内容の欠落や意図しない分割がないことを確認した。
+[検証原稿](fixtures/vivliostyle-footnotes/basic.md)の脚注定義を10行に分け、各行に説明文を含む原稿をPDFへ変換した。HTMLにすべての内容が含まれることを検証プログラムで確認し、脚注全体がページ下部の脚注領域へ配置され、内容の欠落や意図しない分割がないことをPDFで目視確認した。
 
 Vivliostyleには脚注をページ間で分割するか制御する`footnote-policy`がある。ただし、Thunder Clawでは一ページにわたる脚注を想定しないため、現時点では追加の要件を定めない。
 
@@ -123,7 +122,7 @@ export default {
 
 ## 再現方法
 
-検証に使用する入力と、HTMLおよびPDFの確認手順は、[検証用fixtureのREADME](fixtures/vivliostyle-footnotes/README.md)を参照する。
+検証に使用する入力と、HTMLおよびPDFの確認手順は、[検証用fixtureのREADME](fixtures/vivliostyle-footnotes/README.md)を参照する。fixture内で`npm ci`を実行した後、HTMLは`npm run verify:html`、PDFは`npm run build:pdf`で再生成できる。PDFの組版結果はREADMEに記載した観点で目視確認する。
 
 ## 暫定的な責務判断
 
