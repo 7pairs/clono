@@ -43,8 +43,12 @@ diff -u output/vfm-2.7.0.html output/vfm-2.7.2.html
 このディレクトリで次のコマンドを実行する。
 
 ```shell
+set -eu
+
 mkdir -p output
+rm -f output/footnotes.pdf
 npx --yes --package=@vivliostyle/cli@11.1.0 vivliostyle build --config vivliostyle.config.mjs --output output/footnotes.pdf
+test -s output/footnotes.pdf
 ```
 
 生成された`output/footnotes.pdf`の全ページをPDFビューアーで開き、次を確認する。
