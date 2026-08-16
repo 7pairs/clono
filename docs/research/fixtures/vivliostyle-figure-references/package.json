@@ -1,0 +1,19 @@
+{
+  "name": "@clono/research-vivliostyle-figure-references",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^22.13.0 || ^24.0.0"
+  },
+  "scripts": {
+    "verify": "npm run verify:html && npm run verify:pdf",
+    "verify:html": "node scripts/verify-html.mjs",
+    "verify:pdf": "node scripts/verify-pdf.mjs"
+  },
+  "devDependencies": {
+    "@vivliostyle/cli": "11.1.0",
+    "@vivliostyle/vfm": "2.7.0",
+    "mupdf": "1.28.0"
+  }
+}
