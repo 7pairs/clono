@@ -24,6 +24,7 @@ const result = spawnSync(
   {
     cwd: fixtureDirectory,
     stdio: 'inherit',
+    timeout: 120_000,
   },
 );
 
