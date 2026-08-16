@@ -1,0 +1,62 @@
+@page {
+  size: A5;
+  margin: 18mm;
+}
+
+@page :first {
+  counter-reset: chapter;
+}
+
+@page :nth(1) {
+  counter-increment: chapter;
+}
+
+body {
+  font-family: sans-serif;
+}
+
+.chapter-start-spacer {
+  block-size: 18mm;
+  font-size: 0;
+}
+
+section.level1 > h1 {
+  counter-reset: section;
+}
+
+section.level1 > h1::before {
+  content: "第" counter(chapter) "章 ";
+}
+
+section.level2 > h2 {
+  counter-increment: section;
+  counter-reset: subsection;
+}
+
+section.level2 > h2::before {
+  content: counter(chapter) "." counter(section) " ";
+}
+
+section.level3 > h3 {
+  counter-increment: subsection;
+}
+
+section.level3 > h3::before {
+  content: counter(chapter) "." counter(section) "." counter(subsection) " ";
+}
+
+a.xref-chapter::before {
+  content: "第" target-counter(attr(href url), chapter) "章";
+}
+
+a.xref-section::before {
+  content: target-counter(attr(href url), chapter) "." target-counter(attr(href url), section);
+}
+
+a.xref-subsection::before {
+  content: target-counter(attr(href url), chapter) "." target-counter(attr(href url), section) "." target-counter(attr(href url), subsection);
+}
+
+a.xref-title::after {
+  content: " " target-text(attr(href url), content);
+}
