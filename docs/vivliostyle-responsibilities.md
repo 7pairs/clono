@@ -42,10 +42,10 @@ Thunder Clawの書籍制作に必要な機能について、現在のVivliostyle
 | 機能 | 制作上の必要性 | Vivliostyleの対応 | `clono`の責務 | 調査状態 | 詳細 |
 | --- | --- | --- | --- | --- | --- |
 | 脚注 | 必須 | VFMの`dpub`モードで基本要件に対応できる。コラム内の脚注は未確認 | 暫定的に、脚注の参照と定義、その内容を壊さず後段へ渡す。独自記法やHTMLへの変換は実装しない | 調査中 | [調査記録](research/vivliostyle-footnotes.md) |
-| 見出し、画像、表、コードリストへの参照用IDの付与 | 必須 | 見出しはVFMの明示的なIDに対応できる。その他は未調査 | 見出しIDはVFMの記法を保持し、未定義・重複IDの診断を担う候補とする。その他は未決定 | 調査中 | [見出しの調査記録](research/vivliostyle-heading-references.md) |
-| 見出し、画像、表、コードリストへの連番付与 | 必須 | 見出しはCSSカウンターで章・節・小節番号を生成できる。その他は未調査 | 見出し番号を計算せず、VivliostyleとテーマCSSへ委譲する。その他は未決定 | 調査中 | [見出しの調査記録](research/vivliostyle-heading-references.md) |
-| 参照用IDを使った見出し、画像、表、コードリストの番号参照 | 必須 | 見出しは`target-counter()`で同一・別原稿ファイルの番号を参照できる。その他は未調査 | 著者向け記法を参照用の`a`要素へ変換し、参照を診断する。番号生成はVivliostyleへ委譲する。その他は未決定 | 調査中 | [見出しの調査記録](research/vivliostyle-heading-references.md) |
-| 参照用IDを使った見出し、画像、表、コードリストの番号とタイトルの参照 | 必須 | 見出しは`target-counter()`と`target-text()`で同一・別原稿ファイルの番号とタイトルを参照できる。その他は未調査 | 著者向け記法を参照用の`a`要素へ変換し、参照を診断する。番号とタイトルの生成はVivliostyleへ委譲する。その他は未決定 | 調査中 | [見出しの調査記録](research/vivliostyle-heading-references.md) |
+| 見出し、画像、表、コードリストへの参照用IDの付与 | 必須 | 見出しはVFMの明示的なIDに対応できる。画像はIDを持つ`figure`構造をVFMが保持できる。表とコードリストは未調査 | 見出しIDはVFMの記法を保持する。番号付き画像はIDを持つ`figure`へ変換する。未定義・重複IDの診断を担う候補とする。表とコードリストは未決定 | 調査中 | [見出し](research/vivliostyle-heading-references.md)、[画像](research/vivliostyle-figure-references.md) |
+| 見出し、画像、表、コードリストへの連番付与 | 必須 | 見出しと画像はCSSカウンターで章ごとの番号を生成できる。表とコードリストは未調査 | 見出し番号と図番号を計算せず、VivliostyleとテーマCSSへ委譲する。表とコードリストは未決定 | 調査中 | [見出し](research/vivliostyle-heading-references.md)、[画像](research/vivliostyle-figure-references.md) |
+| 参照用IDを使った見出し、画像、表、コードリストの番号参照 | 必須 | 見出しと画像は`target-counter()`で同一・別原稿ファイルの番号を参照できる。表とコードリストは未調査 | 著者向け記法を参照用の`a`要素へ変換し、参照を診断する。番号生成はVivliostyleへ委譲する。表とコードリストは未決定 | 調査中 | [見出し](research/vivliostyle-heading-references.md)、[画像](research/vivliostyle-figure-references.md) |
+| 参照用IDを使った見出し、画像、表、コードリストの番号とタイトルの参照 | 必須 | 見出しと画像は`target-counter()`と`target-text()`で同一・別原稿ファイルの番号とタイトルを参照できる。表とコードリストは未調査 | 著者向け記法を参照用の`a`要素へ変換し、参照を診断する。番号とタイトルの生成はVivliostyleへ委譲する。表とコードリストは未決定 | 調査中 | [見出し](research/vivliostyle-heading-references.md)、[画像](research/vivliostyle-figure-references.md) |
 | 表へのキャプションの付与 | 必須 | 未調査 | 未決定 | 未調査 | — |
 | 目次の生成 | 必須 | 未調査 | 未決定 | 未調査 | — |
 | 索引へ掲載するキーワードの指定と索引の生成 | 必須 | 未調査 | 未決定 | 未調査 | — |
