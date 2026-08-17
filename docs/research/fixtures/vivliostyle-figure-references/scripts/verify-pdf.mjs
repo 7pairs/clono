@@ -26,24 +26,25 @@ const expectedFigureReferences = [
   {
     text: '同一文書内の番号は図1.1を期待する。',
     targetId: 'figure-architecture',
-    destinationPageText: '画像の検証',
+    destinationCaption: '図1.1 全体構成',
   },
   {
     text: '番号なしの画像を挟んだ後の番号とタイトルは図1.2 処理フローを期待する。',
     targetId: 'figure-workflow',
-    destinationPageText: '画像の検証',
+    destinationCaption: '図1.2 処理フロー',
   },
   {
     text: '別文書の番号とタイトルは図2.1 配置構成を期待する。',
     targetId: 'figure-layout',
-    destinationPageText: '別文書の画像',
+    destinationCaption: '図2.1 配置構成',
   },
   {
     text: '前の文書の番号とタイトルは図1.1 全体構成を期待する。',
     targetId: 'figure-architecture',
-    destinationPageText: '画像の検証',
+    destinationCaption: '図1.1 全体構成',
   },
 ];
+const maximumFigureToCaptionDistance = 150;
 
 function normalizeText(text) {
   return text.replace(/\s+/g, ' ').trim();
@@ -63,6 +64,32 @@ function rectanglesIntersect(first, second) {
     first[2] > second[0] &&
     first[1] < second[3] &&
     first[3] > second[1]
+  );
+}
+
+function findUniqueTextBlock(pages, expectedText, description) {
+  const matchingBlocks = pages.flatMap(({ pageNumber, textBlocks }) =>
+    textBlocks
+      .filter(({ text }) => compactText(text) === compactText(expectedText))
+      .map((block) => ({ ...block, pageNumber })),
+  );
+  assert.equal(
+    matchingBlocks.length,
+    1,
+    `PDF must contain one text block for ${description}`,
+  );
+  return matchingBlocks[0];
+}
+
+function destinationTargetsCaption(destination, captionBlock) {
+  const [captionLeft, captionTop, captionRight] = captionBlock.bounds;
+  return (
+    destination?.type === 'XYZ' &&
+    destination.page === captionBlock.pageNumber &&
+    destination.x >= captionLeft &&
+    destination.x <= captionRight &&
+    destination.y < captionTop &&
+    captionTop - destination.y <= maximumFigureToCaptionDistance
   );
 }
 
@@ -147,6 +174,7 @@ const internalLinks = pages.flatMap(({ pageNumber, links }) =>
     .filter(({ link }) => !link.isExternal())
     .map(({ link, linkIndex }) => ({
       bounds: link.getBounds(),
+      destination: document.resolveLinkDestination(link.getURI()),
       destinationPage: document.resolveLink(link),
       key: `${pageNumber}:${linkIndex}`,
       sourcePage: pageNumber,
@@ -160,20 +188,11 @@ assert.ok(
 );
 
 const figureReferences = expectedFigureReferences.map((expectedReference) => {
-  const matchingBlocks = pages.flatMap(({ pageNumber, textBlocks }) =>
-    textBlocks
-      .filter(
-        ({ text }) => compactText(text) === compactText(expectedReference.text),
-      )
-      .map((block) => ({ ...block, pageNumber })),
+  const matchingBlock = findUniqueTextBlock(
+    pages,
+    expectedReference.text,
+    JSON.stringify(expectedReference.text),
   );
-  assert.equal(
-    matchingBlocks.length,
-    1,
-    `PDF must contain one text block for ${JSON.stringify(expectedReference.text)}`,
-  );
-
-  const [matchingBlock] = matchingBlocks;
   const matchingLinks = internalLinks.filter(
     ({ bounds, sourcePage }) =>
       sourcePage === matchingBlock.pageNumber &&
@@ -184,12 +203,10 @@ const figureReferences = expectedFigureReferences.map((expectedReference) => {
     `${JSON.stringify(expectedReference.text)} must contain link annotations`,
   );
 
-  const destinationPage = pages.find(({ text }) =>
-    text.includes(expectedReference.destinationPageText),
-  );
-  assert.ok(
-    destinationPage,
-    `PDF must contain the destination for ${expectedReference.targetId}`,
+  const destinationCaptionBlock = findUniqueTextBlock(
+    pages,
+    expectedReference.destinationCaption,
+    `the ${JSON.stringify(expectedReference.destinationCaption)} caption`,
   );
 
   assert.ok(
@@ -199,9 +216,15 @@ const figureReferences = expectedFigureReferences.map((expectedReference) => {
   assert.ok(
     matchingLinks.every(
       ({ destinationPage: actualPage }) =>
-        actualPage === destinationPage.pageNumber,
+        actualPage === destinationCaptionBlock.pageNumber,
     ),
     `${JSON.stringify(expectedReference.text)} must resolve to the expected page`,
+  );
+  assert.ok(
+    matchingLinks.every(({ destination }) =>
+      destinationTargetsCaption(destination, destinationCaptionBlock),
+    ),
+    `${JSON.stringify(expectedReference.text)} must resolve immediately above the expected caption`,
   );
 
   return {
