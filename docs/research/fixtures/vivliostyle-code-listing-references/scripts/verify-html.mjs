@@ -74,6 +74,7 @@ function verifyNumberedListing(html, listing, source) {
       `<figcaption id="${escapeRegExp(listing.captionId)}">` +
       `${escapeRegExp(listing.caption)}</figcaption>\\s*` +
       '<pre class="language-kotlin"><code class="language-kotlin">' +
+      '[\\s\\S]*?<span class="token keyword">fun</span>' +
       '[\\s\\S]*?</code></pre>\\s*</figure>',
   );
   assert.match(html, pattern, `${source} must preserve the ${listing.id} listing`);
@@ -123,12 +124,6 @@ for (const fixture of fixtures) {
     codeBlocks.length,
     fixture.totalCodeBlockCount,
     `${fixture.source} must contain all code blocks`,
-  );
-
-  assert.match(
-    html,
-    /<span class="token keyword">fun<\/span>/,
-    `${fixture.source} must preserve Kotlin syntax highlighting`,
   );
 
   if (fixture.source === 'chapter-one.md') {
