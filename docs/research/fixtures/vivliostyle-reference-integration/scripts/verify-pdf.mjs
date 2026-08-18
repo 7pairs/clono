@@ -121,7 +121,10 @@ const outputStat = await stat(outputPath);
 assert.ok(outputStat.size > 0, 'Vivliostyle CLI must produce a non-empty PDF');
 
 const document = mupdf.Document.openDocument(outputPath);
-const pages = Array.from({ length: document.countPages() }, (_, pageNumber) => {
+const pageCount = document.countPages();
+assert.equal(pageCount, 5, 'The integrated fixture must produce exactly five pages');
+
+const pages = Array.from({ length: pageCount }, (_, pageNumber) => {
   const page = document.loadPage(pageNumber);
   const structuredText = page.toStructuredText();
   const structuredTextJson = JSON.parse(structuredText.asJSON());
