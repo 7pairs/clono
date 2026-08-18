@@ -1,0 +1,63 @@
+@page {
+  size: a5;
+  margin: 18mm;
+}
+
+@page :first {
+  counter-reset: chapter;
+}
+
+@page :nth(1) {
+  counter-increment: chapter;
+}
+
+body {
+  counter-reset: listing;
+  font-family: sans-serif;
+}
+
+pre {
+  padding: 0.6em;
+  overflow-wrap: anywhere;
+  background: #f4f6f8;
+  font-size: 8.5pt;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  break-inside: auto;
+}
+
+.numbered-listing {
+  margin: 0.75em 0;
+  counter-increment: listing;
+  break-inside: auto;
+}
+
+.numbered-listing > figcaption {
+  margin-bottom: 0.5em;
+  break-after: avoid;
+}
+
+.numbered-listing > figcaption::before {
+  content: "リスト" counter(chapter) "." counter(listing) " ";
+}
+
+.token.keyword {
+  color: #7a3e9d;
+  font-weight: bold;
+}
+
+.token.function {
+  color: #005cc5;
+}
+
+.token.string {
+  color: #8a3b12;
+}
+
+a.xref-listing::before {
+  content: "リスト" target-counter(attr(href url), chapter) "." target-counter(attr(href url), listing);
+}
+
+a.xref-title::after {
+  content: " " target-text(attr(data-caption-href url), content);
+}
