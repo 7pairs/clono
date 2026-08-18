@@ -2,7 +2,7 @@
 
 - 状態: 調査中
 - 作成日: 2026-08-15
-- 最終更新日: 2026-08-17
+- 最終更新日: 2026-08-18
 
 ## 目的
 
@@ -42,10 +42,10 @@ Thunder Clawの書籍制作に必要な機能について、現在のVivliostyle
 | 機能 | 制作上の必要性 | Vivliostyleの対応 | `clono`の責務 | 調査状態 | 詳細 |
 | --- | --- | --- | --- | --- | --- |
 | 脚注 | 必須 | VFMの`dpub`モードで基本要件に対応できる。コラム内の脚注は未確認 | 暫定的に、脚注の参照と定義、その内容を壊さず後段へ渡す。独自記法やHTMLへの変換は実装しない | 調査中 | [調査記録](research/vivliostyle-footnotes.md) |
-| 見出し、画像、表、コードリストへの参照用IDの付与 | 必須 | 見出しはVFMの明示的なIDに対応できる。画像に指定したIDは`img`へ付与される。画像、表、コードリストは、原稿に記述したIDとclassを持つ`figure`を保持でき、表とコードリストでは内側のMarkdownも変換できる | 見出しIDはVFMの記法を保持する。番号付き画像、表、コードリストの著者向け記法を、参照用IDと必要なclassを持つ`figure`構造へ変換する。表とコードリストではタイトル参照用IDを持つ`figcaption`も生成する。未定義・重複IDの診断を担う候補とする | 調査済み | [見出し](research/vivliostyle-heading-references.md)、[画像](research/vivliostyle-figure-references.md)、[表](research/vivliostyle-table-references.md)、[コードリスト](research/vivliostyle-code-listing-references.md) |
-| 見出し、画像、表、コードリストへの連番付与 | 必須 | 個別検証では、すべてCSSカウンターで章ごとの番号を生成できる。図、表、コードリストのカウンターを同じテーマで使用する結合テストは未実施 | 見出し番号、図番号、表番号、リスト番号を計算せず、VivliostyleとテーマCSSへ委譲する。統合テーマでは各カウンターを一つの`counter-reset`で初期化する | 調査中 | [見出し](research/vivliostyle-heading-references.md)、[画像](research/vivliostyle-figure-references.md)、[表](research/vivliostyle-table-references.md)、[コードリスト](research/vivliostyle-code-listing-references.md) |
-| 参照用IDを使った見出し、画像、表、コードリストの番号参照 | 必須 | 個別検証では、すべて`target-counter()`で同一・別原稿ファイルの番号を参照できる。統合テーマでの結合テストは未実施 | 著者向け記法を参照種別に応じた`a`要素へ変換し、参照を診断する。番号生成はVivliostyleへ委譲する | 調査中 | [見出し](research/vivliostyle-heading-references.md)、[画像](research/vivliostyle-figure-references.md)、[表](research/vivliostyle-table-references.md)、[コードリスト](research/vivliostyle-code-listing-references.md) |
-| 参照用IDを使った見出し、画像、表、コードリストの番号とタイトルの参照 | 必須 | 個別検証では、すべて`target-counter()`と`target-text()`で同一・別原稿ファイルの番号とタイトルを参照できる。表とコードリストではタイトル取得用にキャプションを別のIDで参照する。統合テーマでの結合テストは未実施 | 著者向け記法を参照種別に応じた`a`要素へ変換し、参照を診断する。表とコードリストでは本体とキャプションへの参照を生成する。番号とタイトルの生成はVivliostyleへ委譲する | 調査中 | [見出し](research/vivliostyle-heading-references.md)、[画像](research/vivliostyle-figure-references.md)、[表](research/vivliostyle-table-references.md)、[コードリスト](research/vivliostyle-code-listing-references.md) |
+| 見出し、画像、表、コードリストへの参照用IDの付与 | 必須 | 見出しはVFMの明示的なIDに対応できる。画像に指定したIDは`img`へ付与される。画像、表、コードリストは、原稿に記述したIDとclassを持つ`figure`を保持でき、表とコードリストでは内側のMarkdownも変換できる | 見出しIDはVFMの記法を保持する。番号付き画像、表、コードリストの著者向け記法を、参照用IDと必要なclassを持つ`figure`構造へ変換し、タイトル参照用IDを持つ`figcaption`も生成する。未定義・重複IDの診断を担う候補とする | 調査済み | [見出し](research/vivliostyle-heading-references.md)、[画像](research/vivliostyle-figure-references.md)、[表](research/vivliostyle-table-references.md)、[コードリスト](research/vivliostyle-code-listing-references.md)、[結合検証](research/vivliostyle-reference-integration.md) |
+| 見出し、画像、表、コードリストへの連番付与 | 必須 | すべてCSSカウンターで章ごとの番号を生成できる。図、表、コードリストのカウンターは、同じテーマと文書でも独立して動作する | 見出し番号、図番号、表番号、リスト番号を計算せず、VivliostyleとテーマCSSへ委譲する。統合テーマでは各カウンターを一つの`counter-reset`で初期化する | 調査済み | [見出し](research/vivliostyle-heading-references.md)、[画像](research/vivliostyle-figure-references.md)、[表](research/vivliostyle-table-references.md)、[コードリスト](research/vivliostyle-code-listing-references.md)、[結合検証](research/vivliostyle-reference-integration.md) |
+| 参照用IDを使った見出し、画像、表、コードリストの番号参照 | 必須 | すべて`target-counter()`で同一・別原稿ファイルの番号を参照できる。統合テーマでも前方・後方の参照がPDF内部リンクになる | 著者向け記法を参照種別に応じた`href`とclassを持つ`a`要素へ変換し、参照を診断する。番号生成はVivliostyleへ委譲する | 調査済み | [見出し](research/vivliostyle-heading-references.md)、[画像](research/vivliostyle-figure-references.md)、[表](research/vivliostyle-table-references.md)、[コードリスト](research/vivliostyle-code-listing-references.md)、[結合検証](research/vivliostyle-reference-integration.md) |
+| 参照用IDを使った見出し、画像、表、コードリストの番号とタイトルの参照 | 必須 | すべて`target-counter()`と`target-text()`で同一・別原稿ファイルの番号とタイトルを参照できる。統合テーマではタイトル取得先を`data-title-href`へ統一できる | 著者向け記法を、番号とクリック先を示す`href`、タイトル取得先を示す`data-title-href`、参照種別に応じたclassを持つ`a`要素へ変換し、参照を診断する。番号とタイトルの生成はVivliostyleへ委譲する | 調査済み | [見出し](research/vivliostyle-heading-references.md)、[画像](research/vivliostyle-figure-references.md)、[表](research/vivliostyle-table-references.md)、[コードリスト](research/vivliostyle-code-listing-references.md)、[結合検証](research/vivliostyle-reference-integration.md) |
 | 表へのキャプションの付与 | 必須 | Markdown表を含む`figure`と`figcaption`をVFMが保持し、CSSで表番号を付けたキャプションを表の下へ表示できる | 番号付き表の著者向け記法を、IDを持つ`figure`、Markdown表、タイトル参照用IDを持つ`figcaption`へ変換する | 調査済み | [調査記録](research/vivliostyle-table-references.md) |
 | 目次の生成 | 必須 | 未調査 | 未決定 | 未調査 | — |
 | 索引へ掲載するキーワードの指定と索引の生成 | 必須 | 未調査 | 未決定 | 未調査 | — |
