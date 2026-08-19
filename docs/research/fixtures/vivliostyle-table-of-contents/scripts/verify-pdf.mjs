@@ -66,6 +66,18 @@ function destinationIsNearBlock(destination, block) {
   );
 }
 
+function textInsideBounds(textLines, bounds) {
+  const [left, top, right, bottom] = bounds;
+  return textLines
+    .filter(({ bounds: [lineLeft, lineTop, lineRight, lineBottom] }) => {
+      const centerX = (lineLeft + lineRight) / 2;
+      const centerY = (lineTop + lineBottom) / 2;
+      return centerX >= left && centerX <= right && centerY >= top && centerY <= bottom;
+    })
+    .map(({ text }) => text)
+    .join('');
+}
+
 await mkdir(outputDirectory, { recursive: true });
 await rm(outputPath, { force: true });
 
@@ -102,6 +114,14 @@ const pages = Array.from({ length: pageCount }, (_, pageNumber) => {
         bounds: blockBounds(block.bbox),
         text: block.lines.map(({ text }) => text).join(''),
       })),
+    textLines: structuredTextJson.blocks
+      .filter(({ type }) => type === 'text')
+      .flatMap(({ lines }) =>
+        lines.map((line) => ({
+          bounds: blockBounds(line.bbox),
+          text: line.text,
+        })),
+      ),
     links: page.getLinks().map((link) => ({
       bounds: link.getBounds(),
       destination: document.resolveLinkDestination(link.getURI()),
@@ -130,15 +150,15 @@ assert.equal(tocPage.links.length, expectedTocEntries.length, 'ToC link count mu
 
 const compactTocText = compactText(tocPage.text);
 for (const entry of expectedTocEntries) {
-  assert.ok(
-    compactTocText.includes(compactText(`${entry.tocLabel}${entry.displayedPageNumber}`)),
-    `ToC must display ${entry.tocLabel} and page ${entry.displayedPageNumber}`,
-  );
-
   const matchingLinks = tocPage.links.filter(({ uri }) => uri.endsWith(entry.targetId));
   assert.equal(matchingLinks.length, 1, `ToC must contain one link to ${entry.targetId}`);
 
   const [link] = matchingLinks;
+  assert.equal(
+    compactText(textInsideBounds(tocPage.textLines, link.bounds)),
+    compactText(`${entry.tocLabel}${entry.displayedPageNumber}`),
+    `ToC link to ${entry.targetId} must display its exact label and page number`,
+  );
   assert.equal(link.destinationPage, entry.targetPage, `${entry.targetId} must resolve to its page`);
   const destinationBlock = findUniqueTextBlock(pages, entry.destinationText);
   assert.ok(

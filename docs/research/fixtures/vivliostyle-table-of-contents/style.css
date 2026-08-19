@@ -51,7 +51,7 @@ section.level2 > h2 {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: baseline;
-  color: currentColor;
+  color: currentcolor;
   text-decoration: none;
 }
 
