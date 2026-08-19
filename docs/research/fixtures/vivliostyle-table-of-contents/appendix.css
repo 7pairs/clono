@@ -1,0 +1,11 @@
+@page :nth(1) {
+  counter-increment: appendix;
+}
+
+section.level1 > h1::before {
+  content: "付録" counter(appendix, upper-alpha) " ";
+}
+
+section.level2 > h2::before {
+  content: counter(appendix, upper-alpha) "." counter(section) " ";
+}

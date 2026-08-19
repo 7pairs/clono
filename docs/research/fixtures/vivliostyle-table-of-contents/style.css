@@ -1,0 +1,93 @@
+@page {
+  size: a5;
+  margin: 18mm;
+
+  @bottom-center {
+    content: counter(page);
+  }
+}
+
+@page :first {
+  counter-reset: chapter appendix;
+}
+
+body {
+  font-family: sans-serif;
+}
+
+section.level1 > h1 {
+  counter-reset: section;
+}
+
+section.level2 > h2 {
+  counter-increment: section;
+}
+
+#toc ol {
+  margin: 0;
+  padding: 0;
+}
+
+#toc li {
+  list-style: none;
+}
+
+#toc li li {
+  margin-left: 1.5em;
+}
+
+#toc li[data-section-level="1"] {
+  margin-top: 0.65em;
+  font-weight: bold;
+}
+
+#toc li[data-section-level="2"] {
+  margin-top: 0.2em;
+  font-size: 0.9em;
+  font-weight: normal;
+}
+
+#toc a {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  color: currentColor;
+  text-decoration: none;
+}
+
+#toc a::before {
+  content: "";
+}
+
+#toc .toc-title {
+  display: flex;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+#toc .toc-title::after {
+  flex: auto;
+  margin: 0 0.5em;
+  border-bottom: 1px dotted;
+  content: "";
+}
+
+#toc a::after {
+  content: target-counter(attr(href url), page);
+}
+
+#toc li[data-document-kind="chapter"][data-section-level="1"] > a::before {
+  content: "第" target-counter(attr(href url), chapter) "章 ";
+}
+
+#toc li[data-document-kind="chapter"] li[data-section-level="2"] > a::before {
+  content: target-counter(attr(href url), chapter) "." target-counter(attr(href url), section) " ";
+}
+
+#toc li[data-document-kind="appendix"][data-section-level="1"] > a::before {
+  content: "付録" target-counter(attr(href url), appendix, upper-alpha) " ";
+}
+
+#toc li[data-document-kind="appendix"] li[data-section-level="2"] > a::before {
+  content: target-counter(attr(href url), appendix, upper-alpha) "." target-counter(attr(href url), section) " ";
+}
