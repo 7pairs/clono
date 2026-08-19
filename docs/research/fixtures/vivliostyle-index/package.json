@@ -1,0 +1,21 @@
+{
+  "name": "@clono/research-vivliostyle-index",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^22.13.0 || ^24.0.0"
+  },
+  "scripts": {
+    "build:pdf": "vivliostyle build --config vivliostyle.config.mjs --output output/index.pdf",
+    "build:webpub": "vivliostyle build --config vivliostyle.config.mjs --output output/webpub --format webpub",
+    "verify": "npm run verify:webpub && npm run verify:pdf",
+    "verify:pdf": "node scripts/verify-pdf.mjs",
+    "verify:webpub": "node scripts/verify-webpub.mjs"
+  },
+  "devDependencies": {
+    "@vivliostyle/cli": "11.1.0",
+    "@vivliostyle/vfm": "2.7.0",
+    "mupdf": "1.28.0"
+  }
+}
