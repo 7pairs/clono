@@ -2,7 +2,7 @@
 
 - 状態: 調査中
 - 作成日: 2026-08-15
-- 最終更新日: 2026-08-18
+- 最終更新日: 2026-08-19
 
 ## 目的
 
@@ -47,7 +47,7 @@ Thunder Clawの書籍制作に必要な機能について、現在のVivliostyle
 | 参照用IDを使った見出し、画像、表、コードリストの番号参照 | 必須 | すべて`target-counter()`で同一・別原稿ファイルの番号を参照できる。統合テーマでも前方・後方の参照がPDF内部リンクになる | 著者向け記法を参照種別に応じた`href`とclassを持つ`a`要素へ変換し、参照を診断する。番号生成はVivliostyleへ委譲する | 調査済み | [見出し](research/vivliostyle-heading-references.md)、[画像](research/vivliostyle-figure-references.md)、[表](research/vivliostyle-table-references.md)、[コードリスト](research/vivliostyle-code-listing-references.md)、[結合検証](research/vivliostyle-reference-integration.md) |
 | 参照用IDを使った見出し、画像、表、コードリストの番号とタイトルの参照 | 必須 | すべて`target-counter()`と`target-text()`で同一・別原稿ファイルの番号とタイトルを参照できる。統合テーマではタイトル取得先を`data-title-href`へ統一できる | 著者向け記法を、番号とクリック先を示す`href`、タイトル取得先を示す`data-title-href`、参照種別に応じたclassを持つ`a`要素へ変換し、参照を診断する。番号とタイトルの生成はVivliostyleへ委譲する | 調査済み | [見出し](research/vivliostyle-heading-references.md)、[画像](research/vivliostyle-figure-references.md)、[表](research/vivliostyle-table-references.md)、[コードリスト](research/vivliostyle-code-listing-references.md)、[結合検証](research/vivliostyle-reference-integration.md) |
 | 表へのキャプションの付与 | 必須 | Markdown表を含む`figure`と`figcaption`をVFMが保持し、CSSで表番号を付けたキャプションを表の下へ表示できる | 番号付き表の著者向け記法を、IDを持つ`figure`、Markdown表、タイトル参照用IDを持つ`figcaption`へ変換する | 調査済み | [調査記録](research/vivliostyle-table-references.md) |
-| 目次の生成 | 必須 | 未調査 | 未決定 | 未調査 | — |
+| 目次の生成 | 必須 | Vivliostyle CLIの自動目次で指定階層の見出し、タイトル、リンク先を抽出できる。設定の変換関数とテーマCSSを組み合わせ、掲載文書の選別、本文・付録・番号なし文書の番号、連続する紙面上のページ番号、PDF内部リンクを生成できる | 見出し一覧、番号、ページ番号、目次Markdownは生成せずVivliostyleへ委譲する。原稿順序、文書種別、目次への掲載有無を一つの書籍構造として表現し、必要に応じてVivliostyle設定へ変換する入力契約を担う候補とする | 調査済み | [調査記録](research/vivliostyle-table-of-contents.md) |
 | 索引へ掲載するキーワードの指定と索引の生成 | 必須 | 未調査 | 未決定 | 未調査 | — |
 
 ## 更新方針

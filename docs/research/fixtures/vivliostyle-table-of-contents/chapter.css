@@ -1,0 +1,11 @@
+@page :nth(1) {
+  counter-increment: chapter;
+}
+
+section.level1 > h1::before {
+  content: "第" counter(chapter) "章 ";
+}
+
+section.level2 > h2::before {
+  content: counter(chapter) "." counter(section) " ";
+}
