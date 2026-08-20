@@ -1,0 +1,42 @@
+@page {
+  size: a5;
+  margin: 16mm;
+}
+
+:root {
+  font-family: sans-serif;
+  font-size: 10pt;
+  line-height: 1.5;
+}
+
+h1 {
+  margin-block: 0 1rem;
+}
+
+h2 {
+  margin-block: 1rem 0.5rem;
+}
+
+p {
+  margin-block: 0 0.5rem;
+}
+
+.blank-line {
+  block-size: 1.5rem;
+}
+
+.text-align-right {
+  text-align: right;
+}
+
+.definition-list dt {
+  font-weight: bold;
+}
+
+.definition-list dd {
+  margin-inline-start: 2rem;
+}
+
+.page-break {
+  break-before: page;
+}
