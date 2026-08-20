@@ -30,14 +30,28 @@ const expectedMarkers = [
 
 const expectedGroups = ['alphanumeric', 'a', 'ka', 'sa', 'ha'];
 const expectedEntries = [
-  ['Android', 'Android', 'android', ['index-android-1', 'index-android-2', 'index-android-3']],
-  ['API', 'API', 'api', ['index-api-1', 'index-api-2']],
-  ['アプリ', 'あぷり', 'あふり', ['index-app-1', 'index-app-2']],
-  ['画像', 'がぞう', 'かそう', ['index-image-1']],
-  ['コラム', 'こらむ', 'こらむ', ['index-column-1']],
-  ['索引', 'さくいん', 'さくいん', ['index-index-1']],
-  ['バックナンバー', 'ばっくなんばー', 'はつくなんはあ', ['index-backnumber-1']],
-].map(([term, reading, sortKey, targetIds]) => ({ term, reading, sortKey, targetIds }));
+  [
+    'Android',
+    'Android',
+    'android',
+    [
+      'chapter-one.html#index-android-1',
+      'chapter-one.html#index-android-2',
+      'chapter-two.html#index-android-3',
+    ],
+  ],
+  ['API', 'API', 'api', ['chapter-one.html#index-api-1', 'chapter-two.html#index-api-2']],
+  ['アプリ', 'あぷり', 'あふり', ['chapter-one.html#index-app-1', 'chapter-two.html#index-app-2']],
+  ['画像', 'がぞう', 'かそう', ['chapter-two.html#index-image-1']],
+  ['コラム', 'こらむ', 'こらむ', ['chapter-two.html#index-column-1']],
+  ['索引', 'さくいん', 'さくいん', ['chapter-one.html#index-index-1']],
+  [
+    'バックナンバー',
+    'ばっくなんばー',
+    'はつくなんはあ',
+    ['chapter-two.html#index-backnumber-1'],
+  ],
+].map(([term, reading, sortKey, targetHrefs]) => ({ term, reading, sortKey, targetHrefs }));
 
 function extractAttribute(attributes, name) {
   return attributes.match(new RegExp(`${name}="([^"]+)"`, 'u'))?.[1];
@@ -107,7 +121,7 @@ const actualEntries = [...indexHtml.matchAll(
   reading: extractAttribute(attributes, 'data-index-reading'),
   sortKey: extractAttribute(attributes, 'data-index-sort-key'),
   displayedTerm: contents.match(/<dt>([^<]+)<\/dt>/u)?.[1],
-  targetIds: [...contents.matchAll(/href="[^"]+#([^"]+)"/gu)].map(([, id]) => id),
+  targetHrefs: [...contents.matchAll(/href="([^"]+#[^"]+)"/gu)].map(([, href]) => href),
 }));
 
 assert.deepEqual(
@@ -117,13 +131,19 @@ assert.deepEqual(
 );
 
 for (const entry of expectedEntries) {
-  for (const targetId of entry.targetIds) {
-    const marker = expectedMarkers.find(({ id }) => id === targetId);
-    assert.ok(marker, `Expected marker metadata for ${targetId}`);
+  for (const targetHref of entry.targetHrefs) {
+    const [documentPath, targetId, ...unexpectedFragments] = targetHref.split('#');
+    assert.equal(unexpectedFragments.length, 0, `Index target ${targetHref} must contain one fragment`);
+    const marker = expectedMarkers.find(
+      ({ documentPath: markerDocumentPath, id }) =>
+        markerDocumentPath === documentPath && id === targetId,
+    );
+    assert.ok(marker, `Expected marker metadata for ${targetHref}`);
+    assert.ok(htmlByPath.has(documentPath), `Index target document ${documentPath} must exist`);
     assert.match(
-      htmlByPath.get(marker.documentPath),
+      htmlByPath.get(documentPath),
       new RegExp(`id="${targetId}"`, 'u'),
-      `Index target ${targetId} must exist`,
+      `Index target ${targetHref} must exist`,
     );
   }
 }

@@ -71,6 +71,20 @@ function findUniqueTextBlock(pages, expectedText) {
   return matches[0];
 }
 
+function blockIsCenteredInFooter(blockBounds, pageBounds) {
+  const [pageLeft, pageTop, pageRight, pageBottom] = pageBounds;
+  const [blockLeft, blockTop, blockRight, blockBottom] = blockBounds;
+  const pageWidth = pageRight - pageLeft;
+  const pageHeight = pageBottom - pageTop;
+  const pageCenterX = (pageLeft + pageRight) / 2;
+  const blockCenterX = (blockLeft + blockRight) / 2;
+  return (
+    blockTop >= pageBottom - pageHeight * 0.1 &&
+    blockBottom <= pageBottom &&
+    Math.abs(blockCenterX - pageCenterX) <= pageWidth * 0.05
+  );
+}
+
 function destinationIsNearBlock(destination, block) {
   const [left, top, right] = block.bounds;
   return (
@@ -140,6 +154,7 @@ const pages = Array.from({ length: pageCount }, (_, pageNumber) => {
     },
   });
   return {
+    bounds: page.getBounds(),
     pageNumber,
     text: structuredText.asText(),
     textBlocks: structuredTextJson.blocks
@@ -160,9 +175,12 @@ const pages = Array.from({ length: pageCount }, (_, pageNumber) => {
 
 for (const [index, page] of pages.entries()) {
   assert.equal(
-    page.textBlocks.filter(({ text }) => text.trim() === String(index + 1)).length,
+    page.textBlocks.filter(
+      ({ bounds, text }) =>
+        text.trim() === String(index + 1) && blockIsCenteredInFooter(bounds, page.bounds),
+    ).length,
     1,
-    `Page ${index + 1} must display its continuous page number once`,
+    `Page ${index + 1} must display its continuous page number once in the centered footer`,
   );
 }
 
