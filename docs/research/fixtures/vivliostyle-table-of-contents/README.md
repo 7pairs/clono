@@ -105,6 +105,6 @@ npm run verify:pdf
 
 ## 参照資料
 
-- [目次の作成 | Vivliostyle Documentation](https://docs.vivliostyle.org/ja/cli/toc-page/)
-- [チュートリアル⑦目次の作成 | Vivliostyle](https://vivliostyle.org/ja/tutorials/create-table-of-contents/)
-- [Vivliostyle CLI Config Reference](https://github.com/vivliostyle/vivliostyle-cli/blob/main/docs/config.md)
+- [目次の作成 | Vivliostyle CLI 11.1.0](https://github.com/vivliostyle/vivliostyle-cli/blob/v11.1.0/docs/ja/toc-page.md)
+- [チュートリアル⑦目次の作成 | Vivliostyle](https://vivliostyle.org/ja/tutorials/create-table-of-contents/)（2026-08-19参照）
+- [Vivliostyle CLI 11.1.0 Config Reference](https://github.com/vivliostyle/vivliostyle-cli/blob/v11.1.0/docs/config.md)

@@ -2,7 +2,7 @@
 
 - 状態: 調査中
 - 初回調査日: 2026-08-15
-- 最終更新日: 2026-08-16
+- 最終更新日: 2026-08-20
 - 検証環境:
   - 実行環境: macOS、Node.js 24.19.0
   - HTML変換: `@vivliostyle/vfm` 2.7.0および2.7.2
@@ -152,7 +152,8 @@ export default {
 
 ## 参照資料
 
-- [脚注ガイド | Vivliostyle Documentation](https://docs.vivliostyle.org/ja/cookbook/footnotes/)
-- [Vivliostyle Flavored Markdown | Vivliostyle Documentation](https://docs.vivliostyle.org/ja/vfm/vfm/)
-- [Vivliostyle CLIの変更履歴](https://github.com/vivliostyle/vivliostyle-cli/blob/main/CHANGELOG.md)
+- [脚注ガイド | Vivliostyle Documentation](https://docs.vivliostyle.org/ja/cookbook/footnotes/)（2026-08-15参照）
+- [Vivliostyle Flavored Markdown 2.7.0](https://github.com/vivliostyle/vfm/blob/v2.7.0/docs/ja/vfm.md)
+- [Vivliostyle Flavored Markdown 2.7.2](https://github.com/vivliostyle/vfm/blob/ae9e5564dcd72dfa4a146df317f8bcfe68d7f851/docs/ja/vfm.md)
+- [Vivliostyle CLI 11.1.0の変更履歴](https://github.com/vivliostyle/vivliostyle-cli/blob/v11.1.0/CHANGELOG.md)
 - [Vivliostyle.js 2.41.0のリリース](https://github.com/vivliostyle/vivliostyle.js/releases/tag/v2.41.0)

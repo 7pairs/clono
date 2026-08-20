@@ -30,7 +30,7 @@
 
 この方法は「1つのMarkdownファイルが1つの章に対応し、設定ファイルの`entry`が章順に並ぶ」構成を前提とする。章として数えない前付・後付などを別のMarkdownファイルとして`entry`へ含める場合に、章カウンターを増やさない指定が可能かは未検証である。
 
-この方式は、Vivliostyle公式の[チュートリアル⑤カウンタと柱のスタイル](https://vivliostyle.org/ja/tutorials/configure-counters-running-heads/)をもとにしている。
+この方式は、Vivliostyle公式の[チュートリアル⑤カウンタと柱のスタイル](https://vivliostyle.org/ja/tutorials/configure-counters-running-heads/)（2026-08-16参照）をもとにしている。
 
 `chapter-two.md`先頭の`chapter-start-spacer`は、2つ目の文書の先頭見出しがページ上端で欠けることを避け、目視確認を安定させるためのfixture専用要素である。製品用の原稿構文やテーマとして採用するものではない。
 

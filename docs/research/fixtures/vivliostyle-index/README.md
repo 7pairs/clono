@@ -130,6 +130,6 @@ npm run verify:pdf
 
 ## 参照資料
 
-- [Vivliostyle Flavored Markdown](https://docs.vivliostyle.org/ja/vfm/vfm/)
-- [Vivliostyle CLI Config Reference](https://github.com/vivliostyle/vivliostyle-cli/blob/main/docs/config.md)
-- [サポートするCSS機能](https://docs.vivliostyle.org/ja/reference/supported-css-features/)
+- [Vivliostyle Flavored Markdown 2.7.0](https://github.com/vivliostyle/vfm/blob/v2.7.0/docs/ja/vfm.md)
+- [Vivliostyle CLI 11.1.0 Config Reference](https://github.com/vivliostyle/vivliostyle-cli/blob/v11.1.0/docs/config.md)
+- [サポートするCSS機能 | Vivliostyle.js 2.44.1](https://github.com/vivliostyle/vivliostyle.js/blob/v2.44.1/docs/ja/supported-css-features.md)

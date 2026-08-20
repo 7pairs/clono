@@ -2,6 +2,7 @@
 
 - 状態: 調査中
 - 初回調査日: 2026-08-19
+- 最終更新日: 2026-08-20
 - 検証環境:
   - 実行環境: macOS、Node.js 24.19.0
   - HTML変換: `@vivliostyle/vfm` 2.7.0
@@ -41,9 +42,9 @@ Thunder Clawの前作では、本文中へ索引項目と読みを明示する�
 
 ## 公式情報の確認
 
-2026年8月19日時点の[VFM公式ドキュメント](https://docs.vivliostyle.org/ja/vfm/vfm/)には、索引項目と読みを指定する構文は記載されていない。
+検証に使用した[VFM 2.7.0の公式ドキュメント](https://github.com/vivliostyle/vfm/blob/v2.7.0/docs/ja/vfm.md)には、索引項目と読みを指定する構文は記載されていない。
 
-[Vivliostyle CLIの設定リファレンス](https://github.com/vivliostyle/vivliostyle-cli/blob/main/docs/config.md)には目次を自動生成する`toc`設定があるが、本文から索引項目を収集し、分類、並べ替え、統合して索引文書を生成する設定は確認できない。[公式チュートリアル](https://vivliostyle.org/ja/tutorials/)にも目次の自動・手動生成はあるが、索引生成は記載されていない。
+[Vivliostyle CLI 11.1.0の設定リファレンス](https://github.com/vivliostyle/vivliostyle-cli/blob/v11.1.0/docs/config.md)には目次を自動生成する`toc`設定があるが、本文から索引項目を収集し、分類、並べ替え、統合して索引文書を生成する設定は確認できない。2026年8月19日に確認した[公式チュートリアル](https://vivliostyle.org/ja/tutorials/)にも目次の自動・手動生成はあるが、索引生成は記載されていない。
 
 これは公式ドキュメントが「索引機能は存在しない」と明記していることを意味しない。一方、VFMとVivliostyle CLIの文書化された公開インターフェースには、clonoの要件を満たす索引収集・生成機能は確認できない。このため、現時点ではVivliostyleによる索引の自動生成を前提としない。
 
@@ -214,7 +215,7 @@ clonoはVivliostyleによる組版前にMarkdownを変換するため、その�
 
 ## 参照資料
 
-- [Vivliostyle Flavored Markdown](https://docs.vivliostyle.org/ja/vfm/vfm/)
-- [Vivliostyle CLI Config Reference](https://github.com/vivliostyle/vivliostyle-cli/blob/main/docs/config.md)
-- [チュートリアル一覧 | Vivliostyle](https://vivliostyle.org/ja/tutorials/)
-- [サポートするCSS機能](https://docs.vivliostyle.org/ja/reference/supported-css-features/)
+- [Vivliostyle Flavored Markdown 2.7.0](https://github.com/vivliostyle/vfm/blob/v2.7.0/docs/ja/vfm.md)
+- [Vivliostyle CLI 11.1.0 Config Reference](https://github.com/vivliostyle/vivliostyle-cli/blob/v11.1.0/docs/config.md)
+- [チュートリアル一覧 | Vivliostyle](https://vivliostyle.org/ja/tutorials/)（2026-08-19参照）
+- [サポートするCSS機能 | Vivliostyle.js 2.44.1](https://github.com/vivliostyle/vivliostyle.js/blob/v2.44.1/docs/ja/supported-css-features.md)
