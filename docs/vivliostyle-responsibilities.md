@@ -30,11 +30,11 @@ Thunder Clawの書籍制作に必要な機能について、現在のVivliostyle
 
 | 機能 | 制作上の必要性 | Vivliostyleの対応 | `clono`の責務 | 調査状態 | 詳細 |
 | --- | --- | --- | --- | --- | --- |
-| 空行 | 可能性あり | 未調査 | 未決定 | 未調査 | — |
-| 強制改行 | 現時点では不要 | 未調査 | 未決定 | 未調査 | — |
-| 強制改ページ | 可能性あり | 未調査 | 未決定 | 未調査 | — |
-| 段落の右寄せ | 必須 | 未調査 | 未決定 | 未調査 | — |
-| 定義リスト | 可能性あり | 未調査 | 未決定 | 未調査 | — |
+| 空行 | 可能性あり | 通常のMarkdown空行は可視要素として保持されない。空のHTML要素はVFMが保持し、CSSで一行相当の空白を表示できる | 著者向け記法を空白用の構造へ変換する候補とする。空白の寸法と表示はテーマCSSへ委譲する | 調査済み | [調査記録](research/vivliostyle-basic-presentation.md) |
+| 強制改行 | 現時点では不要 | 標準Markdownのバックスラッシュによる強制改行を`br`へ変換できる | 標準記法を壊さずVFMへ渡す。独自記法や変換は実装しない | 調査済み | [調査記録](research/vivliostyle-basic-presentation.md) |
+| 強制改ページ | 可能性あり | 空のHTML要素をVFMが保持し、CSSの`break-before: page`で後続の見出しまたは通常段落を次ページから開始できる | 著者向け記法を改ページ用の構造へ変換する候補とする。改ページはテーマCSSへ委譲する | 調査済み | [調査記録](research/vivliostyle-basic-presentation.md) |
+| 段落の右寄せ | 必須 | 複数のMarkdown段落を含むHTMLコンテナをVFMが保持し、CSSの`text-align: right`でまとめて右寄せできる | 著者向け記法を、複数段落を保持できる右寄せ用コンテナへ変換する候補とする。文字揃えはテーマCSSへ委譲する | 調査済み | [調査記録](research/vivliostyle-basic-presentation.md) |
+| 定義リスト | 可能性あり | 標準記法は確認できない。`dl`、`dt`、`dd`と説明内のMarkdownをVFMが保持または変換し、CSSで字下げできる | 著者向け記法を`dl`、`dt`、`dd`へ変換する候補とする。説明内のMarkdown変換と表示はVFMとテーマCSSへ委譲する | 調査済み | [調査記録](research/vivliostyle-basic-presentation.md) |
 | コラムなどの囲み枠 | 必須 | 未調査 | 未決定 | 未調査 | — |
 
 ## 文書情報を扱う機能
