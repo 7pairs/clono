@@ -133,6 +133,11 @@ assert.ok(
   chapterOneHtml.indexOf('id="basic-column"') < chapterOneHtml.indexOf('id="fn2"'),
   'The column footnote body must be emitted outside the column container',
 );
+assert.doesNotMatch(
+  basicColumn,
+  /\bid="fn2"/u,
+  'The column footnote body must not be nested inside the column container',
+);
 
 const chapterTwoColumn = assertColumn(
   chapterTwoHtml,

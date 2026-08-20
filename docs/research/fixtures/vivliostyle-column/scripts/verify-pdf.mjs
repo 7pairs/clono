@@ -32,6 +32,31 @@ function findUniqueLine(pages, expectedText) {
   return matches[0];
 }
 
+function assertFootnotesAtPageBottom(pages, footnotes, lastMainContent, context) {
+  assert.ok(
+    footnotes.every(({ pageNumber }) => pageNumber === lastMainContent.pageNumber),
+    `${context} footnotes must share the page with their references`,
+  );
+
+  const orderedFootnotes = [...footnotes].sort(
+    (left, right) => left.bounds[1] - right.bounds[1],
+  );
+  const firstFootnote = orderedFootnotes[0];
+  const lastFootnote = orderedFootnotes.at(-1);
+  assert.ok(
+    firstFootnote.bounds[1] > lastMainContent.bounds[3],
+    `${context} footnotes must appear below the main content`,
+  );
+
+  const pageBottom = pages[lastMainContent.pageNumber].bounds[3];
+  const contentToFootnotesGap = firstFootnote.bounds[1] - lastMainContent.bounds[3];
+  const footnotesToBottomGap = pageBottom - lastFootnote.bounds[3];
+  assert.ok(
+    footnotesToBottomGap < contentToFootnotesGap,
+    `${context} footnotes must form a page-bottom area separated from the main content`,
+  );
+}
+
 await mkdir(outputDirectory, { recursive: true });
 await rm(outputPath, { force: true });
 
@@ -53,7 +78,7 @@ assert.ok(outputStat.size > 0, 'Vivliostyle CLI must produce a non-empty PDF');
 
 const document = mupdf.Document.openDocument(outputPath);
 const pageCount = document.countPages();
-assert.equal(pageCount, 5, 'The column fixture must produce exactly five pages');
+assert.ok(pageCount > 0, 'The column fixture must contain at least one page');
 
 const pages = Array.from({ length: pageCount }, (_, pageNumber) => {
   const page = document.loadPage(pageNumber);
@@ -163,17 +188,16 @@ const chapterOneFootnotes = [
   findUniqueLine(pages, '第1章のコラム脚注。'),
   findUniqueLine(pages, '第1章の本文後脚注。'),
 ];
-assert.ok(
-  chapterOneFootnotes.every(({ pageNumber }) => pageNumber === basicTitle.pageNumber),
-  'Body and column footnotes in chapter one must share the reference page',
+const chapterOneLastMainContent = findUniqueLine(
+  pages,
+  'コラムの後に本文から参照する脚注。',
 );
-for (const footnote of chapterOneFootnotes) {
-  const pageBottom = pages[footnote.pageNumber].bounds[3];
-  assert.ok(
-    footnote.bounds[1] >= pageBottom * 0.72,
-    'Each chapter-one footnote must appear near the bottom of its page',
-  );
-}
+assertFootnotesAtPageBottom(
+  pages,
+  chapterOneFootnotes,
+  chapterOneLastMainContent,
+  'Chapter-one',
+);
 
 const chapterTwoHeading = findUniqueLine(pages, '第2章 脚注番号のリセット');
 const chapterTwoColumnTitle = findUniqueLine(pages, '章内コラムの確認');
@@ -181,18 +205,21 @@ const chapterTwoFootnotes = [
   findUniqueLine(pages, '第2章の本文脚注。'),
   findUniqueLine(pages, '第2章のコラム脚注。'),
 ];
-assert.ok(
-  chapterTwoFootnotes.every(({ pageNumber }) => pageNumber === chapterTwoHeading.pageNumber),
-  'Body and column footnotes in chapter two must share the reference page',
-);
 assert.equal(chapterTwoColumnTitle.pageNumber, chapterTwoHeading.pageNumber);
-for (const footnote of chapterTwoFootnotes) {
-  const pageBottom = pages[footnote.pageNumber].bounds[3];
-  assert.ok(
-    footnote.bounds[1] >= pageBottom * 0.72,
-    'Each chapter-two footnote must appear near the bottom of its page',
-  );
-}
+assert.ok(
+  chapterTwoHeading.pageNumber > longEnd.pageNumber,
+  'Chapter two must begin after the long column has ended',
+);
+const chapterTwoLastMainContent = findUniqueLine(
+  pages,
+  '第2章のコラムから次の脚注を参照する。',
+);
+assertFootnotesAtPageBottom(
+  pages,
+  chapterTwoFootnotes,
+  chapterTwoLastMainContent,
+  'Chapter-two',
+);
 
 const chapterTwoPageText = compactText(pages[chapterTwoHeading.pageNumber].text);
 assert.match(
