@@ -2,7 +2,7 @@
 
 - 状態: 調査済み
 - 初回調査日: 2026-08-16
-- 最終更新日: 2026-08-18
+- 最終更新日: 2026-08-20
 - 検証環境:
   - 実行環境: macOS、Node.js 24.19.0
   - HTML変換: `@vivliostyle/vfm` 2.7.0
@@ -196,7 +196,7 @@ VFM標準のMarkdown画像では属性が`img`へ付き、代替テキストが�
 
 ## 参照資料
 
-- [画像 | Vivliostyle Flavored Markdown](https://docs.vivliostyle.org/ja/vfm/vfm/#画像image)
-- [チュートリアル⑤カウンタと柱のスタイル | Vivliostyle](https://vivliostyle.org/ja/tutorials/configure-counters-running-heads/)
-- [チュートリアル⑥基本的な要素のスタイル | Vivliostyle](https://vivliostyle.org/ja/tutorials/configure-basic-elements/)
-- [Supported CSS Features | Vivliostyle Documentation](https://docs.vivliostyle.org/ja/reference/supported-css-features/)
+- [画像 | Vivliostyle Flavored Markdown 2.7.0](https://github.com/vivliostyle/vfm/blob/v2.7.0/docs/ja/vfm.md#画像-image)
+- [チュートリアル⑤カウンタと柱のスタイル | Vivliostyle](https://vivliostyle.org/ja/tutorials/configure-counters-running-heads/)（2026-08-16参照）
+- [チュートリアル⑥基本的な要素のスタイル | Vivliostyle](https://vivliostyle.org/ja/tutorials/configure-basic-elements/)（2026-08-16参照）
+- [Supported CSS Features | Vivliostyle.js 2.44.1](https://github.com/vivliostyle/vivliostyle.js/blob/v2.44.1/docs/ja/supported-css-features.md)

@@ -2,6 +2,7 @@
 
 - 状態: 調査済み
 - 調査日: 2026-08-19
+- 最終更新日: 2026-08-20
 - 検証環境:
   - 実行環境: macOS、Node.js 24.19.0
   - HTML変換: `@vivliostyle/vfm` 2.7.0
@@ -170,6 +171,6 @@ PDFの自動検証では、12件の目次項目について次を個別に確認
 
 ## 参照資料
 
-- [目次の作成 | Vivliostyle Documentation](https://docs.vivliostyle.org/ja/cli/toc-page/)
-- [チュートリアル⑦目次の作成 | Vivliostyle](https://vivliostyle.org/ja/tutorials/create-table-of-contents/)
-- [Vivliostyle CLI Config Reference](https://github.com/vivliostyle/vivliostyle-cli/blob/main/docs/config.md)
+- [目次の作成 | Vivliostyle CLI 11.1.0](https://github.com/vivliostyle/vivliostyle-cli/blob/v11.1.0/docs/ja/toc-page.md)
+- [チュートリアル⑦目次の作成 | Vivliostyle](https://vivliostyle.org/ja/tutorials/create-table-of-contents/)（2026-08-19参照）
+- [Vivliostyle CLI 11.1.0 Config Reference](https://github.com/vivliostyle/vivliostyle-cli/blob/v11.1.0/docs/config.md)
