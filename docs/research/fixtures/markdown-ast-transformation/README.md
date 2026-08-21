@@ -1,0 +1,150 @@
+# Markdown AST変換・出力検証用fixture
+
+## 目的
+
+Generic Directivesを含む単一のMarkdown文字列をmdastとして解析し、既知のdirectiveを意味検証して用途別のraw HTMLへ変換し、VFMが処理できるMarkdownとして出力できるか検証する。出力をVFM 2.7.0でHTMLへ変換し、標準Markdown、コードフェンス、脚注と、clonoが生成する候補構造が共存できることも確認する。
+
+このfixtureは、clonoの著者向け記法、class名、HTML構造、診断文、内部API、採用ライブラリを確定するものではない。実用途を模した仮の変換で、AST変換と出力方式の成立性を調査する。
+
+## 検証パイプライン
+
+```text
+入力Markdown
+  → mdast解析
+  → 既知directiveの意味検証
+  → AST変換
+  → VFM向けMarkdown
+  → VFM 2.7.0
+  → HTML検証
+```
+
+ファイルへの出力、CLI、複数原稿、文書全体の情報収集、PDF生成は対象に含めない。
+
+## 仮変換
+
+| 想定用途 | 仮のdirective | 仮の出力 |
+| --- | --- | --- |
+| 右寄せ | Container directiveの`align` | `div.text-align-right` |
+| 強制改ページ | Leaf directiveの`page-break` | `div.page-break[aria-hidden="true"]` |
+| 索引指定 | Text directiveの`index` | `span.index-marker[data-index-reading]` |
+
+これらは、Container、leaf、textの3種類を現実的な構造へ変換するための候補である。記法、属性、class名、HTML要素は仕様として採用していない。
+
+## 入力と期待結果
+
+### `input/valid.md`
+
+- `align`、`page-break`、`index`がraw HTMLを含むMarkdownへ変換される
+- 通常の見出し、段落、強調、リンク、インラインコード、強制改行が保持される
+- VFMの脚注参照と定義がmdastの往復後にも保持される
+- コードフェンス内のdirectiveらしい文字列は変換されない
+- 未知の`third-party` directiveは名前、属性、本文の意味を保持する
+- VFM 2.7.0が変換後のMarkdownをHTMLへ変換し、用途別のHTML構造と脚注構造を保持する
+
+未知のdirectiveはclonoが出力するMarkdownまでを検証対象とする。VFMはGeneric Directivesを解釈しないため、VFM変換後のHTMLで未知のdirectiveが意味を持つことは要件に含めない。
+
+### `input/invalid.md`
+
+- `position="right"`を持たない`align`
+- 未定義の属性を持つ`page-break`
+- 空でない`reading`属性を持たない`index`
+- Text directiveとして誤って記述した`align`
+- clonoが認識しない`third-party`
+
+4件の既知directiveについて、入力ファイル、行、列、directive名、説明を持つ診断を返す。未知のdirectiveは診断対象にせず、既知directiveが一つでも不正な場合は出力Markdownを返さない。
+
+## AST変換方式
+
+Container directiveは、開始raw HTMLノード、元の`children`、終了raw HTMLノードへ置き換える。これにより、container内のMarkdownをVFMへ委譲する。
+
+Leaf directiveは一つのraw HTMLノードへ置き換える。Text directiveは開始raw HTMLノード、元のインライン`children`、終了raw HTMLノードへ置き換える。動的なHTML属性値はエスケープしてから出力する。
+
+未知のdirectiveノードは変換せず、`mdast-util-directive`でMarkdownへ再直列化する。元の空白や引用符との完全一致は要求せず、再解析後に名前、属性、本文を取得できることを意味的保持の条件とする。
+
+## 脚注の保持
+
+VFMの脚注記法を通常テキストへ崩さずmdastとして往復させるため、解析に`micromark-extension-gfm-footnote`、解析と直列化に`mdast-util-gfm-footnote`を使用する。
+
+このfixtureでは、脚注参照と定義がそれぞれ`footnoteReference`と`footnoteDefinition`になり、直列化後も脚注記法として残ることを確認する。そのMarkdownをVFMの`dpub`モードで変換し、`doc-noteref`と`doc-footnote`のHTML構造、脚注内のインラインコードとリンクを検証する。
+
+## 依存関係
+
+- Node.js 22.13.0以降の22系、または24系
+- Temurin JDK 21
+- shadow-cljs 3.4.12
+- `mdast-util-from-markdown` 2.0.3
+- `mdast-util-to-markdown` 2.1.2
+- `micromark-extension-directive` 4.0.0
+- `mdast-util-directive` 3.1.0
+- `micromark-extension-gfm-footnote` 2.1.0
+- `mdast-util-gfm-footnote` 2.1.0
+- `@vivliostyle/vfm` 2.7.0
+- `node-html-parser` 9.0.1
+
+依存関係はこのディレクトリの`package-lock.json`に固定する。`@vivliostyle/vfm`と`node-html-parser`は、clono側の変換後に行うHTML結合検証だけに使用する開発依存関係である。
+
+clono側の解析、検証、AST変換、Markdown直列化は、`remark-parse`、`remark-directive`、`unified`を直接使用せず、mdastおよびmicromarkの低レベルAPIで実装する。VFM 2.7.0自身の推移的依存関係には`remark-parse`と`unified`が含まれるが、これはVFMによる後段のHTML変換に使用される。
+
+2026年8月21日の`npm audit`では、開発依存関係のVFM 2.7.0を経由する3件のmoderateと3件のhighが報告された。`npm audit --omit=dev`では0件であり、clono側の変換を模したproduction依存関係には報告されなかった。このfixtureは固定したVFMとの結合を再現する調査資材であり、外部から受け取った信頼できない入力の処理には使用しない。
+
+## 実行方法
+
+```shell
+set -eu
+npm ci
+npm test
+```
+
+正常な入力から生成されるVFM向けMarkdownを表示するには、次を実行する。
+
+```shell
+set -eu
+npm run inspect
+```
+
+不正な入力の診断と終了コードを確認するには、inspectorをビルドしてから対象を指定する。
+
+```shell
+set -eu
+npm run build:inspect
+node target/inspect.js input/invalid.md
+```
+
+`target/`と`.shadow-cljs/`は生成物であり、Gitの管理対象には含めない。
+
+## 自動検証
+
+`src/test/clono/research/transformer_test.cljs`は、次を確認する。
+
+- 正常な入力では、診断なしでVFM向けMarkdownを返す
+- 3種類の既知directiveをraw HTMLへ置き換える
+- 動的なHTML属性値をエスケープし、VFM変換後にも元の値を保持する
+- 再解析後に既知directiveがなく、未知のdirectiveだけが意味的に保持される
+- 通常のMarkdown、コードフェンス、脚注のmdast構造を保持する
+- 不正な既知directiveをすべて位置付きで診断し、出力を返さない
+- 未知のdirectiveを診断対象にしない
+- 未知のdirectiveをVFMへ直接渡すと、記法と内容が通常テキストとしてHTMLへ出力される
+- VFM変換後に、通常のMarkdown、用途別HTML、脚注、コードフェンスの内容が保持される
+
+## 検証範囲の境界
+
+診断は、パーサーが既知のdirectiveノードとして認識した入力に対する意味検証だけを扱う。Generic Directives自体の構文が壊れ、通常テキストなど別の構造になった場合の検出は対象に含めない。
+
+変換処理は、意味検証がすべて成功した後にだけASTを変更する。失敗時には出力文字列を返さない。既存ファイルを残さないための一時ファイルや安全な置換は、ファイルI/Oを実装する段階で検証する。
+
+入力位置は変換前のmdastから診断へコピーする。出力Markdownと元の入力とのsource mapは生成しない。
+
+未知のdirectiveの内部に既知のdirectiveが入れ子になった場合の変換方針、警告、複数エラーの表示形式、診断コード、HTML以外の出力、生成Markdownの整形方針は確定しない。
+
+## 参照資料
+
+- [Markdown AST変換と出力方式に関する調査](../../markdown-ast-transformation.md)
+- [Generic DirectivesとMarkdown ASTに関する調査](../../markdown-ast.md)
+- [Generic directives/plugins syntax](https://talk.commonmark.org/t/generic-directives-plugins-syntax/444)
+- [`mdast-util-from-markdown` 2.0.3](https://github.com/syntax-tree/mdast-util-from-markdown/tree/2.0.3)
+- [`mdast-util-to-markdown` 2.1.2](https://github.com/syntax-tree/mdast-util-to-markdown/tree/2.1.2)
+- [`micromark-extension-directive` 4.0.0](https://github.com/micromark/micromark-extension-directive/tree/4.0.0)
+- [`mdast-util-directive` 3.1.0](https://github.com/syntax-tree/mdast-util-directive/tree/3.1.0)
+- [`micromark-extension-gfm-footnote` 2.1.0](https://github.com/micromark/micromark-extension-gfm-footnote/tree/2.1.0)
+- [`mdast-util-gfm-footnote` 2.1.0](https://github.com/syntax-tree/mdast-util-gfm-footnote/tree/2.1.0)
+- [VFM 2.7.0](https://github.com/vivliostyle/vfm/tree/v2.7.0)
