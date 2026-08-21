@@ -180,20 +180,15 @@ Generic Directivesの3種類は、clonoが必要とするブロック範囲、�
 
 今回の調査だけでは、低レベルAPIと`remark`のどちらを採用するか決定しない。
 
-## 後続調査への申し送り
+## 後続調査の結果
 
-次の段階では、mdastノードを用途別の出力構造へ実際に変換し、Vivliostyleへ渡せるMarkdownまたはHTMLとして安全に出力できるか検証する。
+[Markdown AST変換と出力方式に関する調査](markdown-ast-transformation.md)では、既知のdirectiveをraw HTMLノードへ変換し、VFMが処理できるMarkdownとして直列化するパイプラインを検証した。
 
-特に、次を確認する必要がある。
+通常のMarkdown、コードフェンス、VFMの脚注、未知のdirectiveを必要な範囲で保持しながら、Container、leaf、textの各directiveを用途別のHTML構造へ変換できた。直列化したMarkdownはVFM 2.7.0でHTMLへ変換でき、変換後の構造と脚注も保持された。
 
-- 既知のdirectiveだけを用途別のノードまたはraw HTMLへ変換できるか
-- 見出し、段落、リンク、コードフェンス、VFMの脚注など、変換対象外のMarkdownを壊さないか
-- 未知のdirectiveの意味と表記をどこまで保持するか
-- 直列化したMarkdownをVFMが期待どおり解析できるか
-- 変換後も診断に必要な元の入力位置を追跡できるか
-- Markdownへの直列化と、HTMLへの直接出力のどちらをclonoの出力契約とするか
+既知のdirectiveは変換前に意味検証し、入力位置を含む診断を生成できた。不正な既知のdirectiveがある場合はASTを変換せず、出力Markdownを返さない構成も成立した。
 
-著者向け記法、採用ライブラリ、内部表現、変換パイプライン、診断形式は、この後続調査を踏まえてADRで決定する。
+この結果により、VFM向けMarkdownは主要な出力形式の有力候補となった。著者向け記法、採用ライブラリ、内部表現、変換パイプライン、出力契約、診断形式は、二つの調査結果を踏まえてADRで決定する。
 
 ## 再現方法
 
