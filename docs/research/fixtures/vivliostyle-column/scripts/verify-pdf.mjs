@@ -21,14 +21,50 @@ function compactText(text) {
   return text.replace(/\s+/gu, '');
 }
 
-function findUniqueLine(pages, expectedText) {
+function findUniqueTextRange(pages, expectedText) {
   const compactExpectedText = compactText(expectedText);
-  const matches = pages.flatMap(({ pageNumber, textLines }) =>
-    textLines
-      .filter(({ text }) => compactText(text).includes(compactExpectedText))
-      .map((line) => ({ ...line, pageNumber })),
-  );
-  assert.equal(matches.length, 1, `PDF must contain one line for ${expectedText}`);
+  assert.ok(compactExpectedText.length > 0, 'The expected PDF text must not be empty');
+
+  const matches = pages.flatMap(({ pageNumber, textLines }) => {
+    let offset = 0;
+    const segments = textLines
+      .map((line) => {
+        const text = compactText(line.text);
+        const segment = {
+          ...line,
+          end: offset + text.length,
+          start: offset,
+          text,
+        };
+        offset = segment.end;
+        return segment;
+      })
+      .filter(({ text }) => text.length > 0);
+    const pageText = segments.map(({ text }) => text).join('');
+    const pageMatches = [];
+
+    let matchStart = pageText.indexOf(compactExpectedText);
+    while (matchStart >= 0) {
+      const matchEnd = matchStart + compactExpectedText.length;
+      const matchedLines = segments.filter(
+        ({ end, start }) => start < matchEnd && end > matchStart,
+      );
+      assert.ok(matchedLines.length > 0, `PDF text range must contain ${expectedText}`);
+      pageMatches.push({
+        bounds: [
+          Math.min(...matchedLines.map(({ bounds }) => bounds[0])),
+          Math.min(...matchedLines.map(({ bounds }) => bounds[1])),
+          Math.max(...matchedLines.map(({ bounds }) => bounds[2])),
+          Math.max(...matchedLines.map(({ bounds }) => bounds[3])),
+        ],
+        pageNumber,
+      });
+      matchStart = pageText.indexOf(compactExpectedText, matchStart + 1);
+    }
+
+    return pageMatches;
+  });
+  assert.equal(matches.length, 1, `PDF must contain one text range for ${expectedText}`);
   return matches[0];
 }
 
@@ -146,25 +182,25 @@ assert.deepEqual(
   'The PDF must link every footnote reference and body to its exact counterpart',
 );
 
-const basicTitle = findUniqueLine(pages, 'コラムの基本表現');
-const basicLastItem = findUniqueLine(pages, '番号付きリストの項目2');
+const basicTitle = findUniqueTextRange(pages, 'コラムの基本表現');
+const basicLastItem = findUniqueTextRange(pages, '番号付きリストの項目2');
 assert.equal(
   basicTitle.pageNumber,
   basicLastItem.pageNumber,
   'The short basic column must remain on one page',
 );
 
-const extendedTitle = findUniqueLine(pages, 'SHOULD要素を含むコラム');
-const extendedLastRow = findUniqueLine(pages, '検証完了');
+const extendedTitle = findUniqueTextRange(pages, 'SHOULD要素を含むコラム');
+const extendedLastRow = findUniqueTextRange(pages, '検証完了');
 assert.equal(
   extendedTitle.pageNumber,
   extendedLastRow.pageNumber,
   'The short extended column must remain on one page',
 );
 
-const longTitle = findUniqueLine(pages, 'ページをまたぐ長いコラム');
-const longStart = findUniqueLine(pages, '長いコラムの開始を示す固有の文章。');
-const longEnd = findUniqueLine(pages, '長いコラムの終了を示す固有の文章。');
+const longTitle = findUniqueTextRange(pages, 'ページをまたぐ長いコラム');
+const longStart = findUniqueTextRange(pages, '長いコラムの開始を示す固有の文章。');
+const longEnd = findUniqueTextRange(pages, '長いコラムの終了を示す固有の文章。');
 assert.equal(longTitle.pageNumber, longStart.pageNumber);
 assert.ok(
   longEnd.pageNumber > longStart.pageNumber,
@@ -180,15 +216,19 @@ assert.equal(
 );
 
 for (const paragraphNumber of ['01', '10', '20', '30']) {
-  findUniqueLine(pages, `第${paragraphNumber}段落。`);
+  findUniqueTextRange(pages, `第${paragraphNumber}段落。`);
 }
+findUniqueTextRange(
+  pages,
+  '第01段落。長いコラムを複数ページへ分割できることを確認するための文章。',
+);
 
 const chapterOneFootnotes = [
-  findUniqueLine(pages, '第1章の本文前脚注。'),
-  findUniqueLine(pages, '第1章のコラム脚注。'),
-  findUniqueLine(pages, '第1章の本文後脚注。'),
+  findUniqueTextRange(pages, '第1章の本文前脚注。'),
+  findUniqueTextRange(pages, '第1章のコラム脚注。'),
+  findUniqueTextRange(pages, '第1章の本文後脚注。'),
 ];
-const chapterOneLastMainContent = findUniqueLine(
+const chapterOneLastMainContent = findUniqueTextRange(
   pages,
   'コラムの後に本文から参照する脚注。',
 );
@@ -199,18 +239,18 @@ assertFootnotesAtPageBottom(
   'Chapter-one',
 );
 
-const chapterTwoHeading = findUniqueLine(pages, '第2章 脚注番号のリセット');
-const chapterTwoColumnTitle = findUniqueLine(pages, '章内コラムの確認');
+const chapterTwoHeading = findUniqueTextRange(pages, '第2章 脚注番号のリセット');
+const chapterTwoColumnTitle = findUniqueTextRange(pages, '章内コラムの確認');
 const chapterTwoFootnotes = [
-  findUniqueLine(pages, '第2章の本文脚注。'),
-  findUniqueLine(pages, '第2章のコラム脚注。'),
+  findUniqueTextRange(pages, '第2章の本文脚注。'),
+  findUniqueTextRange(pages, '第2章のコラム脚注。'),
 ];
 assert.equal(chapterTwoColumnTitle.pageNumber, chapterTwoHeading.pageNumber);
 assert.ok(
   chapterTwoHeading.pageNumber > longEnd.pageNumber,
   'Chapter two must begin after the long column has ended',
 );
-const chapterTwoLastMainContent = findUniqueLine(
+const chapterTwoLastMainContent = findUniqueTextRange(
   pages,
   '第2章のコラムから次の脚注を参照する。',
 );
