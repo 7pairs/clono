@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80" viewBox="0 0 240 80" role="img" aria-labelledby="title">
+  <title id="title">コラム内画像</title>
+  <rect width="240" height="80" fill="#d9e8f5"/>
+  <circle cx="40" cy="40" r="22" fill="#4477aa"/>
+  <path d="M80 26h130v10H80zm0 22h95v10H80z" fill="#335577"/>
+</svg>
+

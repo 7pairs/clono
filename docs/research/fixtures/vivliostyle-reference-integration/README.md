@@ -98,9 +98,10 @@ npm run verify:pdf
 - clonoで使用する各要素と参照の著者向け記法
 - `data-title-href`を含む最終的なHTML出力契約
 - 未定義ID、重複ID、参照種別の不一致に対する診断
-- コラム内から参照する脚注との結合
 - 前付・後付を含む実際の書籍構成でのカウンター制御
 - Thunder Clawの製品用テーマとの結合
+
+コラム内から参照する脚注は、このfixtureの作成後に追加した[コラム検証用fixture](../vivliostyle-column/)で、本文との連番、ページ下部への配置、章ごとの番号リセットを検証している。
 
 ## fixture固有の調整
 
@@ -113,3 +114,4 @@ npm run verify:pdf
 - [表の調査記録](../../vivliostyle-table-references.md)
 - [コードリストの調査記録](../../vivliostyle-code-listing-references.md)
 - [脚注の調査記録](../../vivliostyle-footnotes.md)
+- [コラムの調査記録](../../vivliostyle-column.md)

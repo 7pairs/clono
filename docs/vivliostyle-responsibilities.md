@@ -35,13 +35,13 @@ Thunder Clawの書籍制作に必要な機能について、現在のVivliostyle
 | 強制改ページ | 可能性あり | 空のHTML要素をVFMが保持し、CSSの`break-before: page`で後続の見出しまたは通常段落を次ページから開始できる | 著者向け記法を改ページ用の構造へ変換する候補とする。改ページはテーマCSSへ委譲する | 調査済み | [調査記録](research/vivliostyle-basic-presentation.md) |
 | 段落の右寄せ | 必須 | 複数のMarkdown段落を含むHTMLコンテナをVFMが保持し、CSSの`text-align: right`でまとめて右寄せできる | 著者向け記法を、複数段落を保持できる右寄せ用コンテナへ変換する候補とする。文字揃えはテーマCSSへ委譲する | 調査済み | [調査記録](research/vivliostyle-basic-presentation.md) |
 | 定義リスト | 可能性あり | 標準記法は確認できない。`dl`、`dt`、`dd`と説明内のMarkdownをVFMが保持または変換し、CSSで字下げできる | 著者向け記法を`dl`、`dt`、`dd`へ変換する候補とする。説明内のMarkdown変換と表示はVFMとテーマCSSへ委譲する | 調査済み | [調査記録](research/vivliostyle-basic-presentation.md) |
-| コラムなどの囲み枠 | 必須 | 未調査 | 未決定 | 未調査 | — |
+| コラムなどの囲み枠 | 必須 | 複数段落と必要なMarkdown要素を含むHTMLコンテナをVFMが保持または変換し、VivliostyleとテーマCSSで囲み枠の表示と長いコラムのページ分割ができる。コラム内脚注も本文と連番でページ下部へ配置できる | 著者向け記法を、必須タイトルと複数のブロックを保持できるコラム用コンテナへ変換する候補とする。内部のMarkdownと脚注記法を壊さずVFMへ渡し、外観とページ分割はテーマCSSへ委譲する | 調査済み | [調査記録](research/vivliostyle-column.md) |
 
 ## 文書情報を扱う機能
 
 | 機能 | 制作上の必要性 | Vivliostyleの対応 | `clono`の責務 | 調査状態 | 詳細 |
 | --- | --- | --- | --- | --- | --- |
-| 脚注 | 必須 | VFMの`dpub`モードで基本要件に対応できる。コラム内の脚注は未確認 | 暫定的に、脚注の参照と定義、その内容を壊さず後段へ渡す。独自記法やHTMLへの変換は実装しない | 調査中 | [調査記録](research/vivliostyle-footnotes.md) |
+| 脚注 | 必須 | VFMの`dpub`モードは、本文とコラム内のPandoc風脚注をDPUB-ARIAの参照と脚注本文へ変換し、参照順に番号を付ける。一章一ファイルの構成では章ごとに番号が1へ戻る。Vivliostyle.jsはこの構造を認識し、脚注本文を参照ページの下部へ配置する | 脚注の参照、定義、インラインコード、リンクを壊さず後段へ渡す。独自脚注記法や脚注HTMLへの変換は実装しない | 調査済み | [調査記録](research/vivliostyle-footnotes.md)、[コラムとの結合](research/vivliostyle-column.md) |
 | 見出し、画像、表、コードリストへの参照用IDの付与 | 必須 | 見出しはVFMの明示的なIDに対応できる。通常のMarkdown画像に指定したIDは`img`へ付与される。番号付き画像、表、コードリストでは、原稿に記述したIDとclassを持つ`figure`を保持でき、表とコードリストでは内側のMarkdownも変換できる | 見出しIDはVFMの記法を保持する。番号付き画像、表、コードリストの著者向け記法を、参照用IDと必要なclassを持つ`figure`構造へ変換し、タイトル参照用IDを持つ`figcaption`も生成する。未定義・重複IDの診断を担う候補とする | 調査済み | [見出し](research/vivliostyle-heading-references.md)、[画像](research/vivliostyle-figure-references.md)、[表](research/vivliostyle-table-references.md)、[コードリスト](research/vivliostyle-code-listing-references.md)、[結合検証](research/vivliostyle-reference-integration.md) |
 | 見出し、画像、表、コードリストへの連番付与 | 必須 | すべてCSSカウンターで章ごとの番号を生成できる。図、表、コードリストのカウンターは、同じテーマと文書でも独立して動作する | 見出し番号、図番号、表番号、リスト番号を計算せず、VivliostyleとテーマCSSへ委譲する。統合テーマでは各カウンターを一つの`counter-reset`で初期化する | 調査済み | [見出し](research/vivliostyle-heading-references.md)、[画像](research/vivliostyle-figure-references.md)、[表](research/vivliostyle-table-references.md)、[コードリスト](research/vivliostyle-code-listing-references.md)、[結合検証](research/vivliostyle-reference-integration.md) |
 | 参照用IDを使った見出し、画像、表、コードリストの番号参照 | 必須 | すべて`target-counter()`で同一・別原稿ファイルの番号を参照できる。統合テーマでも前方・後方の参照がPDF内部リンクになる | 著者向け記法を参照種別に応じた`href`とclassを持つ`a`要素へ変換し、参照を診断する。番号生成はVivliostyleへ委譲する | 調査済み | [見出し](research/vivliostyle-heading-references.md)、[画像](research/vivliostyle-figure-references.md)、[表](research/vivliostyle-table-references.md)、[コードリスト](research/vivliostyle-code-listing-references.md)、[結合検証](research/vivliostyle-reference-integration.md) |
