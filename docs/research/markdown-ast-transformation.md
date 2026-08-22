@@ -2,6 +2,7 @@
 
 - 状態: 調査済み
 - 調査日: 2026-08-21
+- 最終更新日: 2026-08-22
 - 検証環境:
   - OS: macOS 26.5.2
   - Node.js: 24.19.0
@@ -50,6 +51,7 @@ Container、leaf、textの各directiveを一つずつ確認するため、次の
 ```text
 入力Markdown
   → mdast解析
+  → 未知directiveの検出
   → 既知directiveの意味検証
   → AST変換
   → VFM向けMarkdown
@@ -85,7 +87,9 @@ VFM 2.7.0は推移的依存関係として`remark-parse`と`unified`を含む。
 - directive名
 - 問題の説明
 
-fixtureでは4件の不正な既知directiveと、一つの未知のdirectiveを同じ原稿へ置いた。4件の既知directiveだけが入力順に診断され、未知のdirectiveに対する診断は生成されなかった。
+当初のfixtureでは、未知のdirectiveを診断せずに意味的保持の可能性を検証した。後続のADRを反映したfixtureでは、4件の不正な既知directiveと1件の未知directiveを入力位置順に診断した。
+
+未知のContainer directive内に不正な既知directiveを置いた検証では、未知のContainer自体について一件だけ診断し、その子孫は走査しなかった。Containerの外側にある不正な既知directiveと、別の未知directiveは引き続き入力位置順に診断された。
 
 意味検証はASTの変更前に文書全体へ実行した。診断が一つでもある場合、変換処理は`output`を`nil`として失敗し、部分的に変換したMarkdownを返さなかった。
 
@@ -120,7 +124,7 @@ Text directiveは、開始raw HTMLノード、元のインライン子ノード�
 これは<span class="index-marker" data-index-reading="さくいんこうもく">索引項目</span>です。
 ```
 
-動的なHTML属性値は、`&`、`"`、`<`、`>`をHTMLエスケープしてから出力した。自動検証では`A&B`を`A&amp;B`としてMarkdownへ出力し、VFM変換後のHTML属性値を`A&B`として取得できることを確認した。
+動的なHTML属性値は、`&`、`"`、`<`、`>`をHTMLエスケープしてから出力した。自動検証では、引用符、タグ文字列、イベントハンドラーに見える文字列を含む値を入力し、VFM変換後にも値が一つの`data-index-reading`属性内へ保持され、追加の属性や`img`要素が生成されないことを確認した。
 
 ### VFMとの結合
 
@@ -159,38 +163,40 @@ VFMが扱うMarkdown機能を変換前後で保持するには、clono側のパ�
 
 ### 未知のdirective
 
-未知の`third-party` directiveは変換せず、`mdast-util-directive`でMarkdownへ再直列化した。再解析後も名前、属性、本文を取得でき、意味的保持の要件を満たした。空白や引用符など、元の文字列表現との完全一致は要求していない。
+低レベルAPIの能力を確認する検証では、未知の`third-party` directiveを意味検証とAST変換へ渡さず、`mdast-util-directive`でMarkdownへ再直列化した。再解析後も名前、属性、本文を取得でき、意味的保持の要件を満たした。空白や引用符など、元の文字列表現との完全一致は要求していない。
 
 この保証はclonoが生成するVFM向けMarkdownまでを対象とする。VFM 2.7.0自身はGeneric Directivesを解釈せず、未知のdirectiveをそのままVFMへ渡すと記法が通常テキストとしてHTMLへ現れる。別のツールに未知のdirectiveを処理させる場合は、clonoの後、VFMの前に実行する必要がある。
 
-未知のdirectiveの内部に既知のdirectiveが入れ子になった場合の変換方針は、今回決定していない。
+未知のdirectiveの内部に既知のdirectiveが入れ子になった場合の変換方針は、この調査では決定しなかった。後続の[ADR 0003](../decisions/0003-adopt-generic-directives-mdast-transformation-pipeline.md)では、初期仕様で未知のdirectiveをエラーとし、未知のContainer directiveを診断境界として子孫を走査しない方針を採用した。
+
+このfixtureで確認した意味的保持は、将来の方針変更が技術的に可能であることを示すものであり、未知のdirectiveを保持することを初期仕様として採用したものではない。
 
 ### 診断と入力位置
 
 パーサーが既知のdirectiveノードとして認識した入力では、mdastの`position`からファイル名、行、列を持つ診断を生成できた。属性不足と誤ったdirective種別を、変換処理とは分離して検出できた。
 
-構文自体が壊れ、directiveノードとして認識されない入力の診断は今回の対象外である。また、変換後のMarkdownと元の入力を対応付けるsource mapは生成していない。
+構文自体が壊れ、directiveノードとして認識されない入力の診断はこのfixtureの対象外である。[Generic DirectivesとMarkdown ASTに関する調査](markdown-ast.md)の追加検証では、保証範囲を限定した構文診断を別途試作した。また、変換後のMarkdownと元の入力を対応付けるsource mapは生成していない。
 
 ### 低レベルAPI
 
 解析、意味検証、再帰的なAST変換、Markdown直列化を、ClojureScriptからmdastとmicromarkの低レベルAPIを直接利用して実装できた。今回の規模では、`unified`またはremarkの処理パイプラインを追加しなくても、一方向の変換処理を構成できた。
 
-一方、将来のプラグインが変換処理を登録する方法、文書全体の状態を処理間で受け渡す方法、既存のremarkプラグインを利用する必要性は検証していない。今回の結果だけでは、低レベルAPIを直接採用するか、`unified`およびremarkを採用するかを決定しない。
+一方、将来のプラグインが変換処理を登録する方法、文書全体の状態を処理間で受け渡す方法、既存のremarkプラグインを利用する必要性は検証していない。今回の調査単独では採用方式を決定せず、後続の[ADR 0003](../decisions/0003-adopt-generic-directives-mdast-transformation-pipeline.md)で、初期実装に低レベルAPIを直接利用する方針を採用した。
 
 ## 評価
 
 次の構成は、clonoの最小変換パイプラインとして技術的に成立する。
 
 1. Generic Directivesと必要なMarkdown拡張を含む入力をmdastへ解析する
-2. AST全体を走査し、既知のdirectiveを入力位置付きで意味検証する
-3. エラーがなければ、既知のdirectiveを用途別のraw HTMLノードへ変換する
-4. 未知のdirectiveと変換対象外のMarkdownを保持する
-5. ASTをVFM向けMarkdownへ直列化する
+2. 未知のdirectiveを位置付きで検出し、未知のContainer directiveは子孫を走査しない
+3. 既知のdirectiveを入力位置付きで意味検証する
+4. エラーがなければ、既知のdirectiveを用途別のraw HTMLノードへ変換する
+5. 変換対象外のMarkdownを保持し、ASTをVFM向けMarkdownへ直列化する
 6. MarkdownからHTMLへの変換と組版をVivliostyleへ委譲する
 
 このパイプラインは、構文認識、意味検証、AST変換、直列化を分離できる。既知の不正な入力で出力を生成せず、標準MarkdownとVFMの機能を後段へ委譲できるため、プロジェクト憲章の構造化、診断可能性、Vivliostyleとの責務分担に適合する。
 
-今回の検証は、VFM向けMarkdownを主要出力とする判断を支持する。ただし、記法、採用ライブラリ、内部表現、変換規則の登録方法、出力契約、診断形式の正式な採用はADRで行う。
+今回の検証は、VFM向けMarkdownを主要出力とする判断を支持した。後続の[ADR 0003](../decisions/0003-adopt-generic-directives-mdast-transformation-pipeline.md)では、Generic Directives、mdast、低レベルAPIによる変換パイプライン、VFM向けMarkdownを正式に採用した。また、調査時の仮定とは異なり、未知のdirectiveを初期仕様ではエラーとした。
 
 ## セキュリティと依存関係
 
@@ -200,7 +206,7 @@ VFMが扱うMarkdown機能を変換前後で保持するには、clono側のパ�
 
 VFM 2.7.0は、Vivliostyle CLI 11.1.0が使用するバージョンとの結合を再現するため、検証専用の開発依存関係として固定している。fixtureは外部から受け取った信頼できない入力の処理には使用しない。監査結果だけを解消する目的で、検証対象と異なるVFMへ更新または変更しない。
 
-## 未確認・未決定事項
+## 調査時点の未確認・未決定事項
 
 - 著者向けのdirective名、属性、内容モデル
 - 変換後のclass名、HTML要素、属性
@@ -216,7 +222,7 @@ VFM 2.7.0は、Vivliostyle CLI 11.1.0が使用するバージョンとの結合�
 - 生成Markdownの整形方針
 - 完成したHTMLを別の出力形式として提供する必要性
 
-これらは、ADR、最小変換パイプライン、最初の独自記法、CLI、複数原稿対応の各段階で、必要な範囲だけを決定または検証する。
+このうち、採用ライブラリ、内部表現、変換パイプライン、主要な出力契約、未知のdirectiveの初期方針は、後続の[ADR 0003](../decisions/0003-adopt-generic-directives-mdast-transformation-pipeline.md)で決定した。残る事項は、最小変換パイプライン、最初の独自記法、CLI、複数原稿対応の各段階で、必要な範囲だけを決定または検証する。
 
 ## 再現方法
 

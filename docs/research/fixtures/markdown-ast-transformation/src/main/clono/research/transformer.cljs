@@ -12,12 +12,30 @@
    "page-break" "leafDirective"
    "index" "textDirective"})
 
+(def directive-node-types
+  #{"containerDirective" "leafDirective" "textDirective"})
+
 (defn children [node]
   (when (js/Array.isArray (.-children node))
     (array-seq (.-children node))))
 
 (defn nodes [tree]
   (tree-seq #(some? (children %)) children tree))
+
+(defn directive-node? [node]
+  (contains? directive-node-types (.-type node)))
+
+(defn unknown-directive? [node]
+  (and (directive-node? node)
+       (not (contains? known-directive-names (.-name node)))))
+
+(defn validation-children [node]
+  (when-not (and (= "containerDirective" (.-type node))
+                 (unknown-directive? node))
+    (children node)))
+
+(defn validation-nodes [tree]
+  (tree-seq #(some? (validation-children %)) validation-children tree))
 
 (defn property [object & names]
   (reduce gobj/get object names))
@@ -59,12 +77,16 @@
       nil)))
 
 (defn validation-message [node]
-  (when (contains? known-directive-names (.-name node))
+  (cond
+    (unknown-directive? node)
+    (str "`" (.-name node) "`は登録されていないdirectiveです。")
+
+    (contains? known-directive-names (.-name node))
     (or (wrong-node-type-message node)
         (invalid-attributes-message node))))
 
 (defn validate [tree source-name]
-  (->> (nodes tree)
+  (->> (validation-nodes tree)
        (keep (fn [node]
                (when-let [message (validation-message node)]
                  (diagnostic source-name node message))))
@@ -124,4 +146,3 @@
         {:ok? true
          :output (markdown-ast/serialize tree)
          :diagnostics []}))))
-

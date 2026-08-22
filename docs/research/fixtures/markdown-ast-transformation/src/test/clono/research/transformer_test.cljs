@@ -39,12 +39,8 @@
       (is (.includes output "<div class=\"page-break\" aria-hidden=\"true\"></div>"))
       (is (.includes output "<span class=\"index-marker\" data-index-reading=\"さくいんこうもく\">索引項目</span>")))
 
-    (testing "When transformed Markdown is reparsed, then known directives are replaced and an unknown directive is semantically preserved"
-      (is (= ["third-party"] (directive-names reparsed)))
-      (let [unknown (first (filter #(= "third-party" (.-name %))
-                                   (transformer/nodes reparsed)))]
-        (is (= "sample" (-> unknown .-attributes (gobj/get "mode"))))
-        (is (= "clonoが知らない記法です。" (node-text unknown))))
+    (testing "When transformed Markdown is reparsed, then all known directives are replaced"
+      (is (empty? (directive-names reparsed)))
       (is (= 5 (count (nodes-by-type reparsed "html")))))
 
     (testing "When transformed Markdown is reparsed, then standard Markdown, code, and footnotes retain their structure"
@@ -81,24 +77,71 @@
                :line 11
                :column 4
                :directive "align"
-               :message "`align`は`containerDirective`として記述する必要があります。"}]
+               :message "`align`は`containerDirective`として記述する必要があります。"}
+              {:file "input/invalid.md"
+               :line 13
+               :column 1
+               :directive "third-party"
+               :message "`third-party`は登録されていないdirectiveです。"}]
              (:diagnostics result))))
 
-    (testing "When an invalid document also contains an unknown directive, then no diagnostic is added for the unknown directive"
-      (is (= ["align" "page-break" "index" "align"]
+    (testing "When an invalid document also contains an unknown directive, then all independent diagnostics remain in source order"
+      (is (= ["align" "page-break" "index" "align" "third-party"]
              (mapv :directive (:diagnostics result)))))))
 
-(deftest dynamic-html-attribute-test
+(deftest unknown-directive-test
   (let [result (transformer/transform
-                "これは:index[安全な索引]{reading=\"A&B\"}です。"
+                (read-input "unknown-nested")
+                "input/unknown-nested.md")]
+    (testing "When an unknown container has an invalid known descendant, then the container is reported without traversing its descendants"
+      (is (false? (:ok? result)))
+      (is (nil? (:output result)))
+      (is (= [{:file "input/unknown-nested.md"
+               :line 1
+               :column 1
+               :directive "third-party"
+               :message "`third-party`は登録されていないdirectiveです。"}
+              {:file "input/unknown-nested.md"
+               :line 5
+               :column 1
+               :directive "index"
+               :message "`index`には空でない`reading`属性が必要です。"}
+              {:file "input/unknown-nested.md"
+               :line 7
+               :column 1
+               :directive "another-extension"
+               :message "`another-extension`は登録されていないdirectiveです。"}]
+             (:diagnostics result))))))
+
+(deftest unknown-preservation-capability-test
+  (let [markdown ":::third-party{mode=\"sample\"}\nclonoが知らない記法です。\n:::\n"
+        output (-> markdown markdown-ast/parse markdown-ast/serialize)
+        reparsed (markdown-ast/parse output)
+        unknown (first (filter #(= "third-party" (.-name %))
+                               (transformer/nodes reparsed)))
+        html (stringify output #js {:partial true})]
+    (testing "When an unknown directive bypasses the adopted validation policy, then the low-level parser can preserve its meaning"
+      (is (= "sample" (-> unknown .-attributes (gobj/get "mode"))))
+      (is (= "clonoが知らない記法です。" (node-text unknown)))
+      (is (.includes html ":::third-party")))))
+
+(deftest dynamic-html-attribute-test
+  (let [dangerous-value "A&B\"><img src=x onerror=alert(1)>"
+        result (transformer/transform
+                "これは:index[安全な索引]{reading='A&B\"><img src=x onerror=alert(1)>'}です。"
                 "attribute.md")
         html (stringify (:output result) #js {:partial true})
         document (parse html)
         index-marker (.querySelector document "span.index-marker")]
-    (testing "When a directive attribute contains an HTML metacharacter, then generated Markdown escapes it and VFM preserves its value"
+    (testing "When a directive attribute attempts to escape its HTML attribute, then generated Markdown contains only the allowed structure"
       (is (true? (:ok? result)))
-      (is (.includes (:output result) "data-index-reading=\"A&amp;B\""))
-      (is (= "A&B" (.getAttribute index-marker "data-index-reading"))))))
+      (is (.includes (:output result)
+                     "data-index-reading=\"A&amp;B&quot;&gt;&lt;img src=x onerror=alert(1)&gt;\""))
+      (is (= dangerous-value
+             (.getAttribute index-marker "data-index-reading")))
+      (is (nil? (.getAttribute index-marker "onerror")))
+      (is (nil? (.querySelector document "img")))
+      (is (= 1 (count (query-all document "span.index-marker")))))))
 
 (deftest vfm-integration-test
   (let [result (transformer/transform (read-input "valid") "input/valid.md")
@@ -109,10 +152,7 @@
         index-marker (.querySelector document "span.index-marker")
         footnote-reference (.querySelector document "a[role=doc-noteref]")
         footnote-body (.querySelector document "aside[role=doc-footnote]")
-        code (.querySelector document "pre.language-markdown code")
-        unknown-paragraph (first (filter #(.includes (.-textContent %)
-                                                   ":::third-party")
-                                         (query-all document "p")))]
+        code (.querySelector document "pre.language-markdown code")]
     (testing "When transformed Markdown is processed by VFM, then standard Markdown and transformed HTML structures are preserved"
       (is (= "AST変換と出力方式の検証"
              (.-textContent (.querySelector document "h1"))))
@@ -126,11 +166,6 @@
       (is (= "さくいんこうもく"
              (.getAttribute index-marker "data-index-reading")))
       (is (= "索引項目" (.-textContent index-marker))))
-
-    (testing "When an unknown directive reaches VFM, then VFM renders its syntax and content as ordinary text"
-      (is (some? unknown-paragraph))
-      (is (.includes (.-textContent unknown-paragraph)
-                     "clonoが知らない記法です。")))
 
     (testing "When transformed Markdown contains a VFM footnote, then its reference, body, inline code, and link reach VFM HTML"
       (is (some? footnote-reference))
