@@ -34,7 +34,7 @@ Markdownの構造化表現にはmdastを採用する。初期実装では、mdas
 
 初期実装では、`unified`、`remark-parse`、`remark-directive`を`clono`自身の変換パイプラインへ直接採用しない。将来これらを採用できるよう、解析と直列化を変換規則から分離する。
 
-脚注など、入力に含まれるMarkdown拡張を専用のmdastノードとして保持する必要がある場合は、解析と直列化の両方へ対応する拡張を追加する。初期実装では、VFMで使用するGFM形式の脚注を保持するため、`micromark-extension-gfm-footnote`と`mdast-util-gfm-footnote`を使用する。
+脚注など、入力に含まれるMarkdown拡張を専用のmdastノードとして保持する必要がある場合は、解析と直列化の両方へ対応する拡張を追加する。初期実装では、VFMで使用するGFM形式の脚注を保持するため、`micromark-extension-gfm-footnote`と`mdast-util-gfm-footnote`を使用する。また、Markdown表を保持し、directiveの内容モデルで表を識別できるように、`micromark-extension-gfm-table`と`mdast-util-gfm-table`を使用する。
 
 採用ライブラリと役割はこのADRで管理する。正確なバージョンは`package.json`と`package-lock.json`で固定する。
 
