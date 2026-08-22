@@ -79,8 +79,10 @@
       (is (= 1 (count (test-support/nodes-by-type tree "footnoteReference"))))))
 
   (testing "When the clono stylesheet is inspected, then it provides the required right-alignment rule"
-    (is (= ".clono-align-right {\n  text-align: right;\n}\n"
-           (.readFileSync fs "styles/clono.css" "utf8")))))
+    (let [stylesheet (-> (.readFileSync fs "styles/clono.css" "utf8")
+                         (.replace #"\r\n?" "\n"))]
+      (is (= ".clono-align-right {\n  text-align: right;\n}\n"
+             stylesheet)))))
 
 (deftest invalid-align-test
   (testing "When an align directive violates its contract, then transformation fails with a positioned diagnostic"
