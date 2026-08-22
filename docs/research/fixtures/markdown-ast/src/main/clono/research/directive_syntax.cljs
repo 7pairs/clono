@@ -8,6 +8,16 @@
 (def directive-node-types
   #{"containerDirective" "leafDirective" "textDirective"})
 
+(def micromark-directive-types
+  {"directiveContainer" "containerDirective"
+   "directiveLeaf" "leafDirective"
+   "directiveText" "textDirective"})
+
+(def micromark-attribute-types
+  #{"directiveContainerAttributes"
+    "directiveLeafAttributes"
+    "directiveTextAttributes"})
+
 (defn children [node]
   (when (js/Array.isArray (.-children node))
     (array-seq (.-children node))))
@@ -49,8 +59,8 @@
    :message message
    ::offset (gobj/get point "offset")})
 
-(defn unclosed-container-diagnostics [markdown source-name known-names]
-  (loop [remaining (seq (micromark-events markdown))
+(defn unclosed-container-diagnostics [events source-name known-names]
+  (loop [remaining (seq events)
          stack []
          diagnostics []]
     (if-let [event (first remaining)]
@@ -99,34 +109,78 @@
           (recur (next remaining) stack diagnostics)))
       diagnostics)))
 
+(defn parsed-attribute-directive-keys [events]
+  (loop [remaining (seq events)
+         stack []
+         result #{}]
+    (if-let [event (first remaining)]
+      (let [kind (event-kind event)
+            type (event-type event)]
+        (cond
+          (and (= "enter" kind)
+               (contains? micromark-directive-types type))
+          (recur (next remaining)
+                 (conj stack
+                       {:key [(get micromark-directive-types type)
+                              (property (event-token event) "start" "offset")]
+                        :attributes-parsed? false})
+                 result)
+
+          (and (= "enter" kind)
+               (contains? micromark-attribute-types type)
+               (seq stack))
+          (recur (next remaining)
+                 (update-top stack #(assoc % :attributes-parsed? true))
+                 result)
+
+          (and (= "exit" kind)
+               (contains? micromark-directive-types type)
+               (seq stack))
+          (let [{:keys [key attributes-parsed?]} (peek stack)]
+            (recur (next remaining)
+                   (pop stack)
+                   (cond-> result
+                     attributes-parsed? (conj key))))
+
+          :else
+          (recur (next remaining) stack result)))
+      result)))
+
 (defn malformed-attribute-diagnostics
-  [markdown tree source-name required-attribute-names]
-  (->> (nodes tree)
-       (keep (fn [node]
-               (let [type (.-type node)
-                     name (.-name node)
-                     end (property node "position" "end")
-                     offset (when end (.-offset end))]
-                 (when (and (contains? directive-node-types type)
-                            (contains? required-attribute-names name)
-                            (number? offset)
-                            (= "{" (.charAt markdown offset)))
-                   (diagnostic
-                    source-name
-                    name
-                    end
-                    :malformed-attributes
-                    (str "`" name "`の属性を解析できません。"))))))
-       vec))
+  [markdown tree events source-name required-attribute-names]
+  (let [parsed-attribute-keys (parsed-attribute-directive-keys events)]
+    (->> (nodes tree)
+         (keep (fn [node]
+                 (let [type (.-type node)
+                       name (.-name node)
+                       start-offset (property node "position" "start" "offset")
+                       end (property node "position" "end")
+                       end-offset (when end (.-offset end))]
+                   (when (and (contains? directive-node-types type)
+                              (contains? required-attribute-names name)
+                              (number? start-offset)
+                              (number? end-offset)
+                              (= "{" (.charAt markdown end-offset))
+                              (not (contains? parsed-attribute-keys
+                                              [type start-offset])))
+                     (diagnostic
+                      source-name
+                      name
+                      end
+                      :malformed-attributes
+                      (str "`" name "`の属性を解析できません。"))))))
+         vec)))
 
 (defn syntax-diagnostics
   [markdown source-name {:keys [known-names required-attribute-names]}]
-  (let [tree (markdown-ast/parse markdown)]
+  (let [tree (markdown-ast/parse markdown)
+        events (micromark-events markdown)]
     (->> (concat
-          (unclosed-container-diagnostics markdown source-name known-names)
+          (unclosed-container-diagnostics events source-name known-names)
           (malformed-attribute-diagnostics
            markdown
            tree
+           events
            source-name
            required-attribute-names))
          (sort-by ::offset)

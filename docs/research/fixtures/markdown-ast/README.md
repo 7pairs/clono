@@ -28,8 +28,9 @@ Generic Directives Proposalに基づくMarkdownをmdastへ変換し、ClojureScr
 - Generic Directivesとして不完全な構文が、パーサーによってどのように扱われるかを確認できる
 - コードフェンス内のdirectiveらしい文字列がdirectiveとして解析されない
 - 閉じていない既知のContainer directiveを、micromarkのフェンスイベントから位置付きで検出できる
-- 閉じていない属性がdirectiveの直後に通常テキストとして残る場合、mdastの終了位置と既知directiveの検証規則を組み合わせて位置付きで検出できる
+- 閉じていない属性がdirectiveの直後に通常テキストとして残る場合、mdastの終了位置、micromarkによる属性ブロックの解析成否、既知directiveの検証規則を組み合わせて位置付きで検出できる
 - コードフェンス、インラインコード、エスケープした文字列、通常の時刻表記を構文診断として誤検出しない
+- 正常な属性ブロックの後ろに通常テキストの`{...}`が続く場合、構文診断として誤検出しない
 
 ## 入力
 
@@ -42,6 +43,7 @@ Generic Directives Proposalに基づくMarkdownをmdastへ変換し、ClojureScr
 | `input/malformed-attributes.md` | 閉じていない既知のText directive属性に対する位置付き診断 |
 | `input/unclosed-container.md` | 閉じていない既知のContainer directiveに対する位置付き診断 |
 | `input/directive-like-literals.md` | コードフェンス、インラインコード、エスケープ、通常テキストの誤検出防止 |
+| `input/valid-attributes-followed-by-text.md` | 正常な属性ブロックの後ろに続く通常テキストの誤検出防止 |
 
 ## 依存関係
 
@@ -97,12 +99,13 @@ node target/inspect.js input/malformed.md
 - コードフェンス内のdirectiveらしい文字列の保護
 - 閉じていない属性とContainer directiveに対するファイル名、行、列付きの構文診断
 - コードフェンス、インラインコード、エスケープした記法、通常テキストに対する構文診断の抑制
+- 正常な属性ブロックの後ろに続く通常テキストの`{...}`に対する構文診断の抑制
 
 ## 検証範囲の境界
 
 このfixtureでは、パーサーがdirectiveとして認識した既知のノードについて、clonoが属性と入力位置を利用して意味検証できることまでを扱う。clono用directiveの検証規則や診断形式は確定しない。
 
-構文が壊れている場合、パーサーがdirectiveの一部を通常テキストとして扱ったり、閉じていないcontainer directiveを文書末尾までのノードとして扱ったりする。追加検証では、micromarkのイベントに含まれる開始および終了フェンスの数と、mdastノードの終了位置に残る未解析の`{`を利用し、調査対象の二種類を位置付きで診断した。
+構文が壊れている場合、パーサーがdirectiveの一部を通常テキストとして扱ったり、閉じていないcontainer directiveを文書末尾までのノードとして扱ったりする。追加検証では、micromarkのイベントに含まれる開始および終了フェンスの数と属性ブロックの解析成否、mdastノードの終了位置に残る未解析の`{`を利用し、調査対象の二種類を位置付きで診断した。正常な属性ブロックを持つdirectiveの後ろに通常テキストの`{...}`が続く場合は、後者を構文診断の対象としない。
 
 この構文診断は、実現可能性を確認するための試作である。mdastとmicromarkのイベントを個別に生成するため入力を二度解析しており、production実装のAPIや処理回数を決定するものではない。また、構文の壊れ方によっては、Container directiveまたはLeaf directiveの開始行全体が通常テキストになり、directiveノードもdirectiveイベントも生成されない。既知のdirective名を通常テキストから追加で探索しなければ検出できない場合があるため、すべての構文誤りを検出できるとは結論づけない。
 

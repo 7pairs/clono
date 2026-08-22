@@ -173,6 +173,13 @@
             "input/directive-like-literals.md"
             options))))
 
+    (testing "When ordinary braced text follows valid attributes, then no syntax diagnostic is reported"
+      (is (empty?
+           (directive-syntax/syntax-diagnostics
+            (read-input "valid-attributes-followed-by-text")
+            "input/valid-attributes-followed-by-text.md"
+            options))))
+
     (testing "When valid candidate directives are inspected, then no syntax diagnostic is reported"
       (is (empty?
            (directive-syntax/syntax-diagnostics

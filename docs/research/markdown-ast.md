@@ -168,7 +168,7 @@ ADRの策定時に、閉じていないContainer directiveと不正な属性が�
 
 閉じていないContainer directiveについて、mdastでは文書末尾までを含む通常の`containerDirective`になる。一方、`micromark`のイベントでは、正常なContainer directiveに開始と終了の二つの`directiveContainerFence`が含まれ、閉じていないContainer directiveには開始フェンスだけが含まれた。既知のdirective名とフェンス数を照合することで、開始位置のファイル名、行、列を持つ診断を生成できた。
 
-閉じていないText directiveの属性について、directive本体は属性なしの`textDirective`になり、未解析の`{`以降は通常の`text`ノードになった。mdastノードの終了オフセットにある元入力の文字と、そのdirectiveが属性を必要とするという意味上の規則を照合することで、未解析の`{`の位置を診断できた。
+閉じていないText directiveの属性について、directive本体は属性なしの`textDirective`になり、未解析の`{`以降は通常の`text`ノードになった。mdastノードの終了オフセットにある元入力の文字、micromarkによる属性ブロックの解析成否、そのdirectiveが属性を必要とするという意味上の規則を照合することで、未解析の`{`の位置を診断できた。正常な属性ブロックの後ろに通常テキストとして`{...}`が続く入力は、構文診断の対象とならないことも確認した。
 
 同じ文字列をコードフェンスまたはインラインコードへ置いた場合はdirectiveノードにならず、構文診断の対象にもならなかった。エスケープしたText directiveと通常の時刻表記も診断されなかった。元入力全体をdirective用の正規表現だけで走査せず、Markdownの解析結果と入力位置を利用することで、今回確認した保護対象との誤認識を避けられた。
 
