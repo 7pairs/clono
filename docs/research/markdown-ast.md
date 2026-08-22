@@ -2,6 +2,7 @@
 
 - 状態: 調査済み
 - 調査日: 2026-08-21
+- 最終更新日: 2026-08-22
 - 検証環境:
   - OS: macOS 26.5.2
   - Node.js: 24.19.0
@@ -10,6 +11,7 @@
   - ClojureScriptビルド: shadow-cljs 3.4.12
   - Markdown解析: `mdast-util-from-markdown` 2.0.3
   - Markdown直列化: `mdast-util-to-markdown` 2.1.2
+  - Markdownトークン化: `micromark` 4.0.2
   - directive構文拡張: `micromark-extension-directive` 4.0.0
   - directive用mdast拡張: `mdast-util-directive` 3.1.0
 
@@ -160,6 +162,20 @@ mdastだけでは、文書末尾までを意図して記述したcontainerと、
 
 Generic Directivesとして認識されない壊れ方もあり得るため、すべての構文誤りをmdast上の既知ノードだけから検出できるとは結論づけない。
 
+### 構文エラー検出の追加調査
+
+ADRの策定時に、閉じていないContainer directiveと不正な属性が意味検証を通過する可能性を確認する必要が生じたため、fixtureへ位置付き構文診断の試作を追加した。
+
+閉じていないContainer directiveについて、mdastでは文書末尾までを含む通常の`containerDirective`になる。一方、`micromark`のイベントでは、正常なContainer directiveに開始と終了の二つの`directiveContainerFence`が含まれ、閉じていないContainer directiveには開始フェンスだけが含まれた。既知のdirective名とフェンス数を照合することで、開始位置のファイル名、行、列を持つ診断を生成できた。
+
+閉じていないText directiveの属性について、directive本体は属性なしの`textDirective`になり、未解析の`{`以降は通常の`text`ノードになった。mdastノードの終了オフセットにある元入力の文字、micromarkによる属性ブロックの解析成否、そのdirectiveが属性を必要とするという意味上の規則を照合することで、未解析の`{`の位置を診断できた。正常な属性ブロックの後ろに通常テキストとして`{...}`が続く入力は、構文診断の対象とならないことも確認した。
+
+同じ文字列をコードフェンスまたはインラインコードへ置いた場合はdirectiveノードにならず、構文診断の対象にもならなかった。エスケープしたText directiveと通常の時刻表記も診断されなかった。元入力全体をdirective用の正規表現だけで走査せず、Markdownの解析結果と入力位置を利用することで、今回確認した保護対象との誤認識を避けられた。
+
+ただし、構文の壊れ方によっては、Container directiveまたはLeaf directiveの開始行全体が通常の`data`イベントと`text`ノードになり、directive用のイベントもmdastノードも生成されない。未終端のラベルも、属性の場合とは異なる分割結果になる。これらをすべて検出するには、コードなどの保護範囲を考慮しながら、既知のdirective名に一致する通常テキストを追加で検査する必要がある。
+
+したがって、今回指定した未終端Containerと、必須属性を持つText directiveの未終端属性は位置付きで検出できる。一方、Generic Directivesとして認識されないすべての壊れ方を、現在の方式で位置付き診断へ変換できるとは結論づけない。試作は入力をmdastとmicromarkイベントへ個別に解析しており、production実装のAPIと処理回数も未決定である。
+
 ### コードフェンス
 
 コードフェンス内にContainer directiveとText directiveに見える文字列を置いても、文書全体は一つの`code`ノードとなり、directiveノードは生成されなかった。正規表現による文書全体の置換とは異なり、コード例を変換対象から除外できる。
@@ -188,7 +204,7 @@ Generic Directivesの3種類は、clonoが必要とするブロック範囲、�
 
 既知のdirectiveは変換前に意味検証し、入力位置を含む診断を生成できた。不正な既知のdirectiveがある場合はASTを変換せず、出力Markdownを返さない構成も成立した。
 
-この結果により、VFM向けMarkdownは主要な出力形式の有力候補となった。著者向け記法、採用ライブラリ、内部表現、変換パイプライン、出力契約、診断形式は、二つの調査結果を踏まえてADRで決定する。
+この結果を受け、[ADR 0003](../decisions/0003-adopt-generic-directives-mdast-transformation-pipeline.md)では、Generic Directives、mdast、低レベルAPIによる変換パイプライン、VFM向けMarkdownを正式に採用した。個別機能のdirective名、属性、内容モデルは、各機能の仕様で決定する。
 
 ## 再現方法
 
@@ -210,5 +226,6 @@ Generic Directivesの3種類は、clonoが必要とするブロック範囲、�
 - [Generic directives/plugins syntax](https://talk.commonmark.org/t/generic-directives-plugins-syntax/444)
 - [`mdast-util-from-markdown` 2.0.3](https://github.com/syntax-tree/mdast-util-from-markdown/tree/2.0.3)
 - [`mdast-util-to-markdown` 2.1.2](https://github.com/syntax-tree/mdast-util-to-markdown/tree/2.1.2)
+- [`micromark` 4.0.2](https://github.com/micromark/micromark/tree/4.0.2)
 - [`micromark-extension-directive` 4.0.0](https://github.com/micromark/micromark-extension-directive/tree/4.0.0)
 - [`mdast-util-directive` 3.1.0](https://github.com/syntax-tree/mdast-util-directive/tree/3.1.0)

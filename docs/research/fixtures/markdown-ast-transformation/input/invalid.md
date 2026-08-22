@@ -11,5 +11,5 @@
 これは:align[誤った種類]{position="right"}です。
 
 :::third-party{mode="sample"}
-未知の記法はエラーにしません。
+未知の記法です。
 :::

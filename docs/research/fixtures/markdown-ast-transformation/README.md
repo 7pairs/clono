@@ -11,6 +11,7 @@ Generic Directivesを含む単一のMarkdown文字列をmdastとして解析し�
 ```text
 入力Markdown
   → mdast解析
+  → 未知directiveの検出
   → 既知directiveの意味検証
   → AST変換
   → VFM向けMarkdown
@@ -38,10 +39,7 @@ Generic Directivesを含む単一のMarkdown文字列をmdastとして解析し�
 - 通常の見出し、段落、強調、リンク、インラインコード、強制改行が保持される
 - VFMの脚注参照と定義がmdastの往復後にも保持される
 - コードフェンス内のdirectiveらしい文字列は変換されない
-- 未知の`third-party` directiveは名前、属性、本文の意味を保持する
 - VFM 2.7.0が変換後のMarkdownをHTMLへ変換し、用途別のHTML構造と脚注構造を保持する
-
-未知のdirectiveはclonoが出力するMarkdownまでを検証対象とする。VFMはGeneric Directivesを解釈しないため、VFM変換後のHTMLで未知のdirectiveが意味を持つことは要件に含めない。
 
 ### `input/invalid.md`
 
@@ -51,15 +49,24 @@ Generic Directivesを含む単一のMarkdown文字列をmdastとして解析し�
 - Text directiveとして誤って記述した`align`
 - clonoが認識しない`third-party`
 
-4件の既知directiveについて、入力ファイル、行、列、directive名、説明を持つ診断を返す。未知のdirectiveは診断対象にせず、既知directiveが一つでも不正な場合は出力Markdownを返さない。
+4件の不正な既知directiveと1件の未知directiveについて、入力ファイル、行、列、directive名、説明を持つ診断を入力位置順に返す。診断が一つでもある場合は出力Markdownを返さない。
+
+### `input/unknown-nested.md`
+
+- 未知の`third-party` Container directive
+- その内側にある不正な既知の`index`
+- Containerの外側にある不正な既知の`index`
+- 独立した未知の`another-extension` Container directive
+
+未知のContainer directiveについて一件だけ診断し、その子孫は検査しない。Containerの外側にある不正な既知directiveと、別の未知directiveは引き続き検査し、診断を入力位置順に返す。
 
 ## AST変換方式
 
 Container directiveは、開始raw HTMLノード、元の`children`、終了raw HTMLノードへ置き換える。これにより、container内のMarkdownをVFMへ委譲する。
 
-Leaf directiveは一つのraw HTMLノードへ置き換える。Text directiveは開始raw HTMLノード、元のインライン`children`、終了raw HTMLノードへ置き換える。動的なHTML属性値はエスケープしてから出力する。
+Leaf directiveは一つのraw HTMLノードへ置き換える。Text directiveは開始raw HTMLノード、元のインライン`children`、終了raw HTMLノードへ置き換える。動的なHTML属性値はエスケープしてから出力する。属性の境界を脱出しようとする値について、VFM変換後にも許可した`span`と`data-index-reading`だけが生成されることを確認する。
 
-未知のdirectiveノードは変換せず、`mdast-util-directive`でMarkdownへ再直列化する。元の空白や引用符との完全一致は要求せず、再解析後に名前、属性、本文を取得できることを意味的保持の条件とする。
+初期ポリシーでは未知のdirectiveをエラーとし、AST変換と直列化を行わない。一方、低レベルAPIが未知のdirectiveの名前、属性、本文を意味的に保持できることは、将来ポリシーを変更できる技術的能力として別のテストで維持する。これは未知のdirectiveを保持することを初期仕様として採用するものではない。
 
 ## 脚注の保持
 
@@ -118,28 +125,30 @@ node target/inspect.js input/invalid.md
 
 - 正常な入力では、診断なしでVFM向けMarkdownを返す
 - 3種類の既知directiveをraw HTMLへ置き換える
-- 動的なHTML属性値をエスケープし、VFM変換後にも元の値を保持する
-- 再解析後に既知directiveがなく、未知のdirectiveだけが意味的に保持される
+- 動的なHTML属性値をエスケープし、属性または要素の境界を脱出できない
+- 再解析後に既知directiveが残らない
 - 通常のMarkdown、コードフェンス、脚注のmdast構造を保持する
 - 不正な既知directiveをすべて位置付きで診断し、出力を返さない
-- 未知のdirectiveを診断対象にしない
-- 未知のdirectiveをVFMへ直接渡すと、記法と内容が通常テキストとしてHTMLへ出力される
+- 未知のdirectiveを位置付きで診断し、出力を返さない
+- 未知のContainer directiveの子孫を検査せず、外側の独立した問題は入力位置順に診断する
+- 検証ポリシーを迂回した低レベルAPIでは、未知のdirectiveを意味的に保持できる
 - VFM変換後に、通常のMarkdown、用途別HTML、脚注、コードフェンスの内容が保持される
 
 ## 検証範囲の境界
 
-診断は、パーサーが既知のdirectiveノードとして認識した入力に対する意味検証だけを扱う。Generic Directives自体の構文が壊れ、通常テキストなど別の構造になった場合の検出は対象に含めない。
+診断は、パーサーがdirectiveノードとして認識した入力に対する未知directiveの検出と、既知directiveの意味検証を扱う。Generic Directives自体の構文が壊れ、通常テキストなど別の構造になった場合の検出はこのfixtureに含めず、`markdown-ast` fixtureの追加調査で扱う。
 
 変換処理は、意味検証がすべて成功した後にだけASTを変更する。失敗時には出力文字列を返さない。既存ファイルを残さないための一時ファイルや安全な置換は、ファイルI/Oを実装する段階で検証する。
 
 入力位置は変換前のmdastから診断へコピーする。出力Markdownと元の入力とのsource mapは生成しない。
 
-未知のdirectiveの内部に既知のdirectiveが入れ子になった場合の変換方針、警告、複数エラーの表示形式、診断コード、HTML以外の出力、生成Markdownの整形方針は確定しない。
+未知のdirectiveを警告または保持する将来のポリシー、その場合の子孫走査、複数エラーの表示形式、診断コード、HTML以外の出力、生成Markdownの整形方針は確定しない。
 
 ## 参照資料
 
 - [Markdown AST変換と出力方式に関する調査](../../markdown-ast-transformation.md)
 - [Generic DirectivesとMarkdown ASTに関する調査](../../markdown-ast.md)
+- [ADR 0003: Generic DirectivesとmdastによるMarkdown変換パイプラインを採用する](../../../decisions/0003-adopt-generic-directives-mdast-transformation-pipeline.md)
 - [Generic directives/plugins syntax](https://talk.commonmark.org/t/generic-directives-plugins-syntax/444)
 - [`mdast-util-from-markdown` 2.0.3](https://github.com/syntax-tree/mdast-util-from-markdown/tree/2.0.3)
 - [`mdast-util-to-markdown` 2.1.2](https://github.com/syntax-tree/mdast-util-to-markdown/tree/2.1.2)

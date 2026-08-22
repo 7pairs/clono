@@ -13,10 +13,6 @@ Thunder Claw
 
 これは:index[索引項目]{reading="さくいんこうもく"}です。
 
-:::third-party{mode="sample"}
-clonoが知らない記法です。
-:::
-
 ```markdown
 :::align{position="right"}
 :index[コード内]{reading="こおとない"}
@@ -25,4 +21,3 @@ clonoが知らない記法です。
 ```
 
 [^note]: 脚注には`変数名`と[リンク](https://docs.vivliostyle.org/ja/vfm/)を含めます。
-

@@ -2,6 +2,7 @@
   (:require
    ["node:fs" :as fs]
    [cljs.test :refer [deftest is testing]]
+   [clono.research.directive-syntax :as directive-syntax]
    [clono.research.markdown-ast :as markdown-ast]
    [goog.object :as gobj]))
 
@@ -137,3 +138,51 @@
       (is (= "markdown" (.-lang code)))
       (is (.includes (.-value code) ":index[索引項目]"))
       (is (empty? (filter #(some? (.-name %)) (nodes tree)))))))
+
+(deftest directive-syntax-diagnostic-test
+  (let [options {:known-names #{"column" "index"}
+                 :required-attribute-names #{"column" "index"}}]
+    (testing "When a known directive has an unclosed attribute block, then its source position is reported"
+      (is (= [{:file "input/malformed-attributes.md"
+               :line 1
+               :column 23
+               :directive "index"
+               :kind :malformed-attributes
+               :message "`index`の属性を解析できません。"}]
+             (directive-syntax/syntax-diagnostics
+              (read-input "malformed-attributes")
+              "input/malformed-attributes.md"
+              options))))
+
+    (testing "When a known container has no closing fence, then its opening position is reported"
+      (is (= [{:file "input/unclosed-container.md"
+               :line 1
+               :column 1
+               :directive "column"
+               :kind :unclosed-container
+               :message "`column`の終了マーカーがありません。"}]
+             (directive-syntax/syntax-diagnostics
+              (read-input "unclosed-container")
+              "input/unclosed-container.md"
+              options))))
+
+    (testing "When directive-like text is protected or ordinary prose, then no syntax diagnostic is reported"
+      (is (empty?
+           (directive-syntax/syntax-diagnostics
+            (read-input "directive-like-literals")
+            "input/directive-like-literals.md"
+            options))))
+
+    (testing "When ordinary braced text follows valid attributes, then no syntax diagnostic is reported"
+      (is (empty?
+           (directive-syntax/syntax-diagnostics
+            (read-input "valid-attributes-followed-by-text")
+            "input/valid-attributes-followed-by-text.md"
+            options))))
+
+    (testing "When valid candidate directives are inspected, then no syntax diagnostic is reported"
+      (is (empty?
+           (directive-syntax/syntax-diagnostics
+            (read-input "candidate")
+            "input/candidate.md"
+            options))))))
