@@ -21,6 +21,7 @@
       (is (= 1 (count (test-support/nodes-by-type tree "inlineCode"))))
       (is (= 1 (count (test-support/nodes-by-type tree "footnoteReference"))))
       (is (= 1 (count (test-support/nodes-by-type tree "footnoteDefinition"))))
+      (is (= 1 (count (test-support/nodes-by-type tree "table"))))
       (is (= "markdown" (.-lang code)))
       (is (.includes (.-value code) ":index[コード内]"))))
 
