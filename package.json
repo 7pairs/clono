@@ -6,7 +6,8 @@
     "clono": "dist/clono.js"
   },
   "files": [
-    "dist/"
+    "dist/",
+    "styles/"
   ],
   "scripts": {
     "build": "shadow-cljs compile cli",
@@ -26,8 +27,11 @@
     "mdast-util-directive": "3.1.0",
     "mdast-util-from-markdown": "2.0.3",
     "mdast-util-gfm-footnote": "2.1.0",
+    "mdast-util-gfm-table": "2.0.0",
     "mdast-util-to-markdown": "2.1.2",
+    "micromark": "4.0.2",
     "micromark-extension-directive": "4.0.0",
-    "micromark-extension-gfm-footnote": "2.1.0"
+    "micromark-extension-gfm-footnote": "2.1.0",
+    "micromark-extension-gfm-table": "2.1.1"
   }
 }
