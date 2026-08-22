@@ -60,6 +60,9 @@
                  "::::\n")
     :message "`align`の直下には段落だけを記述できます（directiveを検出しました）。"}])
 
+(defn- normalize-line-endings [value]
+  (.replace value (js/RegExp. "\\r\\n?" "g") "\n"))
+
 (deftest align-transformation-test
   (let [result (pipeline/run "align.md" valid-align-source)
         output (:output result)
@@ -79,10 +82,14 @@
       (is (= 1 (count (test-support/nodes-by-type tree "footnoteReference"))))))
 
   (testing "When the clono stylesheet is inspected, then it provides the required right-alignment rule"
-    (let [stylesheet (-> (.readFileSync fs "styles/clono.css" "utf8")
-                         (.replace #"\r\n?" "\n"))]
+    (let [stylesheet (normalize-line-endings
+                      (.readFileSync fs "styles/clono.css" "utf8"))]
       (is (= ".clono-align-right {\n  text-align: right;\n}\n"
-             stylesheet)))))
+             stylesheet))))
+
+  (testing "When multiple Windows line endings are normalized, then every line ending becomes LF"
+    (is (= "first\nsecond\nthird\n"
+           (normalize-line-endings "first\r\nsecond\r\nthird\r")))))
 
 (deftest invalid-align-test
   (testing "When an align directive violates its contract, then transformation fails with a positioned diagnostic"
