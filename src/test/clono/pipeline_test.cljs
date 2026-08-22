@@ -4,25 +4,56 @@
    [clono.markdown :as markdown]
    [clono.pipeline :as pipeline]
    [clono.test-support :as test-support]
-   [goog.object :as gobj]))
+   [clono.transform :as transform]))
 
 (deftest run-test
-  (let [output (pipeline/run test-support/markdown-source)
+  (let [result (pipeline/run "manuscript.md" test-support/standard-markdown-source)
+        output (:output result)
         tree (markdown/parse output)
-        column (test-support/directive tree "column")
-        page-break (test-support/directive tree "page-break")
-        index (test-support/directive tree "index")
         code (first (test-support/nodes-by-type tree "code"))]
-    (testing "When Markdown passes through the minimal pipeline, then its supported meaning is preserved"
+    (testing "When valid Markdown passes through the pipeline, then output is returned without diagnostics"
+      (is (true? (:ok? result)))
       (is (string? output))
-      (is (= "column" (.-name column)))
-      (is (= "コラム" (gobj/get (.-attributes column) "title")))
-      (is (= "leafDirective" (.-type page-break)))
-      (is (= "textDirective" (.-type index)))
-      (is (= "さくいんこうもく" (gobj/get (.-attributes index) "reading")))
+      (is (empty? (:diagnostics result))))
+
+    (testing "When valid Markdown is serialized, then its supported meaning is preserved"
       (is (= 1 (count (test-support/nodes-by-type tree "strong"))))
       (is (= 1 (count (test-support/nodes-by-type tree "inlineCode"))))
       (is (= 1 (count (test-support/nodes-by-type tree "footnoteReference"))))
       (is (= 1 (count (test-support/nodes-by-type tree "footnoteDefinition"))))
       (is (= "markdown" (.-lang code)))
-      (is (.includes (.-value code) ":index[コード内]")))))
+      (is (.includes (.-value code) ":index[コード内]"))))
+
+  (let [source (str ":::third-party\n"
+                    ":nested[内部の未知記法]\n"
+                    ":::\n\n"
+                    "::page-break\n\n"
+                    ":index[独立した未知記法]\n")
+        transform-called? (atom false)
+        result (with-redefs [transform/transform
+                             (fn [tree]
+                               (reset! transform-called? true)
+                               tree)]
+                 (pipeline/run "unknown.md" source))]
+    (testing "When unknown directives are found, then independent diagnostics are returned in source order"
+      (is (false? (:ok? result)))
+      (is (= [{:file "unknown.md"
+               :line 1
+               :column 1
+               :directive "third-party"
+               :message "`third-party`は登録されていないdirectiveです。"}
+              {:file "unknown.md"
+               :line 5
+               :column 1
+               :directive "page-break"
+               :message "`page-break`は登録されていないdirectiveです。"}
+              {:file "unknown.md"
+               :line 7
+               :column 1
+               :directive "index"
+               :message "`index`は登録されていないdirectiveです。"}]
+             (:diagnostics result))))
+
+    (testing "When diagnostics are returned, then transformation is skipped and output is omitted"
+      (is (nil? (:output result)))
+      (is (false? @transform-called?)))))
