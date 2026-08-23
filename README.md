@@ -79,6 +79,7 @@ node dist/clono.js manuscript.md --output build/manuscript.md
 ## ドキュメント
 
 - [プロジェクト憲章](docs/project-charter.md): プロジェクトの目的、設計原則、開発方針
+- [開発ワークフロー](docs/development-workflow.md): Sora Flowによる通常開発とリリースのブランチ戦略
 - [設計判断の記録](docs/decisions/): 採用した技術や方針と、その判断理由
 - [著者向け記法](docs/specifications/authoring-syntax.md): 利用可能な記法と開発状態
 - [単一ファイル変換CLI仕様](docs/specifications/single-file-cli.md): CLIの入出力、診断、終了コード

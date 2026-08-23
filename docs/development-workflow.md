@@ -1,0 +1,109 @@
+# clono開発ワークフロー
+
+- 状態: 有効
+- 作成日: 2026-08-23
+- 最終更新日: 2026-08-23
+
+## 目的
+
+この文書は、`clono`における通常開発とリリースのブランチ戦略を定める。コミット履歴やブランチ名だけでは判別できない、各ブランチの責務、レビューの実施場所、リリース時の変更禁止範囲を正本として記録する。
+
+プロジェクト全体の開発方法であるSora Driven Developmentについては、[プロジェクト憲章](project-charter.md)を正本とする。この文書で定めるSora Flowは、Sora Driven Developmentのもとで、レビュー済みの変更を小さな単位で`main`へ届けるためのブランチおよびリリース運用である。
+
+## Sora Flow
+
+Sora Flowは、Git Flowをもとに、リリース準備の変更とレビューを`develop`側で完了させてから、変更禁止の`release`ブランチを`main`へ昇格させる`clono`固有のワークフローである。
+
+通常のGit Flowでは、`release`ブランチを作成してからバージョン更新などのリリース準備を行い、その変更を`main`と`develop`の両方へマージする。Sora Flowでは、リリース準備を通常の作業ブランチとPull Requestで先に`develop`へ取り込み、その後に`release`ブランチを作成する。
+
+これにより、次の状態を実現する。
+
+- リリース固有の変更も、通常の変更と同じ経路でCodeRabbitのレビューとCIを受ける
+- `release`から`main`へのPull Requestで、既にレビュー済みの累積差分をCodeRabbitが再レビューすることを避ける
+- `release`ブランチへ未レビューの変更が混入しない
+- リリース時点の内容を固定しながら、`main`を安定した利用可能な状態に保つ
+- リリース後に`release`から`develop`へ戻すためだけのマージを原則として不要にする
+
+## ブランチの責務
+
+| ブランチ | 責務 |
+| --- | --- |
+| `main` | リリース済みの安定した状態を保持する |
+| `develop` | 次のリリースへ含める、レビュー済みの変更を統合する |
+| 作業ブランチ | 機能、修正、文書、調査などの変更を行い、`develop`向けPull Requestを作成する |
+| リリース準備ブランチ | バージョンやリリースに必要な文書などを変更し、通常のレビューを経て`develop`へ取り込む |
+| `release/<version>` | レビュー済みの`develop`を`main`へ昇格させるために一時的に使用し、作成後は変更しない |
+
+作業ブランチには、変更内容に応じて`feature/`、`fix/`、`chore/`などの接頭辞を使用できる。リリース準備ブランチには、`chore/prepare-0.1.0`のように対象バージョンと目的が分かる名前を使用する。
+
+## 通常開発
+
+通常の変更は、次の流れで`develop`へ取り込む。
+
+1. `develop`から作業ブランチを作成する
+2. 仕様、実装、テストおよび関連文書を変更する
+3. 作業ブランチから`develop`へPull Requestを作成する
+4. CodeRabbitのレビューとCIを完了する
+5. 必要な指摘へ対応した後、Pull Requestを`develop`へマージする
+
+レビューの範囲と変更単位は、変更内容とリスクに応じて判断する。ただし、リリースへ含める変更は、`release`ブランチを作成する前に必要なレビューと検証を完了させる。
+
+## リリース
+
+### リリース準備
+
+リリース準備は、`release`ブランチではなく、`develop`から作成したリリース準備ブランチで行う。
+
+1. リリースするバージョンと内容を決定する
+2. `develop`から`chore/prepare-<version>`などのリリース準備ブランチを作成する
+3. バージョン、READMEなど、リリースに必要な変更を行う
+4. リリース準備ブランチから`develop`へPull Requestを作成する
+5. CodeRabbitのレビューとCIを完了する
+6. リリース準備のPull Requestを`develop`へマージする
+
+この時点で、リリースへ含める内容とリリース準備の変更は、すべて`develop`に存在し、必要なレビューと検証を完了している必要がある。
+
+### リリースブランチの作成と昇格
+
+リリース準備を取り込んだ後、短いリリース期間が終わるまで`develop`への通常の変更を一時的に停止する。続いて、次の流れで`develop`を`main`へ昇格させる。
+
+1. `develop`から`release/<version>`を作成する
+2. `release/<version>`から`main`へPull Requestを作成する
+3. Pull Requestのタイトルへ`[release]`を含める
+4. CIと、リリース内容全体の最終差分を確認する
+5. merge commitを使用して`main`へマージする
+6. `main`のマージ結果とCIを確認する
+7. `main`のマージコミットへ`v<version>`形式のバージョンタグを付ける
+8. `release/<version>`を削除する
+9. `develop`の変更停止を解除する
+
+`[release]`は、[CodeRabbitの設定](../.coderabbit.yaml)によってリリースPull Requestの自動レビューを停止するために使用する。リリース準備を含むすべての変更は既に`develop`向けPull Requestでレビュー済みであり、リリースPull Requestでは同じ累積差分の再レビューを行わない。一方、CIは省略しない。
+
+`release/<version>`では、バージョン、文書、実装その他のファイルを直接変更しない。`release/<version>`は作業場所や永続的なリリース記録ではなく、レビュー済みの`develop`を固定して`main`へ昇格させるための一時的な通過点である。
+
+リリース済みの状態を示す正本は、`main`のマージコミットに付けたバージョンタグとする。merge commitを使用しているため、`release/<version>`を削除した後も、リリースに含まれたコミットはタグを起点として履歴から追跡できる。リリースブランチを保存目的で残さない。
+
+### リリースブランチ作成後に問題が見つかった場合
+
+`release/<version>`の作成後、`main`へマージする前に問題が見つかった場合は、リリースを一時停止し、`release/<version>`へ直接変更を加えない。
+
+1. `develop`から修正用の作業ブランチを作成する
+2. 修正用のPull Requestを`develop`へ作成する
+3. CodeRabbitのレビューとCIを完了する
+4. 修正を`develop`へマージする
+5. `release/<version>`を更新後の`develop`へfast-forwardするか、同じコミットから作り直す
+6. `main`向けPull RequestのCIと最終差分を再確認する
+
+リリース期間中は`develop`への通常の変更を停止するため、修正後の`develop`を`release/<version>`へfast-forwardできる状態を維持する。未レビューの修正を`release/<version>`へ追加したり、通常の機能追加を修正と一緒にリリースへ取り込んだりしない。
+
+## マージと履歴
+
+`release/<version>`から`main`へのPull Requestは、squash mergeまたはrebase mergeではなく、merge commitを使用する。`develop`側でレビューしたコミットと`main`の履歴上の関係を保持し、次回以降のリリース差分を追跡しやすくするためである。
+
+Sora Flowに従う限り、`release/<version>`は`develop`に存在しない独自の変更を持たない。このため、リリース後に`release/<version>`を`develop`へマージしない。
+
+## 更新方針
+
+- ブランチの責務、レビュー経路、リリース手順またはマージ方法を変更する場合は、この文書を更新する
+- CodeRabbitやCIの設定を変更した場合は、この文書の説明と実際の動作が一致することを確認する
+- `README.md`と`AGENTS.md`からこの文書への導線を維持する
