@@ -1,0 +1,67 @@
+@page {
+  size: a5;
+  margin: 18mm;
+
+  @bottom-center {
+    content: counter(page);
+  }
+}
+
+body {
+  font-family: sans-serif;
+}
+
+.column {
+  margin-block: 1.5em;
+  padding: 0.8em 1em;
+  border: 1px solid;
+}
+
+.column > :first-child {
+  margin-top: 0;
+}
+
+.column > :last-child {
+  margin-bottom: 0;
+}
+
+.index-group {
+  margin-block: 1.2em;
+}
+
+.index-group h2 {
+  margin-block: 0 0.4em;
+  padding-bottom: 0.15em;
+  border-bottom: 1px solid;
+  font-size: 1.15em;
+}
+
+.index-list {
+  margin: 0;
+}
+
+.index-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 1em;
+  align-items: baseline;
+  margin-block: 0.25em;
+}
+
+.index-entry dt,
+.index-entry dd {
+  margin: 0;
+}
+
+.index-entry dd {
+  white-space: nowrap;
+}
+
+.index-page {
+  color: currentcolor;
+  text-decoration: none;
+}
+
+.index-page::after {
+  content: target-counter(attr(href url), page);
+}

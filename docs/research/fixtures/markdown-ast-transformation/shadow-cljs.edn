@@ -1,0 +1,17 @@
+{:source-paths
+ ["src/main"
+  "src/test"]
+
+ :dependencies
+ []
+
+ :builds
+ {:inspect
+  {:target :node-script
+   :output-to "target/inspect.js"
+   :main clono.research.inspect/main}
+
+  :test
+  {:target :node-test
+   :output-to "target/tests.js"}}}
+

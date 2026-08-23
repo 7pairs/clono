@@ -1,0 +1,37 @@
+{
+  "name": "clono",
+  "version": "0.1.0",
+  "private": true,
+  "bin": {
+    "clono": "dist/clono.js"
+  },
+  "files": [
+    "dist/",
+    "styles/"
+  ],
+  "scripts": {
+    "build": "shadow-cljs compile cli",
+    "build:release": "shadow-cljs release cli",
+    "watch": "shadow-cljs watch cli",
+    "test": "shadow-cljs compile test && node target/tests.js",
+    "test:watch": "shadow-cljs watch test-watch",
+    "prepack": "npm run build:release"
+  },
+  "engines": {
+    "node": "^22.13.0 || ^24.0.0"
+  },
+  "devDependencies": {
+    "shadow-cljs": "3.4.12"
+  },
+  "dependencies": {
+    "mdast-util-directive": "3.1.0",
+    "mdast-util-from-markdown": "2.0.3",
+    "mdast-util-gfm-footnote": "2.1.0",
+    "mdast-util-gfm-table": "2.0.0",
+    "mdast-util-to-markdown": "2.1.2",
+    "micromark": "4.0.2",
+    "micromark-extension-directive": "4.0.0",
+    "micromark-extension-gfm-footnote": "2.1.0",
+    "micromark-extension-gfm-table": "2.1.1"
+  }
+}

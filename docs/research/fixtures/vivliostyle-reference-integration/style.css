@@ -1,0 +1,153 @@
+@page {
+  size: a5;
+  margin: 18mm;
+}
+
+@page :first {
+  counter-reset: chapter;
+}
+
+@page :nth(1) {
+  counter-increment: chapter;
+}
+
+body {
+  counter-reset: figure table listing;
+  font-family: sans-serif;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.chapter-start-spacer {
+  block-size: 18mm;
+  font-size: 0;
+}
+
+section.level1 > h1 {
+  counter-reset: section;
+}
+
+section.level1 > h1::before {
+  content: "第" counter(chapter) "章 ";
+}
+
+section.level2 > h2 {
+  counter-increment: section;
+}
+
+section.level2 > h2::before {
+  content: counter(chapter) "." counter(section) " ";
+}
+
+.numbered-figure,
+.numbered-table {
+  margin: 0.75em 0;
+  break-inside: avoid;
+}
+
+.numbered-figure {
+  text-align: center;
+  counter-increment: figure;
+}
+
+.numbered-figure img {
+  display: block;
+  max-width: 90%;
+  max-height: 24mm;
+  margin: 0 auto;
+}
+
+.numbered-figure > figcaption {
+  margin-top: 0.4em;
+}
+
+.numbered-figure > figcaption::before {
+  content: "図" counter(chapter) "." counter(figure) " ";
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.2em 0.45em;
+  border: 1px solid #777;
+}
+
+.numbered-table {
+  counter-increment: table;
+}
+
+.numbered-table > figcaption {
+  margin-top: 0.4em;
+}
+
+.numbered-table > figcaption::before {
+  content: "表" counter(chapter) "." counter(table) " ";
+}
+
+pre {
+  padding: 0.55em;
+  overflow-wrap: anywhere;
+  background: #f4f6f8;
+  font-size: 8.5pt;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.numbered-listing {
+  margin: 0.75em 0;
+  counter-increment: listing;
+  break-inside: avoid;
+}
+
+.numbered-listing > figcaption {
+  margin-bottom: 0.4em;
+  break-after: avoid;
+}
+
+.numbered-listing > figcaption::before {
+  content: "リスト" counter(chapter) "." counter(listing) " ";
+}
+
+.token.keyword {
+  color: #7a3e9d;
+  font-weight: bold;
+}
+
+.token.function {
+  color: #005cc5;
+}
+
+.token.string {
+  color: #8a3b12;
+}
+
+a.xref-chapter::before {
+  content: "第" target-counter(attr(href url), chapter) "章";
+}
+
+a.xref-section::before {
+  content: target-counter(attr(href url), chapter) "." target-counter(attr(href url), section);
+}
+
+a.xref-figure::before {
+  content: "図" target-counter(attr(href url), chapter) "." target-counter(attr(href url), figure);
+}
+
+a.xref-table::before {
+  content: "表" target-counter(attr(href url), chapter) "." target-counter(attr(href url), table);
+}
+
+a.xref-listing::before {
+  content: "リスト" target-counter(attr(href url), chapter) "." target-counter(attr(href url), listing);
+}
+
+a.xref-title::after {
+  content: " " target-text(attr(data-title-href url), content);
+}

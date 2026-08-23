@@ -1,0 +1,50 @@
+@page {
+  size: a5;
+  margin: 18mm;
+}
+
+@page :first {
+  counter-reset: chapter;
+}
+
+@page :nth(1) {
+  counter-increment: chapter;
+}
+
+body {
+  counter-reset: table;
+  font-family: sans-serif;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.25em 0.5em;
+  border: 1px solid #777;
+}
+
+.numbered-table {
+  margin: 0.75em 0;
+  counter-increment: table;
+  break-inside: avoid;
+}
+
+.numbered-table > figcaption {
+  margin-top: 0.5em;
+}
+
+.numbered-table > figcaption::before {
+  content: "表" counter(chapter) "." counter(table) " ";
+}
+
+a.xref-table::before {
+  content: "表" target-counter(attr(href url), chapter) "." target-counter(attr(href url), table);
+}
+
+a.xref-title::after {
+  content: " " target-text(attr(data-caption-href url), content);
+}

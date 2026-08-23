@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="180" viewBox="0 0 640 180">
+  <rect width="640" height="180" rx="24" fill="#f3f6fa"/>
+  <rect x="50" y="55" width="140" height="70" rx="12" fill="#dbeafe" stroke="#2563eb" stroke-width="4"/>
+  <rect x="250" y="55" width="140" height="70" rx="12" fill="#dcfce7" stroke="#16a34a" stroke-width="4"/>
+  <rect x="450" y="55" width="140" height="70" rx="12" fill="#ffedd5" stroke="#ea580c" stroke-width="4"/>
+  <path d="M195 90h45m-12-12 12 12-12 12M395 90h45m-12-12 12 12-12 12" fill="none" stroke="#475569" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="120" y="99" text-anchor="middle" font-family="sans-serif" font-size="25" fill="#1e3a8a">Input</text>
+  <text x="320" y="99" text-anchor="middle" font-family="sans-serif" font-size="25" fill="#166534">Transform</text>
+  <text x="520" y="99" text-anchor="middle" font-family="sans-serif" font-size="25" fill="#9a3412">Output</text>
+</svg>
