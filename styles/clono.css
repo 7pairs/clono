@@ -9,3 +9,7 @@
 .clono-column-title {
   break-after: avoid;
 }
+
+.clono-page-break {
+  break-before: page;
+}

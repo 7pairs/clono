@@ -28,7 +28,6 @@
   (let [source (str ":::third-party\n"
                     ":nested[内部の未知記法]\n"
                     ":::\n\n"
-                    "::page-break\n\n"
                     ":index[独立した未知記法]\n")
         transform-called? (atom false)
         result (with-redefs [transform/transform
@@ -45,11 +44,6 @@
                :message "`third-party`は登録されていないdirectiveです。"}
               {:file "unknown.md"
                :line 5
-               :column 1
-               :directive "page-break"
-               :message "`page-break`は登録されていないdirectiveです。"}
-              {:file "unknown.md"
-               :line 7
                :column 1
                :directive "index"
                :message "`index`は登録されていないdirectiveです。"}]
