@@ -5,6 +5,7 @@ This file provides working instructions for AI agents contributing to `clono`.
 ## Documents to Read Before Working
 
 - Read the [project charter](docs/project-charter.md) to understand the project's purpose, design principles, and development policy.
+- Before release-related work, read the [development workflow](docs/development-workflow.md) and follow Sora Flow.
 - Before working on design or technology choices, review the relevant architectural decision records in [docs/decisions](docs/decisions/).
 - Refer to the [README](README.md) for development environment requirements and basic commands.
 - Treat documents in the repository as the source of truth for specifications, design decisions, and development conventions. Do not rely only on conversation history.
@@ -62,4 +63,5 @@ This file provides working instructions for AI agents contributing to `clono`.
 ## Git
 
 - Do not commit, amend, rebase, merge, push, create branches, or delete branches unless explicitly requested by the project owner.
+- Follow [Sora Flow](docs/development-workflow.md) for branch responsibilities and releases. Treat `release/<version>` as a temporary, read-only promotion branch for reviewed `develop`; record the release with a version tag on `main`, then delete the release branch.
 - Treat existing uncommitted changes as work owned by the project owner. Do not overwrite or discard changes outside the requested scope.
