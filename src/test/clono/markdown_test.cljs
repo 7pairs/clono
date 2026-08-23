@@ -13,7 +13,9 @@
     (testing "When Markdown extensions are parsed, then directives and footnotes become dedicated mdast nodes"
       (is (= "containerDirective" (.-type column)))
       (is (= "column" (.-name column)))
-      (is (= "コラム" (gobj/get (.-attributes column) "title")))
+      (let [label (first (test-support/children column))]
+        (is (true? (gobj/get (.-data label) "directiveLabel")))
+        (is (= "コラム" (.-value (first (test-support/children label))))))
       (is (= "leafDirective" (.-type page-break)))
       (is (= "textDirective" (.-type index)))
       (is (= "さくいんこうもく" (gobj/get (.-attributes index) "reading")))

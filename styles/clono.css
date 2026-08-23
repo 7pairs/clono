@@ -1,3 +1,11 @@
 .clono-align-right {
   text-align: right;
 }
+
+.clono-column {
+  break-inside: avoid;
+}
+
+.clono-column-title {
+  break-after: avoid;
+}
