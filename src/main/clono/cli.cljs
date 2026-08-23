@@ -181,15 +181,27 @@
       (.unlinkSync fs temporary-path)
       (catch :default _ nil))))
 
+(defn ^:no-doc restore-output-mode! [output-path output-mode]
+  (.chmodSync fs output-path output-mode))
+
 (defn- write-output [output output-path output-mode content]
   (let [temporary-path (temporary-output-path output-path)]
     (try
       (.writeFileSync fs temporary-path content #js {:encoding "utf8"
                                                       :flag "wx"
                                                       :mode private-file-mode})
-      (.chmodSync fs temporary-path (or output-mode private-file-mode))
+      (.chmodSync fs temporary-path private-file-mode)
       (.renameSync fs temporary-path output-path)
-      {:ok? true}
+      (if output-mode
+        (try
+          (restore-output-mode! output-path output-mode)
+          {:ok? true}
+          (catch :default error
+            {:ok? false
+             :message (str output
+                           ": 内容は更新しましたが、既存の許可ビットを復元できません: "
+                           (error-message error))}))
+        {:ok? true})
       (catch :default error
         {:ok? false
          :message (str output ": ファイルを書き込めません: "

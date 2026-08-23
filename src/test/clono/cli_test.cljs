@@ -141,6 +141,30 @@
             (is (= 8r600 (permission-bits output))))
           (is (empty? (temporary-output-files directory)))))))
 
+  (testing "When restoring existing permissions fails, then transformed output remains private and an error is returned"
+    (with-temporary-directory
+      (fn [directory]
+        (let [input (.join path directory "input.md")
+              output (.join path directory "output.md")]
+          (write-file! input valid-source)
+          (write-file! output "previous output\n")
+          (when (supported-posix?)
+            (.chmodSync fs output 8r640))
+          (with-redefs [cli/restore-output-mode!
+                        (fn [_ _]
+                          (throw (js/Error. "permission restoration failed")))]
+            (let [command-result (cli/command-result [input "-o" output])]
+              (is (= 1 (:exit-code command-result)))
+              (is (nil? (:stdout command-result)))
+              (is (.includes (:stderr command-result)
+                             "内容は更新しましたが、既存の許可ビットを復元できません"))))
+          (let [content (.readFileSync fs output "utf8")]
+            (is (.includes content "<div class=\"clono-align-right\">"))
+            (is (not= "previous output\n" content)))
+          (when (supported-posix?)
+            (is (= 8r600 (permission-bits output))))
+          (is (empty? (temporary-output-files directory)))))))
+
   (testing "When transformation reports a diagnostic, then an existing output is preserved"
     (with-temporary-directory
       (fn [directory]
