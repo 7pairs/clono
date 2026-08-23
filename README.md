@@ -10,9 +10,9 @@ Vivliostyleを主要な出力先として想定し、Vivliostyleが持つ機能�
 
 ## 開発状況
 
-現在は開発初期段階です。Node.js向けCLIの最小構成と、ビルド、テスト、CIの開発基盤までを実装しています。Markdownの変換機能はまだ利用できません。
+現在は開発初期段階です。Node.js向けCLIで単一のMarkdownファイルを変換できます。独自記法は文字揃え記法だけを実装しており、複数ファイルや書籍プロジェクトの一括変換にはまだ対応していません。
 
-npmパッケージとしての公開もまだ行っていません。現時点のCLIは、開発環境でビルドしたうえで起動確認に利用できます。
+npmパッケージとしての公開はまだ行っていません。現時点のCLIは、開発環境でビルドして利用します。
 
 ## 必要な環境
 
@@ -62,10 +62,26 @@ npm run build
 node dist/clono.js --help
 ```
 
+## 単一ファイルの変換
+
+入力Markdownと出力先を指定して、単一のファイルを変換します。
+
+```shell
+node dist/clono.js manuscript.md --output build/manuscript.md
+```
+
+出力先の親ディレクトリは、コマンドを実行する前に作成してください。既存の出力ファイルは上書きします。変換に成功した場合は何も表示せず、診断またはファイル操作エラーが発生した場合は標準エラーへ問題を表示して終了コード`1`を返します。
+
+利用可能な記法と詳しいCLIの契約は、[clono著者向け記法](docs/specifications/authoring-syntax.md)と[単一ファイル変換CLI仕様](docs/specifications/single-file-cli.md)を参照してください。
+
+文字揃え記法が生成する構造に必要な基盤CSSは、`styles/clono.css`にあります。このCLIは基盤CSSを出力先へコピーしないため、現時点では利用者が書籍プロジェクト側で組み込む必要があります。正式な組み込み方法は、書籍プロジェクトを扱うCLIとともに今後決定します。
+
 ## ドキュメント
 
 - [プロジェクト憲章](docs/project-charter.md): プロジェクトの目的、設計原則、開発方針
 - [設計判断の記録](docs/decisions/): 採用した技術や方針と、その判断理由
+- [著者向け記法](docs/specifications/authoring-syntax.md): 利用可能な記法と開発状態
+- [単一ファイル変換CLI仕様](docs/specifications/single-file-cli.md): CLIの入出力、診断、終了コード
 
 ## ライセンス
 
