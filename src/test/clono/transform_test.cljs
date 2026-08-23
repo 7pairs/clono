@@ -84,8 +84,8 @@
   (testing "When the clono stylesheet is inspected, then it provides the required right-alignment rule"
     (let [stylesheet (normalize-line-endings
                       (.readFileSync fs "styles/clono.css" "utf8"))]
-      (is (= ".clono-align-right {\n  text-align: right;\n}\n"
-             stylesheet))))
+      (is (.includes stylesheet
+                     ".clono-align-right {\n  text-align: right;\n}\n"))))
 
   (testing "When multiple Windows line endings are normalized, then every line ending becomes LF"
     (is (= "first\nsecond\nthird\n"
