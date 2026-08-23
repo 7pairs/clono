@@ -14,6 +14,9 @@
        "  -o, --output <output>  変換後のMarkdownを書き込むファイル\n"
        "  -h, --help             使用方法を表示\n"))
 
+(def ^:private private-file-mode 8r600)
+(def ^:private permission-mask 8r777)
+
 (defn parse-arguments [arguments]
   (cond
     (empty? arguments)
@@ -137,7 +140,10 @@
                 :else
                 {:ok? true
                  :input-path input-path
-                 :output-path output-path})))))
+                 :output-path output-path
+                 :output-mode (when output-stat
+                                (bit-and permission-mask
+                                         (gobj/get output-stat "mode")))})))))
       (catch :default error
         {:ok? false
          :kind :file
@@ -175,11 +181,13 @@
       (.unlinkSync fs temporary-path)
       (catch :default _ nil))))
 
-(defn- write-output [output output-path content]
+(defn- write-output [output output-path output-mode content]
   (let [temporary-path (temporary-output-path output-path)]
     (try
       (.writeFileSync fs temporary-path content #js {:encoding "utf8"
-                                                      :flag "wx"})
+                                                      :flag "wx"
+                                                      :mode private-file-mode})
+      (.chmodSync fs temporary-path (or output-mode private-file-mode))
       (.renameSync fs temporary-path output-path)
       {:ok? true}
       (catch :default error
@@ -204,6 +212,7 @@
                 (diagnostics-result (:diagnostics transformation))
                 (let [output-result (write-output output
                                                   (:output-path paths)
+                                                  (:output-mode paths)
                                                   (normalize-line-endings
                                                    (:output transformation)))]
                   (if (:ok? output-result)

@@ -4,7 +4,11 @@
    ["node:os" :as os]
    ["node:path" :as path]
    [cljs.test :refer [deftest is testing]]
-   [clono.cli :as cli]))
+   [clono.cli :as cli]
+   [goog.object :as gobj]))
+
+(def supported-posix-platforms
+  #{"darwin" "linux"})
 
 (def successful-help-result
   {:exit-code 0
@@ -38,6 +42,14 @@
 
 (defn- write-file! [file-path content]
   (.writeFileSync fs file-path content "utf8"))
+
+(defn- supported-posix? []
+  (contains? supported-posix-platforms
+             (.-platform js/process)))
+
+(defn- permission-bits [file-path]
+  (bit-and 8r777
+           (gobj/get (.statSync fs file-path) "mode")))
 
 (defn- temporary-output-files [directory]
   (filter #(.startsWith % ".clono-")
@@ -103,12 +115,30 @@
               output (.join path directory "output.md")]
           (write-file! input valid-source)
           (write-file! output "previous output\n")
+          (when (supported-posix?)
+            (.chmodSync fs output 8r640))
           (is (= successful-transformation-result
                  (cli/command-result [input "--output" output])))
           (let [content (.readFileSync fs output "utf8")]
             (is (.includes content "<div class=\"clono-align-right\">"))
             (is (.includes content "Thunder Claw"))
             (is (not (.includes content "\r"))))
+          (when (supported-posix?)
+            (is (= 8r640 (permission-bits output))))
+          (is (empty? (temporary-output-files directory)))))))
+
+  (testing "When a valid file is transformed to a new output, then owner-only permissions are used on POSIX"
+    (with-temporary-directory
+      (fn [directory]
+        (let [input (.join path directory "input.md")
+              output (.join path directory "output.md")]
+          (write-file! input valid-source)
+          (is (= successful-transformation-result
+                 (cli/command-result [input "-o" output])))
+          (is (.includes (.readFileSync fs output "utf8")
+                         "Thunder Claw"))
+          (when (supported-posix?)
+            (is (= 8r600 (permission-bits output))))
           (is (empty? (temporary-output-files directory)))))))
 
   (testing "When transformation reports a diagnostic, then an existing output is preserved"
