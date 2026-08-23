@@ -2,10 +2,12 @@
   (:require
    [clono.ast :as ast]
    [clono.directive-validation :as directive-validation]
-   [clono.transform.align :as align]))
+   [clono.transform.align :as align]
+   [clono.transform.column :as column]))
 
 (def rules
-  {"align" align/rule})
+  {"align" align/rule
+   "column" column/rule})
 
 (def known-directive-names
   (set (keys rules)))
