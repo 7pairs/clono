@@ -33,7 +33,10 @@
             {:action :error
              :message "出力ファイルを複数指定できません。"}
             (if-let [value (second remaining)]
-              (recur (nnext remaining) input value)
+              (if (.startsWith value "-")
+                {:action :error
+                 :message (str "未知のオプションです: " value)}
+                (recur (nnext remaining) input value))
               {:action :error
                :message (str "`" argument "`には出力ファイルの指定が必要です。")}))
 

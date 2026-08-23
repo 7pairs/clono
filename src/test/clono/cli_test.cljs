@@ -64,7 +64,11 @@
     (is (= {:action :transform
             :input "input.md"
             :output "output.md"}
-           (cli/parse-arguments ["-o" "output.md" "input.md"]))))
+           (cli/parse-arguments ["-o" "output.md" "input.md"])))
+    (is (= {:action :transform
+            :input "input.md"
+            :output "./-output.md"}
+           (cli/parse-arguments ["input.md" "-o" "./-output.md"]))))
 
   (testing "When arguments violate the command contract, then a specific argument error is returned"
     (doseq [[arguments message]
@@ -81,7 +85,11 @@
              [["--unknown"]
               "未知のオプションです: --unknown"]
              [["input.md" "--output=output.md"]
-              "未知のオプションです: --output=output.md"]]]
+              "未知のオプションです: --output=output.md"]
+             [["input.md" "-o" "--unknown"]
+              "未知のオプションです: --unknown"]
+             [["input.md" "--output" "--unknown"]
+              "未知のオプションです: --unknown"]]]
       (is (= {:action :error
               :message message}
              (cli/parse-arguments arguments))
