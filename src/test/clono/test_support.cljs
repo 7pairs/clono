@@ -2,7 +2,7 @@
 
 (def markdown-source
   (str "# 最小パイプライン\n\n"
-       ":::column{title=\"コラム\"}\n"
+       ":::column[コラム]\n"
        "**本文**と脚注[^note]です。\n"
        ":::\n\n"
        "::page-break\n\n"

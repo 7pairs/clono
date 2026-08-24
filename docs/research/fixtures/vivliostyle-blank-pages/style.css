@@ -1,0 +1,33 @@
+@page {
+  size: a5;
+  margin: 16mm;
+
+  @top-center {
+    content: "RUNNING HEADER";
+  }
+
+  @bottom-center {
+    content: counter(page);
+  }
+}
+
+@page clono-blank {
+  @top-center {
+    content: none;
+  }
+
+  @bottom-center {
+    content: counter(page);
+  }
+}
+
+html {
+  font-family: sans-serif;
+}
+
+.clono-blank-page {
+  page: clono-blank;
+  break-before: page;
+  break-after: page;
+  min-block-size: 1px;
+}

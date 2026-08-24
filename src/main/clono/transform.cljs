@@ -2,10 +2,14 @@
   (:require
    [clono.ast :as ast]
    [clono.directive-validation :as directive-validation]
-   [clono.transform.align :as align]))
+   [clono.transform.align :as align]
+   [clono.transform.column :as column]
+   [clono.transform.page-break :as page-break]))
 
 (def rules
-  {"align" align/rule})
+  {"align" align/rule
+   "column" column/rule
+   "page-break" page-break/rule})
 
 (def known-directive-names
   (set (keys rules)))
@@ -17,16 +21,21 @@
        set))
 
 (defn validate [tree source-name]
-  (->> (directive-validation/validation-nodes tree known-directive-names)
-       (keep (fn [node]
-               (when-let [rule (get rules (.-name node))]
-                 [node rule])))
-       (mapcat (fn [[node rule]]
-                 ((:diagnostics rule)
-                  node
-                  source-name
-                  known-directive-names)))
-       vec))
+  (let [node-diagnostics
+        (->> (directive-validation/validation-nodes tree known-directive-names)
+             (keep (fn [node]
+                     (when-let [rule (get rules (.-name node))]
+                       [node rule])))
+             (mapcat (fn [[node rule]]
+                       ((:diagnostics rule)
+                        node
+                        source-name
+                        known-directive-names))))
+        document-diagnostics
+        (->> (vals rules)
+             (keep :document-diagnostics)
+             (mapcat #(% tree source-name known-directive-names)))]
+    (vec (concat node-diagnostics document-diagnostics))))
 
 (declare transform-node!)
 
