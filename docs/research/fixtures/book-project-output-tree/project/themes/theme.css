@@ -1,0 +1,22 @@
+@page {
+  size: a5;
+  margin: 18mm;
+
+  @bottom-center {
+    content: counter(page);
+  }
+}
+
+body::before {
+  display: block;
+  margin-block-end: 1rem;
+  color: #1e40af;
+  content: "EXTERNAL THEME APPLIED";
+  font-size: 9pt;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
