@@ -19,8 +19,8 @@ assert.equal(buildResult.status, 0, 'The PDF build script must finish successful
 const document = mupdf.Document.openDocument(outputPath);
 const pages = Array.from({ length: document.countPages() }, (_, pageNumber) =>
   document.loadPage(pageNumber).toStructuredText().asText(),
-);
-const documentText = pages.join('\n').replace(/\s+/gu, ' ');
+).map((pageText) => pageText.replace(/\s+/gu, ' '));
+const documentText = pages.join('\n');
 
 for (const expectedText of [
   '第1章 ルート原稿',
@@ -34,14 +34,36 @@ for (const expectedText of [
   assert.ok(documentText.includes(expectedText), `The PDF must contain ${expectedText}`);
 }
 
-assert.ok(
-  pages.filter((pageText) => pageText.includes('EXTERNAL THEME APPLIED')).length >= 3,
-  'The external theme must apply to every publication entry',
-);
+const entryHeadings = ['第1章 ルート原稿', '第2章 ネストした原稿', '付録 通過HTML'];
+const headingPositions = entryHeadings.map((heading) => {
+  const position = documentText.indexOf(heading);
+  assert.notEqual(position, -1, `The PDF must contain ${heading}`);
+  assert.equal(
+    documentText.indexOf(heading, position + heading.length),
+    -1,
+    `The PDF must contain ${heading} exactly once`,
+  );
+  return position;
+});
+
+for (let index = 1; index < headingPositions.length; index += 1) {
+  assert.ok(
+    headingPositions[index - 1] < headingPositions[index],
+    `${entryHeadings[index - 1]} must precede ${entryHeadings[index]}`,
+  );
+}
+
+for (const heading of entryHeadings) {
+  const entryPages = pages.filter((pageText) => pageText.includes(heading));
+  assert.equal(entryPages.length, 1, `${heading} must identify exactly one entry page`);
+  assert.ok(
+    entryPages[0].includes('EXTERNAL THEME APPLIED'),
+    `The external theme must apply to the entry containing ${heading}`,
+  );
+}
 assert.ok(
   !documentText.includes('FIXTURE_SOURCE_TOKEN'),
   'The PDF must not contain an untransformed Markdown token',
 );
 
 console.log(`Verified generated book in ${outputPath}`);
-

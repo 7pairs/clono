@@ -21,6 +21,7 @@ const sourceDirectory = path.resolve(projectDirectory, sourceRoot);
 const outputDirectory = path.resolve(projectDirectory, outputRoot);
 const outputParent = path.dirname(outputDirectory);
 const outputBaseName = path.basename(outputDirectory);
+const lockDirectory = path.join(outputParent, `.${outputBaseName}.clono-lock`);
 const marker = {
   format: 1,
   producer: '@clono/research-book-project-output-tree',
@@ -64,13 +65,13 @@ async function directoryIsEmpty(directory) {
 }
 
 async function verifyOwnedOutput() {
-  if (!(await pathExists(outputDirectory))) return false;
+  if (!(await pathExists(outputDirectory))) return 'missing';
 
   const outputStat = await stat(outputDirectory);
   if (!outputStat.isDirectory()) {
     throw new Error(`The output path is not a directory: ${outputRoot}`);
   }
-  if (await directoryIsEmpty(outputDirectory)) return false;
+  if (await directoryIsEmpty(outputDirectory)) return 'empty';
 
   let existingMarker;
   try {
@@ -89,7 +90,24 @@ async function verifyOwnedOutput() {
   if (JSON.stringify(existingMarker) !== JSON.stringify(marker)) {
     throw new Error(`The output ownership marker does not match this project: ${outputRoot}`);
   }
-  return true;
+  return 'owned';
+}
+
+async function withOutputLock(action) {
+  try {
+    await mkdir(lockDirectory);
+  } catch (error) {
+    if (error.code === 'EEXIST') {
+      throw new Error(`The output directory is locked by another build: ${outputRoot}`);
+    }
+    throw error;
+  }
+
+  try {
+    return await action();
+  } finally {
+    await rmdir(lockDirectory);
+  }
 }
 
 function transformMarkdown(source) {
@@ -136,16 +154,20 @@ async function verifyPublication(stagingDirectory) {
   }
 }
 
-async function publish(stagingDirectory, hasOwnedOutput) {
-  if (!hasOwnedOutput && !(await pathExists(outputDirectory))) {
+async function publish(stagingDirectory, outputState) {
+  if (outputState === 'missing') {
     await rename(stagingDirectory, outputDirectory);
     return;
   }
 
-  if (!hasOwnedOutput && (await directoryIsEmpty(outputDirectory))) {
+  if (outputState === 'empty') {
     await rmdir(outputDirectory);
     await rename(stagingDirectory, outputDirectory);
     return;
+  }
+
+  if (outputState !== 'owned') {
+    throw new Error(`Unknown output state: ${outputState}`);
   }
 
   const backupDirectory = path.join(
@@ -166,7 +188,6 @@ validateRoots();
 await stat(sourceDirectory);
 await mkdir(outputParent, { recursive: true });
 
-const hasOwnedOutput = await verifyOwnedOutput();
 const stagingDirectory = path.join(
   outputParent,
   `.${outputBaseName}.clono-staging-${randomUUID()}`,
@@ -180,7 +201,10 @@ try {
     `${JSON.stringify(marker, null, 2)}\n`,
     'utf8',
   );
-  await publish(stagingDirectory, hasOwnedOutput);
+  await withOutputLock(async () => {
+    const outputState = await verifyOwnedOutput();
+    await publish(stagingDirectory, outputState);
+  });
 } catch (error) {
   await rm(stagingDirectory, { recursive: true, force: true });
   throw error;

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, rm, rmdir, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -9,6 +9,8 @@ const buildScript = fileURLToPath(new URL('./build-project.mjs', import.meta.url
 const projectDirectory = fileURLToPath(new URL('../project/', import.meta.url));
 const sourceDirectory = path.join(projectDirectory, 'manuscripts');
 const outputDirectory = path.join(projectDirectory, 'build', 'manuscripts');
+const outputParent = path.dirname(outputDirectory);
+const lockDirectory = path.join(outputParent, '.manuscripts.clono-lock');
 
 function runBuild(expectedStatus) {
   const result = spawnSync(process.execPath, [buildScript], {
@@ -77,6 +79,24 @@ await assert.rejects(
   { code: 'ENOENT' },
   'Regeneration must remove stale files from an owned output tree',
 );
+
+const outputBeforeLockedBuild = await read('chapter-one.md');
+await mkdir(lockDirectory);
+const lockedBuild = runBuild(1);
+assert.match(lockedBuild.stderr, /is locked by another build/u);
+assert.equal(
+  await read('chapter-one.md'),
+  outputBeforeLockedBuild,
+  'A locked output directory must remain unchanged',
+);
+assert.deepEqual(
+  (await readdir(outputParent)).filter((name) =>
+    /^\.manuscripts\.clono-(?:staging|backup)-/u.test(name),
+  ),
+  [],
+  'A refused concurrent build must not leave staging or backup directories',
+);
+await rmdir(lockDirectory);
 
 await rm(outputDirectory, { recursive: true });
 await mkdir(outputDirectory, { recursive: true });
