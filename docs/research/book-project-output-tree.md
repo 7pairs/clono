@@ -176,12 +176,15 @@ Markdownだけを兄弟ディレクトリへ出力する方式は、特定の配
 - 出力先を自動作成する
 - 所有マーカーとstagingを使い、利用者のファイルを保護する
 - 原稿一覧と生成済みファイルの不一致、パスの重複および出力先の衝突を診断する
+- 実行中のclonoに同梱された基盤CSSを、生成済み原稿ツリーの可視な予約領域へコピーする
+- 基盤CSSの予約領域を定義し、入力原稿との衝突を診断する
 - 将来、空白ページ、索引などの生成物を原稿順序へ組み込む
 
 ### Vivliostyleへ委譲する責務
 
 - 生成済みMarkdownと通過HTMLをVFMまたはHTMLとして処理する
 - 書籍構造から渡された`entry`を指定順に組版する
+- 生成済み原稿ツリーのclono基盤CSSを利用者テーマより先に適用する
 - 原稿ツリー外の利用者テーマを適用する
 - 画像など、生成済み原稿から参照する静的ファイルを読み込む
 - HTML、Web出版物またはPDFを生成する
@@ -192,7 +195,7 @@ Markdownだけを兄弟ディレクトリへ出力する方式は、特定の配
 - 書籍固有のVivliostyle設定とテーマ
 - clonoが生成しない表紙、奥付またはその他の書籍資材
 
-最終的な責務は、書籍構造、設定形式、基盤CSSおよびVivliostyle設定との接続方法を仕様化する際に確定する。
+基盤CSSと利用者テーマをVivliostyleへ順序付きで渡す方法は、後続の[clono基盤CSSと利用者テーマの統合に関する調査](vivliostyle-clono-stylesheet.md)で技術的に成立することを確認した。npmパッケージをテーマとして指定する方式と、生成済み原稿ツリーへ基盤CSSをコピーする方式の両方が成立したが、初期仕様では後者を採用候補とする。最終的な責務は、書籍構造、予約領域、設定形式およびVivliostyle設定との接続方法を仕様化する際に確定する。
 
 ## CLIに関する関連方針
 
@@ -220,7 +223,9 @@ clono build path/to/book
 - コピーする通常ファイルと除外するファイルの規則
 - 原稿ツリー外にある画像などの静的ファイル
 - シンボリックリンク、ファイルの許可ビット、タイムスタンプ、ACLおよび拡張属性
-- clonoの基盤CSSを配置し、利用者テーマへ組み込む方法
+- clono基盤CSSを配置する可視な予約領域の最終名称と、入力原稿との衝突時の扱い
+- clonoの基盤CSSと利用者テーマをVivliostyle設定へ渡すヘルパーの最終的なインターフェース
+- 基盤CSSをすべての書籍ビルドで出力するか、対象記法を使用した場合だけ出力するか
 - clono本体のClojureScript変換パイプラインとの結合
 - 複数原稿から診断を収集する順序と、診断がある場合の出力契約
 - 文書全体の情報収集、相互参照、索引および生成文書を挿入する処理段階
@@ -253,7 +258,9 @@ Vivliostyle CLIはPDF生成時にローカルのHTTPサーバーを起動する�
 - 設定を一元管理するために、今回のJavaScriptモジュール共有方式を利用できない場合
 - WindowsまたはLinuxで、stagingと既存出力の置き換えが成立しない場合
 - 所有マーカーでは利用者のファイルを十分に保護できない事例が確認された場合
-- 実際の相互参照、索引、空白ページまたは基盤CSSを生成済み原稿ツリーへ組み込めない場合
+- 実際の相互参照、索引または空白ページを生成済み原稿ツリーへ組み込めない場合
+- 生成済み原稿ツリーのclono基盤CSSをWebPubへ収録できない場合
+- 生成済み原稿ツリーへ基盤CSSを含めることが運用上の問題になる場合
 
 ## 参照資料
 
@@ -263,5 +270,6 @@ Vivliostyle CLIはPDF生成時にローカルのHTTPサーバーを起動する�
 - [Vivliostyleの空白ページに関する調査](vivliostyle-blank-pages.md)
 - [Vivliostyleの目次に関する調査](vivliostyle-table-of-contents.md)
 - [Markdown AST変換と出力方式に関する調査](markdown-ast-transformation.md)
+- [clono基盤CSSと利用者テーマの統合に関する調査](vivliostyle-clono-stylesheet.md)
 - [検証用fixture](fixtures/book-project-output-tree/)
 - [Vivliostyle CLI 11.1.0 Config Reference](https://github.com/vivliostyle/vivliostyle-cli/blob/v11.1.0/docs/config.md)
