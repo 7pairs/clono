@@ -74,7 +74,7 @@ node dist/clono.js manuscript.md --output build/manuscript.md
 
 利用可能な記法と詳しいCLIの契約は、[clono著者向け記法](docs/specifications/authoring-syntax.md)と[単一ファイル変換CLI仕様](docs/specifications/single-file-cli.md)を参照してください。
 
-文字揃え記法、コラム記法、強制改ページ記法が生成する構造に必要な基盤CSSは、`styles/clono.css`にあります。このCLIは基盤CSSを出力先へコピーしないため、現時点では利用者が書籍プロジェクト側で組み込む必要があります。正式な組み込み方法は、書籍プロジェクトを扱うCLIとともに今後決定します。
+文字揃え記法、コラム記法、強制改ページ記法が生成する構造に必要な基盤CSSは、`styles/clono.css`にあります。このCLIは基盤CSSを出力先へコピーしないため、現時点では利用者が書籍プロジェクト側で組み込む必要があります。今後実装する一括変換での組み込み方法は、[書籍プロジェクト仕様](docs/specifications/book-project.md)を参照してください。
 
 ## ドキュメント
 
@@ -83,6 +83,7 @@ node dist/clono.js manuscript.md --output build/manuscript.md
 - [設計判断の記録](docs/decisions/): 採用した技術や方針と、その判断理由
 - [著者向け記法](docs/specifications/authoring-syntax.md): 利用可能な記法と開発状態
 - [単一ファイル変換CLI仕様](docs/specifications/single-file-cli.md): CLIの入出力、診断、終了コード
+- [書籍プロジェクト仕様](docs/specifications/book-project.md): 複数原稿の設定、変換、基盤CSSおよび出力保護
 
 ## ライセンス
 
