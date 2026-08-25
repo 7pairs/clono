@@ -87,7 +87,7 @@ theme: [
 ]
 ```
 
-fixtureはコピー後のCSSがリポジトリルートの`styles/clono.css`とバイト単位で一致することを確認する。`_clono`という名称は検証用の候補であり、書籍プロジェクト仕様として確定したものではない。
+fixtureはコピー後のCSSがリポジトリルートの`styles/clono.css`とバイト単位で一致することを確認する。検証後に策定した[書籍プロジェクト仕様](../specifications/book-project.md)では、`_clono/styles/clono.css`を初期仕様の固定パスとして採用した。
 
 ## 技術検証
 
@@ -196,7 +196,7 @@ npmパッケージ方式と、可視の予約領域へ基盤CSSをコピーす�
 - WebPubへ基盤CSSを収録し、生成物内のパスだけで参照できる
 - 同じ設定からPDFにも基盤CSSと利用者テーマを適用できる
 
-初期の書籍プロジェクト仕様では、`clono build`が実行中のclonoに同梱された基盤CSSを生成済み原稿ツリーの可視な予約領域へコピーする方式を採用候補とする。
+後続の[書籍プロジェクト仕様](../specifications/book-project.md)では、`clono build`が実行中のclonoに同梱された基盤CSSを生成済み原稿ツリーの可視な予約領域へコピーする方式を採用した。
 
 この方式には次の利点がある。
 
@@ -234,7 +234,7 @@ clonoの基盤CSSは、利用者による上書きを妨げないよう、機能
 - clonoの既定値を変更する場合、同じclassに対する後続のCSS規則を定義する
 - フォント、色、余白、枠線などの紙面デザインを管理する
 
-最終的な予約領域の名称、設定項目、Vivliostyle設定へ橋渡しするヘルパー、および利用者テーマを指定しない場合の扱いは、書籍プロジェクト仕様とADRで確定する。
+後続の[書籍プロジェクト仕様](../specifications/book-project.md)では、予約領域を`_clono/`とし、基盤CSSを常に出力すること、入力原稿との衝突をエラーにすること、利用者テーマを`vivliostyle.config.mjs`で管理することを定めた。設定ヘルパーは初期仕様に含めず、具体的な必要性が生じるまで後回しにする。
 
 ## 成立条件と未確認事項
 
@@ -242,12 +242,6 @@ clonoの基盤CSSは、利用者による上書きを妨げないよう、機能
 
 次の事項は未確認または未決定である。
 
-- 予約領域の最終的なディレクトリ名とCSSのパス
-- 入力原稿が予約領域と同じパスを使用した場合の診断
-- 基盤CSSをすべての書籍ビルドで出力するか、対象記法を使用した場合だけ出力するか
-- 書籍プロジェクトの設定で利用者テーマを表現する形式
-- clonoの基盤CSSを自動的に先頭へ加えるヘルパーのインターフェース
-- 利用者テーマを指定しない場合のVivliostyle設定
 - 一つの原稿だけ別のテーマを使用する場合の扱い
 - WindowsとLinuxにおける生成済みCSSのコピー、WebPubおよびPDF生成
 - npmパッケージ方式を再検討する場合の、公開済みclono、ネットワーク、キャッシュ、導入時間および依存関係の重複
@@ -283,6 +277,7 @@ Vivliostyle CLIはWebPubとPDFの生成時にローカルのHTTPサーバーを�
 
 - [著者向け記法仕様](../specifications/authoring-syntax.md)
 - [単一ファイル変換CLI仕様](../specifications/single-file-cli.md)
+- [書籍プロジェクト仕様](../specifications/book-project.md)
 - [書籍プロジェクトの生成済み原稿ツリーに関する調査](book-project-output-tree.md)
 - [検証用fixture](fixtures/vivliostyle-clono-stylesheet/)
 - [Vivliostyle CLI 11.1.0 Config Reference](https://github.com/vivliostyle/vivliostyle-cli/blob/v11.1.0/docs/config.md)
