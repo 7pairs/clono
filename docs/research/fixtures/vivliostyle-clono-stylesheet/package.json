@@ -1,0 +1,25 @@
+{
+  "name": "@clono/research-vivliostyle-clono-stylesheet",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^22.13.0 || ^24.0.0"
+  },
+  "scripts": {
+    "build:generated:pdf": "node scripts/prepare-generated-tree.mjs && vivliostyle build --config vivliostyle.generated-theme.config.mjs --output output/generated-theme.pdf",
+    "build:generated:webpub": "node scripts/prepare-generated-tree.mjs && vivliostyle build --config vivliostyle.generated-theme.config.mjs --output output/generated-theme-webpub --format webpub",
+    "build:package:pdf": "node scripts/prepare-package-theme.mjs && vivliostyle build --config vivliostyle.config.mjs --output output/package-theme.pdf",
+    "build:package:webpub": "node scripts/prepare-package-theme.mjs && vivliostyle build --config vivliostyle.config.mjs --output output/package-theme-webpub --format webpub",
+    "verify": "npm run verify:webpub && npm run verify:pdf",
+    "verify:pdf": "node scripts/verify-pdf.mjs",
+    "verify:webpub": "node scripts/verify-webpub.mjs",
+    "prepare:generated": "node scripts/prepare-generated-tree.mjs",
+    "prepare:package": "node scripts/prepare-package-theme.mjs"
+  },
+  "devDependencies": {
+    "@vivliostyle/cli": "11.1.0",
+    "@vivliostyle/vfm": "2.7.0",
+    "mupdf": "1.28.0"
+  }
+}
