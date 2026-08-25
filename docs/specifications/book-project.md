@@ -43,7 +43,7 @@ clono build <project>
 
 - `<project>`には書籍プロジェクトのルートディレクトリを指定する
 - `<project>`を省略した場合は、カレントディレクトリを書籍プロジェクトのルートとする
-- 相対パスは、`clono`を起動したときのカレントディレクトリを基準に解決する
+- 相対パスで指定した`<project>`は、`clono`を起動したときのカレントディレクトリを基準に解決する
 - 指定したプロジェクトルート直下の`clono.config.mjs`だけを読み込み、祖先ディレクトリを探索しない
 - 初期仕様では、設定ファイルのパス、入力原稿ルートまたは生成済み原稿ルートをCLIオプションで上書きしない
 
@@ -63,6 +63,7 @@ export default {
     { path: "preface.md", kind: "frontmatter", includeInToc: true },
     { path: "chapter-one.md", kind: "chapter", includeInToc: true },
     { path: "appendix-a.md", kind: "appendix", includeInToc: true },
+    { path: "appendix-notes.md", kind: "appendix", includeInToc: false },
     { path: "index.md", kind: "backmatter", includeInToc: true },
     { path: "colophon.html", kind: "backmatter", includeInToc: false },
   ],
@@ -144,24 +145,102 @@ clonoが生成するHTML構造には、用途を示す固定の`clono-`接頭辞
 
 利用者テーマによるあらゆる上書きを無条件に保証するものではない。同じオリジンとカスケードレイヤーにおいて、基盤CSSを先、同じ詳細度以上の利用者テーマを後から読み込んだ場合に、通常のCSSカスケードによって上書きできる構造とする。
 
-利用者テーマは`clono.config.mjs`では管理せず、書籍固有の`vivliostyle.config.mjs`で管理する。初期仕様では設定ヘルパーを提供しないため、`vivliostyle.config.mjs`は`clono.config.mjs`を直接importして原稿順序を参照し、基盤CSSを利用者テーマより前に明示する。
+利用者テーマは`clono.config.mjs`では管理せず、書籍固有の`vivliostyle.config.mjs`で管理する。初期仕様では設定ヘルパーを提供しないため、`vivliostyle.config.mjs`は`clono.config.mjs`を直接importし、各設定値をVivliostyleの契約へ明示的に変換する。
+
+- `path`は、`outputRoot`以下にある生成済み原稿の`entry`へ変換する
+- `kind`は、本文・付録などの原稿別テーマの選択と、目次項目の文書種別を示すメタデータへ変換する
+- `includeInToc`が`false`の原稿は、`kind`にかかわらず`transformDocumentList`で目次から除外する
+- clono基盤CSSは、すべての原稿で利用者テーマより前に指定する
+
+次の例は、この変換の要点を示す。`element`と`text`は、Vivliostyle CLIの目次変換関数が扱うhastノードを生成するためのローカル関数であり、clonoが提供するヘルパーではない。
 
 ```javascript
 import clonoConfig from "./clono.config.mjs";
 
 const { outputRoot, publication } = clonoConfig;
-const theme = [
-  `${outputRoot}/_clono/styles/clono.css`,
-  "themes/book.css",
-];
+
+function element(tagName, properties = {}, children = []) {
+  return { type: "element", tagName, properties, children };
+}
+
+function text(value) {
+  return { type: "text", value };
+}
+
+function outputHtmlPath(sourcePath) {
+  return sourcePath.replace(/\.md$/u, ".html");
+}
+
+const documentByOutput = new Map(
+  publication.map((document) => [outputHtmlPath(document.path), document]),
+);
+
+function addDocumentKind(node, kind) {
+  if (node.type !== "element" || node.tagName !== "li") return node;
+  return {
+    ...node,
+    properties: {
+      ...node.properties,
+      "data-document-kind": kind,
+    },
+  };
+}
+
+function transformDocumentList(nodeList) {
+  return (propsList) =>
+    element(
+      "ol",
+      {},
+      nodeList.flatMap((document, index) => {
+        const metadata = documentByOutput.get(document.href);
+        if (!metadata?.includeInToc) return [];
+
+        const children = [propsList[index].children].flat(2);
+        if (document.sections?.length === 1 && document.sections[0].level === 1) {
+          return children.flatMap((child) =>
+            child.type === "element" && child.tagName === "ol"
+              ? child.children.map((item) => addDocumentKind(item, metadata.kind))
+              : child,
+          );
+        }
+
+        return [
+          element("li", { "data-document-kind": metadata.kind }, [
+            element("a", { href: document.href }, [text(document.title)]),
+            ...children,
+          ]),
+        ];
+      }),
+    );
+}
+
+function themeFor(kind) {
+  const kindTheme = {
+    chapter: "themes/chapter.css",
+    appendix: "themes/appendix.css",
+  }[kind];
+  return [
+    `${outputRoot}/_clono/styles/clono.css`,
+    "themes/book.css",
+    ...(kindTheme ? [kindTheme] : []),
+  ];
+}
 
 export default {
-  entry: publication.map(({ path }) => ({
+  entry: publication.map(({ path, kind }) => ({
     path: `${outputRoot}/${path}`,
-    theme,
+    theme: themeFor(kind),
   })),
+  toc: {
+    title: "目次",
+    htmlPath: "toc.html",
+    sectionDepth: 2,
+    transformDocumentList,
+  },
 };
 ```
+
+`includeInToc`による選別、`kind`に応じた本文・付録の番号、および目次項目への文書種別の付与は、[Vivliostyleの目次に関する調査](../research/vivliostyle-table-of-contents.md)とそのfixtureでWebPubおよびPDFまで検証している。書籍固有の目次テンプレート、CSSおよび`transformSectionList`は、利用者が`vivliostyle.config.mjs`で管理する。
 
 利用者テーマを指定しない場合も、生成した構造を機能させるため基盤CSSはVivliostyle設定へ指定する。clonoは`vivliostyle.config.mjs`を生成、変更または検証しない。
 
