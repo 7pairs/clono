@@ -13,6 +13,9 @@
   #{"path" "kind" "includeInToc"})
 (def ^:private document-kinds
   #{"frontmatter" "chapter" "appendix" "backmatter"})
+;; Closure cannot transpile a dynamic import expression in a node-script release.
+(def ^:private dynamic-import
+  (js/Function. "specifier" "return import(specifier);"))
 
 (defn- error-message [error]
   (or (.-message error) (str error)))
@@ -113,6 +116,15 @@
          (not (.startsWith relative (str ".." (.-sep path))))
          (not (.isAbsolute path relative)))))
 
+(defn- source-readability-diagnostics [config-path source-path]
+  (try
+    (.accessSync fs source-path (.-R_OK (.-constants fs)))
+    []
+    (catch :default error
+      [(diagnostic config-path
+                   (str "`sourceRoot`を読み取れません: "
+                        (error-message error)))])))
+
 (defn- validate-root-paths [config-path project-root source-result output-result]
   (if (or (nil? (:value source-result)) (nil? (:value output-result)))
     {:diagnostics []}
@@ -127,7 +139,7 @@
                             (.statSync fs output-path))
               source-symlink (existing-symlink project-root source-root)
               output-symlink (existing-symlink project-root output-root)
-              diagnostics
+              path-diagnostics
               (cond-> []
                 (nil? source-stat)
                 (conj (diagnostic config-path
@@ -156,11 +168,15 @@
                     (path-descendant? output-path source-path))
                 (conj (diagnostic config-path
                                   "`sourceRoot`と`outputRoot`には同じパスまたは祖先・子孫関係にあるパスを指定できません。")))]
-          (when (and source-stat (.isDirectory source-stat) (nil? source-symlink))
-            (.accessSync fs source-path (.-R_OK (.-constants fs))))
-          {:source-path source-path
-           :output-path output-path
-           :diagnostics diagnostics})
+          (let [readability-diagnostics
+                (if (and source-stat
+                         (.isDirectory source-stat)
+                         (nil? source-symlink))
+                  (source-readability-diagnostics config-path source-path)
+                  [])]
+            {:source-path source-path
+             :output-path output-path
+             :diagnostics (into path-diagnostics readability-diagnostics)}))
         (catch :default error
           {:diagnostics
            [(diagnostic config-path
@@ -326,7 +342,23 @@
          :diagnostics []}))))
 
 (defn ^:no-doc import-config-module [specifier]
-  (js* "import(~{})" specifier))
+  (dynamic-import specifier))
+
+(defn- import-error-result [config-path error]
+  {:ok? false
+   :config nil
+   :diagnostics
+   [(diagnostic config-path
+                (str "`clono.config.mjs`を読み込めません: "
+                     (error-message error)))]})
+
+(defn- validation-error-result [config-path error]
+  {:ok? false
+   :config nil
+   :diagnostics
+   [(diagnostic config-path
+                (str "`clono.config.mjs`を検証できません: "
+                     (error-message error)))]})
 
 (defn load-project-config [project]
   (let [project-root (.resolve path project)
@@ -367,16 +399,19 @@
 
           :else
           (-> (import-config-module (.-href (pathToFileURL config-path)))
-              (.then #(validate-config project-root
-                                       config-path
-                                       (gobj/get % "default")))
-              (.catch (fn [error]
-                        {:ok? false
-                         :config nil
-                         :diagnostics
-                         [(diagnostic config-path
-                                      (str "`clono.config.mjs`を読み込めません: "
-                                           (error-message error)))]})))))
+              (.then (fn [module]
+                       {:module module})
+                     (fn [error]
+                       {:import-error error}))
+              (.then (fn [{:keys [module import-error]}]
+                       (if import-error
+                         (import-error-result config-path import-error)
+                         (try
+                           (validate-config project-root
+                                            config-path
+                                            (gobj/get module "default"))
+                           (catch :default error
+                             (validation-error-result config-path error)))))))))
       (catch :default error
         (js/Promise.resolve
          {:ok? false

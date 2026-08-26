@@ -30,24 +30,26 @@
                   (reject (js/Error. (.-message message))))))
        (.once worker "error" reject)))))
 
-(defn- with-project [setup assertion done]
-  (let [project (.mkdtempSync fs (.join path (.tmpdir os) "clono-config-test-"))]
-    (try
-      (let [load-path (or (setup project) project)
-            result-promise (with-redefs [config/import-config-module
-                                         import-config-module]
-                             (config/load-project-config load-path))]
-        (-> result-promise
-          (.then assertion)
-          (.catch (fn [error]
-                    (is false (str "Unexpected rejected promise: " (.-message error)))))
-          (.finally (fn []
-                      (.rmSync fs project #js {:recursive true :force true})
-                      (done)))))
-      (catch :default error
-        (.rmSync fs project #js {:recursive true :force true})
-        (is false (str "Unexpected setup error: " (.-message error)))
-        (done)))))
+(defn- with-project
+  ([setup assertion done]
+   (with-project setup import-config-module assertion done))
+  ([setup importer assertion done]
+   (let [project (.mkdtempSync fs (.join path (.tmpdir os) "clono-config-test-"))]
+     (try
+       (let [load-path (or (setup project) project)
+             result-promise (with-redefs [config/import-config-module importer]
+                              (config/load-project-config load-path))]
+         (-> result-promise
+             (.then assertion)
+             (.catch (fn [error]
+                       (is false (str "Unexpected rejected promise: " (.-message error)))))
+             (.finally (fn []
+                         (.rmSync fs project #js {:recursive true :force true})
+                         (done)))))
+       (catch :default error
+         (.rmSync fs project #js {:recursive true :force true})
+         (is false (str "Unexpected setup error: " (.-message error)))
+         (done))))))
 
 (defn- messages [result]
   (mapv :message (:diagnostics result)))
@@ -252,3 +254,27 @@
                          "configuration exploded"))
           (is (not (.includes (:message (first (:diagnostics result))) "    at "))))
         done))))
+
+(deftest unexpected-validation-error-test
+  (async done
+    (testing "When configuration validation throws unexpectedly, then it is distinguished from an import failure"
+      (let [invalid-config
+            (js/Proxy. #js {}
+                       #js {:ownKeys
+                            (fn []
+                              (throw (js/Error. "validation exploded")))})]
+        (with-project
+          (fn [project]
+            (write-file! (.join path project "clono.config.mjs")
+                         "export default {};\n"))
+          (fn [_]
+            (js/Promise.resolve #js {:default invalid-config}))
+          (fn [result]
+            (is (false? (:ok? result)))
+            (is (nil? (:config result)))
+            (is (= 1 (count (:diagnostics result))))
+            (is (.startsWith (:message (first (:diagnostics result)))
+                             "`clono.config.mjs`を検証できません:"))
+            (is (.includes (:message (first (:diagnostics result)))
+                           "validation exploded")))
+          done)))))
