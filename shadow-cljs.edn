@@ -10,7 +10,16 @@
  {:cli
   {:target :node-script
    :output-to "dist/clono.js"
-   :main clono.cli/main}
+   :main clono.cli/main
+   :compiler-options
+   {:output-feature-set :es2020}}
+
+  :config-integration
+  {:target :node-script
+   :output-to "target/config-integration.js"
+   :main clono.book.config-integration/main
+   :compiler-options
+   {:output-feature-set :es2020}}
 
   :test
   {:target :node-test

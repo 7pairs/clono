@@ -13,7 +13,8 @@
     "build": "shadow-cljs compile cli",
     "build:release": "shadow-cljs release cli",
     "watch": "shadow-cljs watch cli",
-    "test": "shadow-cljs compile test && node target/tests.js",
+    "test": "shadow-cljs compile test && node target/tests.js && npm run test:config-integration",
+    "test:config-integration": "shadow-cljs release config-integration && node target/config-integration.js",
     "test:watch": "shadow-cljs watch test-watch",
     "prepack": "npm run build:release"
   },
