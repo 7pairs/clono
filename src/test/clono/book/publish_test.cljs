@@ -7,7 +7,11 @@
    [clono.book.generate :as generate]
    [clono.book.plan :as plan]
    [clono.book.publish :as publish]
-   [clono.book.transform :as book-transform]))
+   [clono.book.transform :as book-transform]
+   [goog.object :as gobj]))
+
+(def ^:private supported-posix-platforms
+  #{"darwin" "linux"})
 
 (defn- with-temporary-project [f]
   (let [project (.mkdtempSync fs (.join path (.tmpdir os) "clono-publish-test-"))]
@@ -61,6 +65,12 @@
            vec)
       [])))
 
+(defn- supported-posix? []
+  (contains? supported-posix-platforms (.-platform js/process)))
+
+(defn- permission-bits [file-path]
+  (bit-and 8r777 (gobj/get (.statSync fs file-path) "mode")))
+
 (deftest output-publication-test
   (testing "When output is missing, then the generated tree is published without temporary artifacts"
     (with-temporary-project
@@ -103,7 +113,37 @@
           (write-file! stale "stale\n")
           (is (:ok? (publish/run plan)))
           (is (false? (.existsSync fs stale)))
-          (is (empty? (temporary-artifacts project))))))))
+          (is (empty? (temporary-artifacts project)))))))
+
+  (testing "When publishing staging over an empty output directory fails, then the empty directory and its permissions are restored"
+    (with-temporary-project
+      (fn [project]
+        (let [plan (prepare-plan project)
+              output (output-path project)
+              original-rename publish/rename-path!
+              failed? (atom false)]
+          (.mkdirSync fs output #js {:recursive true})
+          (when (supported-posix?)
+            (.chmodSync fs output 8r750))
+          (with-redefs [publish/rename-path!
+                        (fn [source destination]
+                          (if (and (not @failed?)
+                                   (= destination output)
+                                   (.startsWith (.basename path source)
+                                                ".manuscripts.clono-staging-"))
+                            (do
+                              (reset! failed? true)
+                              (throw (js/Error. "publication failed")))
+                            (original-rename source destination)))]
+            (let [result (publish/run plan)]
+              (is (false? (:ok? result)))
+              (is (.isDirectory (.statSync fs output)))
+              (is (empty? (array-seq (.readdirSync fs output))))
+              (when (supported-posix?)
+                (is (= 8r750 (permission-bits output))))
+              (is (.includes (:message (first (:diagnostics result)))
+                             "既存出力を復元しました"))
+              (is (empty? (temporary-artifacts project))))))))))
 
 (deftest unowned-output-test
   (testing "When output is non-empty without an ownership marker, then it is preserved and staging is removed"

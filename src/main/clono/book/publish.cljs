@@ -163,19 +163,6 @@
                     (str "生成済み原稿ツリーを公開できません: "
                          (error-message error)))]})))
 
-(defn- publish-empty [staging-path output-path]
-  (try
-    (.rmdirSync fs output-path)
-    (rename-path! staging-path output-path)
-    {:ok? true
-     :diagnostics []}
-    (catch :default error
-      {:ok? false
-       :diagnostics
-       [(diagnostic output-path
-                    (str "空の生成済み原稿ルートを初期化できません: "
-                         (error-message error)))]})))
-
 (defn- restore-backup [backup-path output-path publish-error]
   (try
     (rename-path! backup-path output-path)
@@ -193,7 +180,7 @@
                          (error-message publish-error) "; 復元エラー: "
                          (error-message restore-error)))]})))
 
-(defn- publish-owned [staging-path output-path backup-prefix]
+(defn- publish-existing [staging-path output-path backup-prefix]
   (let [backup-path (backup-path backup-prefix)]
     (try
       (rename-path! output-path backup-path)
@@ -222,8 +209,8 @@
 (defn- publish-generated [staging-path output-path backup-prefix state]
   (case state
     :missing (publish-missing staging-path output-path)
-    :empty (publish-empty staging-path output-path)
-    :owned (publish-owned staging-path output-path backup-prefix)
+    :empty (publish-existing staging-path output-path backup-prefix)
+    :owned (publish-existing staging-path output-path backup-prefix)
     {:ok? false
      :diagnostics
      [(diagnostic output-path
