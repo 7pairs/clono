@@ -21,6 +21,13 @@
    :compiler-options
    {:output-feature-set :es2020}}
 
+  :cli-integration
+  {:target :node-script
+   :output-to "target/cli-integration.js"
+   :main clono.cli-integration/main
+   :compiler-options
+   {:output-feature-set :es2020}}
+
   :test
   {:target :node-test
    :output-to "target/tests.js"}

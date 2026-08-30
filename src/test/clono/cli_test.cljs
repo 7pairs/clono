@@ -63,7 +63,7 @@
   (testing "When -h or --help is given, then usage is returned successfully without evaluating other arguments"
     (doseq [arguments [["-h"]
                        ["--help"]
-                       ["input.md" "--unknown" "--help"]]]
+                       ["transform" "input.md" "--unknown" "--help"]]]
       (is (= successful-help-result
              (cli/command-result arguments))
           (str "Unexpected result for " arguments))))
@@ -72,36 +72,48 @@
     (is (= {:action :transform
             :input "input.md"
             :output "output.md"}
-           (cli/parse-arguments ["input.md" "--output" "output.md"])))
+           (cli/parse-arguments ["transform" "input.md" "--output" "output.md"])))
     (is (= {:action :transform
             :input "input.md"
             :output "output.md"}
-           (cli/parse-arguments ["-o" "output.md" "input.md"])))
+           (cli/parse-arguments ["transform" "-o" "output.md" "input.md"])))
     (is (= {:action :transform
             :input "input.md"
             :output "./-output.md"}
-           (cli/parse-arguments ["input.md" "-o" "./-output.md"]))))
+           (cli/parse-arguments ["transform" "input.md" "-o" "./-output.md"]))))
+
+  (testing "When build has zero or one project argument, then a book command is parsed"
+    (is (= {:action :build
+            :project "."}
+           (cli/parse-arguments ["build"])))
+    (is (= {:action :build
+            :project "books/next"}
+           (cli/parse-arguments ["build" "books/next"]))))
 
   (testing "When arguments violate the command contract, then a specific argument error is returned"
     (doseq [[arguments message]
-            [[["input.md"]
+            [[["transform" "input.md"]
               "出力ファイルを指定してください。"]
-             [["-o" "output.md"]
+             [["transform" "-o" "output.md"]
               "入力ファイルを指定してください。"]
-             [["input.md" "-o"]
+             [["transform" "input.md" "-o"]
               "`-o`には出力ファイルの指定が必要です。"]
-             [["input.md" "-o" "one.md" "--output" "two.md"]
+             [["transform" "input.md" "-o" "one.md" "--output" "two.md"]
               "出力ファイルを複数指定できません。"]
-             [["one.md" "two.md" "-o" "output.md"]
+             [["transform" "one.md" "two.md" "-o" "output.md"]
               "入力ファイルを複数指定できません。"]
              [["--unknown"]
               "未知のオプションです: --unknown"]
-             [["input.md" "--output=output.md"]
+             [["transform" "input.md" "--output=output.md"]
               "未知のオプションです: --output=output.md"]
-             [["input.md" "-o" "--unknown"]
+             [["transform" "input.md" "-o" "--unknown"]
               "未知のオプションです: --unknown"]
-             [["input.md" "--output" "--unknown"]
-              "未知のオプションです: --unknown"]]]
+             [["transform" "input.md" "--output" "--unknown"]
+              "未知のオプションです: --unknown"]
+             [["build" "one" "two"]
+              "書籍プロジェクトを複数指定できません。"]
+             [["unknown"]
+              "未知のサブコマンドです: unknown"]]]
       (is (= {:action :error
               :message message}
              (cli/parse-arguments arguments))
@@ -118,7 +130,7 @@
           (when (supported-posix?)
             (.chmodSync fs output 8r640))
           (is (= successful-transformation-result
-                 (cli/command-result [input "--output" output])))
+                 (cli/command-result ["transform" input "--output" output])))
           (let [content (.readFileSync fs output "utf8")]
             (is (.includes content "<div class=\"clono-align-right\">"))
             (is (.includes content "Thunder Claw"))
@@ -134,7 +146,7 @@
               output (.join path directory "output.md")]
           (write-file! input valid-source)
           (is (= successful-transformation-result
-                 (cli/command-result [input "-o" output])))
+                 (cli/command-result ["transform" input "-o" output])))
           (is (.includes (.readFileSync fs output "utf8")
                          "Thunder Claw"))
           (when (supported-posix?)
@@ -153,7 +165,7 @@
           (with-redefs [cli/restore-output-mode!
                         (fn [_ _]
                           (throw (js/Error. "permission restoration failed")))]
-            (let [command-result (cli/command-result [input "-o" output])]
+            (let [command-result (cli/command-result ["transform" input "-o" output])]
               (is (= 1 (:exit-code command-result)))
               (is (nil? (:stdout command-result)))
               (is (.includes (:stderr command-result)
@@ -172,7 +184,7 @@
               output (.join path directory "output.md")]
           (write-file! input invalid-source)
           (write-file! output "previous output\n")
-          (let [command-result (cli/command-result [input "-o" output])]
+          (let [command-result (cli/command-result ["transform" input "-o" output])]
             (is (= 1 (:exit-code command-result)))
             (is (nil? (:stdout command-result)))
             (is (.includes (:stderr command-result)
@@ -186,7 +198,7 @@
         (let [input (.join path directory "invalid.md")
               output (.join path directory "output.md")]
           (write-file! input invalid-source)
-          (is (= 1 (:exit-code (cli/command-result [input "-o" output]))))
+          (is (= 1 (:exit-code (cli/command-result ["transform" input "-o" output]))))
           (is (false? (.existsSync fs output))))))))
 
 (deftest file-validation-test
@@ -195,7 +207,7 @@
       (fn [directory]
         (let [input (.join path directory "missing.md")
               output (.join path directory "output.md")
-              command-result (cli/command-result [input "-o" output])]
+              command-result (cli/command-result ["transform" input "-o" output])]
           (is (= 1 (:exit-code command-result)))
           (is (.includes (:stderr command-result) "入力ファイルが存在しません。"))
           (is (false? (.existsSync fs output)))))))
@@ -207,7 +219,7 @@
               output-directory (.join path directory "missing")
               output (.join path output-directory "output.md")]
           (write-file! input valid-source)
-          (let [command-result (cli/command-result [input "-o" output])]
+          (let [command-result (cli/command-result ["transform" input "-o" output])]
             (is (= 1 (:exit-code command-result)))
             (is (.includes (:stderr command-result) "出力先の親ディレクトリが存在しません。"))
             (is (false? (.existsSync fs output-directory))))))))
@@ -217,7 +229,7 @@
       (fn [directory]
         (let [input (.join path directory "input.md")]
           (write-file! input valid-source)
-          (let [command-result (cli/command-result [input "-o" input])]
+          (let [command-result (cli/command-result ["transform" input "-o" input])]
             (is (= 1 (:exit-code command-result)))
             (is (.includes (:stderr command-result)
                            "入力ファイルと出力ファイルに同じファイルを指定できません。"))
@@ -231,7 +243,7 @@
               output (.join path directory "output")]
           (write-file! input valid-source)
           (.mkdirSync fs output)
-          (is (.includes (:stderr (cli/command-result [directory "-o" input]))
+          (is (.includes (:stderr (cli/command-result ["transform" directory "-o" input]))
                          "入力パスにはファイルを指定してください。"))
-          (is (.includes (:stderr (cli/command-result [input "-o" output]))
+          (is (.includes (:stderr (cli/command-result ["transform" input "-o" output]))
                          "出力パスにはファイルを指定してください。")))))))

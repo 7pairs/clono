@@ -10,7 +10,7 @@ Vivliostyleを主要な出力先として想定し、Vivliostyleが持つ機能�
 
 ## 開発状況
 
-現在は開発初期段階です。Node.js向けCLIで単一のMarkdownファイルを変換できます。独自記法は文字揃え記法、コラム記法、強制改ページ記法を実装しており、複数ファイルや書籍プロジェクトの一括変換にはまだ対応していません。
+現在は開発初期段階です。Node.js向けCLIで単一のMarkdownファイルと、複数の原稿・静的ファイルからなる書籍プロジェクトを変換できます。独自記法は文字揃え記法、コラム記法、強制改ページ記法を実装しています。
 
 npmパッケージとしての公開はまだ行っていません。現時点のCLIは、開発環境でビルドして利用します。
 
@@ -67,14 +67,40 @@ node dist/clono.js --help
 入力Markdownと出力先を指定して、単一のファイルを変換します。
 
 ```shell
-node dist/clono.js manuscript.md --output build/manuscript.md
+node dist/clono.js transform manuscript.md --output build/manuscript.md
 ```
 
 出力先の親ディレクトリは、コマンドを実行する前に作成してください。既存の出力ファイルは上書きします。変換に成功した場合は何も表示せず、診断またはファイル操作エラーが発生した場合は標準エラーへ問題を表示して終了コード`1`を返します。
 
 利用可能な記法と詳しいCLIの契約は、[clono著者向け記法](docs/specifications/authoring-syntax.md)と[単一ファイル変換CLI仕様](docs/specifications/single-file-cli.md)を参照してください。
 
-文字揃え記法、コラム記法、強制改ページ記法が生成する構造に必要な基盤CSSは、`styles/clono.css`にあります。このCLIは基盤CSSを出力先へコピーしないため、現時点では利用者が書籍プロジェクト側で組み込む必要があります。今後実装する一括変換での組み込み方法は、[書籍プロジェクト仕様](docs/specifications/book-project.md)を参照してください。
+`transform`サブコマンドは、文字揃え記法、コラム記法、強制改ページ記法が生成する構造に必要な`styles/clono.css`を出力先へコピーしません。単一ファイルの出力を組版する場合は、利用者が基盤CSSを組み込んでください。
+
+## 書籍プロジェクトの変換
+
+書籍プロジェクトのルートに`clono.config.mjs`を作成し、入力原稿ルート、生成済み原稿ルートおよび原稿順序を指定します。
+
+```javascript
+export default {
+  sourceRoot: "manuscripts",
+  outputRoot: "build/manuscripts",
+  publication: [
+    { path: "introduction.md", kind: "frontmatter", includeInToc: true },
+    { path: "chapter-one.md", kind: "chapter", includeInToc: true },
+  ],
+};
+```
+
+カレントディレクトリ、または指定した書籍プロジェクトを変換します。
+
+```shell
+node dist/clono.js build
+node dist/clono.js build path/to/book
+```
+
+`build`サブコマンドは、入力原稿ツリーのMarkdownを変換し、その他の通常ファイルを相対パスのままコピーします。生成済み原稿ツリーにはclono基盤CSSと所有マーカーも配置します。既存出力は、一致する所有マーカーを持つ場合だけ安全に置き換えます。成功時は何も表示せず、診断がある場合は部分的な出力を公開しません。
+
+設定項目、出力先の保護、Vivliostyle設定との連携方法は、[書籍プロジェクト仕様](docs/specifications/book-project.md)を参照してください。
 
 ## ドキュメント
 
