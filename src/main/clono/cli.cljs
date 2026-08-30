@@ -4,11 +4,17 @@
    ["node:fs" :as fs]
    ["node:path" :as path]
    [clojure.string :as string]
+   [clono.book.config :as book-config]
+   [clono.book.plan :as book-plan]
+   [clono.book.publish :as book-publish]
+   [clono.book.transform :as book-transform]
    [clono.pipeline :as pipeline]
    [goog.object :as gobj]))
 
 (def usage
-  (str "Usage: clono <input> --output <output>\n"
+  (str "Usage:\n"
+       "  clono transform <input> --output <output>\n"
+       "  clono build [project]\n"
        "\n"
        "Options:\n"
        "  -o, --output <output>  変換後のMarkdownを書き込むファイル\n"
@@ -16,6 +22,66 @@
 
 (def ^:private private-file-mode 8r600)
 (def ^:private permission-mask 8r777)
+
+(defn- parse-transform-arguments [arguments]
+  (loop [remaining (seq arguments)
+         input nil
+         output nil]
+    (if-let [argument (first remaining)]
+      (cond
+        (#{"-o" "--output"} argument)
+        (if output
+          {:action :error
+           :message "出力ファイルを複数指定できません。"}
+          (if-let [value (second remaining)]
+            (if (.startsWith value "-")
+              {:action :error
+               :message (str "未知のオプションです: " value)}
+              (recur (nnext remaining) input value))
+            {:action :error
+             :message (str "`" argument "`には出力ファイルの指定が必要です。")}))
+
+        (.startsWith argument "-")
+        {:action :error
+         :message (str "未知のオプションです: " argument)}
+
+        input
+        {:action :error
+         :message "入力ファイルを複数指定できません。"}
+
+        :else
+        (recur (next remaining) argument output))
+      (cond
+        (nil? input)
+        {:action :error
+         :message "入力ファイルを指定してください。"}
+
+        (nil? output)
+        {:action :error
+         :message "出力ファイルを指定してください。"}
+
+        :else
+        {:action :transform
+         :input input
+         :output output}))))
+
+(defn- parse-build-arguments [arguments]
+  (cond
+    (empty? arguments)
+    {:action :build
+     :project "."}
+
+    (.startsWith (first arguments) "-")
+    {:action :error
+     :message (str "未知のオプションです: " (first arguments))}
+
+    (next arguments)
+    {:action :error
+     :message "書籍プロジェクトを複数指定できません。"}
+
+    :else
+    {:action :build
+     :project (first arguments)}))
 
 (defn parse-arguments [arguments]
   (cond
@@ -25,47 +91,19 @@
     (some #{"-h" "--help"} arguments)
     {:action :help}
 
+    (= "transform" (first arguments))
+    (parse-transform-arguments (next arguments))
+
+    (= "build" (first arguments))
+    (parse-build-arguments (next arguments))
+
+    (.startsWith (first arguments) "-")
+    {:action :error
+     :message (str "未知のオプションです: " (first arguments))}
+
     :else
-    (loop [remaining (seq arguments)
-           input nil
-           output nil]
-      (if-let [argument (first remaining)]
-        (cond
-          (#{"-o" "--output"} argument)
-          (if output
-            {:action :error
-             :message "出力ファイルを複数指定できません。"}
-            (if-let [value (second remaining)]
-              (if (.startsWith value "-")
-                {:action :error
-                 :message (str "未知のオプションです: " value)}
-                (recur (nnext remaining) input value))
-              {:action :error
-               :message (str "`" argument "`には出力ファイルの指定が必要です。")}))
-
-          (.startsWith argument "-")
-          {:action :error
-           :message (str "未知のオプションです: " argument)}
-
-          input
-          {:action :error
-           :message "入力ファイルを複数指定できません。"}
-
-          :else
-          (recur (next remaining) argument output))
-        (cond
-          (nil? input)
-          {:action :error
-           :message "入力ファイルを指定してください。"}
-
-          (nil? output)
-          {:action :error
-           :message "出力ファイルを指定してください。"}
-
-          :else
-          {:action :transform
-           :input input
-           :output output})))))
+    {:action :error
+     :message (str "未知のサブコマンドです: " (first arguments))}))
 
 (defn- result [exit-code stdout stderr]
   {:exit-code exit-code
@@ -160,7 +198,9 @@
                      (error-message error))})))
 
 (defn- format-diagnostic [{:keys [file line column message]}]
-  (str file ":" line ":" column ": " message))
+  (if (and (some? line) (some? column))
+    (str file ":" line ":" column ": " message)
+    (str file ": " message)))
 
 (defn- diagnostics-result [diagnostics]
   (result 1 nil (str (string/join "\n" (map format-diagnostic diagnostics)) "\n")))
@@ -235,12 +275,36 @@
                (str input ": 変換を実行できません: "
                     (error-message error))))))))))
 
+(defn- build-with-config [config]
+  (let [plan-result (book-plan/create config)]
+    (if-not (:ok? plan-result)
+      (diagnostics-result (:diagnostics plan-result))
+      (let [transformation (book-transform/run (:plan plan-result))]
+        (if-not (:ok? transformation)
+          (diagnostics-result (:diagnostics transformation))
+          (let [publication (book-publish/run (:plan transformation))]
+            (if (:ok? publication)
+              (result 0 nil nil)
+              (diagnostics-result (:diagnostics publication)))))))))
+
+(defn- build-result [project]
+  (-> (book-config/load-project-config project)
+      (.then (fn [config-result]
+               (if (:ok? config-result)
+                 (build-with-config (:config config-result))
+                 (diagnostics-result (:diagnostics config-result)))))
+      (.catch (fn [error]
+                (error-result
+                 (str project ": 書籍プロジェクトを変換できません: "
+                      (error-message error)))))))
+
 (defn command-result [arguments]
-  (let [{:keys [action input output message]} (parse-arguments arguments)]
+  (let [{:keys [action input output project message]} (parse-arguments arguments)]
     (case action
       :help (help-result)
       :error (argument-error-result message)
-      :transform (transform-result input output))))
+      :transform (transform-result input output)
+      :build (build-result project))))
 
 (defn- write-result! [{:keys [exit-code stdout stderr]}]
   (when stdout
@@ -250,4 +314,10 @@
   (set! (.-exitCode js/process) exit-code))
 
 (defn main [& arguments]
-  (write-result! (command-result arguments)))
+  (-> (js/Promise.resolve (command-result arguments))
+      (.then write-result!)
+      (.catch (fn [error]
+                (write-result!
+                 (error-result
+                  (str "clonoを実行できません: "
+                       (error-message error))))))))
