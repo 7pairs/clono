@@ -23,7 +23,8 @@
          (= "manuscripts" (:source-root loaded-config))
          (= "build/manuscripts" (:output-root loaded-config))
          (= (.join path project "manuscripts") (:source-path loaded-config))
-         (= [{:path "chapter.md"
+         (= [{:type :document
+              :path "chapter.md"
               :kind "chapter"
               :include-in-toc true}]
             (mapv #(dissoc % :file-path) (:publication loaded-config))))))
@@ -41,7 +42,7 @@
             "  sourceRoot,\n"
             "  outputRoot: 'build/manuscripts',\n"
             "  publication: [\n"
-            "    { path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+            "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
             "  ],\n"
             "};\n"))
       (-> (config/load-project-config project)

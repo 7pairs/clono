@@ -43,10 +43,12 @@
       (fn [project]
         (let [source (.join path project "manuscripts")
               generation-path (.join path project "staging")
-              publication [{:path "chapter.md"
+              publication [{:type :document
+                            :path "chapter.md"
                             :kind "chapter"
                             :include-in-toc true}
-                           {:path "appendix.html"
+                           {:type :document
+                            :path "appendix.html"
                             :kind "appendix"
                             :include-in-toc false}]
               binary-content (js/Uint8Array. #js [0 1 2 127 128 255])]
@@ -71,6 +73,11 @@
                    (.readFileSync fs
                                   (.join path generation-path "appendix.html")
                                   "utf8")))
+            (is (false? (.existsSync fs
+                                      (.join path generation-path
+                                             "_clono"
+                                             "pages"
+                                             "blank-page.html"))))
             (is (.isDirectory (.statSync fs (.join path generation-path "empty"))))
             (is (= (vec (array-seq binary-content))
                    (vec (array-seq
@@ -91,13 +98,60 @@
                    (read-json (.join path generation-path
                                      ".clono-output.json"))))))))))
 
+(deftest blank-page-generation-test
+  (testing "When publication contains repeated blank pages, then one shared HTML resource and the required stylesheet rule are generated"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              generation-path (.join path project "staging")
+              publication [{:type :blank-page}
+                           {:type :document
+                            :path "chapter.md"
+                            :kind "chapter"
+                            :include-in-toc true}
+                           {:type :blank-page}
+                           {:type :blank-page}]
+              blank-page-path (.join path generation-path
+                                     "_clono"
+                                     "pages"
+                                     "blank-page.html")]
+          (write-file! (.join path source "chapter.md") "# 本文\n")
+          (let [result (generate/run
+                        (transformed-plan project publication)
+                        generation-path)]
+            (is (:ok? result))
+            (is (= (str "<!doctype html>\n"
+                        "<html>\n"
+                        "  <head>\n"
+                        "    <meta charset=\"utf-8\">\n"
+                        "    <title>Blank page</title>\n"
+                        "  </head>\n"
+                        "  <body>\n"
+                        "    <div class=\"clono-blank-page\" aria-hidden=\"true\"></div>\n"
+                        "  </body>\n"
+                        "</html>\n")
+                   (.readFileSync fs blank-page-path "utf8")))
+            (is (.includes (.readFileSync fs
+                                         (.join path generation-path
+                                                "_clono"
+                                                "styles"
+                                                "clono.css")
+                                         "utf8")
+                           (str ".clono-blank-page {\n"
+                                "  page: clono-blank;\n"
+                                "  break-before: page;\n"
+                                "  break-after: page;\n"
+                                "  min-block-size: 1px;\n"
+                                "}")))))))))
+
 (deftest empty-existing-generation-root-test
   (testing "When the generation root is an existing empty directory, then the generated tree is created there"
     (with-temporary-project
       (fn [project]
         (let [source (.join path project "manuscripts")
               generation-path (.join path project "staging")
-              publication [{:path "chapter.md"
+              publication [{:type :document
+                            :path "chapter.md"
                             :kind "chapter"
                             :include-in-toc true}]]
           (write-file! (.join path source "chapter.md") "# 本文\n")
@@ -144,7 +198,8 @@
       (fn [project]
         (let [source (.join path project "manuscripts")
               generation-path (.join path project "staging")
-              publication [{:path "chapter.md"
+              publication [{:type :document
+                            :path "chapter.md"
                             :kind "chapter"
                             :include-in-toc true}]
               asset (.join path source "asset.txt")]
@@ -172,8 +227,8 @@
         (let [generation-path (.join path project "staging")
               plan {:source-root "manuscripts"
                     :output-root "build/manuscripts"
-                    :publication [{:path "missing-one.md"}
-                                  {:path "missing-two.html"}]
+                    :publication [{:type :document :path "missing-one.md"}
+                                  {:type :document :path "missing-two.html"}]
                     :operations []}
               result (generate/run plan generation-path)]
           (is (false? (:ok? result)))
