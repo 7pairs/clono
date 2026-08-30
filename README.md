@@ -85,8 +85,19 @@ export default {
   sourceRoot: "manuscripts",
   outputRoot: "build/manuscripts",
   publication: [
-    { path: "introduction.md", kind: "frontmatter", includeInToc: true },
-    { path: "chapter-one.md", kind: "chapter", includeInToc: true },
+    {
+      type: "document",
+      path: "introduction.md",
+      kind: "frontmatter",
+      includeInToc: true,
+    },
+    { type: "blank-page" },
+    {
+      type: "document",
+      path: "chapter-one.md",
+      kind: "chapter",
+      includeInToc: true,
+    },
   ],
 };
 ```
@@ -100,7 +111,7 @@ node dist/clono.js build
 node dist/clono.js build path/to/book
 ```
 
-`build`サブコマンドは、入力原稿ツリーのMarkdownを変換し、その他の通常ファイルを相対パスのままコピーします。生成済み原稿ツリーにはclono基盤CSSと所有マーカーも配置します。既存出力は、一致する所有マーカーを持つ場合だけ安全に置き換えます。成功時は何も表示せず、診断がある場合は部分的な出力を公開しません。
+`build`サブコマンドは、入力原稿ツリーのMarkdownを変換し、その他の通常ファイルを相対パスのままコピーします。`publication`には原稿を表す`document`に加えて、原稿間へ一ページ挿入する`blank-page`を指定できます。生成済み原稿ツリーには、必要な空白ページHTML、clono基盤CSSおよび所有マーカーも配置します。既存出力は、一致する所有マーカーを持つ場合だけ安全に置き換えます。成功時は何も表示せず、診断がある場合は部分的な出力を公開しません。
 
 `build`サブコマンドはWebPubまたはPDFを生成せず、`vivliostyle.config.mjs`も生成・変更しません。生成済み原稿ツリーと、書籍プロジェクト側で管理するVivliostyle設定および利用者テーマを組み合わせて組版してください。
 
