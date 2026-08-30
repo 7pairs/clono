@@ -91,6 +91,8 @@ export default {
 };
 ```
 
+`clono.config.mjs`は通常のJavaScriptとして実行されるため、信頼できる書籍プロジェクトの設定だけを読み込んでください。
+
 カレントディレクトリ、または指定した書籍プロジェクトを変換します。
 
 ```shell
@@ -99,6 +101,8 @@ node dist/clono.js build path/to/book
 ```
 
 `build`サブコマンドは、入力原稿ツリーのMarkdownを変換し、その他の通常ファイルを相対パスのままコピーします。生成済み原稿ツリーにはclono基盤CSSと所有マーカーも配置します。既存出力は、一致する所有マーカーを持つ場合だけ安全に置き換えます。成功時は何も表示せず、診断がある場合は部分的な出力を公開しません。
+
+`build`サブコマンドはWebPubまたはPDFを生成せず、`vivliostyle.config.mjs`も生成・変更しません。生成済み原稿ツリーと、書籍プロジェクト側で管理するVivliostyle設定および利用者テーマを組み合わせて組版してください。
 
 設定項目、出力先の保護、Vivliostyle設定との連携方法は、[書籍プロジェクト仕様](docs/specifications/book-project.md)を参照してください。
 
