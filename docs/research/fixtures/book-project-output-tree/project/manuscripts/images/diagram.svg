@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="160" viewBox="0 0 480 160" role="img" aria-labelledby="title description">
+  <title id="title">ミラーされた検証用画像</title>
+  <desc id="description">生成済み原稿から相対パスで参照するSVG画像</desc>
+  <rect x="4" y="4" width="472" height="152" rx="16" fill="#eef6ff" stroke="#2563eb" stroke-width="8"/>
+  <text x="240" y="92" text-anchor="middle" font-family="sans-serif" font-size="28" fill="#1e3a8a">MIRRORED SVG ASSET</text>
+</svg>
+

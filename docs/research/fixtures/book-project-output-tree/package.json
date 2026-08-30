@@ -1,0 +1,22 @@
+{
+  "name": "@clono/research-book-project-output-tree",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^22.13.0 || ^24.0.0"
+  },
+  "scripts": {
+    "build:project": "node scripts/build-project.mjs",
+    "build:pdf": "node scripts/build-pdf.mjs",
+    "verify": "npm run verify:output && npm run verify:pdf",
+    "verify:output": "node scripts/verify-output.mjs",
+    "verify:pdf": "node scripts/verify-pdf.mjs"
+  },
+  "devDependencies": {
+    "@vivliostyle/cli": "11.1.0",
+    "@vivliostyle/vfm": "2.7.0",
+    "mupdf": "1.28.0"
+  }
+}
+

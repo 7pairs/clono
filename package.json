@@ -1,6 +1,6 @@
 {
   "name": "clono",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "bin": {
     "clono": "dist/clono.js"
@@ -13,7 +13,9 @@
     "build": "shadow-cljs compile cli",
     "build:release": "shadow-cljs release cli",
     "watch": "shadow-cljs watch cli",
-    "test": "shadow-cljs compile test && node target/tests.js",
+    "test": "shadow-cljs compile test && node target/tests.js && npm run test:config-integration && npm run test:cli-integration",
+    "test:config-integration": "shadow-cljs release config-integration && node target/config-integration.js",
+    "test:cli-integration": "shadow-cljs release cli cli-integration && node target/cli-integration.js",
     "test:watch": "shadow-cljs watch test-watch",
     "prepack": "npm run build:release"
   },
