@@ -19,6 +19,9 @@
   (.mkdirSync fs (.dirname path file-path) #js {:recursive true})
   (.writeFileSync fs file-path content "utf8"))
 
+(defn- normalize-line-endings [value]
+  (.replace value (js/RegExp. "\\r\\n?" "g") "\n"))
+
 (defn- book-config [project publication]
   {:project-root project
    :config-path (.join path project "clono.config.mjs")
@@ -118,7 +121,14 @@
           (write-file! (.join path source "chapter.md") "# 本文\n")
           (let [result (generate/run
                         (transformed-plan project publication)
-                        generation-path)]
+                        generation-path)
+                stylesheet (normalize-line-endings
+                            (.readFileSync fs
+                                           (.join path generation-path
+                                                  "_clono"
+                                                  "styles"
+                                                  "clono.css")
+                                           "utf8"))]
             (is (:ok? result))
             (is (= (str "<!doctype html>\n"
                         "<html>\n"
@@ -131,12 +141,7 @@
                         "  </body>\n"
                         "</html>\n")
                    (.readFileSync fs blank-page-path "utf8")))
-            (is (.includes (.readFileSync fs
-                                         (.join path generation-path
-                                                "_clono"
-                                                "styles"
-                                                "clono.css")
-                                         "utf8")
+            (is (.includes stylesheet
                            (str ".clono-blank-page {\n"
                                 "  page: clono-blank;\n"
                                 "  break-before: page;\n"
