@@ -36,10 +36,14 @@
       (fn [project]
         (let [source (.join path project "manuscripts")
               output (.join path project "build" "manuscripts")
-              publication [{:path "chapter.md"
+              publication [{:type :document
+                            :path "chapter.md"
                             :kind "chapter"
                             :include-in-toc true}
-                           {:path "appendix.MD"
+                           {:type :blank-page}
+                           {:type :blank-page}
+                           {:type :document
+                            :path "appendix.MD"
                             :kind "appendix"
                             :include-in-toc false}]]
           (write-file! (.join path source "chapter.md") "# 本文\n")
@@ -78,7 +82,8 @@
           (write-file! (.join path source "chapter.md") "# 本文\n")
           (let [result (plan/create
                         (book-config project
-                                     [{:path "chapter.md"
+                                     [{:type :document
+                                       :path "chapter.md"
                                        :kind "chapter"
                                        :include-in-toc true}]))
                 messages (set (map :message (:diagnostics result)))]
@@ -102,7 +107,8 @@
                         (if (= "win32" (.-platform js/process)) "junction" "dir"))
           (let [result (plan/create
                         (book-config project
-                                     [{:path "chapter.md"
+                                     [{:type :document
+                                       :path "chapter.md"
                                        :kind "chapter"
                                        :include-in-toc true}]))]
             (is (false? (:ok? result)))
@@ -118,7 +124,8 @@
           (write-file! (.join path source "existing.md") "# 本文\n")
           (let [result (plan/create
                         (book-config project
-                                     [{:path "missing.md"
+                                     [{:type :document
+                                       :path "missing.md"
                                        :kind "chapter"
                                        :include-in-toc true}]))]
             (is (false? (:ok? result)))
@@ -137,7 +144,8 @@
             (execFileSync "mkfifo" #js [fifo])
             (let [result (plan/create
                           (book-config project
-                                       [{:path "chapter.md"
+                                       [{:type :document
+                                         :path "chapter.md"
                                          :kind "chapter"
                                          :include-in-toc true}]))]
               (is (false? (:ok? result)))

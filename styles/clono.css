@@ -13,3 +13,10 @@
 .clono-page-break {
   break-before: page;
 }
+
+.clono-blank-page {
+  page: clono-blank;
+  break-before: page;
+  break-after: page;
+  min-block-size: 1px;
+}

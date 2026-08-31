@@ -6,6 +6,18 @@
 
 (def ^:private marker-name ".clono-output.json")
 (def ^:private stylesheet-relative-path "_clono/styles/clono.css")
+(def ^:private blank-page-relative-path "_clono/pages/blank-page.html")
+(def ^:private blank-page-content
+  (str "<!doctype html>\n"
+       "<html>\n"
+       "  <head>\n"
+       "    <meta charset=\"utf-8\">\n"
+       "    <title>Blank page</title>\n"
+       "  </head>\n"
+       "  <body>\n"
+       "    <div class=\"clono-blank-page\" aria-hidden=\"true\"></div>\n"
+       "  </body>\n"
+       "</html>\n"))
 
 (defn- error-message [error]
   (or (.-message error) (str error)))
@@ -138,6 +150,29 @@
                       (str "clono基盤CSSを生成できません: "
                            (error-message error)))]}))))
 
+(defn- blank-page? [entry]
+  (= :blank-page (:type entry)))
+
+(defn- generate-blank-page [generation-path publication]
+  (if-not (some blank-page? publication)
+    {:ok? true
+     :diagnostics []}
+    (let [destination (descendant-path generation-path blank-page-relative-path)]
+      (try
+        (.mkdirSync fs (.dirname path destination) #js {:recursive true})
+        (.writeFileSync fs
+                        destination
+                        blank-page-content
+                        #js {:encoding "utf8" :flag "wx"})
+        {:ok? true
+         :diagnostics []}
+        (catch :default error
+          {:ok? false
+           :diagnostics
+           [(diagnostic blank-page-relative-path
+                        (str "空白ページ資材を生成できません: "
+                             (error-message error)))]})))))
+
 (defn- publication-diagnostics [generation-path publication]
   (reduce
    (fn [diagnostics entry]
@@ -161,10 +196,27 @@
                                (str "`publication`の生成済み原稿を確認できません: "
                                     (error-message error)))))))))
    []
-   publication))
+   (filter #(= :document (:type %)) publication)))
+
+(defn- blank-page-diagnostics [generation-path publication]
+  (if-not (some blank-page? publication)
+    []
+    (let [generated-path (descendant-path generation-path blank-page-relative-path)]
+      (try
+        (let [entry-stat (when (.existsSync fs generated-path)
+                           (.lstatSync fs generated-path))]
+          (if (and entry-stat (.isFile entry-stat))
+            []
+            [(diagnostic blank-page-relative-path
+                         "空白ページ資材を生成できませんでした。")]))
+        (catch :default error
+          [(diagnostic blank-page-relative-path
+                       (str "生成した空白ページ資材を確認できません: "
+                            (error-message error)))])))))
 
 (defn- verify-publication [generation-path publication]
-  (let [diagnostics (publication-diagnostics generation-path publication)]
+  (let [diagnostics (into (publication-diagnostics generation-path publication)
+                          (blank-page-diagnostics generation-path publication))]
     {:ok? (empty? diagnostics)
      :diagnostics diagnostics}))
 
@@ -210,6 +262,9 @@
       (loop [remaining [(fn []
                          (execute-operations generation-path
                                              (:operations plan)))
+                        (fn []
+                          (generate-blank-page generation-path
+                                               (:publication plan)))
                         (fn [] (copy-stylesheet generation-path))
                         (fn []
                           (verify-publication generation-path

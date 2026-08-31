@@ -10,7 +10,9 @@
 (def ^:private top-level-fields
   #{"sourceRoot" "outputRoot" "publication"})
 (def ^:private publication-fields
-  #{"path" "kind" "includeInToc"})
+  #{"type" "path" "kind" "includeInToc"})
+(def ^:private document-fields publication-fields)
+(def ^:private blank-page-fields #{"type"})
 (def ^:private document-kinds
   #{"frontmatter" "chapter" "appendix" "backmatter"})
 ;; Closure cannot transpile a dynamic import expression in a node-script release.
@@ -183,50 +185,89 @@
                         (str "入力原稿ルートと生成済み原稿ルートを確認できません: "
                              (error-message error)))]})))))
 
+(defn- document-entry-structure [config-path index entry]
+  (let [context (str "`publication[" index "]`")
+        field-names (own-field-names entry)
+        path-value (gobj/get entry "path")
+        kind (gobj/get entry "kind")
+        include-in-toc (gobj/get entry "includeInToc")
+        path-result (if (contains? field-names "path")
+                      (relative-path-result config-path
+                                            (str "publication[" index "].path")
+                                            path-value)
+                      {:diagnostics []})
+        diagnostics
+        (into (into (unknown-field-diagnostics config-path
+                                                context
+                                                document-fields
+                                                entry)
+                    (required-field-diagnostics config-path
+                                                context
+                                                document-fields
+                                                entry))
+              (concat
+               (:diagnostics path-result)
+               (when (and (:value path-result)
+                          (not (contains? #{".md" ".html"}
+                                          (.toLowerCase
+                                           (.extname path (:value path-result))))))
+                 [(diagnostic config-path
+                              (str "`publication[" index "].path`には`.md`または`.html`のファイルを指定してください。"))])
+               (when (and (contains? field-names "kind")
+                          (not (and (string? kind) (contains? document-kinds kind))))
+                 [(diagnostic config-path
+                              (str "`publication[" index "].kind`には`frontmatter`、`chapter`、`appendix`または`backmatter`を指定してください。"))])
+               (when (and (contains? field-names "includeInToc")
+                          (not (boolean? include-in-toc)))
+                 [(diagnostic config-path
+                              (str "`publication[" index "].includeInToc`には真偽値を指定してください。"))])))]
+    {:entry (when (empty? diagnostics)
+              {:type :document
+               :path (:value path-result)
+               :kind kind
+               :include-in-toc include-in-toc})
+     :diagnostics diagnostics}))
+
+(defn- blank-page-entry-structure [config-path index entry]
+  (let [context (str "`publication[" index "]`")
+        diagnostics (unknown-field-diagnostics config-path
+                                                context
+                                                blank-page-fields
+                                                entry)]
+    {:entry (when (empty? diagnostics)
+              {:type :blank-page})
+     :diagnostics diagnostics}))
+
 (defn- publication-entry-structure [config-path index entry]
   (let [context (str "`publication[" index "]`")]
     (if-not (javascript-object? entry)
       {:diagnostics
        [(diagnostic config-path (str context "にはオブジェクトを指定してください。"))]}
       (let [field-names (own-field-names entry)
-            path-value (gobj/get entry "path")
-            kind (gobj/get entry "kind")
-            include-in-toc (gobj/get entry "includeInToc")
-            path-result (if (contains? field-names "path")
-                          (relative-path-result config-path
-                                                (str "publication[" index "].path")
-                                                path-value)
-                          {:diagnostics []})
-            diagnostics
-            (into (into (unknown-field-diagnostics config-path
-                                                    context
-                                                    publication-fields
-                                                    entry)
-                        (required-field-diagnostics config-path
-                                                    context
-                                                    publication-fields
-                                                    entry))
-                  (concat
-                   (:diagnostics path-result)
-                   (when (and (:value path-result)
-                              (not (contains? #{".md" ".html"}
-                                              (.toLowerCase
-                                               (.extname path (:value path-result))))))
-                     [(diagnostic config-path
-                                  (str "`publication[" index "].path`には`.md`または`.html`のファイルを指定してください。"))])
-                   (when (and (contains? field-names "kind")
-                              (not (and (string? kind) (contains? document-kinds kind))))
-                     [(diagnostic config-path
-                                  (str "`publication[" index "].kind`には`frontmatter`、`chapter`、`appendix`または`backmatter`を指定してください。"))])
-                   (when (and (contains? field-names "includeInToc")
-                              (not (boolean? include-in-toc)))
-                     [(diagnostic config-path
-                                  (str "`publication[" index "].includeInToc`には真偽値を指定してください。"))])))]
-        {:entry (when (empty? diagnostics)
-                  {:path (:value path-result)
-                   :kind kind
-                   :include-in-toc include-in-toc})
-         :diagnostics diagnostics}))))
+            type-present? (contains? field-names "type")
+            entry-type (gobj/get entry "type")]
+        (cond
+          (not type-present?)
+          {:entry nil
+           :diagnostics
+           [(diagnostic config-path
+                        (str context "に必須の設定項目`type`がありません。"))]}
+
+          (= "document" entry-type)
+          (document-entry-structure config-path index entry)
+
+          (= "blank-page" entry-type)
+          (blank-page-entry-structure config-path index entry)
+
+          :else
+          {:entry nil
+           :diagnostics
+           (into (unknown-field-diagnostics config-path
+                                            context
+                                            publication-fields
+                                            entry)
+                 [(diagnostic config-path
+                              (str "`publication[" index "].type`には`document`または`blank-page`を指定してください。"))])})))))
 
 (defn- validate-publication-files [config-path source-path entries]
   (loop [remaining entries
@@ -234,11 +275,16 @@
          validated []
          diagnostics []]
     (if-let [entry (first remaining)]
-      (let [entry-path (:path entry)
-            file-path (resolve-portable-path source-path entry-path)
-            duplicate? (contains? seen entry-path)
-            path-diagnostics
-            (try
+      (if (= :blank-page (:type entry))
+        (recur (next remaining)
+               seen
+               (conj validated entry)
+               diagnostics)
+        (let [entry-path (:path entry)
+              file-path (resolve-portable-path source-path entry-path)
+              duplicate? (contains? seen entry-path)
+              path-diagnostics
+              (try
               (let [symlink (existing-symlink source-path entry-path)
                     file-stat (when (.existsSync fs file-path)
                                 (.statSync fs file-path))]
@@ -263,10 +309,10 @@
                 [(diagnostic config-path
                              (str "`publication`の原稿を確認できません: " entry-path ": "
                                   (error-message error)))]))]
-        (recur (next remaining)
-               (conj seen entry-path)
-               (conj validated (assoc entry :file-path file-path))
-               (into diagnostics path-diagnostics)))
+          (recur (next remaining)
+                 (conj seen entry-path)
+                 (conj validated (assoc entry :file-path file-path))
+                 (into diagnostics path-diagnostics))))
       {:publication validated
        :diagnostics diagnostics})))
 
@@ -300,7 +346,7 @@
                                            project-root
                                            source-result
                                            output-result)
-          structural-diagnostics
+          base-structural-diagnostics
           (into (into (unknown-field-diagnostics config-path
                                                   "設定"
                                                   top-level-fields
@@ -314,11 +360,18 @@
                  (:diagnostics output-result)
                  (when (and publication-present? (not publication-array?))
                    [(diagnostic config-path "`publication`には配列を指定してください。")])
-                 (when (and publication-array? (zero? (alength publication-value)))
-                   [(diagnostic config-path "`publication`には一件以上の原稿を指定してください。")])
                  (mapcat :diagnostics publication-results)
                  (:diagnostics root-result)))
           structured-entries (mapv :entry publication-results)
+          document-required-diagnostics
+          (if (and publication-array?
+                   (every? some? structured-entries)
+                   (not-any? #(= :document (:type %)) structured-entries))
+            [(diagnostic config-path
+                         "`publication`には一件以上の`document`を指定してください。")]
+            [])
+          structural-diagnostics (into base-structural-diagnostics
+                                       document-required-diagnostics)
           files-result (if (and (empty? structural-diagnostics)
                                 (every? some? structured-entries))
                          (validate-publication-files config-path

@@ -103,6 +103,7 @@
                            (map :path)
                            set)]
     (->> (:publication config)
+         (filter #(= :document (:type %)))
          (remove #(contains? planned-files (:path %)))
          (mapv #(diagnostic
                  (:config-path config)

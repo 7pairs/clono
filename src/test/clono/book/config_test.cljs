@@ -68,8 +68,9 @@
                 "  sourceRoot,\n"
                 "  outputRoot: 'build/../build/manuscripts',\n"
                 "  publication: [\n"
-                "    { path: './chapter.md', kind: 'chapter', includeInToc: true },\n"
-                "    { path: 'colophon.html', kind: 'backmatter', includeInToc: false },\n"
+                "    { type: 'document', path: './chapter.md', kind: 'chapter', includeInToc: true },\n"
+                "    { type: 'blank-page' },\n"
+                "    { type: 'document', path: 'colophon.html', kind: 'backmatter', includeInToc: false },\n"
                 "  ],\n"
                 "};\n")))
         (fn [result]
@@ -82,14 +83,18 @@
             (is (= (.join path project-root "manuscripts") source-path))
             (is (= "build/manuscripts" output-root))
             (is (= (.join path project-root "build" "manuscripts") output-path))
-            (is (= [{:path "chapter.md"
+            (is (= [{:type :document
+                     :path "chapter.md"
                      :kind "chapter"
                      :include-in-toc true}
-                    {:path "colophon.html"
+                    {:type :blank-page}
+                    {:type :document
+                     :path "colophon.html"
                      :kind "backmatter"
                      :include-in-toc false}]
                    (mapv #(dissoc % :file-path) publication)))
-            (is (every? #(.isAbsolute path (:file-path %)) publication))))
+            (is (every? #(.isAbsolute path (:file-path %))
+                        (filter #(= :document (:type %)) publication)))))
         done))))
 
 (deftest configuration-location-test
@@ -117,7 +122,7 @@
            (str "export default {\n"
                 "  sourceRoot: 42,\n"
                 "  publication: [\n"
-                "    { path: 'chapter.txt', kind: 'unknown', includeInToc: 'yes', extra: true },\n"
+                "    { type: 'document', path: 'chapter.txt', kind: 'unknown', includeInToc: 'yes', extra: true },\n"
                 "    null,\n"
                 "  ],\n"
                 "  extra: true,\n"
@@ -136,6 +141,54 @@
             (is (contains? actual "`publication[1]`にはオブジェクトを指定してください。"))))
         done))))
 
+(deftest publication-type-validation-test
+  (async done
+    (testing "When publication entry types are missing or invalid, then discriminated entry diagnostics are returned"
+      (with-project
+        (fn [project]
+          (write-file! (.join path project "manuscripts" "chapter.md") "# 本文\n")
+          (write-file!
+           (.join path project "clono.config.mjs")
+           (str "export default {\n"
+                "  sourceRoot: 'manuscripts',\n"
+                "  outputRoot: 'build/manuscripts',\n"
+                "  publication: [\n"
+                "    { path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+                "    { type: 'blank-page', path: 'chapter.md' },\n"
+                "    { type: 'unknown', extra: true },\n"
+                "  ],\n"
+                "};\n")))
+        (fn [result]
+          (is (false? (:ok? result)))
+          (is (= #{"`publication[0]`に必須の設定項目`type`がありません。"
+                   "`publication[1]`に未知の設定項目`path`があります。"
+                   "`publication[2]`に未知の設定項目`extra`があります。"
+                   "`publication[2].type`には`document`または`blank-page`を指定してください。"}
+                 (set (messages result)))))
+        done))))
+
+(deftest document-required-test
+  (async done
+    (testing "When publication contains only blank pages, then the configuration is rejected"
+      (with-project
+        (fn [project]
+          (.mkdirSync fs (.join path project "manuscripts"))
+          (write-file!
+           (.join path project "clono.config.mjs")
+           (str "export default {\n"
+                "  sourceRoot: 'manuscripts',\n"
+                "  outputRoot: 'build/manuscripts',\n"
+                "  publication: [\n"
+                "    { type: 'blank-page' },\n"
+                "    { type: 'blank-page' },\n"
+                "  ],\n"
+                "};\n")))
+        (fn [result]
+          (is (false? (:ok? result)))
+          (is (= ["`publication`には一件以上の`document`を指定してください。"]
+                 (messages result))))
+        done))))
+
 (deftest root-path-validation-test
   (async done
     (testing "When sourceRoot and outputRoot overlap, then the configuration is rejected"
@@ -148,7 +201,7 @@
                 "  sourceRoot: 'manuscripts',\n"
                 "  outputRoot: 'manuscripts/build',\n"
                 "  publication: [\n"
-                "    { path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+                "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
                 "  ],\n"
                 "};\n")))
         (fn [result]
@@ -173,7 +226,7 @@
           (is (false? (:ok? result)))
           (is (= #{"`sourceRoot`に基準ディレクトリの外側へ出るパスは指定できません。"
                    "`outputRoot`に絶対パスは指定できません。"
-                   "`publication`には一件以上の原稿を指定してください。"}
+                   "`publication`には一件以上の`document`を指定してください。"}
                  (set (messages result)))))
         done))))
 
@@ -194,7 +247,7 @@
                 "  sourceRoot: 'manuscripts',\n"
                 "  outputRoot: 'generated-link/manuscripts',\n"
                 "  publication: [\n"
-                "    { path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+                "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
                 "  ],\n"
                 "};\n")))
         (fn [result]
@@ -223,11 +276,11 @@
                   "  sourceRoot: 'manuscripts',\n"
                   "  outputRoot: 'build/manuscripts',\n"
                   "  publication: [\n"
-                  "    { path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
-                  "    { path: './chapter.md', kind: 'chapter', includeInToc: true },\n"
-                  "    { path: 'missing.md', kind: 'chapter', includeInToc: true },\n"
-                  "    { path: 'directory.md', kind: 'chapter', includeInToc: true },\n"
-                  "    { path: 'linked.md', kind: 'chapter', includeInToc: true },\n"
+                  "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+                  "    { type: 'document', path: './chapter.md', kind: 'chapter', includeInToc: true },\n"
+                  "    { type: 'document', path: 'missing.md', kind: 'chapter', includeInToc: true },\n"
+                  "    { type: 'document', path: 'directory.md', kind: 'chapter', includeInToc: true },\n"
+                  "    { type: 'document', path: 'linked.md', kind: 'chapter', includeInToc: true },\n"
                   "  ],\n"
                   "};\n"))))
         (fn [result]

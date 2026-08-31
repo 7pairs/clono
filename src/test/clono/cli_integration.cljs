@@ -32,7 +32,9 @@
        "  sourceRoot: 'manuscripts',\n"
        "  outputRoot: 'build/manuscripts',\n"
        "  publication: [\n"
-       "    { path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+       "    { type: 'blank-page' },\n"
+       "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+       "    { type: 'blank-page' },\n"
        "  ],\n"
        "};\n"))
 
@@ -41,8 +43,8 @@
        "  sourceRoot: 'manuscripts',\n"
        "  outputRoot: 'build/manuscripts',\n"
        "  publication: [\n"
-       "    { path: 'a.md', kind: 'chapter', includeInToc: true },\n"
-       "    { path: 'b.md', kind: 'chapter', includeInToc: true },\n"
+       "    { type: 'document', path: 'a.md', kind: 'chapter', includeInToc: true },\n"
+       "    { type: 'document', path: 'b.md', kind: 'chapter', includeInToc: true },\n"
        "  ],\n"
        "};\n"))
 
@@ -83,8 +85,18 @@
     (ensure! (= "static asset\n"
                 (.readFileSync fs (.join path output "images" "logo.txt") "utf8"))
              "Release build command did not copy a static file")
-    (ensure! (.existsSync fs (.join path output "_clono" "styles" "clono.css"))
-             "Release build command did not copy the clono stylesheet")
+    (let [stylesheet (.join path output "_clono" "styles" "clono.css")
+          blank-page (.join path output "_clono" "pages" "blank-page.html")]
+      (ensure! (.existsSync fs stylesheet)
+               "Release build command did not copy the clono stylesheet")
+      (ensure! (.includes (.readFileSync fs stylesheet "utf8")
+                          ".clono-blank-page")
+               "Release build command copied a stylesheet without the blank page rule")
+      (ensure! (.existsSync fs blank-page)
+               "Release build command did not generate the blank page resource")
+      (ensure! (.includes (.readFileSync fs blank-page "utf8")
+                          "<div class=\"clono-blank-page\" aria-hidden=\"true\"></div>")
+               "Release build command generated an invalid blank page resource"))
     (ensure! (.existsSync fs (.join path output ".clono-output.json"))
              "Release build command did not create the ownership marker")
 
