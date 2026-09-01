@@ -31,7 +31,8 @@
    :source-path (.join path project "manuscripts")
    :output-root "build/manuscripts"
    :output-path (.join path project "build" "manuscripts")
-   :publication [{:path "chapter.md"
+   :publication [{:type :document
+                  :path "chapter.md"
                   :kind "chapter"
                   :include-in-toc true}]})
 

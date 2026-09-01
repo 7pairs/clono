@@ -37,10 +37,12 @@
       (fn [project]
         (let [source (.join path project "manuscripts")
               output (.join path project "build" "manuscripts")
-              publication [{:path "chapter.md"
+              publication [{:type :document
+                            :path "chapter.md"
                             :kind "chapter"
                             :include-in-toc true}
-                           {:path "appendix.MD"
+                           {:type :document
+                            :path "appendix.MD"
                             :kind "appendix"
                             :include-in-toc true}]]
           (write-file! (.join path source "chapter.md")
@@ -79,10 +81,12 @@
           (let [result (book-transform/run
                         (create-plan
                          project
-                         [{:path "a.md"
+                         [{:type :document
+                           :path "a.md"
                            :kind "chapter"
                            :include-in-toc true}
-                          {:path "b.md"
+                          {:type :document
+                           :path "b.md"
                            :kind "chapter"
                            :include-in-toc true}]))]
             (is (false? (:ok? result)))
@@ -115,10 +119,12 @@
           (let [transformation-plan
                 (create-plan
                  project
-                 [{:path "a.md"
+                 [{:type :document
+                   :path "a.md"
                    :kind "chapter"
                    :include-in-toc true}
-                  {:path "b.md"
+                  {:type :document
+                   :path "b.md"
                    :kind "chapter"
                    :include-in-toc true}])]
             (.unlinkSync fs missing)
@@ -143,10 +149,12 @@
                 transformation-plan
                 (create-plan
                  project
-                 [{:path "a.md"
+                 [{:type :document
+                   :path "a.md"
                    :kind "chapter"
                    :include-in-toc true}
-                  {:path "b.md"
+                  {:type :document
+                   :path "b.md"
                    :kind "chapter"
                    :include-in-toc true}])]
             (with-redefs [pipeline/run
