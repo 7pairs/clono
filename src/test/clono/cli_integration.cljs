@@ -60,13 +60,23 @@
   (let [input (.join path root "single.md")
         output (.join path root "single-output.md")]
     (write-file! input
-                 ":::align{position=\"right\"}\n署名\n:::\n")
+                 (str ":::align{position=\"right\"}\n署名\n:::\n\n"
+                      ":xref[external-figure]"
+                      "{type=\"figure\" format=\"number-title\"}\n"))
     (verify-success!
      (run-cli ["transform" input "--output" output] root)
      "Release transform command")
-    (ensure! (.includes (.readFileSync fs output "utf8")
-                        "<div class=\"clono-align-right\">")
-             "Release transform command did not transform the manuscript")))
+    (let [content (.readFileSync fs output "utf8")]
+      (ensure! (.includes content "<div class=\"clono-align-right\">")
+               "Release transform command did not transform the manuscript")
+      (ensure! (.includes
+                content
+                (str "<span class=\"clono-xref clono-xref-figure "
+                     "clono-xref-number-title clono-xref-placeholder\">"
+                     "図X.X 参照先未解決</span>"))
+               "Release transform command did not generate the xref placeholder")
+      (ensure! (not (.includes content "external-figure"))
+               "Release transform command exposed the unresolved logical ID"))))
 
 (defn- verify-build! [root]
   (let [project (.join path root "book")

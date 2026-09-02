@@ -95,16 +95,39 @@
           (is (pos-int? (:column problem)) case))))))
 
 (deftest unresolved-local-xref-test
-  (testing "When an xref target is absent from the document, then transformation fails before placeholder support is applied"
+  (testing "When transform cannot find a local xref target, then each format becomes a fixed placeholder without link attributes or author input"
+    (doseq [[format expected-text]
+            [["number" "図X.X"]
+             ["number-title" "図X.X 参照先未解決"]
+             ["title" "参照先未解決"]]]
+      (let [source (str ":xref[external-figure]"
+                        "{type=\"figure\" format=\"" format "\"}\n")
+            result (pipeline/run
+                    (transform-context "unresolved-xref.md")
+                    source)
+            output (:output result)
+            expected (str "<span class=\"clono-xref clono-xref-figure "
+                          "clono-xref-" format " clono-xref-placeholder\">"
+                          expected-text
+                          "</span>")]
+        (is (:ok? result) format)
+        (is (empty? (:diagnostics result)) format)
+        (is (.includes output expected) format)
+        (is (not (.includes output "external-figure")) format)
+        (is (not (.includes output "href=")) format)
+        (is (nil? (test-support/directive (markdown/parse output) "xref"))
+            format))))
+
+  (testing "When build cannot find an xref target, then it reports a diagnostic instead of generating a placeholder"
     (let [result
           (pipeline/run
-           (transform-context "unresolved-xref.md")
-           ":xref[external-figure]{type=\"figure\" format=\"number\"}\n")]
+           {:mode :build :source-name "chapter.md"}
+           ":xref[missing-figure]{type=\"figure\" format=\"number\"}\n")]
       (is (false? (:ok? result)))
       (is (nil? (:output result)))
-      (is (= [{:file "unresolved-xref.md"
+      (is (= [{:file "chapter.md"
                :line 1
                :column 1
                :directive "xref"
-               :message "`xref`の参照先`external-figure`が同じ文書に存在しません。"}]
+               :message "`xref`の参照先`missing-figure`を解決できません。"}]
              (:diagnostics result))))))
