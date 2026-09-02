@@ -88,7 +88,8 @@
   (.replace value (js/RegExp. "\\r\\n?" "g") "\n"))
 
 (deftest column-transformation-test
-  (let [result (pipeline/run "column.md" valid-column-source)
+  (let [result (pipeline/run {:mode :transform :source-name "column.md"}
+                             valid-column-source)
         output (:output result)
         tree (markdown/parse output)]
     (testing "When a valid column directive is transformed, then fixed wrapper HTML and supported Markdown are returned"
@@ -128,7 +129,9 @@
 (deftest invalid-column-test
   (testing "When a column directive violates its contract, then transformation fails with a positioned diagnostic"
     (doseq [{:keys [case source message]} invalid-column-cases]
-      (let [result (pipeline/run "invalid-column.md" source)
+      (let [result (pipeline/run {:mode :transform
+                                  :source-name "invalid-column.md"}
+                                 source)
             problem (first (:diagnostics result))]
         (is (false? (:ok? result)) case)
         (is (nil? (:output result)) case)
@@ -148,7 +151,9 @@
                       "未知の内容です。\n"
                       ":::\n"
                       "::::\n")
-          result (pipeline/run "unknown-in-column.md" source)]
+          result (pipeline/run {:mode :transform
+                                :source-name "unknown-in-column.md"}
+                               source)]
       (is (= [{:file "unknown-in-column.md"
                :line 2
                :column 1
@@ -159,7 +164,8 @@
 
   (testing "When a known column container has no closing fence, then transformation fails with its opening position"
     (let [result (pipeline/run
-                  "unclosed-column.md"
+                  {:mode :transform
+                   :source-name "unclosed-column.md"}
                   ":::column[コラム]\n本文です。\n")]
       (is (= [{:file "unclosed-column.md"
                :line 1

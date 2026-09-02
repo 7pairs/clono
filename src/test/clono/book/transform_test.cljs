@@ -158,13 +158,14 @@
                    :kind "chapter"
                    :include-in-toc true}])]
             (with-redefs [pipeline/run
-                          (fn [source-name source]
-                            (swap! processed conj source-name)
-                            (if (= "a.md" source-name)
-                              (throw (js/Error. "unexpected failure"))
-                              {:ok? true
-                               :output source
-                               :diagnostics []}))]
+                          (fn [context source]
+                            (let [source-name (:source-name context)]
+                              (swap! processed conj source-name)
+                              (if (= "a.md" source-name)
+                                (throw (js/Error. "unexpected failure"))
+                                {:ok? true
+                                 :output source
+                                 :diagnostics []})))]
               (let [result (book-transform/run transformation-plan)]
                 (is (false? (:ok? result)))
                 (is (nil? (:plan result)))
@@ -172,3 +173,38 @@
                 (is (= [{:file "a.md"
                          :message "Markdown原稿を変換できません: unexpected failure"}]
                        (:diagnostics result)))))))))))
+
+(deftest execution-context-test
+  (testing "When a book transformation runs, then each Markdown manuscript receives its build context and optional publication entry"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              publication [{:type :document
+                            :path "chapter.md"
+                            :kind "chapter"
+                            :include-in-toc true}]]
+          (write-file! (.join path source "chapter.md") "# 掲載原稿\n")
+          (write-file! (.join path source "notes.md") "# 非掲載原稿\n")
+          (let [contexts (atom [])
+                transformation-plan (create-plan project publication)]
+            (with-redefs [pipeline/run
+                          (fn [context manuscript]
+                            (swap! contexts conj context)
+                            {:ok? true
+                             :output manuscript
+                             :diagnostics []})]
+              (let [result (book-transform/run transformation-plan)
+                    [chapter-context notes-context] @contexts]
+                (is (:ok? result))
+                (is (= ["chapter.md" "notes.md"]
+                       (mapv :source-name @contexts)))
+                (is (= :build (:mode chapter-context)))
+                (is (= (.join path source "chapter.md")
+                       (:input-path chapter-context)))
+                (is (= source (:source-root-path chapter-context)))
+                (is (= (first publication)
+                       (:publication-entry chapter-context)))
+                (is (= :build (:mode notes-context)))
+                (is (= (.join path source "notes.md")
+                       (:input-path notes-context)))
+                (is (nil? (:publication-entry notes-context)))))))))))
