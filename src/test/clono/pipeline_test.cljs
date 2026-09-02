@@ -32,8 +32,13 @@
                     ":nested[内部の未知記法]\n"
                     ":::\n\n"
                     ":index[独立した未知記法]\n")
+        collection-called? (atom false)
         transform-called? (atom false)
-        result (with-redefs [transform/transform
+        result (with-redefs [transform/collect-reference-targets
+                             (fn [_tree _context]
+                               (reset! collection-called? true)
+                               [])
+                             transform/transform
                              (fn [tree _context]
                                (reset! transform-called? true)
                                tree)]
@@ -55,8 +60,9 @@
                :message "`index`は登録されていないdirectiveです。"}]
              (:diagnostics result))))
 
-    (testing "When diagnostics are returned, then transformation is skipped and output is omitted"
+    (testing "When diagnostics are returned, then collection and transformation are skipped and output is omitted"
       (is (nil? (:output result)))
+      (is (false? @collection-called?))
       (is (false? @transform-called?)))))
 
 (deftest execution-context-test
@@ -69,11 +75,24 @@
                                      :kind "chapter"
                                      :include-in-toc true}}
         validation-context (atom nil)
+        collection-context (atom nil)
         transformation-context (atom nil)
+        reference-targets [{:logical-id "diagram"
+                            :type "figure"
+                            :target-id "figure-diagram"
+                            :title-target-id "figure-diagram-caption"
+                            :numbered? true
+                            :source-name "chapter.md"
+                            :line 1
+                            :column 1}]
         result (with-redefs [transform/validate
                              (fn [_tree actual-context]
                                (reset! validation-context actual-context)
                                [])
+                             transform/collect-reference-targets
+                             (fn [_tree actual-context]
+                               (reset! collection-context actual-context)
+                               reference-targets)
                              transform/transform
                              (fn [tree actual-context]
                                (reset! transformation-context actual-context)
@@ -82,4 +101,6 @@
     (testing "When the pipeline runs successfully, then the same execution context is provided to validation and transformation"
       (is (:ok? result))
       (is (= context @validation-context))
-      (is (= context @transformation-context)))))
+      (is (= context @collection-context))
+      (is (= (assoc context :reference-targets reference-targets)
+             @transformation-context)))))
