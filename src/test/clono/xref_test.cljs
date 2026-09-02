@@ -1,5 +1,6 @@
 (ns clono.xref-test
   (:require
+   ["node:fs" :as fs]
    [cljs.test :refer [deftest is testing]]
    [clono.markdown :as markdown]
    [clono.pipeline :as pipeline]
@@ -8,6 +9,9 @@
 (defn- transform-context [source-name]
   {:mode :transform
    :source-name source-name})
+
+(defn- normalize-line-endings [value]
+  (.replace value (js/RegExp. "\\r\\n?" "g") "\n"))
 
 (def figure-source
   (str ":::figure[全体構成]{#architecture}\n"
@@ -131,3 +135,26 @@
                :directive "xref"
                :message "`xref`の参照先`missing-figure`を解決できません。"}]
              (:diagnostics result))))))
+
+(deftest xref-stylesheet-test
+  (testing "When the clono stylesheet is inspected, then resolved figure references receive number and title content without targeting placeholder spans"
+    (let [stylesheet (normalize-line-endings
+                      (.readFileSync fs "styles/clono.css" "utf8"))]
+      (is (.includes
+           stylesheet
+           (str "a.clono-xref-figure.clono-xref-number::before,\n"
+                "a.clono-xref-figure.clono-xref-number-title::before {\n"
+                "  content: \"図\" target-counter(attr(href url), chapter) \".\" "
+                "target-counter(attr(href url), figure);\n"
+                "}\n")))
+      (is (.includes
+           stylesheet
+           (str "a.clono-xref-figure.clono-xref-number-title::after {\n"
+                "  content: \" \" target-text(attr(data-title-href url), content);\n"
+                "}\n")))
+      (is (.includes
+           stylesheet
+           (str "a.clono-xref-figure.clono-xref-title::before {\n"
+                "  content: target-text(attr(data-title-href url), content);\n"
+                "}\n")))
+      (is (not (.includes stylesheet ".clono-xref-placeholder::"))))))
