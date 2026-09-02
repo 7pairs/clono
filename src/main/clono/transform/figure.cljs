@@ -263,7 +263,6 @@
 (defn- document-kind-diagnostics [figures context]
   (let [entry (:publication-entry context)]
     (if (and (= :build (:mode context))
-             (some? entry)
              (not (contains? allowed-document-kinds (:kind entry))))
       (mapv #(node-diagnostic
               context
