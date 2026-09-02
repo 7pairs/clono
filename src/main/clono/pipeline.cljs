@@ -6,8 +6,9 @@
    [clono.markdown :as markdown]
    [clono.transform :as transform]))
 
-(defn run [source-name source]
-  (let [tree (markdown/parse source)
+(defn run [context source]
+  (let [source-name (:source-name context)
+        tree (markdown/parse source)
         diagnostics (diagnostic/finalize
                      (concat
                       (directive-syntax/diagnostics
@@ -21,11 +22,11 @@
                        tree
                        source-name
                        transform/known-directive-names)
-                      (transform/validate tree source-name)))]
+                      (transform/validate tree context)))]
     (if (seq diagnostics)
       {:ok? false
        :output nil
        :diagnostics diagnostics}
       {:ok? true
-       :output (-> tree transform/transform markdown/serialize)
+       :output (-> tree (transform/transform context) markdown/serialize)
        :diagnostics []})))

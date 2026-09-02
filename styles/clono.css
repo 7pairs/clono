@@ -20,3 +20,15 @@
   break-after: page;
   min-block-size: 1px;
 }
+
+body {
+  counter-reset: figure;
+}
+
+.clono-numbered-figure {
+  counter-increment: figure;
+}
+
+.clono-numbered-figure > .clono-figure-caption::before {
+  content: "図" counter(chapter) "." counter(figure) " ";
+}

@@ -15,28 +15,29 @@
        (empty? (ast/children node))
        (empty? (js/Object.keys (attributes node)))))
 
-(defn diagnostics [node source-name _known-directive-names]
-  (cond
-    (not= "leafDirective" (.-type node))
-    [(diagnostic/for-node
-      source-name
-      node
-      "`page-break`はLeaf directiveとして記述する必要があります。")]
+(defn diagnostics [node context _known-directive-names]
+  (let [source-name (:source-name context)]
+    (cond
+      (not= "leafDirective" (.-type node))
+      [(diagnostic/for-node
+        source-name
+        node
+        "`page-break`はLeaf directiveとして記述する必要があります。")]
 
-    (seq (ast/children node))
-    [(diagnostic/for-node
-      source-name
-      node
-      "`page-break`にはラベルを指定できません。")]
+      (seq (ast/children node))
+      [(diagnostic/for-node
+        source-name
+        node
+        "`page-break`にはラベルを指定できません。")]
 
-    (seq (js/Object.keys (attributes node)))
-    [(diagnostic/for-node
-      source-name
-      node
-      "`page-break`には属性を指定できません。")]
+      (seq (js/Object.keys (attributes node)))
+      [(diagnostic/for-node
+        source-name
+        node
+        "`page-break`には属性を指定できません。")]
 
-    :else
-    []))
+      :else
+      [])))
 
 (defn parent-map [tree]
   (let [result (js/Map.)]
@@ -102,8 +103,9 @@
                          "`page-break`の後には紙面へ表示されるトップレベルブロックが必要です。")))))))
          vec)))
 
-(defn document-diagnostics [tree source-name known-directive-names]
-  (let [parents (parent-map tree)
+(defn document-diagnostics [tree context known-directive-names]
+  (let [source-name (:source-name context)
+        parents (parent-map tree)
         nested-diagnostics
         (->> (directive-validation/validation-nodes
               tree
@@ -122,7 +124,7 @@
 (defn html-node [value]
   #js {:type "html" :value value})
 
-(defn transform [_node]
+(defn transform [_node _context]
   [(html-node
     "<div class=\"clono-page-break\" aria-hidden=\"true\"></div>")])
 

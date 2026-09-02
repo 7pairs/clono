@@ -46,7 +46,10 @@
                             :kind "appendix"
                             :include-in-toc true}]]
           (write-file! (.join path source "chapter.md")
-                       ":::align{position=\"right\"}\n本文\n:::\n")
+                       (str ":::align{position=\"right\"}\n本文\n:::\n\n"
+                            ":::figure[構成図]{#diagram}\n"
+                            "![構成図](./images/diagram.svg)\n"
+                            ":::\n"))
           (write-file! (.join path source "appendix.MD")
                        "# 付録\n\n::page-break\n\n続きです。\n")
           (write-file! (.join path source "images" "diagram.svg")
@@ -64,6 +67,8 @@
                            "<div class=\"clono-page-break\" aria-hidden=\"true\"></div>"))
             (is (.includes (:content (nth operations 1))
                            "<div class=\"clono-align-right\">"))
+            (is (.includes (:content (nth operations 1))
+                           "<figure class=\"clono-numbered-figure\" id=\"figure-diagram\">"))
             (is (not (contains? (nth operations 2) :content)))
             (is (not (contains? (nth operations 3) :content)))
             (is (false? (.existsSync fs output)))))))))
@@ -106,6 +111,51 @@
                      :column 1
                      :directive "second"
                      :message "`second`は登録されていないdirectiveです。"}]
+                   (:diagnostics result)))))))))
+
+(deftest book-specific-figure-validation-test
+  (testing "When book manuscripts violate figure kind and image path constraints, then every diagnostic is collected without exposing a partial plan"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              figure-source (fn [id image-path]
+                              (str ":::figure[検証用の図]{#" id "}\n"
+                                   "![図](" image-path ")\n"
+                                   ":::\n"))
+              publication [{:type :document
+                            :path "chapter.md"
+                            :kind "chapter"
+                            :include-in-toc true}
+                           {:type :document
+                            :path "frontmatter.md"
+                            :kind "frontmatter"
+                            :include-in-toc true}]]
+          (write-file! (.join path source "chapter.md")
+                       (figure-source "missing" "./images/missing.svg"))
+          (write-file! (.join path source "frontmatter.md")
+                       (figure-source "front" "./images/existing.svg"))
+          (write-file! (.join path source "notes.md")
+                       (figure-source "unlisted" "./images/existing.svg"))
+          (write-file! (.join path source "images" "existing.svg")
+                       "<svg></svg>\n")
+          (let [result (book-transform/run (create-plan project publication))]
+            (is (false? (:ok? result)))
+            (is (nil? (:plan result)))
+            (is (= [{:file "chapter.md"
+                     :line 2
+                     :column 1
+                     :directive "figure"
+                     :message "`figure`の画像ファイルが存在しません。"}
+                    {:file "frontmatter.md"
+                     :line 1
+                     :column 1
+                     :directive "figure"
+                     :message "`figure`は本文または付録の掲載Markdownにだけ記述できます。"}
+                    {:file "notes.md"
+                     :line 1
+                     :column 1
+                     :directive "figure"
+                     :message "`figure`は本文または付録の掲載Markdownにだけ記述できます。"}]
                    (:diagnostics result)))))))))
 
 (deftest manuscript-read-failure-test
@@ -158,13 +208,14 @@
                    :kind "chapter"
                    :include-in-toc true}])]
             (with-redefs [pipeline/run
-                          (fn [source-name source]
-                            (swap! processed conj source-name)
-                            (if (= "a.md" source-name)
-                              (throw (js/Error. "unexpected failure"))
-                              {:ok? true
-                               :output source
-                               :diagnostics []}))]
+                          (fn [context source]
+                            (let [source-name (:source-name context)]
+                              (swap! processed conj source-name)
+                              (if (= "a.md" source-name)
+                                (throw (js/Error. "unexpected failure"))
+                                {:ok? true
+                                 :output source
+                                 :diagnostics []})))]
               (let [result (book-transform/run transformation-plan)]
                 (is (false? (:ok? result)))
                 (is (nil? (:plan result)))
@@ -172,3 +223,38 @@
                 (is (= [{:file "a.md"
                          :message "Markdown原稿を変換できません: unexpected failure"}]
                        (:diagnostics result)))))))))))
+
+(deftest execution-context-test
+  (testing "When a book transformation runs, then each Markdown manuscript receives its build context and optional publication entry"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              publication [{:type :document
+                            :path "chapter.md"
+                            :kind "chapter"
+                            :include-in-toc true}]]
+          (write-file! (.join path source "chapter.md") "# 掲載原稿\n")
+          (write-file! (.join path source "notes.md") "# 非掲載原稿\n")
+          (let [contexts (atom [])
+                transformation-plan (create-plan project publication)]
+            (with-redefs [pipeline/run
+                          (fn [context manuscript]
+                            (swap! contexts conj context)
+                            {:ok? true
+                             :output manuscript
+                             :diagnostics []})]
+              (let [result (book-transform/run transformation-plan)
+                    [chapter-context notes-context] @contexts]
+                (is (:ok? result))
+                (is (= ["chapter.md" "notes.md"]
+                       (mapv :source-name @contexts)))
+                (is (= :build (:mode chapter-context)))
+                (is (= (.join path source "chapter.md")
+                       (:input-path chapter-context)))
+                (is (= source (:source-root-path chapter-context)))
+                (is (= (first publication)
+                       (:publication-entry chapter-context)))
+                (is (= :build (:mode notes-context)))
+                (is (= (.join path source "notes.md")
+                       (:input-path notes-context)))
+                (is (nil? (:publication-entry notes-context)))))))))))

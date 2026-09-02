@@ -64,7 +64,8 @@
   (.replace value (js/RegExp. "\\r\\n?" "g") "\n"))
 
 (deftest align-transformation-test
-  (let [result (pipeline/run "align.md" valid-align-source)
+  (let [result (pipeline/run {:mode :transform :source-name "align.md"}
+                             valid-align-source)
         output (:output result)
         tree (markdown/parse output)]
     (testing "When a valid align directive is transformed, then fixed wrapper HTML and preserved Markdown are returned"
@@ -94,7 +95,9 @@
 (deftest invalid-align-test
   (testing "When an align directive violates its contract, then transformation fails with a positioned diagnostic"
     (doseq [{:keys [case source message]} invalid-align-cases]
-      (let [result (pipeline/run "invalid-align.md" source)
+      (let [result (pipeline/run {:mode :transform
+                                  :source-name "invalid-align.md"}
+                                 source)
             problem (first (:diagnostics result))]
         (is (false? (:ok? result)) case)
         (is (nil? (:output result)) case)
@@ -114,7 +117,9 @@
                       "未知の内容です。\n"
                       ":::\n"
                       "::::\n")
-          result (pipeline/run "unknown-in-align.md" source)]
+          result (pipeline/run {:mode :transform
+                                :source-name "unknown-in-align.md"}
+                               source)]
       (is (= [{:file "unknown-in-align.md"
                :line 2
                :column 1
@@ -125,7 +130,8 @@
 
   (testing "When a known align container has no closing fence, then transformation fails with its opening position"
     (let [result (pipeline/run
-                  "unclosed-align.md"
+                  {:mode :transform
+                   :source-name "unclosed-align.md"}
                   ":::align{position=\"right\"}\n本文です。\n")]
       (is (= [{:file "unclosed-align.md"
                :line 1
