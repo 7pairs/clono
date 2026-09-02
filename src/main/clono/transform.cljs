@@ -4,11 +4,13 @@
    [clono.directive-validation :as directive-validation]
    [clono.transform.align :as align]
    [clono.transform.column :as column]
+   [clono.transform.figure :as figure]
    [clono.transform.page-break :as page-break]))
 
 (def rules
   {"align" align/rule
    "column" column/rule
+   "figure" figure/rule
    "page-break" page-break/rule})
 
 (def known-directive-names
