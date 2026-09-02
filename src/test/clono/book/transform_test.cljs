@@ -46,7 +46,10 @@
                             :kind "appendix"
                             :include-in-toc true}]]
           (write-file! (.join path source "chapter.md")
-                       ":::align{position=\"right\"}\n本文\n:::\n")
+                       (str ":::align{position=\"right\"}\n本文\n:::\n\n"
+                            ":::figure[構成図]{#diagram}\n"
+                            "![構成図](./images/diagram.svg)\n"
+                            ":::\n"))
           (write-file! (.join path source "appendix.MD")
                        "# 付録\n\n::page-break\n\n続きです。\n")
           (write-file! (.join path source "images" "diagram.svg")
@@ -64,6 +67,8 @@
                            "<div class=\"clono-page-break\" aria-hidden=\"true\"></div>"))
             (is (.includes (:content (nth operations 1))
                            "<div class=\"clono-align-right\">"))
+            (is (.includes (:content (nth operations 1))
+                           "<figure class=\"clono-numbered-figure\" id=\"figure-diagram\">"))
             (is (not (contains? (nth operations 2) :content)))
             (is (not (contains? (nth operations 3) :content)))
             (is (false? (.existsSync fs output)))))))))
