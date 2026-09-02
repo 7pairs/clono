@@ -30,9 +30,16 @@
       (let [reference-targets
             (transform/collect-reference-targets tree context)
             transformation-context
-            (assoc context :reference-targets reference-targets)]
-        {:ok? true
-         :output (-> tree
-                     (transform/transform transformation-context)
-                     markdown/serialize)
-         :diagnostics []}))))
+            (assoc context :reference-targets reference-targets)
+            reference-diagnostics
+            (diagnostic/finalize
+             (transform/reference-diagnostics tree transformation-context))]
+        (if (seq reference-diagnostics)
+          {:ok? false
+           :output nil
+           :diagnostics reference-diagnostics}
+          {:ok? true
+           :output (-> tree
+                       (transform/transform transformation-context)
+                       markdown/serialize)
+           :diagnostics []})))))
