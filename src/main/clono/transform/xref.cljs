@@ -9,6 +9,11 @@
 (def allowed-formats
   #{"number" "number-title" "title"})
 
+(def placeholder-texts
+  {"number" "図X.X"
+   "number-title" "図X.X 参照先未解決"
+   "title" "参照先未解決"})
+
 (defn- attributes [node]
   (or (.-attributes node) #js {}))
 
@@ -84,12 +89,15 @@
         type (gobj/get (attributes node) "type")
         format (gobj/get (attributes node) "format")]
     (cond
+      (and (nil? target) (= :transform (:mode context)))
+      []
+
       (nil? target)
       [(node-diagnostic
         context
         node
         (str "`xref`の参照先`" (label-value node)
-             "`が同じ文書に存在しません。"))]
+             "`を解決できません。"))]
 
       (not= type (:type target))
       [(node-diagnostic
@@ -110,20 +118,37 @@
 (defn- html-node [value]
   #js {:type "html" :value value})
 
-(defn transform [node context]
-  (let [target (reference-target node context)
-        format (gobj/get (attributes node) "format")
-        title-attribute
+(defn- class-value [format placeholder?]
+  (str "clono-xref clono-xref-figure clono-xref-"
+       format
+       (when placeholder? " clono-xref-placeholder")))
+
+(defn- resolved-html [target format]
+  (let [title-attribute
         (when (contains? #{"number-title" "title"} format)
           (str " data-title-href=\"#" (:title-target-id target) "\""))]
+    (str "<a class=\""
+         (class-value format false)
+         "\" href=\"#"
+         (:target-id target)
+         "\""
+         title-attribute
+         "></a>")))
+
+(defn- placeholder-html [format]
+  (str "<span class=\""
+       (class-value format true)
+       "\">"
+       (get placeholder-texts format)
+       "</span>"))
+
+(defn transform [node context]
+  (let [target (reference-target node context)
+        format (gobj/get (attributes node) "format")]
     [(html-node
-      (str "<a class=\"clono-xref clono-xref-figure clono-xref-"
-           format
-           "\" href=\"#"
-           (:target-id target)
-           "\""
-           title-attribute
-           "></a>"))]))
+      (if target
+        (resolved-html target format)
+        (placeholder-html format)))]))
 
 (def rule
   {:node-type "textDirective"
