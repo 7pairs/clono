@@ -113,20 +113,21 @@
                  (invalid-inline-nodes child known-directive-names)))))
            vec))))
 
-(defn diagnostics [node source-name known-directive-names]
-  (if (not= "containerDirective" (.-type node))
-    [(diagnostic/for-node
-      source-name
-      node
-      "`align`はContainer directiveとして記述する必要があります。")]
-    (let [attribute-problem (attribute-diagnostic node source-name)]
-      (cond-> (content-diagnostics node source-name known-directive-names)
-        (some? attribute-problem) (conj attribute-problem)))))
+(defn diagnostics [node context known-directive-names]
+  (let [source-name (:source-name context)]
+    (if (not= "containerDirective" (.-type node))
+      [(diagnostic/for-node
+        source-name
+        node
+        "`align`はContainer directiveとして記述する必要があります。")]
+      (let [attribute-problem (attribute-diagnostic node source-name)]
+        (cond-> (content-diagnostics node source-name known-directive-names)
+          (some? attribute-problem) (conj attribute-problem))))))
 
 (defn html-node [value]
   #js {:type "html" :value value})
 
-(defn transform [node]
+(defn transform [node _context]
   (concat [(html-node "<div class=\"clono-align-right\">")]
           (ast/children node)
           [(html-node "</div>")]))
