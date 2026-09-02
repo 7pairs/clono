@@ -76,6 +76,7 @@
                                      :include-in-toc true}}
         validation-context (atom nil)
         collection-context (atom nil)
+        reference-validation-context (atom nil)
         transformation-context (atom nil)
         reference-targets [{:logical-id "diagram"
                             :type "figure"
@@ -93,14 +94,21 @@
                              (fn [_tree actual-context]
                                (reset! collection-context actual-context)
                                reference-targets)
+                             transform/reference-diagnostics
+                             (fn [_tree actual-context]
+                               (reset! reference-validation-context
+                                       actual-context)
+                               [])
                              transform/transform
                              (fn [tree actual-context]
                                (reset! transformation-context actual-context)
                                tree)]
                  (pipeline/run context "# 見出し\n"))]
-    (testing "When the pipeline runs successfully, then the same execution context is provided to validation and transformation"
+    (testing "When the pipeline runs successfully, then collected targets enrich the context used for reference validation and transformation"
       (is (:ok? result))
       (is (= context @validation-context))
       (is (= context @collection-context))
+      (is (= (assoc context :reference-targets reference-targets)
+             @reference-validation-context))
       (is (= (assoc context :reference-targets reference-targets)
              @transformation-context)))))
