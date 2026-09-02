@@ -39,6 +39,16 @@
              (mapcat #(% tree context known-directive-names)))]
     (vec (concat node-diagnostics document-diagnostics))))
 
+(defn collect-reference-targets [tree context]
+  (->> (directive-validation/validation-nodes tree known-directive-names)
+       (keep (fn [node]
+               (when-let [collector
+                          (:collect-reference-targets
+                           (get rules (.-name node)))]
+                 (collector node context))))
+       (mapcat identity)
+       vec))
+
 (declare transform-node!)
 
 (defn transform-children! [node context]

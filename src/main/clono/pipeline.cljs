@@ -27,6 +27,12 @@
       {:ok? false
        :output nil
        :diagnostics diagnostics}
-      {:ok? true
-       :output (-> tree (transform/transform context) markdown/serialize)
-       :diagnostics []})))
+      (let [reference-targets
+            (transform/collect-reference-targets tree context)
+            transformation-context
+            (assoc context :reference-targets reference-targets)]
+        {:ok? true
+         :output (-> tree
+                     (transform/transform transformation-context)
+                     markdown/serialize)
+         :diagnostics []}))))
