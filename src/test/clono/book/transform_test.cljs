@@ -113,6 +113,51 @@
                      :message "`second`は登録されていないdirectiveです。"}]
                    (:diagnostics result)))))))))
 
+(deftest book-specific-figure-validation-test
+  (testing "When book manuscripts violate figure kind and image path constraints, then every diagnostic is collected without exposing a partial plan"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              figure-source (fn [id image-path]
+                              (str ":::figure[検証用の図]{#" id "}\n"
+                                   "![図](" image-path ")\n"
+                                   ":::\n"))
+              publication [{:type :document
+                            :path "chapter.md"
+                            :kind "chapter"
+                            :include-in-toc true}
+                           {:type :document
+                            :path "frontmatter.md"
+                            :kind "frontmatter"
+                            :include-in-toc true}]]
+          (write-file! (.join path source "chapter.md")
+                       (figure-source "missing" "./images/missing.svg"))
+          (write-file! (.join path source "frontmatter.md")
+                       (figure-source "front" "./images/existing.svg"))
+          (write-file! (.join path source "notes.md")
+                       (figure-source "unlisted" "./images/existing.svg"))
+          (write-file! (.join path source "images" "existing.svg")
+                       "<svg></svg>\n")
+          (let [result (book-transform/run (create-plan project publication))]
+            (is (false? (:ok? result)))
+            (is (nil? (:plan result)))
+            (is (= [{:file "chapter.md"
+                     :line 2
+                     :column 1
+                     :directive "figure"
+                     :message "`figure`の画像ファイルが存在しません。"}
+                    {:file "frontmatter.md"
+                     :line 1
+                     :column 1
+                     :directive "figure"
+                     :message "`figure`は本文または付録の掲載Markdownにだけ記述できます。"}
+                    {:file "notes.md"
+                     :line 1
+                     :column 1
+                     :directive "figure"
+                     :message "`figure`は本文または付録の掲載Markdownにだけ記述できます。"}]
+                   (:diagnostics result)))))))))
+
 (deftest manuscript-read-failure-test
   (testing "When a planned manuscript becomes unreadable, then its failure and later manuscript diagnostics are both returned"
     (with-temporary-project

@@ -232,11 +232,12 @@
                              "src=\"./images/architecture%20diagram.svg\"")
                   kind))))
 
-        (testing "When an unlisted Markdown file contains a figure, then it is transformed without a publication kind"
+        (testing "When an unlisted Markdown file contains a figure, then its missing publication kind is diagnosed"
           (let [result (pipeline/run
                         (build-context source-root input-path nil)
                         source)]
-            (is (:ok? result))))
+            (is (= ["`figure`は本文または付録の掲載Markdownにだけ記述できます。"]
+                   (mapv :message (:diagnostics result))))))
 
         (testing "When a frontmatter or backmatter document contains a figure, then its document kind is diagnosed"
           (doseq [kind ["frontmatter" "backmatter"]]
