@@ -6,7 +6,7 @@
    [clono.markdown :as markdown]
    [clono.transform :as transform]))
 
-(defn run [context source]
+(defn analyze [context source]
   (let [source-name (:source-name context)
         tree (markdown/parse source)
         diagnostics (diagnostic/finalize
@@ -25,21 +25,36 @@
                       (transform/validate tree context)))]
     (if (seq diagnostics)
       {:ok? false
-       :output nil
+       :tree nil
        :diagnostics diagnostics}
-      (let [reference-targets
-            (transform/collect-reference-targets tree context)
-            transformation-context
-            (assoc context :reference-targets reference-targets)
-            reference-diagnostics
-            (diagnostic/finalize
-             (transform/reference-diagnostics tree transformation-context))]
-        (if (seq reference-diagnostics)
-          {:ok? false
-           :output nil
-           :diagnostics reference-diagnostics}
-          {:ok? true
-           :output (-> tree
-                       (transform/transform transformation-context)
-                       markdown/serialize)
-           :diagnostics []})))))
+      {:ok? true
+       :tree tree
+       :diagnostics []})))
+
+(defn run-analyzed [context tree]
+  (let [reference-targets
+        (if (contains? context :reference-targets)
+          (:reference-targets context)
+          (transform/collect-reference-targets tree context))
+        transformation-context
+        (assoc context :reference-targets reference-targets)
+        reference-diagnostics
+        (diagnostic/finalize
+         (transform/reference-diagnostics tree transformation-context))]
+    (if (seq reference-diagnostics)
+      {:ok? false
+       :output nil
+       :diagnostics reference-diagnostics}
+      {:ok? true
+       :output (-> tree
+                   (transform/transform transformation-context)
+                   markdown/serialize)
+       :diagnostics []})))
+
+(defn run [context source]
+  (let [analysis (analyze context source)]
+    (if (:ok? analysis)
+      (run-analyzed context (:tree analysis))
+      {:ok? false
+       :output nil
+       :diagnostics (:diagnostics analysis)})))

@@ -125,7 +125,12 @@
   (testing "When build cannot find an xref target, then it reports a diagnostic instead of generating a placeholder"
     (let [result
           (pipeline/run
-           {:mode :build :source-name "chapter.md"}
+           {:mode :build
+            :source-name "chapter.md"
+            :publication-entry {:type :document
+                                :path "chapter.md"
+                                :kind "chapter"
+                                :include-in-toc true}}
            ":xref[missing-figure]{type=\"figure\" format=\"number\"}\n")]
       (is (false? (:ok? result)))
       (is (nil? (:output result)))

@@ -4,6 +4,7 @@
    [clono.ast :as ast]
    [clono.diagnostic :as diagnostic]
    [clono.transform.figure :as figure]
+   [goog.string :as gstring]
    [goog.object :as gobj]))
 
 (def allowed-formats
@@ -89,6 +90,13 @@
         type (gobj/get (attributes node) "type")
         format (gobj/get (attributes node) "format")]
     (cond
+      (and (= :build (:mode context))
+           (nil? (:publication-entry context)))
+      [(node-diagnostic
+        context
+        node
+        "`publication`に掲載されていないMarkdownでは`xref`を使用できません。")]
+
       (and (nil? target) (= :transform (:mode context)))
       []
 
@@ -98,6 +106,12 @@
         node
         (str "`xref`の参照先`" (label-value node)
              "`を解決できません。"))]
+
+      (:resolution-error? target)
+      [(node-diagnostic
+        context
+        node
+        "`xref`の参照先への相対HTMLパスを安全に生成できません。")]
 
       (not= type (:type target))
       [(node-diagnostic
@@ -124,13 +138,19 @@
        (when placeholder? " clono-xref-placeholder")))
 
 (defn- resolved-html [target format]
-  (let [title-attribute
+  (let [href (or (:href target)
+                 (str "#" (:target-id target)))
+        title-href (or (:title-href target)
+                       (str "#" (:title-target-id target)))
+        title-attribute
         (when (contains? #{"number-title" "title"} format)
-          (str " data-title-href=\"#" (:title-target-id target) "\""))]
+          (str " data-title-href=\""
+               (gstring/htmlEscape title-href)
+               "\""))]
     (str "<a class=\""
          (class-value format false)
-         "\" href=\"#"
-         (:target-id target)
+         "\" href=\""
+         (gstring/htmlEscape href)
          "\""
          title-attribute
          "></a>")))
