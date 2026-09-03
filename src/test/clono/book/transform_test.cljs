@@ -31,6 +31,9 @@
 (defn- create-plan [project publication]
   (:plan (plan/create (book-config project publication))))
 
+(defn- operation-by-path [operations operation-path]
+  (first (filter #(= operation-path (:path %)) operations)))
+
 (deftest multiple-manuscript-transformation-test
   (testing "When a transformation plan contains multiple Markdown manuscripts, then every manuscript is transformed in deterministic plan order without writing output"
     (with-temporary-project
@@ -77,41 +80,173 @@
   (testing "When multiple manuscripts contain independent problems, then every diagnostic is collected in plan and source order without exposing a partial plan"
     (with-temporary-project
       (fn [project]
-        (let [source (.join path project "manuscripts")]
+        (let [source (.join path project "manuscripts")
+              transformed (atom [])]
           (write-file! (.join path source "a.md")
                        (str ":first[未知]\n\n"
                             ":::align{position=\"center\"}\n本文\n:::\n"))
           (write-file! (.join path source "b.md")
                        ":second[未知]\n")
-          (let [result (book-transform/run
-                        (create-plan
-                         project
-                         [{:type :document
-                           :path "a.md"
-                           :kind "chapter"
-                           :include-in-toc true}
-                          {:type :document
-                           :path "b.md"
-                           :kind "chapter"
-                           :include-in-toc true}]))]
-            (is (false? (:ok? result)))
-            (is (nil? (:plan result)))
-            (is (= [{:file "a.md"
-                     :line 1
-                     :column 1
-                     :directive "first"
-                     :message "`first`は登録されていないdirectiveです。"}
-                    {:file "a.md"
-                     :line 3
-                     :column 1
-                     :directive "align"
-                     :message "`align`の`position`属性には`right`を指定する必要があります。"}
-                    {:file "b.md"
-                     :line 1
-                     :column 1
-                     :directive "second"
-                     :message "`second`は登録されていないdirectiveです。"}]
-                   (:diagnostics result)))))))))
+          (with-redefs [pipeline/run-analyzed
+                        (fn [context _tree]
+                          (swap! transformed conj (:source-name context))
+                          {:ok? true :output "transformed\n" :diagnostics []})]
+            (let [result (book-transform/run
+                          (create-plan
+                           project
+                           [{:type :document
+                             :path "a.md"
+                             :kind "chapter"
+                             :include-in-toc true}
+                            {:type :document
+                             :path "b.md"
+                             :kind "chapter"
+                             :include-in-toc true}]))]
+              (is (false? (:ok? result)))
+              (is (nil? (:plan result)))
+              (is (= [] @transformed))
+              (is (= [{:file "a.md"
+                       :line 1
+                       :column 1
+                       :directive "first"
+                       :message "`first`は登録されていないdirectiveです。"}
+                      {:file "a.md"
+                       :line 3
+                       :column 1
+                       :directive "align"
+                       :message "`align`の`position`属性には`right`を指定する必要があります。"}
+                      {:file "b.md"
+                       :line 1
+                       :column 1
+                       :directive "second"
+                       :message "`second`は登録されていないdirectiveです。"}]
+                     (:diagnostics result))))))))))
+
+(deftest cross-document-reference-transformation-test
+  (testing "When published Markdown manuscripts refer to each other's figures, then source-relative links are written to both transformed manuscripts"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              publication [{:type :document
+                            :path "chapters/one.md"
+                            :kind "chapter"
+                            :include-in-toc true}
+                           {:type :document
+                            :path "appendices/two.MD"
+                            :kind "appendix"
+                            :include-in-toc true}]]
+          (write-file!
+           (.join path source "chapters" "one.md")
+           (str ":xref[workflow]{type=\"figure\" format=\"number-title\"}\n\n"
+                ":::figure[概要図]{#overview}\n"
+                "![概要](../images/overview.svg)\n"
+                ":::\n"))
+          (write-file!
+           (.join path source "appendices" "two.MD")
+           (str ":xref[overview]{type=\"figure\" format=\"title\"}\n\n"
+                ":::figure[処理フロー]{#workflow}\n"
+                "![処理](../images/workflow.svg)\n"
+                ":::\n"))
+          (write-file! (.join path source "images" "overview.svg")
+                       "<svg></svg>\n")
+          (write-file! (.join path source "images" "workflow.svg")
+                       "<svg></svg>\n")
+          (let [result (book-transform/run (create-plan project publication))
+                operations (:operations (:plan result))
+                chapter (operation-by-path operations "chapters/one.md")
+                appendix (operation-by-path operations "appendices/two.MD")]
+            (is (:ok? result))
+            (is (empty? (:diagnostics result)))
+            (is (.includes
+                 (:content chapter)
+                 (str "href=\"../appendices/two.html#figure-workflow\" "
+                      "data-title-href=\"../appendices/two.html"
+                      "#figure-workflow-caption\"")))
+            (is (.includes
+                 (:content appendix)
+                 (str "href=\"../chapters/one.html#figure-overview\" "
+                      "data-title-href=\"../chapters/one.html"
+                      "#figure-overview-caption\"")))
+            (is (not (.includes (:content chapter)
+                                "clono-xref-placeholder")))
+            (is (not (.includes (:content appendix)
+                                "clono-xref-placeholder")))))))))
+
+(deftest reference-preflight-failure-test
+  (testing "When published manuscripts contain a duplicate reference ID, then no published or unlisted manuscript is transformed"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              publication [{:type :document
+                            :path "a.md"
+                            :kind "chapter"
+                            :include-in-toc true}
+                           {:type :document
+                            :path "b.md"
+                            :kind "chapter"
+                            :include-in-toc true}]
+              figure-source
+              (str ":::figure[重複する図]{#duplicate}\n"
+                   "![図](./image.svg)\n"
+                   ":::\n")
+              transformed (atom [])]
+          (write-file! (.join path source "a.md") figure-source)
+          (write-file! (.join path source "b.md") figure-source)
+          (write-file! (.join path source "notes.md") "# 非掲載\n")
+          (write-file! (.join path source "image.svg") "<svg></svg>\n")
+          (with-redefs [pipeline/run-analyzed
+                        (fn [context _tree]
+                          (swap! transformed conj (:source-name context))
+                          {:ok? true :output "published\n" :diagnostics []})
+                        pipeline/run
+                        (fn [context _source]
+                          (swap! transformed conj (:source-name context))
+                          {:ok? true :output "unlisted\n" :diagnostics []})]
+            (let [result (book-transform/run
+                          (create-plan project publication))]
+              (is (false? (:ok? result)))
+              (is (nil? (:plan result)))
+              (is (= [] @transformed))
+              (is (= [{:file "b.md"
+                       :line 1
+                       :column 1
+                       :directive "figure"
+                       :message (str "`figure`の論理ID`duplicate`"
+                                     "が重複しています。")}]
+                     (:diagnostics result)))))))))
+
+  (testing "When a published manuscript contains an unresolved reference, then no manuscript is transformed"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              publication [{:type :document
+                            :path "chapter.md"
+                            :kind "chapter"
+                            :include-in-toc true}]
+              transformed (atom [])]
+          (write-file!
+           (.join path source "chapter.md")
+           ":xref[missing]{type=\"figure\" format=\"number\"}\n")
+          (write-file! (.join path source "notes.md") "# 非掲載\n")
+          (with-redefs [pipeline/run-analyzed
+                        (fn [context _tree]
+                          (swap! transformed conj (:source-name context))
+                          {:ok? true :output "published\n" :diagnostics []})
+                        pipeline/run
+                        (fn [context _source]
+                          (swap! transformed conj (:source-name context))
+                          {:ok? true :output "unlisted\n" :diagnostics []})]
+            (let [result (book-transform/run
+                          (create-plan project publication))]
+              (is (false? (:ok? result)))
+              (is (nil? (:plan result)))
+              (is (= [] @transformed))
+              (is (= [{:file "chapter.md"
+                       :line 1
+                       :column 1
+                       :directive "xref"
+                       :message "`xref`の参照先`missing`を解決できません。"}]
+                     (:diagnostics result))))))))))
 
 (deftest book-specific-figure-validation-test
   (testing "When book manuscripts violate figure kind and image path constraints, then every diagnostic is collected without exposing a partial plan"
@@ -265,7 +400,10 @@
                 (is (= ["notes.md"]
                        (mapv :source-name @unlisted-contexts)))
                 (is (= chapter-analysis-context
-                       chapter-transformation-context))
+                       (dissoc chapter-transformation-context
+                               :reference-targets)))
+                (is (= [] (:reference-targets
+                           chapter-transformation-context)))
                 (is (= :build (:mode chapter-analysis-context)))
                 (is (= (.join path source "chapter.md")
                        (:input-path chapter-analysis-context)))
