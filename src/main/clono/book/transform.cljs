@@ -1,6 +1,8 @@
 (ns clono.book.transform
   (:require
    ["node:fs" :as fs]
+   [clono.book.reference-resolution :as reference-resolution]
+   [clono.book.reference-targets :as reference-targets]
    [clono.pipeline :as pipeline]))
 
 (defn- error-message [error]
@@ -127,27 +129,91 @@
     :else
     (transform-operation context operation)))
 
+(defn- analysis-diagnostics [prepared-operations]
+  (into []
+        (mapcat (fn [{:keys [analysis diagnostics]}]
+                  (into diagnostics (:diagnostics analysis))))
+        prepared-operations))
+
+(defn- analyzed-manuscripts [prepared-operations]
+  (->> prepared-operations
+       (keep (fn [{:keys [operation context analysis]}]
+               (when analysis
+                 {:operation operation
+                  :context context
+                  :tree (:tree analysis)})))
+       vec))
+
+(defn- resolved-contexts-by-source [manuscripts]
+  (->> manuscripts
+       (map (fn [{:keys [context]}]
+              [(:source-name context) context]))
+       (into {})))
+
+(defn- apply-resolved-contexts [prepared-operations manuscripts]
+  (let [contexts (resolved-contexts-by-source manuscripts)]
+    (mapv (fn [{:keys [analysis context] :as prepared}]
+            (if analysis
+              (assoc prepared :context (get contexts (:source-name context)))
+              prepared))
+          prepared-operations)))
+
+(defn- preflight [prepared-operations]
+  (let [diagnostics (analysis-diagnostics prepared-operations)]
+    (if (seq diagnostics)
+      {:ok? false
+       :prepared-operations nil
+       :diagnostics diagnostics}
+      (let [manuscripts (analyzed-manuscripts prepared-operations)
+            collection (reference-targets/collect manuscripts)]
+        (if-not (:ok? collection)
+          {:ok? false
+           :prepared-operations nil
+           :diagnostics (:diagnostics collection)}
+          (let [resolution
+                (reference-resolution/resolve-references
+                 manuscripts
+                 (:targets collection))]
+            (if-not (:ok? resolution)
+              {:ok? false
+               :prepared-operations nil
+               :diagnostics (:diagnostics resolution)}
+              {:ok? true
+               :prepared-operations
+               (apply-resolved-contexts prepared-operations
+                                        (:manuscripts resolution))
+               :diagnostics []})))))))
+
+(defn- transform-prepared-operations [prepared-operations]
+  (reduce
+   (fn [result prepared]
+     (let [operation-result (transform-prepared prepared)]
+       {:operations (cond-> (:operations result)
+                      (:operation operation-result)
+                      (conj (:operation operation-result)))
+        :diagnostics (into (:diagnostics result)
+                           (:diagnostics operation-result))}))
+   {:operations []
+    :diagnostics []}
+   prepared-operations))
+
 (defn run [plan]
   (let [publication-documents (publication-by-path (:publication plan))
         prepared-operations
         (mapv #(prepare-operation plan publication-documents %)
               (:operations plan))
-        result
-        (reduce
-         (fn [result prepared]
-           (let [operation-result (transform-prepared prepared)]
-             {:operations (cond-> (:operations result)
-                            (:operation operation-result)
-                            (conj (:operation operation-result)))
-              :diagnostics (into (:diagnostics result)
-                                 (:diagnostics operation-result))}))
-         {:operations []
-          :diagnostics []}
-         prepared-operations)]
-    (if (seq (:diagnostics result))
+        preflight-result (preflight prepared-operations)]
+    (if-not (:ok? preflight-result)
       {:ok? false
        :plan nil
-       :diagnostics (:diagnostics result)}
-      {:ok? true
-       :plan (assoc plan :operations (:operations result))
-       :diagnostics []})))
+       :diagnostics (:diagnostics preflight-result)}
+      (let [result
+            (transform-prepared-operations
+             (:prepared-operations preflight-result))]
+        (if (seq (:diagnostics result))
+          {:ok? false
+           :plan nil
+           :diagnostics (:diagnostics result)}
+          {:ok? true
+           :plan (assoc plan :operations (:operations result))
+           :diagnostics []})))))
