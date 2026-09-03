@@ -33,7 +33,9 @@
 
 (defn run-analyzed [context tree]
   (let [reference-targets
-        (transform/collect-reference-targets tree context)
+        (if (contains? context :reference-targets)
+          (:reference-targets context)
+          (transform/collect-reference-targets tree context))
         transformation-context
         (assoc context :reference-targets reference-targets)
         reference-diagnostics
