@@ -89,6 +89,13 @@
         type (gobj/get (attributes node) "type")
         format (gobj/get (attributes node) "format")]
     (cond
+      (and (= :build (:mode context))
+           (nil? (:publication-entry context)))
+      [(node-diagnostic
+        context
+        node
+        "`publication`に掲載されていないMarkdownでは`xref`を使用できません。")]
+
       (and (nil? target) (= :transform (:mode context)))
       []
 

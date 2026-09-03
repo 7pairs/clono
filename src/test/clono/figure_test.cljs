@@ -261,12 +261,29 @@
                              "src=\"./images/architecture%20diagram.svg\"")
                   kind))))
 
-        (testing "When an unlisted Markdown file contains a figure, then its missing publication kind is diagnosed"
+        (testing "When an unlisted Markdown file contains a figure, then it is transformed without requiring a publication kind"
           (let [result (pipeline/run
                         (build-context source-root input-path nil)
                         source)]
-            (is (= ["`figure`は本文または付録の掲載Markdownにだけ記述できます。"]
-                   (mapv :message (:diagnostics result))))))
+            (is (:ok? result))
+            (is (empty? (:diagnostics result)))
+            (is (.includes (:output result)
+                           "id=\"figure-architecture\""))))
+
+        (testing "When an unlisted Markdown file refers to its own figure, then book references are diagnosed as unavailable"
+          (let [result (pipeline/run
+                        (build-context source-root input-path nil)
+                        (str source
+                             "\n:xref[architecture]{type=\"figure\" format=\"number\"}\n"))]
+            (is (false? (:ok? result)))
+            (is (nil? (:output result)))
+            (is (= [{:file "chapter.md"
+                     :line 5
+                     :column 1
+                     :directive "xref"
+                     :message (str "`publication`に掲載されていないMarkdownでは"
+                                   "`xref`を使用できません。")}]
+                   (:diagnostics result)))))
 
         (testing "When a frontmatter or backmatter document contains a figure, then its document kind is diagnosed"
           (doseq [kind ["frontmatter" "backmatter"]]

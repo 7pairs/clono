@@ -70,7 +70,9 @@ clonoは、番号付き画像を参照可能なHTML構造へ変換し、書籍�
 
 `figure`はMarkdown文書のルート直下にだけ記述できる。コラム、文字揃え、引用、箇条書き、番号付きリスト、脚注定義またはその他のブロックの内部に記述した場合はエラーとする。
 
-`clono build`では、`publication`で`kind`が`chapter`または`appendix`のMarkdown原稿だけに`figure`を記述できる。`frontmatter`または`backmatter`の画像には通常の番号なしMarkdown画像を使用する。前付または後付でも参照可能な番号なし画像が必要になった場合は、IDとキャプションを持つ別の入力契約を改めて検討する。
+`clono build`では、`publication`に掲載され、`kind`が`chapter`または`appendix`のMarkdown原稿に`figure`を記述できる。`frontmatter`または`backmatter`の画像には通常の番号なしMarkdown画像を使用する。前付または後付でも参照可能な番号なし画像が必要になった場合は、IDとキャプションを持つ別の入力契約を改めて検討する。
+
+`publication`に掲載されていないMarkdownには`figure`を記述できる。clonoは番号付き画像の構造へ変換するが、その論理IDを書籍全体の参照名前空間へ登録しない。この原稿では`xref`を使用できない。
 
 `clono transform`は書籍構造と文書種別を読み込まないため、`figure`が記述された文書の`kind`を検証しない。単一ファイル変換の結果を組版する利用者は、本文または付録に相当するカウンターを自身のテーマで用意する。
 

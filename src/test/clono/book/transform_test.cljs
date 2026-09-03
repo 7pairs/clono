@@ -150,11 +150,6 @@
                      :line 1
                      :column 1
                      :directive "figure"
-                     :message "`figure`は本文または付録の掲載Markdownにだけ記述できます。"}
-                    {:file "notes.md"
-                     :line 1
-                     :column 1
-                     :directive "figure"
                      :message "`figure`は本文または付録の掲載Markdownにだけ記述できます。"}]
                    (:diagnostics result)))))))))
 
