@@ -5,13 +5,15 @@
    [clono.transform.align :as align]
    [clono.transform.column :as column]
    [clono.transform.figure :as figure]
-   [clono.transform.page-break :as page-break]))
+   [clono.transform.page-break :as page-break]
+   [clono.transform.xref :as xref]))
 
 (def rules
   {"align" align/rule
    "column" column/rule
    "figure" figure/rule
-   "page-break" page-break/rule})
+   "page-break" page-break/rule
+   "xref" xref/rule})
 
 (def known-directive-names
   (set (keys rules)))
@@ -38,6 +40,26 @@
              (keep :document-diagnostics)
              (mapcat #(% tree context known-directive-names)))]
     (vec (concat node-diagnostics document-diagnostics))))
+
+(defn collect-reference-targets [tree context]
+  (->> (directive-validation/validation-nodes tree known-directive-names)
+       (keep (fn [node]
+               (when-let [collector
+                          (:collect-reference-targets
+                           (get rules (.-name node)))]
+                 (collector node context))))
+       (mapcat identity)
+       vec))
+
+(defn reference-diagnostics [tree context]
+  (->> (directive-validation/validation-nodes tree known-directive-names)
+       (keep (fn [node]
+               (when-let [validator
+                          (:reference-diagnostics
+                           (get rules (.-name node)))]
+                 (validator node context))))
+       (mapcat identity)
+       vec))
 
 (declare transform-node!)
 

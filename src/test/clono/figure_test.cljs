@@ -6,7 +6,8 @@
    [cljs.test :refer [deftest is testing]]
    [clono.markdown :as markdown]
    [clono.pipeline :as pipeline]
-   [clono.test-support :as test-support]))
+   [clono.test-support :as test-support]
+   [clono.transform :as transform]))
 
 (def valid-figure-source
   (str ":::figure[A &amp; &quot;B&quot; &lt;C&gt;]{#architecture}\n"
@@ -209,6 +210,34 @@
               "`figure`から生成するHTML ID`figure-diagram-caption`が重複しています。"]]]
       (let [result (pipeline/run (transform-context "duplicate-figure.md") source)]
         (is (= [message] (mapv :message (:diagnostics result))))))))
+
+(deftest figure-reference-target-collection-test
+  (testing "When a document contains figures, then their reference targets are collected in source order"
+    (let [context (transform-context "figures.md")
+          tree (markdown/parse
+                (str ":::figure[一つ目の図]{#first}\n"
+                     "![図1](first.svg)\n"
+                     ":::\n\n"
+                     ":::figure[二つ目の図]{#second}\n"
+                     "![図2](second.svg)\n"
+                     ":::\n"))]
+      (is (= [{:logical-id "first"
+               :type "figure"
+               :target-id "figure-first"
+               :title-target-id "figure-first-caption"
+               :numbered? true
+               :source-name "figures.md"
+               :line 1
+               :column 1}
+              {:logical-id "second"
+               :type "figure"
+               :target-id "figure-second"
+               :title-target-id "figure-second-caption"
+               :numbered? true
+               :source-name "figures.md"
+               :line 5
+               :column 1}]
+             (transform/collect-reference-targets tree context))))))
 
 (deftest build-figure-validation-test
   (with-temporary-project
