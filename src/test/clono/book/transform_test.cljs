@@ -202,14 +202,14 @@
                    :path "b.md"
                    :kind "chapter"
                    :include-in-toc true}])]
-            (with-redefs [pipeline/run
-                          (fn [context source]
+            (with-redefs [pipeline/run-analyzed
+                          (fn [context tree]
                             (let [source-name (:source-name context)]
                               (swap! processed conj source-name)
                               (if (= "a.md" source-name)
                                 (throw (js/Error. "unexpected failure"))
                                 {:ok? true
-                                 :output source
+                                 :output (str tree)
                                  :diagnostics []})))]
               (let [result (book-transform/run transformation-plan)]
                 (is (false? (:ok? result)))
@@ -230,26 +230,95 @@
                             :include-in-toc true}]]
           (write-file! (.join path source "chapter.md") "# 掲載原稿\n")
           (write-file! (.join path source "notes.md") "# 非掲載原稿\n")
-          (let [contexts (atom [])
+          (let [analysis-contexts (atom [])
+                transformation-contexts (atom [])
+                unlisted-contexts (atom [])
                 transformation-plan (create-plan project publication)]
-            (with-redefs [pipeline/run
+            (with-redefs [pipeline/analyze
                           (fn [context manuscript]
-                            (swap! contexts conj context)
+                            (swap! analysis-contexts conj context)
+                            {:ok? true
+                             :tree manuscript
+                             :diagnostics []})
+                          pipeline/run-analyzed
+                          (fn [context manuscript]
+                            (swap! transformation-contexts conj context)
+                            {:ok? true
+                             :output manuscript
+                             :diagnostics []})
+                          pipeline/run
+                          (fn [context manuscript]
+                            (swap! unlisted-contexts conj context)
                             {:ok? true
                              :output manuscript
                              :diagnostics []})]
               (let [result (book-transform/run transformation-plan)
-                    [chapter-context notes-context] @contexts]
+                    chapter-analysis-context (first @analysis-contexts)
+                    chapter-transformation-context
+                    (first @transformation-contexts)
+                    notes-context (first @unlisted-contexts)]
                 (is (:ok? result))
-                (is (= ["chapter.md" "notes.md"]
-                       (mapv :source-name @contexts)))
-                (is (= :build (:mode chapter-context)))
+                (is (= ["chapter.md"]
+                       (mapv :source-name @analysis-contexts)))
+                (is (= ["chapter.md"]
+                       (mapv :source-name @transformation-contexts)))
+                (is (= ["notes.md"]
+                       (mapv :source-name @unlisted-contexts)))
+                (is (= chapter-analysis-context
+                       chapter-transformation-context))
+                (is (= :build (:mode chapter-analysis-context)))
                 (is (= (.join path source "chapter.md")
-                       (:input-path chapter-context)))
-                (is (= source (:source-root-path chapter-context)))
+                       (:input-path chapter-analysis-context)))
+                (is (= source
+                       (:source-root-path chapter-analysis-context)))
                 (is (= (first publication)
-                       (:publication-entry chapter-context)))
+                       (:publication-entry chapter-analysis-context)))
                 (is (= :build (:mode notes-context)))
                 (is (= (.join path source "notes.md")
                        (:input-path notes-context)))
                 (is (nil? (:publication-entry notes-context)))))))))))
+
+(deftest published-manuscript-analysis-order-test
+  (testing "When a book transformation starts, then every published Markdown manuscript is analyzed before any manuscript is transformed"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              publication [{:type :document
+                            :path "a.md"
+                            :kind "chapter"
+                            :include-in-toc true}
+                           {:type :document
+                            :path "b.md"
+                            :kind "appendix"
+                            :include-in-toc true}]
+              events (atom [])
+              analyzed-trees (atom {})]
+          (write-file! (.join path source "a.md") "# A\n")
+          (write-file! (.join path source "b.md") "# B\n")
+          (write-file! (.join path source "notes.md") "# Notes\n")
+          (with-redefs [pipeline/analyze
+                        (fn [context manuscript]
+                          (let [tree #js {:source manuscript}]
+                            (swap! events conj [:analyze (:source-name context)])
+                            (swap! analyzed-trees assoc (:source-name context) tree)
+                            {:ok? true :tree tree :diagnostics []}))
+                        pipeline/run-analyzed
+                        (fn [context tree]
+                          (swap! events conj [:transform (:source-name context)])
+                          (is (identical? (get @analyzed-trees
+                                               (:source-name context))
+                                          tree))
+                          {:ok? true :output "transformed\n" :diagnostics []})
+                        pipeline/run
+                        (fn [context _manuscript]
+                          (swap! events conj [:run (:source-name context)])
+                          {:ok? true :output "unlisted\n" :diagnostics []})]
+            (let [result (book-transform/run
+                          (create-plan project publication))]
+              (is (:ok? result))
+              (is (= [[:analyze "a.md"]
+                      [:analyze "b.md"]
+                      [:transform "a.md"]
+                      [:transform "b.md"]
+                      [:run "notes.md"]]
+                     @events)))))))))

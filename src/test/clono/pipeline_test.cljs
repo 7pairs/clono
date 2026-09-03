@@ -6,6 +6,35 @@
    [clono.test-support :as test-support]
    [clono.transform :as transform]))
 
+(deftest analysis-test
+  (let [collection-called? (atom false)
+        transform-called? (atom false)
+        result
+        (with-redefs [transform/collect-reference-targets
+                      (fn [_tree _context]
+                        (reset! collection-called? true)
+                        [])
+                      transform/transform
+                      (fn [tree _context]
+                        (reset! transform-called? true)
+                        tree)]
+          (pipeline/analyze
+           {:mode :build
+            :source-name "chapter.md"
+            :publication-entry {:type :document
+                                :path "chapter.md"
+                                :kind "chapter"
+                                :include-in-toc true}}
+           ":::align{position=\"right\"}\n署名\n:::\n"))]
+    (testing "When valid Markdown is analyzed, then its unchanged AST is returned without collection or transformation"
+      (is (:ok? result))
+      (is (some? (:tree result)))
+      (is (empty? (:diagnostics result)))
+      (is (= "containerDirective"
+             (.-type (test-support/directive (:tree result) "align"))))
+      (is (false? @collection-called?))
+      (is (false? @transform-called?)))))
+
 (deftest run-test
   (let [result (pipeline/run {:mode :transform
                               :source-name "manuscript.md"
