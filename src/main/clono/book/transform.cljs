@@ -39,6 +39,42 @@
                     (str "Markdown原稿を変換できません: "
                          (error-message error)))]})))
 
+(defn- analyze-markdown [context operation source]
+  (try
+    {:operation operation
+     :context context
+     :analysis (pipeline/analyze context source)
+     :diagnostics []}
+    (catch :default error
+      {:operation nil
+       :context context
+       :diagnostics
+       [(diagnostic (:path operation)
+                    (str "Markdown原稿を変換できません: "
+                         (error-message error)))]})))
+
+(defn- transform-analyzed [context operation analysis]
+  (if-not (:ok? analysis)
+    {:ok? false
+     :operation nil
+     :diagnostics (:diagnostics analysis)}
+    (try
+      (let [result (pipeline/run-analyzed context (:tree analysis))]
+        (if (:ok? result)
+          {:ok? true
+           :operation (assoc operation :content (:output result))
+           :diagnostics []}
+          {:ok? false
+           :operation nil
+           :diagnostics (:diagnostics result)}))
+      (catch :default error
+        {:ok? false
+         :operation nil
+         :diagnostics
+         [(diagnostic (:path operation)
+                      (str "Markdown原稿を変換できません: "
+                           (error-message error)))]}))))
+
 (defn- transform-operation [context operation]
   (if-not (= :transform-markdown (:action operation))
     {:ok? true
@@ -64,13 +100,42 @@
    :source-root-path (:source-path plan)
    :publication-entry (get publication-documents (:path operation))})
 
+(defn- prepare-operation [plan publication-documents operation]
+  (let [context (execution-context plan publication-documents operation)]
+    (if (and (= :transform-markdown (:action operation))
+             (some? (:publication-entry context)))
+      (let [read-result (read-markdown operation)]
+        (if (:ok? read-result)
+          (analyze-markdown context operation (:source read-result))
+          {:operation nil
+           :context context
+           :diagnostics (:diagnostics read-result)}))
+      {:operation operation
+       :context context
+       :diagnostics []})))
+
+(defn- transform-prepared [{:keys [operation context analysis diagnostics]}]
+  (cond
+    (seq diagnostics)
+    {:ok? false
+     :operation nil
+     :diagnostics diagnostics}
+
+    analysis
+    (transform-analyzed context operation analysis)
+
+    :else
+    (transform-operation context operation)))
+
 (defn run [plan]
   (let [publication-documents (publication-by-path (:publication plan))
+        prepared-operations
+        (mapv #(prepare-operation plan publication-documents %)
+              (:operations plan))
         result
         (reduce
-         (fn [result operation]
-           (let [context (execution-context plan publication-documents operation)
-                 operation-result (transform-operation context operation)]
+         (fn [result prepared]
+           (let [operation-result (transform-prepared prepared)]
              {:operations (cond-> (:operations result)
                             (:operation operation-result)
                             (conj (:operation operation-result)))
@@ -78,7 +143,7 @@
                                  (:diagnostics operation-result))}))
          {:operations []
           :diagnostics []}
-         (:operations plan))]
+         prepared-operations)]
     (if (seq (:diagnostics result))
       {:ok? false
        :plan nil
