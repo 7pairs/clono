@@ -113,7 +113,7 @@ fixtureでは、見出しの最後の子が`text`ノードであり、その値�
 | ID記法のない見出し | ID候補なし |
 | `{注記}`で終わる見出し | ID候補なし |
 
-今回の有効性判定には、番号付き画像の論理IDと同じ`^[a-z][a-z0-9-]*$`を仮定した。最終的なID規則は見出し参照仕様で決定する。
+今回の有効性判定には、番号付き画像の論理IDと同じ`^[a-z][a-z0-9-]*$`を仮定した。後続の[見出し参照仕様](../specifications/heading-references.md)では、この規則を初期仕様として採用した。
 
 同じ`{#duplicate}`を持つ二つの見出しは、別々の`heading`ノードとして保持された。各ノードから同じID候補と異なる入力位置を取得できるため、同一原稿または書籍全体での重複検査に利用できる。
 
@@ -152,7 +152,7 @@ clonoは、収集のために見出しの`{#id}`を削除または別の記法�
 
 初期仕様で`# 見出し {#id}`の形式だけを参照対象として採用する場合、これらを先行して対応する必要はない。別の構文を許可する場合は、VFMの解釈とclonoの収集結果が一致することを追加検証する必要がある。
 
-このfixtureは`h4`の深さとID候補も取得できることを確認したが、`h4`以降を初期の参照対象とするかは決定していない。見出し番号、文書種別ごとの表示、参照用HTMLおよびCSSも、後続の見出し参照仕様で決定する。
+このfixtureは`h4`の深さとID候補も取得できることを確認した。後続の[見出し参照仕様](../specifications/heading-references.md)では、初期の参照対象を`h1`から`h3`までとし、`h4`以降を対象外とした。見出し番号、文書種別ごとの表示、参照用HTMLおよびCSSも同仕様で定める。
 
 ## 再現方法
 
@@ -169,6 +169,7 @@ clonoは、収集のために見出しの`{#id}`を削除または別の記法�
 ## 参照資料
 
 - [Vivliostyleの見出しID・連番・相互参照に関する調査](vivliostyle-heading-references.md)
+- [見出し参照仕様](../specifications/heading-references.md)
 - [Generic DirectivesとMarkdown ASTに関する調査](markdown-ast.md)
 - [番号付き画像と画像参照仕様](../specifications/figure-references.md)
 - [Generic DirectivesとmdastによるMarkdown変換パイプラインのADR](../decisions/0003-adopt-generic-directives-mdast-transformation-pipeline.md)
