@@ -65,7 +65,8 @@
   (.replace value (js/RegExp. "\\r\\n?" "g") "\n"))
 
 (deftest page-break-transformation-test
-  (let [result (pipeline/run "page-break.md" valid-page-break-source)
+  (let [result (pipeline/run {:mode :transform :source-name "page-break.md"}
+                             valid-page-break-source)
         output (:output result)
         tree (markdown/parse output)]
     (testing "When a valid page-break directive is transformed, then a fixed hidden marker and surrounding Markdown are returned"
@@ -89,7 +90,9 @@
 (deftest invalid-page-break-test
   (testing "When a page-break directive violates its contract, then transformation fails with a positioned diagnostic"
     (doseq [{:keys [case source message]} invalid-page-break-cases]
-      (let [result (pipeline/run "invalid-page-break.md" source)
+      (let [result (pipeline/run {:mode :transform
+                                  :source-name "invalid-page-break.md"}
+                                 source)
             problem (first (:diagnostics result))]
         (is (false? (:ok? result)) case)
         (is (nil? (:output result)) case)
@@ -108,7 +111,9 @@
                       "本文です。\n\n"
                       "::page-break\n"
                       "::::\n")
-          result (pipeline/run "page-break-in-column.md" source)]
+          result (pipeline/run {:mode :transform
+                                :source-name "page-break-in-column.md"}
+                               source)]
       (is (= [{:file "page-break-in-column.md"
                :line 4
                :column 1
@@ -121,7 +126,9 @@
     (let [source (str "::::third-party\n"
                       "::page-break\n"
                       "::::\n")
-          result (pipeline/run "page-break-in-unknown.md" source)]
+          result (pipeline/run {:mode :transform
+                                :source-name "page-break-in-unknown.md"}
+                               source)]
       (is (= [{:file "page-break-in-unknown.md"
                :line 1
                :column 1

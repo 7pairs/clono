@@ -6,8 +6,40 @@
    [clono.test-support :as test-support]
    [clono.transform :as transform]))
 
+(deftest analysis-test
+  (let [collection-called? (atom false)
+        transform-called? (atom false)
+        result
+        (with-redefs [transform/collect-reference-targets
+                      (fn [_tree _context]
+                        (reset! collection-called? true)
+                        [])
+                      transform/transform
+                      (fn [tree _context]
+                        (reset! transform-called? true)
+                        tree)]
+          (pipeline/analyze
+           {:mode :build
+            :source-name "chapter.md"
+            :publication-entry {:type :document
+                                :path "chapter.md"
+                                :kind "chapter"
+                                :include-in-toc true}}
+           ":::align{position=\"right\"}\n署名\n:::\n"))]
+    (testing "When valid Markdown is analyzed, then its unchanged AST is returned without collection or transformation"
+      (is (:ok? result))
+      (is (some? (:tree result)))
+      (is (empty? (:diagnostics result)))
+      (is (= "containerDirective"
+             (.-type (test-support/directive (:tree result) "align"))))
+      (is (false? @collection-called?))
+      (is (false? @transform-called?)))))
+
 (deftest run-test
-  (let [result (pipeline/run "manuscript.md" test-support/standard-markdown-source)
+  (let [result (pipeline/run {:mode :transform
+                              :source-name "manuscript.md"
+                              :input-path "/work/manuscript.md"}
+                             test-support/standard-markdown-source)
         output (:output result)
         tree (markdown/parse output)
         code (first (test-support/nodes-by-type tree "code"))]
@@ -29,12 +61,20 @@
                     ":nested[内部の未知記法]\n"
                     ":::\n\n"
                     ":index[独立した未知記法]\n")
+        collection-called? (atom false)
         transform-called? (atom false)
-        result (with-redefs [transform/transform
-                             (fn [tree]
+        result (with-redefs [transform/collect-reference-targets
+                             (fn [_tree _context]
+                               (reset! collection-called? true)
+                               [])
+                             transform/transform
+                             (fn [tree _context]
                                (reset! transform-called? true)
                                tree)]
-                 (pipeline/run "unknown.md" source))]
+                 (pipeline/run {:mode :transform
+                                :source-name "unknown.md"
+                                :input-path "/work/unknown.md"}
+                               source))]
     (testing "When unknown directives are found, then independent diagnostics are returned in source order"
       (is (false? (:ok? result)))
       (is (= [{:file "unknown.md"
@@ -49,6 +89,55 @@
                :message "`index`は登録されていないdirectiveです。"}]
              (:diagnostics result))))
 
-    (testing "When diagnostics are returned, then transformation is skipped and output is omitted"
+    (testing "When diagnostics are returned, then collection and transformation are skipped and output is omitted"
       (is (nil? (:output result)))
+      (is (false? @collection-called?))
       (is (false? @transform-called?)))))
+
+(deftest execution-context-test
+  (let [context {:mode :build
+                 :source-name "chapter.md"
+                 :input-path "/work/manuscripts/chapter.md"
+                 :source-root-path "/work/manuscripts"
+                 :publication-entry {:type :document
+                                     :path "chapter.md"
+                                     :kind "chapter"
+                                     :include-in-toc true}}
+        validation-context (atom nil)
+        collection-context (atom nil)
+        reference-validation-context (atom nil)
+        transformation-context (atom nil)
+        reference-targets [{:logical-id "diagram"
+                            :type "figure"
+                            :target-id "figure-diagram"
+                            :title-target-id "figure-diagram-caption"
+                            :numbered? true
+                            :source-name "chapter.md"
+                            :line 1
+                            :column 1}]
+        result (with-redefs [transform/validate
+                             (fn [_tree actual-context]
+                               (reset! validation-context actual-context)
+                               [])
+                             transform/collect-reference-targets
+                             (fn [_tree actual-context]
+                               (reset! collection-context actual-context)
+                               reference-targets)
+                             transform/reference-diagnostics
+                             (fn [_tree actual-context]
+                               (reset! reference-validation-context
+                                       actual-context)
+                               [])
+                             transform/transform
+                             (fn [tree actual-context]
+                               (reset! transformation-context actual-context)
+                               tree)]
+                 (pipeline/run context "# 見出し\n"))]
+    (testing "When the pipeline runs successfully, then collected targets enrich the context used for reference validation and transformation"
+      (is (:ok? result))
+      (is (= context @validation-context))
+      (is (= context @collection-context))
+      (is (= (assoc context :reference-targets reference-targets)
+             @reference-validation-context))
+      (is (= (assoc context :reference-targets reference-targets)
+             @transformation-context)))))

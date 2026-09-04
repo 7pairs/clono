@@ -259,7 +259,10 @@
         (if-not (:ok? input-result)
           (error-result (:message input-result))
           (try
-            (let [transformation (pipeline/run input (:source input-result))]
+            (let [transformation (pipeline/run {:mode :transform
+                                                :source-name input
+                                                :input-path (:input-path paths)}
+                                               (:source input-result))]
               (if-not (:ok? transformation)
                 (diagnostics-result (:diagnostics transformation))
                 (let [output-result (write-output output

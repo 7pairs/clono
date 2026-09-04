@@ -117,22 +117,23 @@
                (node-description invalid-node) "を使用できません。")))
        (invalid-content-nodes body known-directive-names)))))
 
-(defn diagnostics [node source-name known-directive-names]
-  (if (not= "containerDirective" (.-type node))
-    [(diagnostic/for-node
-      source-name
-      node
-      "`column`はContainer directiveとして記述する必要があります。")]
-    (let [title-problem (title-diagnostic node source-name)
-          attribute-problem (attribute-diagnostic node source-name)]
-      (cond-> (content-diagnostics node source-name known-directive-names)
-        (some? title-problem) (conj title-problem)
-        (some? attribute-problem) (conj attribute-problem)))))
+(defn diagnostics [node context known-directive-names]
+  (let [source-name (:source-name context)]
+    (if (not= "containerDirective" (.-type node))
+      [(diagnostic/for-node
+        source-name
+        node
+        "`column`はContainer directiveとして記述する必要があります。")]
+      (let [title-problem (title-diagnostic node source-name)
+            attribute-problem (attribute-diagnostic node source-name)]
+        (cond-> (content-diagnostics node source-name known-directive-names)
+          (some? title-problem) (conj title-problem)
+          (some? attribute-problem) (conj attribute-problem))))))
 
 (defn html-node [value]
   #js {:type "html" :value value})
 
-(defn transform [node]
+(defn transform [node _context]
   (let [title (title-value (label-node node))]
     (concat [(html-node "<aside class=\"clono-column\">")
              (html-node

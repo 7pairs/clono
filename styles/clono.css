@@ -20,3 +20,28 @@
   break-after: page;
   min-block-size: 1px;
 }
+
+body {
+  counter-reset: figure;
+}
+
+.clono-numbered-figure {
+  counter-increment: figure;
+}
+
+.clono-numbered-figure > .clono-figure-caption::before {
+  content: "図" counter(chapter) "." counter(figure) " ";
+}
+
+a.clono-xref-figure.clono-xref-number::before,
+a.clono-xref-figure.clono-xref-number-title::before {
+  content: "図" target-counter(attr(href url), chapter) "." target-counter(attr(href url), figure);
+}
+
+a.clono-xref-figure.clono-xref-number-title::after {
+  content: " " target-text(attr(data-title-href url), content);
+}
+
+a.clono-xref-figure.clono-xref-title::before {
+  content: target-text(attr(data-title-href url), content);
+}

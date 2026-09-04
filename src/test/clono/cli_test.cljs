@@ -5,6 +5,7 @@
    ["node:path" :as path]
    [cljs.test :refer [deftest is testing]]
    [clono.cli :as cli]
+   [clono.pipeline :as pipeline]
    [goog.object :as gobj]))
 
 (def supported-posix-platforms
@@ -120,6 +121,26 @@
           (str "Unexpected result for " arguments)))))
 
 (deftest file-transformation-test
+  (testing "When a single file is transformed, then the pipeline receives transform mode and the resolved input path"
+    (with-temporary-directory
+      (fn [directory]
+        (let [input (.join path directory "input.md")
+              output (.join path directory "output.md")
+              context (atom nil)]
+          (write-file! input "# 入力\n")
+          (with-redefs [pipeline/run
+                        (fn [actual-context _source]
+                          (reset! context actual-context)
+                          {:ok? true
+                           :output "# 出力\n"
+                           :diagnostics []})]
+            (is (= successful-transformation-result
+                   (cli/command-result ["transform" input "-o" output]))))
+          (is (= {:mode :transform
+                  :source-name input
+                  :input-path input}
+                 @context))))))
+
   (testing "When a valid file is transformed, then the output is replaced silently with LF line endings"
     (with-temporary-directory
       (fn [directory]
