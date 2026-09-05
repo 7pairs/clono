@@ -163,6 +163,53 @@
                      :source-name "headings.md"
                      :source source})))))))
 
+(deftest single-document-heading-target-collection-test
+  (testing "When a single document runs through the pipeline, then heading and figure targets reach transformation in source order"
+    (let [source (str "# はじめに {#introduction}\n\n"
+                      ":::figure[全体構成]{#architecture}\n"
+                      "![図](architecture.svg)\n"
+                      ":::\n\n"
+                      "## 詳細 {#details}\n")
+          transformation-context (atom nil)
+          result
+          (with-redefs [transform/transform
+                        (fn [tree context]
+                          (reset! transformation-context context)
+                          tree)]
+            (pipeline/run {:mode :transform
+                           :source-name "chapter.md"}
+                          source))]
+      (is (:ok? result))
+      (is (= [{:logical-id "introduction"
+               :type "heading"
+               :target-id "introduction"
+               :title-target-id "introduction"
+               :numbered? true
+               :heading-depth 1
+               :document-kind "chapter"
+               :source-name "chapter.md"
+               :line 1
+               :column 1}
+              {:logical-id "architecture"
+               :type "figure"
+               :target-id "figure-architecture"
+               :title-target-id "figure-architecture-caption"
+               :numbered? true
+               :source-name "chapter.md"
+               :line 3
+               :column 1}
+              {:logical-id "details"
+               :type "heading"
+               :target-id "details"
+               :title-target-id "details"
+               :numbered? true
+               :heading-depth 2
+               :document-kind "chapter"
+               :source-name "chapter.md"
+               :line 7
+               :column 1}]
+             (:reference-targets @transformation-context))))))
+
 (deftest heading-reference-target-collision-test
   (testing "When heading logical IDs are repeated, then the later heading is diagnosed without a directive name"
     (let [result

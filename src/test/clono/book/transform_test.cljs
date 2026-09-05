@@ -172,6 +172,71 @@
             (is (not (.includes (:content appendix)
                                 "clono-xref-placeholder")))))))))
 
+(deftest book-heading-target-collection-test
+  (testing "When published manuscripts run through book preflight, then all eligible heading targets reach every manuscript transformation"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              publication [{:type :document
+                            :path "chapter.md"
+                            :kind "chapter"
+                            :include-in-toc true}
+                           {:type :document
+                            :path "preface.md"
+                            :kind "frontmatter"
+                            :include-in-toc true}]
+              transformation-contexts (atom [])]
+          (write-file! (.join path source "chapter.md")
+                       (str "# 本文 {#chapter-heading}\n\n"
+                            "## 本文の節 {#chapter-section}\n"))
+          (write-file! (.join path source "preface.md")
+                       "# はじめに {#preface}\n")
+          (write-file! (.join path source "notes.md")
+                       "# 非掲載原稿 {#unlisted}\n")
+          (with-redefs [pipeline/run-analyzed
+                        (fn [context _tree]
+                          (when (:publication-entry context)
+                            (swap! transformation-contexts conj context))
+                          {:ok? true
+                           :output "transformed\n"
+                           :diagnostics []})]
+            (let [result (book-transform/run (create-plan project publication))
+                  target-metadata
+                  (fn [context]
+                    (mapv #(select-keys
+                            %
+                            [:logical-id
+                             :type
+                             :heading-depth
+                             :document-kind
+                             :numbered?
+                             :source-name])
+                          (:reference-targets context)))
+                  expected-targets
+                  [{:logical-id "chapter-heading"
+                    :type "heading"
+                    :heading-depth 1
+                    :document-kind "chapter"
+                    :numbered? true
+                    :source-name "chapter.md"}
+                   {:logical-id "chapter-section"
+                    :type "heading"
+                    :heading-depth 2
+                    :document-kind "chapter"
+                    :numbered? true
+                    :source-name "chapter.md"}
+                   {:logical-id "preface"
+                    :type "heading"
+                    :heading-depth 1
+                    :document-kind "frontmatter"
+                    :numbered? false
+                    :source-name "preface.md"}]]
+              (is (:ok? result))
+              (is (= ["chapter.md" "preface.md"]
+                     (mapv :source-name @transformation-contexts)))
+              (is (every? #(= expected-targets (target-metadata %))
+                          @transformation-contexts)))))))))
+
 (deftest reference-preflight-failure-test
   (testing "When published manuscripts contain a duplicate reference ID, then no published or unlisted manuscript is transformed"
     (with-temporary-project
