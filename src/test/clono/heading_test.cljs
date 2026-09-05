@@ -162,3 +162,51 @@
                     {:mode :transform
                      :source-name "headings.md"
                      :source source})))))))
+
+(deftest heading-reference-target-collision-test
+  (testing "When heading logical IDs are repeated, then the later heading is diagnosed without a directive name"
+    (let [result
+          (pipeline/run
+           {:mode :transform
+            :source-name "duplicate-headings.md"}
+           (str "# 最初 {#same}\n\n"
+                "## 次 {#same}\n"))]
+      (is (false? (:ok? result)))
+      (is (nil? (:output result)))
+      (is (= [{:file "duplicate-headings.md"
+               :line 3
+               :column 1
+               :message "見出しの論理ID`same`が重複しています。"}]
+             (:diagnostics result)))))
+
+  (testing "When a figure repeats an earlier heading logical ID, then the figure is diagnosed in the shared namespace"
+    (let [result
+          (pipeline/run
+           {:mode :transform
+            :source-name "heading-before-figure.md"}
+           (str "# 見出し {#architecture}\n\n"
+                ":::figure[全体構成]{#architecture}\n"
+                "![図](architecture.svg)\n"
+                ":::\n"))]
+      (is (= [{:file "heading-before-figure.md"
+               :line 3
+               :column 1
+               :directive "figure"
+               :message "`figure`の論理ID`architecture`が重複しています。"}]
+             (:diagnostics result)))))
+
+  (testing "When a heading HTML ID collides with an earlier figure caption ID, then the heading is diagnosed in the shared namespace"
+    (let [result
+          (pipeline/run
+           {:mode :transform
+            :source-name "figure-before-heading.md"}
+           (str ":::figure[全体構成]{#architecture}\n"
+                "![図](architecture.svg)\n"
+                ":::\n\n"
+                "# 見出し {#figure-architecture-caption}\n"))]
+      (is (= [{:file "figure-before-heading.md"
+               :line 5
+               :column 1
+               :message (str "見出しのHTML ID`figure-architecture-caption"
+                             "`が重複しています。")}]
+             (:diagnostics result))))))

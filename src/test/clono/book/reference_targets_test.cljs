@@ -143,4 +143,37 @@
                :directive "figure"
                :message (str "`figure`から生成するHTML ID`"
                              "figure-diagram-caption`が重複しています。")}]
+             (:diagnostics result)))))
+
+  (testing "When a figure repeats a heading logical ID from another manuscript, then the later figure is diagnosed"
+    (let [result
+          (reference-targets/collect
+           [(manuscript "chapter-one.md"
+                        "# 構成 {#architecture}\n")
+            (manuscript "chapter-two.md"
+                        (figure "architecture" "全体構成"))])]
+      (is (false? (:ok? result)))
+      (is (nil? (:targets result)))
+      (is (= [{:file "chapter-two.md"
+               :line 1
+               :column 1
+               :directive "figure"
+               :message "`figure`の論理ID`architecture`が重複しています。"}]
+             (:diagnostics result)))))
+
+  (testing "When a heading HTML ID collides with a figure caption ID from another manuscript, then the later heading is diagnosed without a directive name"
+    (let [result
+          (reference-targets/collect
+           [(manuscript "chapter-one.md"
+                        (figure "architecture" "全体構成"))
+            (manuscript
+             "chapter-two.md"
+             "# 衝突する見出し {#figure-architecture-caption}\n")])]
+      (is (false? (:ok? result)))
+      (is (nil? (:targets result)))
+      (is (= [{:file "chapter-two.md"
+               :line 1
+               :column 1
+               :message (str "見出しのHTML ID`figure-architecture-caption"
+                             "`が重複しています。")}]
              (:diagnostics result))))))
