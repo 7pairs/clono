@@ -4,6 +4,7 @@
    [clono.markdown :as markdown]
    [clono.pipeline :as pipeline]
    [clono.test-support :as test-support]
+   [clono.transform :as transform]
    [clono.transform.heading :as heading]))
 
 (defn- headings [source]
@@ -79,3 +80,85 @@
       (is (:ok? result))
       (is (empty? (:diagnostics result)))
       (is (string? (:output result))))))
+
+(deftest heading-reference-target-test
+  (testing "When eligible headings have valid IDs, then reference targets are generated in source order"
+    (let [source (str "# はじめに {#introduction}\n\n"
+                      "## `clono`の**構造** {#clono-structure}\n\n"
+                      "### 変換パイプライン {#transformation-pipeline}\n")
+          tree (markdown/parse source)
+          targets
+          (transform/collect-reference-targets
+           tree
+           {:mode :transform
+            :source-name "chapter.md"
+            :source source})]
+      (is (= [{:logical-id "introduction"
+               :type "heading"
+               :target-id "introduction"
+               :title-target-id "introduction"
+               :numbered? true
+               :heading-depth 1
+               :document-kind "chapter"
+               :source-name "chapter.md"
+               :line 1
+               :column 1}
+              {:logical-id "clono-structure"
+               :type "heading"
+               :target-id "clono-structure"
+               :title-target-id "clono-structure"
+               :numbered? true
+               :heading-depth 2
+               :document-kind "chapter"
+               :source-name "chapter.md"
+               :line 3
+               :column 1}
+              {:logical-id "transformation-pipeline"
+               :type "heading"
+               :target-id "transformation-pipeline"
+               :title-target-id "transformation-pipeline"
+               :numbered? true
+               :heading-depth 3
+               :document-kind "chapter"
+               :source-name "chapter.md"
+               :line 5
+               :column 1}]
+             targets))))
+
+  (testing "When build targets belong to different document kinds, then numbering metadata follows each publication entry"
+    (let [source "## 対象 {#target}\n"
+          tree (markdown/parse source)
+          target-for
+          (fn [kind]
+            (first
+             (transform/collect-reference-targets
+              tree
+              {:mode :build
+               :source-name (str kind ".md")
+               :source source
+               :publication-entry {:type :document
+                                   :path (str kind ".md")
+                                   :kind kind
+                                   :include-in-toc true}})))]
+      (is (= [["chapter" true]
+              ["appendix" true]
+              ["frontmatter" false]
+              ["backmatter" false]]
+             (mapv (fn [kind]
+                     (let [target (target-for kind)]
+                       [(:document-kind target) (:numbered? target)]))
+                   ["chapter" "appendix" "frontmatter" "backmatter"])))))
+
+  (testing "When headings are outside the supported syntax or have invalid IDs, then no reference target is generated for them"
+    (let [source (str "# 有効 {#valid}\n\n"
+                      "## 不正 {#Invalid_ID}\n\n"
+                      "#### 対象外 {#deep-heading}\n\n"
+                      "Setext {#setext-heading}\n"
+                      "------------------------\n")]
+      (is (= ["valid"]
+             (mapv :logical-id
+                   (transform/collect-reference-targets
+                    (markdown/parse source)
+                    {:mode :transform
+                     :source-name "headings.md"
+                     :source source})))))))
