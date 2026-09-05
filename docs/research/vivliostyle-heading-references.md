@@ -2,7 +2,7 @@
 
 - 状態: 調査済み
 - 初回調査日: 2026-08-16
-- 最終更新日: 2026-08-20
+- 最終更新日: 2026-09-05
 - 検証環境:
   - 実行環境: macOS、Node.js 24.19.0
   - HTML変換: `@vivliostyle/vfm` 2.7.0
@@ -52,7 +52,7 @@ Vivliostyle公式チュートリアルでは、次のページセレクターを
 
 fixtureでは、第1章と第2章を別々のMarkdownファイルに記述し、Vivliostyle CLIの`entry`へ章順に登録する。参照される見出しには明示的なIDを付ける。
 
-clonoの著者向け参照記法は未決定であるため、変換後の出力を模した空の`a`要素を原稿へ直接記述する。
+調査時点ではclonoの著者向け参照記法が未決定であったため、変換後の出力を模した空の`a`要素を原稿へ直接記述した。
 
 ```html
 <a class="xref-chapter xref-title"
@@ -86,7 +86,9 @@ PDFの検証プログラムは、既存のPDFを削除してからVivliostyle CL
 
 VFMが`{#identifier}`で指定したIDを、対応する`h1`、`h2`、`h3`要素へ出力することを確認した。参照用IDをVFMとは別の方法で生成または付け直す必要はない。
 
-IDの自動生成は検証していない。参照先を安定させ、タイトル変更の影響を避けるため、参照する見出しには著者が明示的なIDを指定する方針を候補とする。
+IDの自動生成は検証していない。参照先を安定させ、タイトル変更の影響を避けるため、参照する見出しには著者が明示的なIDを指定する方針を候補とした。後続の[見出し参照仕様](../specifications/heading-references.md)では、この方針を初期仕様として採用した。
+
+後続の[VFM見出しIDのMarkdown ASTに関する調査](markdown-heading-ids.md)では、この記法をclonoと同じMarkdown解析構成へ入力した場合、`{#id}`が見出しの最後にある`text`ノードへ保持されることを確認した。見出しレベル、ID候補および入力位置をClojureScriptから取得できるため、追加の構文解析ライブラリを導入せずに、見出しをclonoの参照対象として収集できる見通しが立った。
 
 ### 章・節・小節番号
 
@@ -135,7 +137,7 @@ fixtureでは目視確認を安定させるため、第2章の先頭へ`chapter-
 - `target-counter()`と`target-text()`を使用して参照文字列を生成する
 - 参照をPDF内部リンクとして保持する
 
-### clonoが担う候補となる責務
+### clonoが担う責務
 
 - 著者向けの参照記法を、番号とクリック先を示す`href`、タイトル取得先を示す`data-title-href`、用途別のclassを持つ空の`a`要素へ変換する
 - 別Markdownファイルを参照する場合に、変換後の出力パスを反映した`href`と`data-title-href`を生成する
@@ -146,6 +148,8 @@ fixtureでは目視確認を安定させるため、第2章の先頭へ`chapter-
 
 各参照種別を同じテーマで扱う[結合検証](vivliostyle-reference-integration.md)により、タイトル取得先を`data-title-href`へ統一した。見出しの番号とタイトルを参照する場合は、`href`と`data-title-href`の両方が同じ見出しIDを指す。
 
+具体的な入力契約、対象とする見出しレベル、文書種別ごとの番号形式、HTMLのclass、単一ファイル変換のプレースホルダー、および診断契約は、後続の[見出し参照仕様](../specifications/heading-references.md)で定める。
+
 ## 成立条件と未確認事項
 
 `@page :nth(1)`による章番号は、「一つのMarkdownファイルが一つの章に対応し、Vivliostyle設定の`entry`が章順に並ぶ」構成を前提とする。
@@ -155,7 +159,6 @@ fixtureでは目視確認を安定させるため、第2章の先頭へ`chapter-
 - 章として数えない前付・後付などを別のMarkdownファイルとして`entry`へ含める場合のカウンター制御
 - 一つのMarkdownファイルへ複数の章を記述する場合の番号制御
 - `h4`以降の番号形式
-- 見出しIDと著者向け参照記法の最終仕様
 - 未定義IDと重複IDに対するVFMおよびVivliostyleの挙動
 - 製品用テーマでのページ先頭見出しのレイアウト
 
@@ -175,6 +178,8 @@ Thunder Clawの次回作で前付・後付を別ファイルとして構成す�
 
 ## 参照資料
 
+- [見出し参照仕様](../specifications/heading-references.md)
+- [VFM見出しIDのMarkdown ASTに関する調査](markdown-heading-ids.md)
 - [セクション分け（Sectionization） | Vivliostyle Flavored Markdown 2.7.0](https://github.com/vivliostyle/vfm/blob/v2.7.0/docs/ja/vfm.md#セクション分け-sectionization)
 - [チュートリアル⑤カウンタと柱のスタイル | Vivliostyle](https://vivliostyle.org/ja/tutorials/configure-counters-running-heads/)（2026-08-16参照）
 - [Supported CSS Features | Vivliostyle.js 2.44.1](https://github.com/vivliostyle/vivliostyle.js/blob/v2.44.1/docs/ja/supported-css-features.md)
