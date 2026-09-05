@@ -28,9 +28,11 @@
     (if (seq diagnostics)
       {:ok? false
        :tree nil
+       :source nil
        :diagnostics diagnostics}
       {:ok? true
        :tree tree
+       :source source
        :diagnostics []})))
 
 (defn run-analyzed [context tree]
@@ -56,7 +58,8 @@
 (defn run [context source]
   (let [analysis (analyze context source)]
     (if (:ok? analysis)
-      (run-analyzed context (:tree analysis))
+      (run-analyzed (assoc context :source (:source analysis))
+                    (:tree analysis))
       {:ok? false
        :output nil
        :diagnostics (:diagnostics analysis)})))

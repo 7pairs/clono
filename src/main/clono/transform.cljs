@@ -5,6 +5,7 @@
    [clono.transform.align :as align]
    [clono.transform.column :as column]
    [clono.transform.figure :as figure]
+   [clono.transform.heading :as heading]
    [clono.transform.page-break :as page-break]
    [clono.transform.xref :as xref]))
 
@@ -42,14 +43,18 @@
     (vec (concat node-diagnostics document-diagnostics))))
 
 (defn collect-reference-targets [tree context]
-  (->> (directive-validation/validation-nodes tree known-directive-names)
-       (keep (fn [node]
-               (when-let [collector
-                          (:collect-reference-targets
-                           (get rules (.-name node)))]
-                 (collector node context))))
-       (mapcat identity)
-       vec))
+  (let [directive-targets
+        (->> (directive-validation/validation-nodes tree known-directive-names)
+             (keep (fn [node]
+                     (when-let [collector
+                                (:collect-reference-targets
+                                 (get rules (.-name node)))]
+                       (collector node context))))
+             (mapcat identity))
+        heading-targets (heading/collect-reference-targets tree context)]
+    (->> (concat directive-targets heading-targets)
+         (sort-by (juxt :line :column))
+         vec)))
 
 (defn reference-diagnostics [tree context]
   (->> (directive-validation/validation-nodes tree known-directive-names)

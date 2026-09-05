@@ -13,6 +13,9 @@
 (def ^:private heading-id-suffix-pattern
   #"([ \t]+\{#([^{}\r\n]*)\})[ \t]*$")
 
+(def ^:private numbered-document-kinds
+  #{"chapter" "appendix"})
+
 (defn- source-fragment [source node]
   (let [start (ast/property node "position" "start" "offset")
         end (ast/property node "position" "end" "offset")]
@@ -50,3 +53,29 @@
                     (str "見出しのIDには英小文字で始まる英小文字、"
                          "数字、ハイフンだけの値を指定してください。"))))))
        vec))
+
+(defn- document-kind [context]
+  (if (= :transform (:mode context))
+    "chapter"
+    (get-in context [:publication-entry :kind])))
+
+(defn collect-reference-targets [tree context]
+  (let [source (:source context)
+        kind (document-kind context)]
+    (->> (ast/nodes tree)
+         (keep (fn [node]
+                 (when-let [candidate (explicit-id-candidate source node)]
+                   (let [logical-id (:value candidate)
+                         start (ast/property node "position" "start")]
+                     (when (reference-id/valid? logical-id)
+                       {:logical-id logical-id
+                        :type "heading"
+                        :target-id logical-id
+                        :title-target-id logical-id
+                        :numbered? (contains? numbered-document-kinds kind)
+                        :heading-depth (.-depth node)
+                        :document-kind kind
+                        :source-name (:source-name context)
+                        :line (ast/property start "line")
+                        :column (ast/property start "column")})))))
+         vec)))
