@@ -49,7 +49,7 @@ Vivliostyleと`clono`の責務分担は、[Vivliostyleとclonoの責務整理](.
 | 番号付きコードリスト | 未定 | 検討前 | `clono`がID、コードフェンス、キャプションを持つ`figure`構造へ変換する候補。番号なしコードブロックには標準Markdownを使用する |
 | 見出し、画像、表、コードリストの連番 | なし | 対象外 | 番号の生成をVivliostyleとテーマCSSのカウンターへ委譲する |
 | 画像の参照 | `:xref[id]{type="figure" format="number"}`、`format="number-title"`または`format="title"` | 実装済み | `clono transform`では、参照種別、表示形式および論理IDを検証し、同一原稿内の参照をリンク構造へ、同一原稿内に参照先がない参照をプレビュー用プレースホルダーへ変換する。`clono build`では、掲載Markdown全体から参照対象を収集し、同一原稿および原稿間の参照をリンク構造へ変換する。重複ID、未定義参照または安全に解決できない原稿間パスは診断し、生成済み原稿ツリーを変更しない。詳細は[番号付き画像と画像参照仕様](figure-references.md)を参照する |
-| 見出しの参照 | `:xref[id]{type="heading" format="number"}`、`format="number-title"`または`format="title"` | 実装予定 | VFMの明示的なIDを持つ`h1`から`h3`までを参照対象とし、画像参照と共通の`xref`をリンク構造または単一ファイル変換用のプレースホルダーへ変換する。詳細は[見出し参照仕様](heading-references.md)を参照する |
+| 見出しの参照 | `:xref[id]{type="heading" format="number"}`、`format="number-title"`または`format="title"` | 実装中 | VFMの明示的なIDを持つ`h1`から`h3`までを参照対象とし、画像参照と共通の`xref`をリンク構造または単一ファイル変換用のプレースホルダーへ変換する。詳細は[見出し参照仕様](heading-references.md)を参照する |
 | 表、コードリストの参照 | 未定 | 検討前 | 画像および見出し参照と共通の`xref`を使用し、`type`で対象を区別する方針。個別機能の実装前に入力契約を決定する |
 
 ### 生成機能
