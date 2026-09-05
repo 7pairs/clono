@@ -4,6 +4,7 @@
    [clono.directive-syntax :as directive-syntax]
    [clono.directive-validation :as directive-validation]
    [clono.markdown :as markdown]
+   [clono.reference-targets :as reference-targets]
    [clono.transform :as transform]
    [clono.transform.heading :as heading]))
 
@@ -36,24 +37,35 @@
        :diagnostics []})))
 
 (defn run-analyzed [context tree]
-  (let [reference-targets
-        (if (contains? context :reference-targets)
+  (let [provided-reference-targets? (contains? context :reference-targets)
+        collected-targets
+        (if provided-reference-targets?
           (:reference-targets context)
           (transform/collect-reference-targets tree context))
-        transformation-context
-        (assoc context :reference-targets reference-targets)
-        reference-diagnostics
-        (diagnostic/finalize
-         (transform/reference-diagnostics tree transformation-context))]
-    (if (seq reference-diagnostics)
+        target-validation
+        (if provided-reference-targets?
+          {:ok? true
+           :targets collected-targets
+           :diagnostics []}
+          (reference-targets/validate collected-targets))]
+    (if-not (:ok? target-validation)
       {:ok? false
        :output nil
-       :diagnostics reference-diagnostics}
-      {:ok? true
-       :output (-> tree
-                   (transform/transform transformation-context)
-                   markdown/serialize)
-       :diagnostics []})))
+       :diagnostics (:diagnostics target-validation)}
+      (let [transformation-context
+            (assoc context :reference-targets (:targets target-validation))
+            reference-diagnostics
+            (diagnostic/finalize
+             (transform/reference-diagnostics tree transformation-context))]
+        (if (seq reference-diagnostics)
+          {:ok? false
+           :output nil
+           :diagnostics reference-diagnostics}
+          {:ok? true
+           :output (-> tree
+                       (transform/transform transformation-context)
+                       markdown/serialize)
+           :diagnostics []})))))
 
 (defn run [context source]
   (let [analysis (analyze context source)]
