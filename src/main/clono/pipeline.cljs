@@ -4,7 +4,8 @@
    [clono.directive-syntax :as directive-syntax]
    [clono.directive-validation :as directive-validation]
    [clono.markdown :as markdown]
-   [clono.transform :as transform]))
+   [clono.transform :as transform]
+   [clono.transform.heading :as heading]))
 
 (defn analyze [context source]
   (let [source-name (:source-name context)
@@ -22,6 +23,7 @@
                        tree
                        source-name
                        transform/known-directive-names)
+                      (heading/diagnostics source tree context)
                       (transform/validate tree context)))]
     (if (seq diagnostics)
       {:ok? false

@@ -3,7 +3,7 @@
    [clojure.string :as str]
    [clono.ast :as ast]
    [clono.diagnostic :as diagnostic]
-   [clono.transform.figure :as figure]
+   [clono.reference-id :as reference-id]
    [goog.string :as gstring]
    [goog.object :as gobj]))
 
@@ -34,7 +34,7 @@
     (if (or (empty? children)
             (not-every? #(= "text" (.-type %)) children)
             (str/blank? label)
-            (not (re-matches figure/logical-id-pattern label)))
+            (not (reference-id/valid? label)))
       [(node-diagnostic
         context
         node

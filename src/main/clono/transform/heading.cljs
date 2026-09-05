@@ -1,6 +1,8 @@
 (ns clono.transform.heading
   (:require
-   [clono.ast :as ast]))
+   [clono.ast :as ast]
+   [clono.diagnostic :as diagnostic]
+   [clono.reference-id :as reference-id]))
 
 (def ^:private supported-depths
   #{1 2 3})
@@ -36,3 +38,15 @@
                      (re-find heading-id-suffix-pattern fragment)]
             {:value value
              :suffix suffix}))))))
+
+(defn diagnostics [source tree context]
+  (->> (ast/nodes tree)
+       (keep (fn [node]
+               (when-let [candidate (explicit-id-candidate source node)]
+                 (when-not (reference-id/valid? (:value candidate))
+                   (diagnostic/at-markdown-point
+                    (:source-name context)
+                    (ast/property node "position" "start")
+                    (str "見出しのIDには英小文字で始まる英小文字、"
+                         "数字、ハイフンだけの値を指定してください。"))))))
+       vec))

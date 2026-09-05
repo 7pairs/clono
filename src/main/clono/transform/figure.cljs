@@ -6,11 +6,9 @@
    [clono.ast :as ast]
    [clono.diagnostic :as diagnostic]
    [clono.directive-validation :as directive-validation]
+   [clono.reference-id :as reference-id]
    [goog.object :as gobj]
    [goog.string :as gstring]))
-
-(def logical-id-pattern
-  #"^[a-z][a-z0-9-]*$")
 
 (def allowed-document-kinds
   #{"chapter" "appendix"})
@@ -73,7 +71,7 @@
       (nil? id)
       (conj (node-diagnostic context node "`figure`には`id`属性が必要です。"))
 
-      (and (some? id) (not (re-matches logical-id-pattern id)))
+      (and (some? id) (not (reference-id/valid? id)))
       (conj (node-diagnostic
              context
              node
@@ -274,7 +272,7 @@
 
 (defn- valid-logical-id [node]
   (let [id (logical-id node)]
-    (when (and (string? id) (re-matches logical-id-pattern id))
+    (when (reference-id/valid? id)
       id)))
 
 (defn- duplicate-id-diagnostics [figures context]
