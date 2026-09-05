@@ -2,6 +2,7 @@
   (:require
    [cljs.test :refer [deftest is testing]]
    [clono.markdown :as markdown]
+   [clono.pipeline :as pipeline]
    [clono.test-support :as test-support]
    [clono.transform.heading :as heading]))
 
@@ -45,3 +46,36 @@
               {:value ""
                :suffix " {#}"}]
              (candidates source))))))
+
+(deftest heading-id-validation-test
+  (testing "When eligible ATX headings have malformed IDs, then positioned diagnostics are returned in source order"
+    (let [result
+          (pipeline/run
+           {:mode :transform
+            :source-name "invalid-headings.md"}
+           (str "# 大文字 {#Invalid}\n\n"
+                "## 空のID {#}\n"))]
+      (is (false? (:ok? result)))
+      (is (nil? (:output result)))
+      (is (= [{:file "invalid-headings.md"
+               :line 1
+               :column 1
+               :message (str "見出しのIDには英小文字で始まる英小文字、"
+                             "数字、ハイフンだけの値を指定してください。")}
+              {:file "invalid-headings.md"
+               :line 3
+               :column 1
+               :message (str "見出しのIDには英小文字で始まる英小文字、"
+                             "数字、ハイフンだけの値を指定してください。")}]
+             (:diagnostics result)))))
+
+  (testing "When malformed IDs use unsupported heading forms, then they remain outside heading reference validation"
+    (let [source (str "#### 深い見出し {#Invalid_ID}\n\n"
+                      "Setext見出し {#Invalid_ID}\n"
+                      "---------------------------\n")
+          result (pipeline/run {:mode :transform
+                                :source-name "unsupported-headings.md"}
+                               source)]
+      (is (:ok? result))
+      (is (empty? (:diagnostics result)))
+      (is (string? (:output result))))))
