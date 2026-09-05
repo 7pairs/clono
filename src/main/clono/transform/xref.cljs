@@ -4,16 +4,34 @@
    [clono.ast :as ast]
    [clono.diagnostic :as diagnostic]
    [clono.reference-id :as reference-id]
+   [clono.transform.xref.figure :as figure-reference]
    [goog.string :as gstring]
    [goog.object :as gobj]))
 
 (def allowed-formats
   #{"number" "number-title" "title"})
 
-(def placeholder-texts
-  {"number" "図X.X"
-   "number-title" "図X.X 参照先未解決"
-   "title" "参照先未解決"})
+(def ^:private reference-type-rules
+  [figure-reference/rule])
+
+(def ^:private reference-type-rules-by-name
+  (->> reference-type-rules
+       (map (juxt :type identity))
+       (into {})))
+
+(defn- option-list [values]
+  (let [formatted (mapv #(str "`" % "`") values)]
+    (case (count formatted)
+      0 ""
+      1 (first formatted)
+      (str (str/join "、" (butlast formatted))
+           "または"
+           (last formatted)))))
+
+(defn- supported-type-message []
+  (str "`xref`の`type`属性には"
+       (option-list (mapv :type reference-type-rules))
+       "を指定してください。"))
 
 (defn- attributes [node]
   (or (.-attributes node) #js {}))
@@ -50,11 +68,12 @@
       (nil? type)
       (conj (node-diagnostic context node "`xref`には`type`属性が必要です。"))
 
-      (and (some? type) (not= "figure" type))
+      (and (some? type)
+           (not (contains? reference-type-rules-by-name type)))
       (conj (node-diagnostic
              context
              node
-             "`xref`の`type`属性には`figure`を指定してください。"))
+             (supported-type-message)))
 
       (nil? format)
       (conj (node-diagnostic context node "`xref`には`format`属性が必要です。"))
@@ -132,12 +151,15 @@
 (defn- html-node [value]
   #js {:type "html" :value value})
 
-(defn- class-value [format placeholder?]
-  (str "clono-xref clono-xref-figure clono-xref-"
-       format
-       (when placeholder? " clono-xref-placeholder")))
+(defn- class-value [type-rule target format placeholder?]
+  (str/join
+   " "
+   (concat ["clono-xref"]
+           ((:class-names type-rule) target)
+           [(str "clono-xref-" format)]
+           (when placeholder? ["clono-xref-placeholder"]))))
 
-(defn- resolved-html [target format]
+(defn- resolved-html [type-rule target format]
   (let [href (or (:href target)
                  (str "#" (:target-id target)))
         title-href (or (:title-href target)
@@ -148,27 +170,29 @@
                (gstring/htmlEscape title-href)
                "\""))]
     (str "<a class=\""
-         (class-value format false)
+         (class-value type-rule target format false)
          "\" href=\""
          (gstring/htmlEscape href)
          "\""
          title-attribute
          "></a>")))
 
-(defn- placeholder-html [format]
+(defn- placeholder-html [type-rule format]
   (str "<span class=\""
-       (class-value format true)
+       (class-value type-rule nil format true)
        "\">"
-       (get placeholder-texts format)
+       (get-in type-rule [:placeholder-texts format])
        "</span>"))
 
 (defn transform [node context]
   (let [target (reference-target node context)
+        type (gobj/get (attributes node) "type")
+        type-rule (get reference-type-rules-by-name type)
         format (gobj/get (attributes node) "format")]
     [(html-node
       (if target
-        (resolved-html target format)
-        (placeholder-html format)))]))
+        (resolved-html type-rule target format)
+        (placeholder-html type-rule format)))]))
 
 (def rule
   {:node-type "textDirective"
