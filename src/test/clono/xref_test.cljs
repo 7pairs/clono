@@ -279,3 +279,61 @@
                 "  content: target-text(attr(data-title-href url), content);\n"
                 "}\n")))
       (is (not (.includes stylesheet ".clono-xref-placeholder::"))))))
+
+(deftest heading-xref-stylesheet-test
+  (testing "When the clono stylesheet is inspected, then heading references receive numbers for every numbered document and heading level"
+    (let [stylesheet (normalize-line-endings
+                      (.readFileSync fs "styles/clono.css" "utf8"))]
+      (doseq [[document level content]
+              [["chapter"
+                "h1"
+                "\"第\" target-counter(attr(href url), chapter) \"章\""]
+               ["chapter"
+                "h2"
+                (str "target-counter(attr(href url), chapter) \".\" "
+                     "target-counter(attr(href url), section)")]
+               ["chapter"
+                "h3"
+                (str "target-counter(attr(href url), chapter) \".\" "
+                     "target-counter(attr(href url), section) \".\" "
+                     "target-counter(attr(href url), subsection)")]
+               ["appendix"
+                "h1"
+                (str "\"付録\" target-counter(attr(href url), appendix, "
+                     "upper-alpha)")]
+               ["appendix"
+                "h2"
+                (str "target-counter(attr(href url), appendix, upper-alpha) "
+                     "\".\" target-counter(attr(href url), section)")]
+               ["appendix"
+                "h3"
+                (str "target-counter(attr(href url), appendix, upper-alpha) "
+                     "\".\" target-counter(attr(href url), section) \".\" "
+                     "target-counter(attr(href url), subsection)")]]]
+        (let [selector (str "a.clono-xref-heading-" document
+                            ".clono-xref-heading-" level)]
+          (is (.includes
+               stylesheet
+               (str selector ".clono-xref-number::before,\n"
+                    selector ".clono-xref-number-title::before {\n"
+                    "  content: " content ";\n"
+                    "}\n"))
+              (str document " " level))))))
+
+  (testing "When the clono stylesheet is inspected, then heading titles are generated only for resolved links that request them"
+    (let [stylesheet (normalize-line-endings
+                      (.readFileSync fs "styles/clono.css" "utf8"))]
+      (is (.includes
+           stylesheet
+           (str "a.clono-xref-heading.clono-xref-number-title::after {\n"
+                "  content: \" \" "
+                "target-text(attr(data-title-href url), content);\n"
+                "}\n")))
+      (is (.includes
+           stylesheet
+           (str "a.clono-xref-heading.clono-xref-title::before {\n"
+                "  content: "
+                "target-text(attr(data-title-href url), content);\n"
+                "}\n")))
+      (is (not (.includes stylesheet
+                          ".clono-xref-placeholder::"))))))
