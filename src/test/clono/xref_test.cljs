@@ -71,7 +71,8 @@
               :message "`xref`には`type`属性が必要です。"}
              {:case "unsupported type"
               :source ":xref[architecture]{type=\"table\" format=\"number\"}\n"
-              :message "`xref`の`type`属性には`figure`を指定してください。"}
+              :message (str "`xref`の`type`属性には`figure`または"
+                            "`heading`を指定してください。")}
              {:case "missing format"
               :source ":xref[architecture]{type=\"figure\"}\n"
               :message "`xref`には`format`属性が必要です。"}
@@ -97,6 +98,18 @@
           (is (= "xref" (:directive problem)) case)
           (is (pos-int? (:line problem)) case)
           (is (pos-int? (:column problem)) case))))))
+
+(deftest heading-xref-type-validation-test
+  (testing "When heading references use a supported format, then analysis accepts their reference type"
+    (doseq [format ["number" "number-title" "title"]]
+      (let [result
+            (pipeline/analyze
+             (transform-context "heading-xref.md")
+             (str ":xref[introduction]{type=\"heading\" format=\""
+                  format
+                  "\"}\n"))]
+        (is (:ok? result) format)
+        (is (empty? (:diagnostics result)) format)))))
 
 (deftest unresolved-local-xref-test
   (testing "When transform cannot find a local xref target, then each format becomes a fixed placeholder without link attributes or author input"
