@@ -1,17 +1,21 @@
 (ns clono.transform.xref.heading)
 
+(def ^:private heading-level-classes
+  {1 "clono-xref-heading-h1"
+   2 "clono-xref-heading-h2"
+   3 "clono-xref-heading-h3"})
+
+(def ^:private document-kind-classes
+  {"chapter" "clono-xref-heading-chapter"
+   "appendix" "clono-xref-heading-appendix"
+   "frontmatter" "clono-xref-heading-unnumbered"
+   "backmatter" "clono-xref-heading-unnumbered"})
+
 (defn- heading-level-class [target]
-  (when-let [depth (:heading-depth target)]
-    (str "clono-xref-heading-h" depth)))
+  (get heading-level-classes (:heading-depth target)))
 
 (defn- document-kind-class [target]
-  (when-let [kind (:document-kind target)]
-    (str "clono-xref-heading-"
-         (case kind
-           "chapter" "chapter"
-           "appendix" "appendix"
-           "frontmatter" "unnumbered"
-           "backmatter" "unnumbered"))))
+  (get document-kind-classes (:document-kind target)))
 
 (defn- class-names [target]
   (cond-> ["clono-xref-heading"]
