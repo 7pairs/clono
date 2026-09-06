@@ -111,6 +111,67 @@
         (is (:ok? result) format)
         (is (empty? (:diagnostics result)) format)))))
 
+(deftest local-heading-xref-transformation-test
+  (testing "When local heading references use every format before and after their targets, then each reference is resolved with heading metadata"
+    (let [source
+          (str ":xref[introduction]{type=\"heading\" format=\"number\"}\n\n"
+               "# はじめに {#introduction}\n\n"
+               ":xref[structure]{type=\"heading\" format=\"number-title\"}\n\n"
+               "## 全体構造 {#structure}\n\n"
+               "### 変換処理 {#transformation}\n\n"
+               ":xref[transformation]{type=\"heading\" format=\"title\"}\n")
+          result (pipeline/run (transform-context "heading-xref.md") source)
+          output (:output result)
+          tree (markdown/parse output)]
+      (is (:ok? result))
+      (is (empty? (:diagnostics result)))
+      (is (.includes
+           output
+           (str "<a class=\"clono-xref clono-xref-heading "
+                "clono-xref-heading-h1 clono-xref-heading-chapter "
+                "clono-xref-number\" href=\"#introduction\"></a>")))
+      (is (.includes
+           output
+           (str "<a class=\"clono-xref clono-xref-heading "
+                "clono-xref-heading-h2 clono-xref-heading-chapter "
+                "clono-xref-number-title\" href=\"#structure\" "
+                "data-title-href=\"#structure\"></a>")))
+      (is (.includes
+           output
+           (str "<a class=\"clono-xref clono-xref-heading "
+                "clono-xref-heading-h3 clono-xref-heading-chapter "
+                "clono-xref-title\" href=\"#transformation\" "
+                "data-title-href=\"#transformation\"></a>")))
+      (is (nil? (test-support/directive tree "xref"))))))
+
+(deftest unresolved-local-heading-xref-test
+  (testing "When transform cannot find a local heading target, then each format becomes its fixed heading placeholder"
+    (doseq [[format expected-text]
+            [["number" "見出し番号未解決"]
+             ["number-title" "見出し参照先未解決"]
+             ["title" "参照先未解決"]]]
+      (let [source (str ":xref[external-heading]"
+                        "{type=\"heading\" format=\"" format "\"}\n")
+            result (pipeline/run
+                    (transform-context "unresolved-heading-xref.md")
+                    source)
+            output (:output result)
+            expected (str "<span class=\"clono-xref clono-xref-heading "
+                          "clono-xref-" format " clono-xref-placeholder\">"
+                          expected-text
+                          "</span>")]
+        (is (:ok? result) format)
+        (is (empty? (:diagnostics result)) format)
+        (is (.includes output expected) format)
+        (is (not (.includes output "external-heading")) format)
+        (is (not (.includes output "href=")) format)
+        (is (not (.includes output "clono-xref-heading-h")) format)
+        (is (not (.includes output "clono-xref-heading-chapter")) format)
+        (is (not (.includes output "clono-xref-heading-unnumbered"))
+            format)
+        (is (nil? (test-support/directive (markdown/parse output) "xref"))
+            format)))))
+
 (deftest unresolved-local-xref-test
   (testing "When transform cannot find a local xref target, then each format becomes a fixed placeholder without link attributes or author input"
     (doseq [[format expected-text]
