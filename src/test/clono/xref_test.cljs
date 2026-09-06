@@ -144,6 +144,48 @@
                 "data-title-href=\"#transformation\"></a>")))
       (is (nil? (test-support/directive tree "xref"))))))
 
+(deftest build-heading-xref-class-test
+  (testing "When build resolves H1 through H3 in each document kind, then allowed level and document classes are generated"
+    (doseq [{:keys [kind document-class numbered?]}
+            [{:kind "chapter"
+              :document-class "clono-xref-heading-chapter"
+              :numbered? true}
+             {:kind "appendix"
+              :document-class "clono-xref-heading-appendix"
+              :numbered? true}
+             {:kind "frontmatter"
+              :document-class "clono-xref-heading-unnumbered"
+              :numbered? false}
+             {:kind "backmatter"
+              :document-class "clono-xref-heading-unnumbered"
+              :numbered? false}]
+            depth [1 2 3]]
+      (let [format (if numbered? "number-title" "title")
+            source-name (str kind "-h" depth ".md")
+            source (str (apply str (repeat depth "#"))
+                        " 対象 {#target}\n\n"
+                        ":xref[target]{type=\"heading\" format=\""
+                        format
+                        "\"}\n")
+            result
+            (pipeline/run
+             {:mode :build
+              :source-name source-name
+              :publication-entry {:type :document
+                                  :path source-name
+                                  :kind kind
+                                  :include-in-toc true}}
+             source)
+            expected-classes
+            (str "clono-xref clono-xref-heading "
+                 "clono-xref-heading-h" depth " "
+                 document-class " clono-xref-" format)]
+        (is (:ok? result) (str kind " h" depth))
+        (is (empty? (:diagnostics result)) (str kind " h" depth))
+        (is (.includes (:output result)
+                       (str "<a class=\"" expected-classes "\""))
+            (str kind " h" depth))))))
+
 (deftest unresolved-local-heading-xref-test
   (testing "When transform cannot find a local heading target, then each format becomes its fixed heading placeholder"
     (doseq [[format expected-text]
