@@ -45,3 +45,41 @@ a.clono-xref-figure.clono-xref-number-title::after {
 a.clono-xref-figure.clono-xref-title::before {
   content: target-text(attr(data-title-href url), content);
 }
+
+a.clono-xref-heading-chapter.clono-xref-heading-h1.clono-xref-number::before,
+a.clono-xref-heading-chapter.clono-xref-heading-h1.clono-xref-number-title::before {
+  content: "第" target-counter(attr(href url), chapter) "章";
+}
+
+a.clono-xref-heading-chapter.clono-xref-heading-h2.clono-xref-number::before,
+a.clono-xref-heading-chapter.clono-xref-heading-h2.clono-xref-number-title::before {
+  content: target-counter(attr(href url), chapter) "." target-counter(attr(href url), section);
+}
+
+a.clono-xref-heading-chapter.clono-xref-heading-h3.clono-xref-number::before,
+a.clono-xref-heading-chapter.clono-xref-heading-h3.clono-xref-number-title::before {
+  content: target-counter(attr(href url), chapter) "." target-counter(attr(href url), section) "." target-counter(attr(href url), subsection);
+}
+
+a.clono-xref-heading-appendix.clono-xref-heading-h1.clono-xref-number::before,
+a.clono-xref-heading-appendix.clono-xref-heading-h1.clono-xref-number-title::before {
+  content: "付録" target-counter(attr(href url), appendix, upper-alpha);
+}
+
+a.clono-xref-heading-appendix.clono-xref-heading-h2.clono-xref-number::before,
+a.clono-xref-heading-appendix.clono-xref-heading-h2.clono-xref-number-title::before {
+  content: target-counter(attr(href url), appendix, upper-alpha) "." target-counter(attr(href url), section);
+}
+
+a.clono-xref-heading-appendix.clono-xref-heading-h3.clono-xref-number::before,
+a.clono-xref-heading-appendix.clono-xref-heading-h3.clono-xref-number-title::before {
+  content: target-counter(attr(href url), appendix, upper-alpha) "." target-counter(attr(href url), section) "." target-counter(attr(href url), subsection);
+}
+
+a.clono-xref-heading.clono-xref-number-title::after {
+  content: " " target-text(attr(data-title-href url), content);
+}
+
+a.clono-xref-heading.clono-xref-title::before {
+  content: target-text(attr(data-title-href url), content);
+}
