@@ -5,6 +5,7 @@
    [clono.diagnostic :as diagnostic]
    [clono.reference-id :as reference-id]
    [clono.transform.xref.figure :as figure-reference]
+   [clono.transform.xref.heading :as heading-reference]
    [goog.string :as gstring]
    [goog.object :as gobj]))
 
@@ -12,7 +13,8 @@
   #{"number" "number-title" "title"})
 
 (def ^:private reference-type-rules
-  [figure-reference/rule])
+  [figure-reference/rule
+   heading-reference/rule])
 
 (def ^:private reference-type-rules-by-name
   (->> reference-type-rules
