@@ -58,6 +58,18 @@
        "  ],\n"
        "};\n"))
 
+(defn- heading-reference-config []
+  (str "export default {\n"
+       "  sourceRoot: 'manuscripts',\n"
+       "  outputRoot: 'build/manuscripts',\n"
+       "  publication: [\n"
+       "    { type: 'document', path: 'frontmatter.md', kind: 'frontmatter', includeInToc: true },\n"
+       "    { type: 'document', path: 'chapters/main.md', kind: 'chapter', includeInToc: true },\n"
+       "    { type: 'document', path: 'appendices/details.md', kind: 'appendix', includeInToc: true },\n"
+       "    { type: 'document', path: 'backmatter.md', kind: 'backmatter', includeInToc: true },\n"
+       "  ],\n"
+       "};\n"))
+
 (defn- chapter-source [reference-id figure-id]
   (str ":xref[" reference-id "]"
        "{type=\"figure\" format=\"number-title\"}\n\n"
@@ -100,6 +112,45 @@
                "Release transform command did not generate the xref placeholder")
       (ensure! (not (.includes content "external-figure"))
                "Release transform command exposed the unresolved logical ID"))))
+
+(defn- verify-heading-transform! [root]
+  (let [input (.join path root "single-heading.md")
+        output (.join path root "single-heading-output.md")]
+    (write-file!
+     input
+     (str ":xref[introduction]{type=\"heading\" format=\"number\"}\n\n"
+          "# はじめに {#introduction}\n\n"
+          "## 全体構造 {#structure}\n\n"
+          ":xref[structure]{type=\"heading\" format=\"number-title\"}\n\n"
+          ":xref[external-heading]{type=\"heading\" format=\"title\"}\n"))
+    (verify-success!
+     (run-cli ["transform" input "--output" output] root)
+     "Release transform command with heading references")
+    (let [content (.readFileSync fs output "utf8")]
+      (ensure!
+       (.includes
+        content
+        (str "<a class=\"clono-xref clono-xref-heading "
+             "clono-xref-heading-h1 clono-xref-heading-chapter "
+             "clono-xref-number\" href=\"#introduction\"></a>"))
+       "Release transform command did not resolve the H1 reference")
+      (ensure!
+       (.includes
+        content
+        (str "<a class=\"clono-xref clono-xref-heading "
+             "clono-xref-heading-h2 clono-xref-heading-chapter "
+             "clono-xref-number-title\" href=\"#structure\" "
+             "data-title-href=\"#structure\"></a>"))
+       "Release transform command did not resolve the H2 reference")
+      (ensure!
+       (.includes
+        content
+        (str "<span class=\"clono-xref clono-xref-heading "
+             "clono-xref-title clono-xref-placeholder\">"
+             "参照先未解決</span>"))
+       "Release transform command did not generate the heading placeholder")
+      (ensure! (not (.includes content "external-heading"))
+               "Release transform command exposed the unresolved heading ID"))))
 
 (defn- verify-build! [root]
   (let [project (.join path root "book")
@@ -244,6 +295,143 @@
                                   expected-files
                                   "Undefined-reference build failure")))))
 
+(defn- verify-heading-reference-build! [root]
+  (let [project (.join path root "heading-reference-book")
+        source (.join path project "manuscripts")
+        output (.join path project "build" "manuscripts")
+        frontmatter-input (.join path source "frontmatter.md")
+        chapter-input (.join path source "chapters" "main.md")
+        appendix-input (.join path source "appendices" "details.md")
+        backmatter-input (.join path source "backmatter.md")
+        frontmatter-output (.join path output "frontmatter.md")
+        chapter-output (.join path output "chapters" "main.md")
+        appendix-output (.join path output "appendices" "details.md")
+        backmatter-output (.join path output "backmatter.md")
+        marker-output (.join path output ".clono-output.json")
+        stylesheet-output (.join path output "_clono" "styles" "clono.css")]
+    (write-file! (.join path project "clono.config.mjs")
+                 (heading-reference-config))
+    (write-file!
+     frontmatter-input
+     (str "# はじめに {#preface}\n\n"
+          ":xref[appendix-details]{type=\"heading\" format=\"title\"}\n"))
+    (write-file!
+     chapter-input
+     (str ":xref[appendix-details]"
+          "{type=\"heading\" format=\"number-title\"}\n\n"
+          ":xref[preface]{type=\"heading\" format=\"title\"}\n\n"
+          "# 本文 {#main}\n\n"
+          "## 基本構造 {#basic-structure}\n"))
+    (write-file!
+     appendix-input
+     (str ":xref[basic-structure]{type=\"heading\" format=\"number\"}\n\n"
+          "# 追加情報 {#appendix-details}\n"))
+    (write-file!
+     backmatter-input
+     (str "# 著者 {#authors}\n\n"
+          ":xref[main]{type=\"heading\" format=\"title\"}\n"))
+
+    (verify-success! (run-cli ["build" project] root)
+                     "Release build command with heading references")
+    (let [frontmatter-content (.readFileSync fs frontmatter-output "utf8")
+          chapter-content (.readFileSync fs chapter-output "utf8")
+          appendix-content (.readFileSync fs appendix-output "utf8")
+          backmatter-content (.readFileSync fs backmatter-output "utf8")
+          marker-content (.readFileSync fs marker-output "utf8")
+          stylesheet-content (.readFileSync fs stylesheet-output "utf8")
+          expected-files {"frontmatter.md" frontmatter-content
+                          "chapters/main.md" chapter-content
+                          "appendices/details.md" appendix-content
+                          "backmatter.md" backmatter-content
+                          "_clono/styles/clono.css" stylesheet-content
+                          ".clono-output.json" marker-content}]
+      (ensure!
+       (.includes
+        frontmatter-content
+        (str "class=\"clono-xref clono-xref-heading "
+             "clono-xref-heading-h1 clono-xref-heading-appendix "
+             "clono-xref-title\" "
+             "href=\"appendices/details.html#appendix-details\" "
+             "data-title-href=\"appendices/details.html"
+             "#appendix-details\""))
+       "Release build command did not resolve the frontmatter reference")
+      (ensure!
+       (.includes
+        chapter-content
+        (str "class=\"clono-xref clono-xref-heading "
+             "clono-xref-heading-h1 clono-xref-heading-appendix "
+             "clono-xref-number-title\" "
+             "href=\"../appendices/details.html#appendix-details\" "
+             "data-title-href=\"../appendices/details.html"
+             "#appendix-details\""))
+       "Release build command did not resolve the appendix heading reference")
+      (ensure!
+       (.includes
+        chapter-content
+        (str "class=\"clono-xref clono-xref-heading "
+             "clono-xref-heading-h1 clono-xref-heading-unnumbered "
+             "clono-xref-title\" href=\"../frontmatter.html#preface\" "
+             "data-title-href=\"../frontmatter.html#preface\""))
+       "Release build command did not resolve the unnumbered heading reference")
+      (ensure!
+       (.includes
+        appendix-content
+        (str "class=\"clono-xref clono-xref-heading "
+             "clono-xref-heading-h2 clono-xref-heading-chapter "
+             "clono-xref-number\" "
+             "href=\"../chapters/main.html#basic-structure\""))
+       "Release build command did not resolve the chapter section reference")
+      (ensure!
+       (.includes
+        backmatter-content
+        (str "class=\"clono-xref clono-xref-heading "
+             "clono-xref-heading-h1 clono-xref-heading-chapter "
+             "clono-xref-title\" href=\"chapters/main.html#main\" "
+             "data-title-href=\"chapters/main.html#main\""))
+       "Release build command did not resolve the backmatter reference")
+      (doseq [content [frontmatter-content
+                       chapter-content
+                       appendix-content
+                       backmatter-content]]
+        (ensure! (not (.includes content "clono-xref-placeholder"))
+                 "Release build command emitted a heading placeholder"))
+      (ensure!
+       (.includes
+        stylesheet-content
+        (str "a.clono-xref-heading-chapter.clono-xref-heading-h1"
+             ".clono-xref-number::before,"))
+       "Release build command copied a stylesheet without chapter references")
+      (ensure!
+       (.includes
+        stylesheet-content
+        (str "a.clono-xref-heading-appendix.clono-xref-heading-h3"
+             ".clono-xref-number-title::before"))
+       "Release build command copied a stylesheet without appendix references")
+
+      (write-file! (.join path output "keep.txt") "keep\n")
+      (write-file!
+       chapter-input
+       (str ":xref[preface]{type=\"heading\" format=\"number\"}\n\n"
+            ":xref[appendix-details]"
+            "{type=\"heading\" format=\"number-title\"}\n\n"
+            ":xref[preface]{type=\"heading\" format=\"title\"}\n\n"
+            "# 本文 {#main}\n\n"
+            "## 基本構造 {#basic-structure}\n"))
+      (let [result (run-cli ["build" project] root)]
+        (ensure! (= 1 (.-status result))
+                 "Release build command accepted a numbered frontmatter reference")
+        (ensure! (= "" (.-stdout result))
+                 "Invalid heading reference build wrote to stdout")
+        (ensure!
+         (= (str "chapters/main.md:1:1: `xref`の表示形式に番号を持たない"
+                 "参照先の番号を指定できません。\n")
+            (.-stderr result))
+         (str "Invalid heading reference diagnostics were incorrect: "
+              (.-stderr result)))
+        (verify-unchanged-output! output
+                                  expected-files
+                                  "Invalid heading reference build failure")))))
+
 (defn- verify-unpositioned-diagnostic! [root]
   (let [project (.join path root "missing-config")
         config-path (.join path project "clono.config.mjs")]
@@ -264,9 +452,11 @@
                                       "clono-cli-integration-"))]
     (try
       (verify-transform! root)
+      (verify-heading-transform! root)
       (verify-build! root)
       (verify-diagnostics! root)
       (verify-reference-build! root)
+      (verify-heading-reference-build! root)
       (verify-unpositioned-diagnostic! root)
       (finally
         (.rmSync fs root #js {:recursive true :force true})))))
