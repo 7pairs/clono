@@ -281,7 +281,7 @@
       (is (not (.includes stylesheet ".clono-xref-placeholder::"))))))
 
 (deftest heading-xref-stylesheet-test
-  (testing "When the clono stylesheet is inspected, then heading references receive numbers for every numbered document and heading level"
+  (testing "When a numbered chapter or appendix heading is referenced, then its formatted heading number is displayed"
     (let [stylesheet (normalize-line-endings
                       (.readFileSync fs "styles/clono.css" "utf8"))]
       (doseq [[document level content]
@@ -320,7 +320,7 @@
                     "}\n"))
               (str document " " level))))))
 
-  (testing "When the clono stylesheet is inspected, then heading titles are generated only for resolved links that request them"
+  (testing "When a heading reference requests its title, then the target title is displayed without altering unresolved placeholders"
     (let [stylesheet (normalize-line-endings
                       (.readFileSync fs "styles/clono.css" "utf8"))]
       (is (.includes
