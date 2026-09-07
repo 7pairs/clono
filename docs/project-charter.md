@@ -2,7 +2,7 @@
 
 - 状態: 有効
 - 作成日: 2026-08-12
-- 最終更新日: 2026-08-15
+- 最終更新日: 2026-09-07
 
 ## 1. 背景
 
@@ -75,13 +75,17 @@ ClojureScriptからの変更は、好みや一時的な不便だけを理由に�
 
 ### 5.2 独自記法
 
-独自記法の第一候補を、[Generic Directives Proposal](https://talk.commonmark.org/t/generic-directives-plugins-syntax/444)に基づく記法とする。既存のJavaScriptエコシステムを利用してASTへ変換できる可能性があり、用途ごとに新たな記法体系を乱立させずに済むと期待できるためである。
+Markdown原稿へ追加する`clono`の独自記法には、[Generic Directives Proposal](https://talk.commonmark.org/t/generic-directives-plugins-syntax/444)に基づく構文を採用する。Container directive、Leaf directiveおよびText directiveを用途に応じて使い分け、用途ごとに異なる構文体系を追加しない。
 
-ただし、これは現時点の有力候補であり、確定仕様ではない。候補ライブラリ、対応構文、生成されるAST、ClojureScriptとの相互運用性に加え、可読性、記述量、Markdownとしてのフォールバック、構文間の衝突、既存ツールとの互換性を実例で検証して決定する。
+この採用範囲には、標準Markdown、VFMの記法、`clono.config.mjs`などの原稿外の入力、および`clono`が生成するraw HTMLを含めない。将来のプラグインにもGeneric Directivesの使用を一律に強制せず、Markdown ASTの検査など、具体的な用途に適した拡張点を選択できる余地を残す。
+
+Generic Directives ProposalはCommonMarkの正式仕様ではない。互換性、保守性または実用性に重大な問題が確認された場合は、具体的な検証結果に基づいて採用方針を再検討する。採用理由、内部表現、使用するライブラリ、診断および出力の詳細は、[Generic DirectivesとmdastによるMarkdown変換パイプラインのADR](decisions/0003-adopt-generic-directives-mdast-transformation-pipeline.md)を正本とする。
 
 ### 5.3 出力形式
 
-Vivliostyleで利用できるMarkdownまたはHTMLを主要な出力候補とする。最終的な出力契約は、変換後も保持すべき意味、Vivliostyleへの委譲範囲、プラグインAPIとの整合性を検証したうえで仕様として定める。
+`clono`の主要な出力形式には、VFMが処理できるMarkdownを採用する。標準Markdownで表現できる構造は可能な限りMarkdownとして保持し、後段へ渡すためにHTML構造が必要な箇所では、必要なraw HTMLを変換後Markdownへ埋め込む。
+
+完成したHTML、WebPubおよびPDFの生成はVivliostyleへ委譲する。将来、具体的な利用例によって別の出力形式が必要になった場合は、保持すべき意味、Vivliostyleとの責務分担およびプラグインAPIとの整合性を検証したうえで追加を検討する。
 
 ## 6. 開発方針
 
