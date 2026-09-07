@@ -94,6 +94,22 @@ Container directiveの`figure`で、参照用IDとキャプションを持つ番
 
 入力契約、参照形式、変換後の構造および制限事項は、[番号付き画像と画像参照仕様](docs/specifications/figure-references.md)を参照してください。
 
+## 見出し参照
+
+VFMの明示的なIDを持つ`h1`から`h3`までの見出しを、画像参照と共通のText directiveで参照できます。表示形式には、見出し番号、見出し番号とタイトル、またはタイトルだけを指定できます。
+
+```markdown
+# はじめに {#introduction}
+
+詳しくは:xref[introduction]{type="heading" format="number-title"}を参照してください。
+```
+
+`transform`サブコマンドは同じ入力Markdownにある見出し参照を解決します。同じ原稿に参照先がない場合は、別原稿への参照を含む章を単独でプレビューできるよう、表示形式に応じた固定のプレースホルダーへ変換します。
+
+`build`サブコマンドは、`publication`に掲載されたすべてのMarkdownから明示ID付き見出しを収集し、同一原稿および原稿間の見出し参照を解決します。本文と付録では、参照先の`kind`と見出しレベルに応じた番号を表示できます。番号を持たない前付と後付では、タイトルだけを参照できます。
+
+見出し番号と参照文字列は、clono基盤CSSが利用者テーマのCSSカウンターを参照して生成します。書籍プロジェクトでは生成済み原稿ツリーの`_clono/styles/clono.css`を、利用者テーマとともにVivliostyleへ読み込んでください。入力契約、番号形式、変換後の構造およびCSSの責務は、[見出し参照仕様](docs/specifications/heading-references.md)を参照してください。
+
 ## 書籍プロジェクトの変換
 
 書籍プロジェクトのルートに`clono.config.mjs`を作成し、入力原稿ルート、生成済み原稿ルートおよび原稿順序を指定します。
