@@ -2,7 +2,7 @@
 
 - 状態: 調査済み
 - 初回調査日: 2026-08-17
-- 最終更新日: 2026-08-20
+- 最終更新日: 2026-09-08
 - 検証環境:
   - 実行環境: macOS、Node.js 24.19.0
   - HTML変換: `@vivliostyle/vfm` 2.7.0
@@ -198,6 +198,7 @@ a.xref-title::after {
 
 ## 参照資料
 
+- [Generic DirectivesとGFM表のMarkdown ASTに関する調査](markdown-table-directive.md)
 - [Vivliostyle Flavored Markdown 2.7.0](https://github.com/vivliostyle/vfm/blob/v2.7.0/docs/ja/vfm.md)
 - [GitHub Flavored Markdown Spec 0.29-gfm: Tables extension](https://github.github.com/gfm/#tables-extension-)
 - [チュートリアル⑤カウンタと柱のスタイル | Vivliostyle](https://vivliostyle.org/ja/tutorials/configure-counters-running-heads/)（2026-08-17参照）

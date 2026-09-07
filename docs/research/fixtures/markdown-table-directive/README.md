@@ -6,6 +6,8 @@ Generic DirectivesのContainer directive内にGFM形式のMarkdown表を記述�
 
 このfixtureは、番号付き表の著者向け記法、class名、HTML構造または診断契約を確定するものではない。仕様策定前の技術的な成立性を確認するため、合意した候補記法と出力構造を使用する。
 
+検証結果、評価および未確認事項は、[Generic DirectivesとGFM表のMarkdown ASTに関する調査](../../markdown-table-directive.md)を参照する。
+
 ## 検証対象
 
 入力は[`input/numbered-table.md`](input/numbered-table.md)に保存している。
