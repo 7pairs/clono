@@ -140,7 +140,9 @@
        (keep (fn [{:keys [operation context analysis]}]
                (when analysis
                  {:operation operation
-                  :context context
+                  :context (cond-> context
+                             (string? (:source analysis))
+                             (assoc :source (:source analysis)))
                   :tree (:tree analysis)})))
        vec))
 

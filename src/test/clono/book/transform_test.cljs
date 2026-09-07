@@ -172,6 +172,201 @@
             (is (not (.includes (:content appendix)
                                 "clono-xref-placeholder")))))))))
 
+(deftest cross-document-heading-reference-transformation-test
+  (testing "When published manuscripts refer to headings in other document kinds, then resolved links contain the target heading metadata"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              publication [{:type :document
+                            :path "frontmatter.md"
+                            :kind "frontmatter"
+                            :include-in-toc true}
+                           {:type :document
+                            :path "chapters/main.md"
+                            :kind "chapter"
+                            :include-in-toc true}
+                           {:type :document
+                            :path "appendices/details.md"
+                            :kind "appendix"
+                            :include-in-toc true}]]
+          (write-file!
+           (.join path source "frontmatter.md")
+           (str "# はじめに {#preface}\n\n"
+                ":xref[appendix-details]"
+                "{type=\"heading\" format=\"title\"}\n"))
+          (write-file!
+           (.join path source "chapters" "main.md")
+           (str ":xref[appendix-details]"
+                "{type=\"heading\" format=\"number-title\"}\n\n"
+                ":xref[preface]{type=\"heading\" format=\"title\"}\n\n"
+                "# 本文 {#main}\n\n"
+                "## 基本構造 {#basic-structure}\n"))
+          (write-file!
+           (.join path source "appendices" "details.md")
+           (str ":xref[basic-structure]"
+                "{type=\"heading\" format=\"number\"}\n\n"
+                "# 追加情報 {#appendix-details}\n"))
+          (let [result (book-transform/run (create-plan project publication))
+                operations (:operations (:plan result))
+                frontmatter (operation-by-path operations "frontmatter.md")
+                chapter (operation-by-path operations "chapters/main.md")
+                appendix (operation-by-path operations
+                                            "appendices/details.md")]
+            (is (:ok? result))
+            (is (empty? (:diagnostics result)))
+            (is (.includes
+                 (:content chapter)
+                 (str "<a class=\"clono-xref clono-xref-heading "
+                      "clono-xref-heading-h1 "
+                      "clono-xref-heading-appendix "
+                      "clono-xref-number-title\" "
+                      "href=\"../appendices/details.html#appendix-details\" "
+                      "data-title-href=\"../appendices/details.html"
+                      "#appendix-details\"></a>")))
+            (is (.includes
+                 (:content chapter)
+                 (str "<a class=\"clono-xref clono-xref-heading "
+                      "clono-xref-heading-h1 "
+                      "clono-xref-heading-unnumbered clono-xref-title\" "
+                      "href=\"../frontmatter.html#preface\" "
+                      "data-title-href=\"../frontmatter.html#preface\"></a>")))
+            (is (.includes
+                 (:content appendix)
+                 (str "<a class=\"clono-xref clono-xref-heading "
+                      "clono-xref-heading-h2 clono-xref-heading-chapter "
+                      "clono-xref-number\" "
+                      "href=\"../chapters/main.html#basic-structure\"></a>")))
+            (is (.includes
+                 (:content frontmatter)
+                 (str "<a class=\"clono-xref clono-xref-heading "
+                      "clono-xref-heading-h1 "
+                      "clono-xref-heading-appendix clono-xref-title\" "
+                      "href=\"appendices/details.html#appendix-details\" "
+                      "data-title-href=\"appendices/details.html"
+                      "#appendix-details\"></a>")))
+            (is (not (.includes (:content chapter)
+                                "clono-xref-placeholder")))
+            (is (not (.includes (:content appendix)
+                                "clono-xref-placeholder")))
+            (is (not (.includes (:content frontmatter)
+                                "clono-xref-placeholder")))))))))
+
+(deftest unnumbered-heading-reference-validation-test
+  (testing "When number formats refer to frontmatter and backmatter headings, then every invalid reference is diagnosed before transformation"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              publication [{:type :document
+                            :path "chapter.md"
+                            :kind "chapter"
+                            :include-in-toc true}
+                           {:type :document
+                            :path "frontmatter.md"
+                            :kind "frontmatter"
+                            :include-in-toc true}
+                           {:type :document
+                            :path "backmatter.md"
+                            :kind "backmatter"
+                            :include-in-toc true}]
+              transformed (atom [])]
+          (write-file!
+           (.join path source "chapter.md")
+           (str ":xref[preface]{type=\"heading\" format=\"number\"}\n\n"
+                ":xref[authors]"
+                "{type=\"heading\" format=\"number-title\"}\n"))
+          (write-file! (.join path source "frontmatter.md")
+                       "# はじめに {#preface}\n")
+          (write-file! (.join path source "backmatter.md")
+                       "# 著者 {#authors}\n")
+          (with-redefs [pipeline/run-analyzed
+                        (fn [context _tree]
+                          (swap! transformed conj (:source-name context))
+                          {:ok? true
+                           :output "transformed\n"
+                           :diagnostics []})]
+            (let [result (book-transform/run (create-plan project publication))]
+              (is (false? (:ok? result)))
+              (is (nil? (:plan result)))
+              (is (= [] @transformed))
+              (is (= [{:file "chapter.md"
+                       :line 1
+                       :column 1
+                       :directive "xref"
+                       :message (str "`xref`の表示形式に番号を持たない"
+                                     "参照先の番号を指定できません。")}
+                      {:file "chapter.md"
+                       :line 3
+                       :column 1
+                       :directive "xref"
+                       :message (str "`xref`の表示形式に番号を持たない"
+                                     "参照先の番号を指定できません。")}]
+                     (:diagnostics result))))))))))
+
+(deftest book-heading-target-collection-test
+  (testing "When published manuscripts run through book preflight, then all eligible heading targets reach every manuscript transformation"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              publication [{:type :document
+                            :path "chapter.md"
+                            :kind "chapter"
+                            :include-in-toc true}
+                           {:type :document
+                            :path "preface.md"
+                            :kind "frontmatter"
+                            :include-in-toc true}]
+              transformation-contexts (atom [])]
+          (write-file! (.join path source "chapter.md")
+                       (str "# 本文 {#chapter-heading}\n\n"
+                            "## 本文の節 {#chapter-section}\n"))
+          (write-file! (.join path source "preface.md")
+                       "# はじめに {#preface}\n")
+          (write-file! (.join path source "notes.md")
+                       "# 非掲載原稿 {#unlisted}\n")
+          (with-redefs [pipeline/run-analyzed
+                        (fn [context _tree]
+                          (when (:publication-entry context)
+                            (swap! transformation-contexts conj context))
+                          {:ok? true
+                           :output "transformed\n"
+                           :diagnostics []})]
+            (let [result (book-transform/run (create-plan project publication))
+                  target-metadata
+                  (fn [context]
+                    (mapv #(select-keys
+                            %
+                            [:logical-id
+                             :type
+                             :heading-depth
+                             :document-kind
+                             :numbered?
+                             :source-name])
+                          (:reference-targets context)))
+                  expected-targets
+                  [{:logical-id "chapter-heading"
+                    :type "heading"
+                    :heading-depth 1
+                    :document-kind "chapter"
+                    :numbered? true
+                    :source-name "chapter.md"}
+                   {:logical-id "chapter-section"
+                    :type "heading"
+                    :heading-depth 2
+                    :document-kind "chapter"
+                    :numbered? true
+                    :source-name "chapter.md"}
+                   {:logical-id "preface"
+                    :type "heading"
+                    :heading-depth 1
+                    :document-kind "frontmatter"
+                    :numbered? false
+                    :source-name "preface.md"}]]
+              (is (:ok? result))
+              (is (= ["chapter.md" "preface.md"]
+                     (mapv :source-name @transformation-contexts)))
+              (is (every? #(= expected-targets (target-metadata %))
+                          @transformation-contexts)))))))))
+
 (deftest reference-preflight-failure-test
   (testing "When published manuscripts contain a duplicate reference ID, then no published or unlisted manuscript is transformed"
     (with-temporary-project

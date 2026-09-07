@@ -13,6 +13,13 @@
    :message message
    offset-key (gobj/get point "offset")})
 
+(defn at-markdown-point [source-name point message]
+  {:file source-name
+   :line (gobj/get point "line")
+   :column (gobj/get point "column")
+   :message message
+   offset-key (gobj/get point "offset")})
+
 (defn for-node [source-name node message]
   (at-point
    source-name

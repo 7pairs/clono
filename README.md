@@ -10,7 +10,7 @@ Vivliostyleを主要な出力先として想定し、Vivliostyleが持つ機能�
 
 ## 開発状況
 
-現在は開発初期段階です。Node.js向けCLIで単一のMarkdownファイルと、複数の原稿・静的ファイルからなる書籍プロジェクトを変換できます。独自記法は文字揃え記法、コラム記法、強制改ページ記法、番号付き画像および画像参照を実装しています。
+現在は開発初期段階です。Node.js向けCLIで単一のMarkdownファイルと、複数の原稿・静的ファイルからなる書籍プロジェクトを変換できます。独自記法は文字揃え記法、コラム記法、強制改ページ記法、番号付き画像、画像参照および見出し参照を実装しています。
 
 npmパッケージとしての公開はまだ行っていません。現時点のCLIは、開発環境でビルドして利用します。
 
@@ -74,7 +74,7 @@ node dist/clono.js transform manuscript.md --output build/manuscript.md
 
 利用可能な記法と詳しいCLIの契約は、[clono著者向け記法](docs/specifications/authoring-syntax.md)と[単一ファイル変換CLI仕様](docs/specifications/single-file-cli.md)を参照してください。
 
-`transform`サブコマンドは、独自記法が生成する構造、図番号および画像参照に必要な`styles/clono.css`を出力先へコピーしません。単一ファイルの出力を組版する場合は、利用者が基盤CSSを組み込んでください。
+`transform`サブコマンドは、独自記法が生成する構造、図番号、画像参照および見出し参照に必要な`styles/clono.css`を出力先へコピーしません。単一ファイルの出力を組版する場合は、利用者が基盤CSSを組み込んでください。
 
 ## 番号付き画像と画像参照
 
@@ -93,6 +93,22 @@ Container directiveの`figure`で、参照用IDとキャプションを持つ番
 `build`サブコマンドは、`publication`に掲載されたすべてのMarkdownから番号付き画像を収集し、同一原稿および原稿間の画像参照を解決します。重複したID、未定義参照または安全に生成できない原稿間リンクがある場合は診断し、生成済み原稿ツリーを変更しません。
 
 入力契約、参照形式、変換後の構造および制限事項は、[番号付き画像と画像参照仕様](docs/specifications/figure-references.md)を参照してください。
+
+## 見出し参照
+
+VFMの明示的なIDを持つ`h1`から`h3`までの見出しを、画像参照と共通のText directiveで参照できます。表示形式には、見出し番号、見出し番号とタイトル、またはタイトルだけを指定できます。
+
+```markdown
+# はじめに {#introduction}
+
+詳しくは:xref[introduction]{type="heading" format="number-title"}を参照してください。
+```
+
+`transform`サブコマンドは同じ入力Markdownにある見出し参照を解決します。同じ原稿に参照先がない場合は、別原稿への参照を含む章を単独でプレビューできるよう、表示形式に応じた固定のプレースホルダーへ変換します。
+
+`build`サブコマンドは、`publication`に掲載されたすべてのMarkdownから明示ID付き見出しを収集し、同一原稿および原稿間の見出し参照を解決します。本文と付録では、参照先の`kind`と見出しレベルに応じた番号を表示できます。番号を持たない前付と後付では、タイトルだけを参照できます。
+
+見出し番号と参照文字列は、clono基盤CSSが利用者テーマのCSSカウンターを参照して生成します。書籍プロジェクトでは生成済み原稿ツリーの`_clono/styles/clono.css`を、利用者テーマとともにVivliostyleへ読み込んでください。入力契約、番号形式、変換後の構造およびCSSの責務は、[見出し参照仕様](docs/specifications/heading-references.md)を参照してください。
 
 ## 書籍プロジェクトの変換
 
@@ -129,7 +145,7 @@ node dist/clono.js build
 node dist/clono.js build path/to/book
 ```
 
-`build`サブコマンドは、入力原稿ツリーのMarkdownを変換し、その他の通常ファイルを相対パスのままコピーします。`publication`には原稿を表す`document`に加えて、原稿間へ一ページ挿入する`blank-page`を指定できます。掲載されたMarkdown全体から参照対象を収集し、原稿間の画像参照も解決します。生成済み原稿ツリーには、必要な空白ページHTML、clono基盤CSSおよび所有マーカーも配置します。既存出力は、一致する所有マーカーを持つ場合だけ安全に置き換えます。成功時は何も表示せず、診断がある場合は部分的な出力を公開しません。
+`build`サブコマンドは、入力原稿ツリーのMarkdownを変換し、その他の通常ファイルを相対パスのままコピーします。`publication`には原稿を表す`document`に加えて、原稿間へ一ページ挿入する`blank-page`を指定できます。掲載されたMarkdown全体から番号付き画像と明示ID付き見出しを収集し、同一原稿および原稿間の参照を解決します。生成済み原稿ツリーには、必要な空白ページHTML、clono基盤CSSおよび所有マーカーも配置します。既存出力は、一致する所有マーカーを持つ場合だけ安全に置き換えます。成功時は何も表示せず、診断がある場合は部分的な出力を公開しません。
 
 `build`サブコマンドはWebPubまたはPDFを生成せず、`vivliostyle.config.mjs`も生成・変更しません。生成済み原稿ツリーと、書籍プロジェクト側で管理するVivliostyle設定および利用者テーマを組み合わせて組版してください。
 
@@ -144,6 +160,7 @@ node dist/clono.js build path/to/book
 - [単一ファイル変換CLI仕様](docs/specifications/single-file-cli.md): CLIの入出力、診断、終了コード
 - [書籍プロジェクト仕様](docs/specifications/book-project.md): 複数原稿の設定、変換、基盤CSSおよび出力保護
 - [番号付き画像と画像参照仕様](docs/specifications/figure-references.md): 番号付き画像の入力、画像参照の解決、診断および出力構造
+- [見出し参照仕様](docs/specifications/heading-references.md): 見出しIDの収集、見出し参照の解決、診断および出力構造
 
 ## ライセンス
 
