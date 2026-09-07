@@ -1,0 +1,4 @@
+/target/
+/.shadow-cljs/
+/node_modules/
+
