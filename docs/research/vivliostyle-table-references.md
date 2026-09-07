@@ -170,10 +170,10 @@ a.xref-title::after {
 
 章番号と表番号の組み合わせは、「一つのMarkdownファイルが一つの章に対応し、Vivliostyle設定の`entry`が章順に並ぶ」構成を前提とする。
 
+後続の[番号付き表と表参照仕様](../specifications/table-references.md)では、Container directiveの`table`で単一のGFM表を囲む著者向け記法を採用し、キャプションと`id`属性を必須とした。記法の解析と変換の技術的な成立性は、[Generic DirectivesとGFM表のMarkdown ASTに関する調査](markdown-table-directive.md)で確認している。
+
 次の事項は未確認または未決定である。
 
-- clonoで使用する番号付き表と参照の著者向け記法
-- キャプションを省略した場合の補完規則
 - キャプション内のMarkdown
 - HTMLで記述する複雑な表とセル結合
 - セル内改行
@@ -198,6 +198,7 @@ a.xref-title::after {
 
 ## 参照資料
 
+- [番号付き表と表参照仕様](../specifications/table-references.md)
 - [Generic DirectivesとGFM表のMarkdown ASTに関する調査](markdown-table-directive.md)
 - [Vivliostyle Flavored Markdown 2.7.0](https://github.com/vivliostyle/vfm/blob/v2.7.0/docs/ja/vfm.md)
 - [GitHub Flavored Markdown Spec 0.29-gfm: Tables extension](https://github.github.com/gfm/#tables-extension-)

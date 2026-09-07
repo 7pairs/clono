@@ -217,7 +217,7 @@ Container directiveの`table`でGFM表を囲む候補記法は、clonoの現在�
 - 複数ページにまたがる表、表の分割またはヘッダー行の繰り返し
 - キャプション内のMarkdown
 
-Vivliostyleへ委譲する表番号、同一原稿および原稿間の参照、PDF内部リンクは、既存の[表ID・キャプション・連番・相互参照に関する調査](vivliostyle-table-references.md)と[参照機能の結合検証](vivliostyle-reference-integration.md)で確認している。正式な著者向け記法、診断、ID、参照およびCSSは、後続の仕様策定と実装で決定する。
+Vivliostyleへ委譲する表番号、同一原稿および原稿間の参照、PDF内部リンクは、既存の[表ID・キャプション・連番・相互参照に関する調査](vivliostyle-table-references.md)と[参照機能の結合検証](vivliostyle-reference-integration.md)で確認している。正式な著者向け記法、診断、ID、参照およびCSSは、後続の[番号付き表と表参照仕様](../specifications/table-references.md)で定める。
 
 ## 再現方法
 
@@ -235,6 +235,7 @@ Vivliostyleへ委譲する表番号、同一原稿および原稿間の参照、
 ## 参照資料
 
 - [プロジェクト憲章](../project-charter.md)
+- [番号付き表と表参照仕様](../specifications/table-references.md)
 - [Vivliostyleの表ID・キャプション・連番・相互参照に関する調査](vivliostyle-table-references.md)
 - [参照機能の結合検証](vivliostyle-reference-integration.md)
 - [Markdown AST変換と出力方式に関する調査](markdown-ast-transformation.md)
