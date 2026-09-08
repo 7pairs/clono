@@ -7,6 +7,7 @@
    [clono.transform.figure :as figure]
    [clono.transform.heading :as heading]
    [clono.transform.page-break :as page-break]
+   [clono.transform.table :as table]
    [clono.transform.xref :as xref]))
 
 (def rules
@@ -14,6 +15,7 @@
    "column" column/rule
    "figure" figure/rule
    "page-break" page-break/rule
+   "table" table/rule
    "xref" xref/rule})
 
 (def known-directive-names
