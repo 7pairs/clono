@@ -4,7 +4,8 @@
    [clono.ast :as ast]
    [clono.markdown :as markdown]
    [clono.pipeline :as pipeline]
-   [clono.test-support :as test-support]))
+   [clono.test-support :as test-support]
+   [clono.transform :as transform]))
 
 (def valid-table-source
   (str ":::table[A &amp; &quot;B&quot; &lt;C&gt;]{#runtime}\n"
@@ -146,6 +147,42 @@
           (is (= "table" (:directive problem)) case)
           (is (pos-int? (:line problem)) case)
           (is (pos-int? (:column problem)) case))))))
+
+(deftest table-reference-target-collection-test
+  (testing "When a document contains numbered and ordinary tables, then only numbered table targets are collected in source order"
+    (let [context (transform-context "tables.md")
+          tree
+          (markdown/parse
+           (str ":::table[一つ目の表]{#first}\n"
+                "| 項目 |\n"
+                "| --- |\n"
+                "| A |\n"
+                ":::\n\n"
+                ":::table[二つ目の表]{#second}\n"
+                "| 項目 |\n"
+                "| --- |\n"
+                "| B |\n"
+                ":::\n\n"
+                "| 番号なし |\n"
+                "| --- |\n"
+                "| C |\n"))]
+      (is (= [{:logical-id "first"
+               :type "table"
+               :target-id "table-first"
+               :title-target-id "table-first-caption"
+               :numbered? true
+               :source-name "tables.md"
+               :line 1
+               :column 1}
+              {:logical-id "second"
+               :type "table"
+               :target-id "table-second"
+               :title-target-id "table-second-caption"
+               :numbered? true
+               :source-name "tables.md"
+               :line 7
+               :column 1}]
+             (transform/collect-reference-targets tree context))))))
 
 (deftest table-document-validation-test
   (testing "When a table is nested in a non-directive block, then its top-level placement is diagnosed"
