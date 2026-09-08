@@ -18,6 +18,13 @@
        "![入力から出力までの構成図](architecture.svg)\n"
        ":::\n"))
 
+(def table-source
+  (str ":::table[実行環境]{#runtime}\n"
+       "| 項目 | 値 |\n"
+       "| --- | --- |\n"
+       "| Node.js | 24 |\n"
+       ":::\n"))
+
 (deftest local-xref-transformation-test
   (testing "When local figure references use every format before and after their target, then each reference is resolved to the expected link structure"
     (let [source (str ":xref[architecture]{type=\"figure\" format=\"number\"}\n\n"
@@ -70,9 +77,9 @@
               :source ":xref[architecture]{format=\"number\"}\n"
               :message "`xref`には`type`属性が必要です。"}
              {:case "unsupported type"
-              :source ":xref[architecture]{type=\"table\" format=\"number\"}\n"
-              :message (str "`xref`の`type`属性には`figure`または"
-                            "`heading`を指定してください。")}
+              :source ":xref[architecture]{type=\"listing\" format=\"number\"}\n"
+              :message (str "`xref`の`type`属性には`figure`、`heading`または"
+                            "`table`を指定してください。")}
              {:case "missing format"
               :source ":xref[architecture]{type=\"figure\"}\n"
               :message "`xref`には`format`属性が必要です。"}
@@ -110,6 +117,46 @@
                   "\"}\n"))]
         (is (:ok? result) format)
         (is (empty? (:diagnostics result)) format)))))
+
+(deftest table-xref-type-validation-test
+  (testing "When table references use a supported format, then analysis accepts their reference type"
+    (doseq [format ["number" "number-title" "title"]]
+      (let [result
+            (pipeline/analyze
+             (transform-context "table-xref.md")
+             (str ":xref[runtime]{type=\"table\" format=\""
+                  format
+                  "\"}\n"))]
+        (is (:ok? result) format)
+        (is (empty? (:diagnostics result)) format)))))
+
+(deftest local-table-xref-transformation-test
+  (testing "When local table references use every format before and after their target, then each reference is resolved to the expected link structure"
+    (let [source
+          (str ":xref[runtime]{type=\"table\" format=\"number\"}\n\n"
+               ":xref[runtime]{type=\"table\" format=\"number-title\"}\n\n"
+               table-source
+               "\n:xref[runtime]{type=\"table\" format=\"title\"}\n")
+          result (pipeline/run (transform-context "table-xref.md") source)
+          output (:output result)
+          tree (markdown/parse output)]
+      (is (:ok? result))
+      (is (empty? (:diagnostics result)))
+      (is (.includes
+           output
+           (str "<a class=\"clono-xref clono-xref-table clono-xref-number\" "
+                "href=\"#table-runtime\"></a>")))
+      (is (.includes
+           output
+           (str "<a class=\"clono-xref clono-xref-table "
+                "clono-xref-number-title\" href=\"#table-runtime\" "
+                "data-title-href=\"#table-runtime-caption\"></a>")))
+      (is (.includes
+           output
+           (str "<a class=\"clono-xref clono-xref-table clono-xref-title\" "
+                "href=\"#table-runtime\" "
+                "data-title-href=\"#table-runtime-caption\"></a>")))
+      (is (nil? (test-support/directive tree "xref"))))))
 
 (deftest local-heading-xref-transformation-test
   (testing "When local heading references use every format before and after their targets, then each reference is resolved with heading metadata"
