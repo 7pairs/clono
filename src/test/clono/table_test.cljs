@@ -1,5 +1,6 @@
 (ns clono.table-test
   (:require
+   ["node:fs" :as fs]
    [cljs.test :refer [deftest is testing]]
    [clono.ast :as ast]
    [clono.markdown :as markdown]
@@ -100,6 +101,9 @@
                          :kind kind
                          :include-in-toc true})})
 
+(defn- normalize-line-endings [value]
+  (.replace value (js/RegExp. "\\r\\n?" "g") "\n"))
+
 (deftest table-transformation-test
   (let [result (pipeline/run (transform-context "table.md")
                              valid-table-source)
@@ -133,6 +137,23 @@
     (testing "When an ordinary GFM table follows a numbered table, then it remains an unwrapped table"
       (is (= ["html" "table" "html" "definition" "table"]
              (mapv #(.-type %) (ast/children tree)))))))
+
+(deftest table-counter-stylesheet-test
+  (testing "When a numbered table is rendered, then its chapter-scoped table number is displayed before the caption"
+    (let [stylesheet (normalize-line-endings
+                      (.readFileSync fs "styles/clono.css" "utf8"))]
+      (is (.includes stylesheet
+                     "body {\n  counter-reset: figure table;\n}\n"))
+      (is (.includes stylesheet
+                     (str ".clono-numbered-table {\n"
+                          "  counter-increment: table;\n"
+                          "}\n")))
+      (is (.includes
+           stylesheet
+           (str ".clono-numbered-table > .clono-table-caption::before {\n"
+                "  content: \"表\" counter(chapter) \".\" "
+                "counter(table) \" \";\n"
+                "}\n"))))))
 
 (deftest invalid-table-test
   (testing "When a table directive violates its local contract, then transformation fails with a positioned diagnostic"
