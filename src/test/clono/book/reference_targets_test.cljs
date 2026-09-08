@@ -114,6 +114,61 @@
                :column 1}]
              (:targets result))))))
 
+(deftest book-table-reference-target-collection-test
+  (testing "When published manuscripts contain tables alongside existing target types, then every numbered target is collected in manuscript and source order"
+    (let [result
+          (reference-targets/collect
+           [(manuscript
+             "chapter-one.md"
+             (str "# 概要 {#overview}\n\n"
+                  (table "runtime" "実行環境")
+                  "\n"
+                  "| 番号なし |\n"
+                  "| --- |\n"
+                  "| 対象外 |\n"))
+            (manuscript
+             "chapter-two.md"
+             (str (figure "architecture" "構成図")
+                  "\n"
+                  (table "commands" "実行コマンド")))])]
+      (is (:ok? result))
+      (is (empty? (:diagnostics result)))
+      (is (= [{:logical-id "overview"
+               :type "heading"
+               :target-id "overview"
+               :title-target-id "overview"
+               :numbered? true
+               :heading-depth 1
+               :document-kind "chapter"
+               :source-name "chapter-one.md"
+               :line 1
+               :column 1}
+              {:logical-id "runtime"
+               :type "table"
+               :target-id "table-runtime"
+               :title-target-id "table-runtime-caption"
+               :numbered? true
+               :source-name "chapter-one.md"
+               :line 3
+               :column 1}
+              {:logical-id "architecture"
+               :type "figure"
+               :target-id "figure-architecture"
+               :title-target-id "figure-architecture-caption"
+               :numbered? true
+               :source-name "chapter-two.md"
+               :line 1
+               :column 1}
+              {:logical-id "commands"
+               :type "table"
+               :target-id "table-commands"
+               :title-target-id "table-commands-caption"
+               :numbered? true
+               :source-name "chapter-two.md"
+               :line 5
+               :column 1}]
+             (:targets result))))))
+
 (deftest book-reference-target-duplicate-test
   (testing "When a logical ID is repeated across published manuscripts, then the later target is diagnosed and no ambiguous collection is returned"
     (let [result

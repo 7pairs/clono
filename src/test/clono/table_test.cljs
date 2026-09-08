@@ -6,7 +6,8 @@
    [clono.markdown :as markdown]
    [clono.pipeline :as pipeline]
    [clono.test-support :as test-support]
-   [clono.transform :as transform]))
+   [clono.transform :as transform]
+   [clono.transform.table :as table-transform]))
 
 (def valid-table-source
   (str ":::table[A &amp; &quot;B&quot; &lt;C&gt;]{#runtime}\n"
@@ -170,6 +171,27 @@
           (is (pos-int? (:column problem)) case))))))
 
 (deftest table-reference-target-collection-test
+  (testing "When a numbered table target is collected, then stable table and caption IDs are returned at its source position"
+    (let [context (transform-context "unit-table.md")
+          tree (markdown/parse
+                (str "前置きです。\n\n"
+                     ":::table[実行環境]{#runtime}\n"
+                     "| 項目 |\n"
+                     "| --- |\n"
+                     "| Node.js |\n"
+                     ":::\n"))]
+      (is (= [{:logical-id "runtime"
+               :type "table"
+               :target-id "table-runtime"
+               :title-target-id "table-runtime-caption"
+               :numbered? true
+               :source-name "unit-table.md"
+               :line 3
+               :column 1}]
+             (table-transform/collect-reference-targets
+              (test-support/directive tree "table")
+              context)))))
+
   (testing "When a document contains numbered and ordinary tables, then only numbered table targets are collected in source order"
     (let [context (transform-context "tables.md")
           tree
@@ -204,6 +226,35 @@
                :line 7
                :column 1}]
              (transform/collect-reference-targets tree context))))))
+
+(deftest table-pipeline-integration-test
+  (testing "When numbered tables share a document with other supported syntax, then every construct is transformed in source order"
+    (let [result
+          (pipeline/run
+           (transform-context "mixed-content.md")
+           (str "# 概要 {#overview}\n\n"
+                ":::figure[構成図]{#architecture}\n"
+                "![図](architecture.svg)\n"
+                ":::\n\n"
+                ":::table[実行環境]{#runtime}\n"
+                "| 項目 | 値 |\n"
+                "| --- | --- |\n"
+                "| Node.js | 24 |\n"
+                ":::\n\n"
+                ":::align{position=\"right\"}\n"
+                "署名\n"
+                ":::\n"))
+          output (:output result)
+          expected-in-order
+          ["# 概要 {#overview}"
+           "<figure class=\"clono-numbered-figure\" id=\"figure-architecture\">"
+           "<figure class=\"clono-numbered-table\" id=\"table-runtime\">"
+           "<div class=\"clono-align-right\">"]
+          positions (mapv #(.indexOf output %) expected-in-order)]
+      (is (:ok? result))
+      (is (empty? (:diagnostics result)))
+      (is (every? #(<= 0 %) positions))
+      (is (apply < positions)))))
 
 (deftest table-reference-target-collision-test
   (testing "When table logical IDs are repeated, then the later table is diagnosed in the shared namespace"
