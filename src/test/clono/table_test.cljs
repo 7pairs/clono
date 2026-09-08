@@ -184,6 +184,84 @@
                :column 1}]
              (transform/collect-reference-targets tree context))))))
 
+(deftest table-reference-target-collision-test
+  (testing "When table logical IDs are repeated, then the later table is diagnosed in the shared namespace"
+    (let [result
+          (pipeline/run
+           (transform-context "duplicate-tables.md")
+           (str ":::table[最初の表]{#same}\n"
+                "| 項目 |\n"
+                "| --- |\n"
+                "| A |\n"
+                ":::\n\n"
+                ":::table[次の表]{#same}\n"
+                "| 項目 |\n"
+                "| --- |\n"
+                "| B |\n"
+                ":::\n"))]
+      (is (false? (:ok? result)))
+      (is (nil? (:output result)))
+      (is (= [{:file "duplicate-tables.md"
+               :line 7
+               :column 1
+               :directive "table"
+               :message "`table`の論理ID`same`が重複しています。"}]
+             (:diagnostics result)))))
+
+  (testing "When a table repeats an earlier figure logical ID, then the table is diagnosed in the shared namespace"
+    (let [result
+          (pipeline/run
+           (transform-context "figure-before-table.md")
+           (str ":::figure[構成図]{#architecture}\n"
+                "![図](architecture.svg)\n"
+                ":::\n\n"
+                ":::table[構成表]{#architecture}\n"
+                "| 項目 |\n"
+                "| --- |\n"
+                "| A |\n"
+                ":::\n"))]
+      (is (= [{:file "figure-before-table.md"
+               :line 5
+               :column 1
+               :directive "table"
+               :message "`table`の論理ID`architecture`が重複しています。"}]
+             (:diagnostics result)))))
+
+  (testing "When a table repeats an earlier heading logical ID, then the table is diagnosed in the shared namespace"
+    (let [result
+          (pipeline/run
+           (transform-context "heading-before-table.md")
+           (str "# 実行環境 {#runtime}\n\n"
+                ":::table[実行環境]{#runtime}\n"
+                "| 項目 |\n"
+                "| --- |\n"
+                "| Node.js |\n"
+                ":::\n"))]
+      (is (= [{:file "heading-before-table.md"
+               :line 3
+               :column 1
+               :directive "table"
+               :message "`table`の論理ID`runtime`が重複しています。"}]
+             (:diagnostics result)))))
+
+  (testing "When a table HTML ID collides with an earlier heading ID, then the table is diagnosed in the shared namespace"
+    (let [result
+          (pipeline/run
+           (transform-context "heading-id-before-table.md")
+           (str "# 実行環境 {#table-runtime}\n\n"
+                ":::table[実行環境]{#runtime}\n"
+                "| 項目 |\n"
+                "| --- |\n"
+                "| Node.js |\n"
+                ":::\n"))]
+      (is (= [{:file "heading-id-before-table.md"
+               :line 3
+               :column 1
+               :directive "table"
+               :message (str "`table`から生成するHTML ID`table-runtime"
+                             "`が重複しています。")}]
+             (:diagnostics result))))))
+
 (deftest table-document-validation-test
   (testing "When a table is nested in a non-directive block, then its top-level placement is diagnosed"
     (let [source (str "> :::table[引用内の表]{#nested}\n"

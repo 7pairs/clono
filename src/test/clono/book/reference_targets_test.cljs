@@ -21,6 +21,13 @@
        "![図](./image.svg)\n"
        ":::\n"))
 
+(defn- table [id caption]
+  (str ":::table[" caption "]{#" id "}\n"
+       "| 項目 |\n"
+       "| --- |\n"
+       "| 値 |\n"
+       ":::\n"))
+
 (deftest book-reference-target-collection-test
   (testing "When published manuscripts contain figures, then their reference targets are collected in manuscript and source order"
     (let [result
@@ -175,5 +182,38 @@
                :line 1
                :column 1
                :message (str "見出しのHTML ID`figure-architecture-caption"
+                             "`が重複しています。")}]
+             (:diagnostics result)))))
+
+  (testing "When a table repeats a figure logical ID from another manuscript, then the later table is diagnosed in the shared namespace"
+    (let [result
+          (reference-targets/collect
+           [(manuscript "chapter-one.md"
+                        (figure "architecture" "構成図"))
+            (manuscript "chapter-two.md"
+                        (table "architecture" "構成表"))])]
+      (is (false? (:ok? result)))
+      (is (nil? (:targets result)))
+      (is (= [{:file "chapter-two.md"
+               :line 1
+               :column 1
+               :directive "table"
+               :message "`table`の論理ID`architecture`が重複しています。"}]
+             (:diagnostics result)))))
+
+  (testing "When a heading HTML ID collides with a table caption ID from another manuscript, then the later heading is diagnosed without a directive name"
+    (let [result
+          (reference-targets/collect
+           [(manuscript "chapter-one.md"
+                        (table "runtime" "実行環境"))
+            (manuscript
+             "chapter-two.md"
+             "# 衝突する見出し {#table-runtime-caption}\n")])]
+      (is (false? (:ok? result)))
+      (is (nil? (:targets result)))
+      (is (= [{:file "chapter-two.md"
+               :line 1
+               :column 1
+               :message (str "見出しのHTML ID`table-runtime-caption"
                              "`が重複しています。")}]
              (:diagnostics result))))))
