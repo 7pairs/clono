@@ -211,6 +211,18 @@
     (concat (placement-diagnostics tree tables context)
             (document-kind-diagnostics tables context))))
 
+(defn collect-reference-targets [node context]
+  (let [id (logical-id node)
+        start (ast/property node "position" "start")]
+    [{:logical-id id
+      :type "table"
+      :target-id (table-id id)
+      :title-target-id (caption-id id)
+      :numbered? true
+      :source-name (:source-name context)
+      :line (ast/property start "line")
+      :column (ast/property start "column")}]))
+
 (defn- html-node [value]
   #js {:type "html" :value value})
 
@@ -235,4 +247,5 @@
    :allowed-attribute-names #{"id"}
    :diagnostics diagnostics
    :document-diagnostics document-diagnostics
+   :collect-reference-targets collect-reference-targets
    :transform transform})
