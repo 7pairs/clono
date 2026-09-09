@@ -27,6 +27,16 @@
    :line 1
    :column 1})
 
+(defn- table-target [logical-id source-name]
+  {:logical-id logical-id
+   :type "table"
+   :target-id (str "table-" logical-id)
+   :title-target-id (str "table-" logical-id "-caption")
+   :numbered? true
+   :source-name source-name
+   :line 1
+   :column 1})
+
 (deftest cross-document-reference-resolution-test
   (testing "When local and cross-document references are resolved, then each manuscript receives source-relative fragment URLs"
     (let [source-name "chapters/chapter-one.md"
@@ -82,6 +92,60 @@
              (:href resolved-target)))
       (is (= "../../chapters/overview.html#figure-overview-caption"
              (:title-href resolved-target))))))
+
+(deftest cross-document-table-reference-resolution-test
+  (testing "When published manuscripts refer to each other's tables, then both references resolve to source-relative table and caption links"
+    (let [chapter-name "chapters/one.md"
+          appendix-name "appendices/two.MD"
+          chapter-source
+          (str ":xref[workflow]{type=\"table\" format=\"number-title\"}\n\n"
+               ":::table[実行環境]{#runtime}\n"
+               "| 項目 | 値 |\n"
+               "| --- | --- |\n"
+               "| Node.js | 24 |\n"
+               ":::\n")
+          appendix-source
+          (str ":xref[runtime]{type=\"table\" format=\"title\"}\n\n"
+               ":::table[処理フロー]{#workflow}\n"
+               "| 手順 |\n"
+               "| --- |\n"
+               "| 変換 |\n"
+               ":::\n")
+          result
+          (reference-resolution/resolve-references
+           [(manuscript chapter-name chapter-source)
+            (manuscript appendix-name appendix-source)]
+           [(table-target "runtime" chapter-name)
+            (table-target "workflow" appendix-name)])
+          resolved (:manuscripts result)
+          chapter-result
+          (pipeline/run-analyzed (get-in resolved [0 :context])
+                                 (get-in resolved [0 :tree]))
+          appendix-result
+          (pipeline/run-analyzed (get-in resolved [1 :context])
+                                 (get-in resolved [1 :tree]))]
+      (is (:ok? result))
+      (is (empty? (:diagnostics result)))
+      (is (:ok? chapter-result))
+      (is (:ok? appendix-result))
+      (is (.includes
+           (:output chapter-result)
+           (str "<a class=\"clono-xref clono-xref-table "
+                "clono-xref-number-title\" "
+                "href=\"../appendices/two.html#table-workflow\" "
+                "data-title-href=\"../appendices/two.html"
+                "#table-workflow-caption\"></a>")))
+      (is (.includes
+           (:output appendix-result)
+           (str "<a class=\"clono-xref clono-xref-table "
+                "clono-xref-title\" "
+                "href=\"../chapters/one.html#table-runtime\" "
+                "data-title-href=\"../chapters/one.html"
+                "#table-runtime-caption\"></a>")))
+      (is (not (.includes (:output chapter-result)
+                          "clono-xref-placeholder")))
+      (is (not (.includes (:output appendix-result)
+                          "clono-xref-placeholder"))))))
 
 (deftest unresolved-book-reference-test
   (testing "When published manuscripts contain unresolved references, then every diagnostic is returned in manuscript and source order without resolved manuscripts"
