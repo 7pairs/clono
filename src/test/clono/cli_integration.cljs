@@ -12,6 +12,9 @@
   (.mkdirSync fs (.dirname path file-path) #js {:recursive true})
   (.writeFileSync fs file-path content "utf8"))
 
+(defn- normalize-line-endings [value]
+  (.replace value (js/RegExp. "\\r\\n?" "g") "\n"))
+
 (defn- ensure! [condition message]
   (when-not condition
     (throw (js/Error. message))))
@@ -329,7 +332,9 @@
                      "Release build command with table references")
     (let [chapter-content (.readFileSync fs chapter-output "utf8")
           appendix-content (.readFileSync fs appendix-output "utf8")
-          stylesheet-content (.readFileSync fs stylesheet-output "utf8")]
+          stylesheet-content
+          (normalize-line-endings
+           (.readFileSync fs stylesheet-output "utf8"))]
       (ensure!
        (.includes chapter-content
                   (str "<figure class=\"clono-numbered-table\" "
@@ -415,7 +420,9 @@
           appendix-content (.readFileSync fs appendix-output "utf8")
           backmatter-content (.readFileSync fs backmatter-output "utf8")
           marker-content (.readFileSync fs marker-output "utf8")
-          stylesheet-content (.readFileSync fs stylesheet-output "utf8")
+          stylesheet-content
+          (normalize-line-endings
+           (.readFileSync fs stylesheet-output "utf8"))
           expected-files {"frontmatter.md" frontmatter-content
                           "chapters/main.md" chapter-content
                           "appendices/details.md" appendix-content
