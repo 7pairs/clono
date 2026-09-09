@@ -158,6 +158,66 @@
                 "data-title-href=\"#table-runtime-caption\"></a>")))
       (is (nil? (test-support/directive tree "xref"))))))
 
+(deftest table-xref-failure-test
+  (testing "When table and figure references name targets of the other type, then both type mismatches are diagnosed without output"
+    (let [source
+          (str figure-source
+               "\n"
+               table-source
+               "\n:xref[architecture]{type=\"table\" format=\"number\"}\n\n"
+               ":xref[runtime]{type=\"figure\" format=\"title\"}\n")
+          result (pipeline/run (transform-context "mismatched-table-xref.md")
+                               source)]
+      (is (false? (:ok? result)))
+      (is (nil? (:output result)))
+      (is (= [{:file "mismatched-table-xref.md"
+               :line 11
+               :column 1
+               :directive "xref"
+               :message "`xref`の参照種別が参照先と一致しません。"}
+              {:file "mismatched-table-xref.md"
+               :line 13
+               :column 1
+               :directive "xref"
+               :message "`xref`の参照種別が参照先と一致しません。"}]
+             (:diagnostics result)))))
+
+  (testing "When build cannot find a table target, then the unresolved reference is diagnosed instead of becoming a placeholder"
+    (let [result
+          (pipeline/run
+           {:mode :build
+            :source-name "chapter.md"
+            :publication-entry {:type :document
+                                :path "chapter.md"
+                                :kind "chapter"
+                                :include-in-toc true}}
+           ":xref[missing-table]{type=\"table\" format=\"number-title\"}\n")]
+      (is (false? (:ok? result)))
+      (is (nil? (:output result)))
+      (is (= [{:file "chapter.md"
+               :line 1
+               :column 1
+               :directive "xref"
+               :message "`xref`の参照先`missing-table`を解決できません。"}]
+             (:diagnostics result)))))
+
+  (testing "When unlisted Markdown contains a table reference, then build rejects it even when the target is local"
+    (let [result
+          (pipeline/run
+           {:mode :build
+            :source-name "notes.md"}
+           (str table-source
+                "\n:xref[runtime]{type=\"table\" format=\"title\"}\n"))]
+      (is (false? (:ok? result)))
+      (is (nil? (:output result)))
+      (is (= [{:file "notes.md"
+               :line 7
+               :column 1
+               :directive "xref"
+               :message (str "`publication`に掲載されていないMarkdownでは"
+                             "`xref`を使用できません。")}]
+             (:diagnostics result))))))
+
 (deftest local-heading-xref-transformation-test
   (testing "When local heading references use every format before and after their targets, then each reference is resolved with heading metadata"
     (let [source

@@ -147,6 +147,39 @@
       (is (not (.includes (:output appendix-result)
                           "clono-xref-placeholder"))))))
 
+(deftest book-table-reference-failure-test
+  (testing "When published manuscripts contain missing and mismatched table references, then every diagnostic is returned in manuscript and source order without resolved manuscripts"
+    (let [result
+          (reference-resolution/resolve-references
+           [(manuscript
+             "chapter-one.md"
+             (str ":xref[missing-table]"
+                  "{type=\"table\" format=\"number\"}\n\n"
+                  ":xref[diagram]{type=\"table\" format=\"title\"}\n"))
+            (manuscript
+             "chapter-two.md"
+             ":xref[runtime]{type=\"figure\" format=\"number-title\"}\n")]
+           [(target "diagram" "chapter-three.md")
+            (table-target "runtime" "chapter-three.md")])]
+      (is (false? (:ok? result)))
+      (is (nil? (:manuscripts result)))
+      (is (= [{:file "chapter-one.md"
+               :line 1
+               :column 1
+               :directive "xref"
+               :message "`xref`の参照先`missing-table`を解決できません。"}
+              {:file "chapter-one.md"
+               :line 3
+               :column 1
+               :directive "xref"
+               :message "`xref`の参照種別が参照先と一致しません。"}
+              {:file "chapter-two.md"
+               :line 1
+               :column 1
+               :directive "xref"
+               :message "`xref`の参照種別が参照先と一致しません。"}]
+             (:diagnostics result))))))
+
 (deftest unresolved-book-reference-test
   (testing "When published manuscripts contain unresolved references, then every diagnostic is returned in manuscript and source order without resolved manuscripts"
     (let [result
