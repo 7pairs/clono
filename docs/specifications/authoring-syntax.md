@@ -2,7 +2,7 @@
 
 - 状態: 策定中
 - 作成日: 2026-08-22
-- 最終更新日: 2026-09-08
+- 最終更新日: 2026-09-09
 
 ## 目的
 
@@ -50,7 +50,7 @@ Vivliostyleと`clono`の責務分担は、[Vivliostyleとclonoの責務整理](.
 | 見出し、画像、表、コードリストの連番 | なし | 対象外 | 番号の生成をVivliostyleとテーマCSSのカウンターへ委譲する |
 | 画像の参照 | `:xref[id]{type="figure" format="number"}`、`format="number-title"`または`format="title"` | 実装済み | `clono transform`では、参照種別、表示形式および論理IDを検証し、同一原稿内の参照をリンク構造へ、同一原稿内に参照先がない参照をプレビュー用プレースホルダーへ変換する。`clono build`では、掲載Markdown全体から参照対象を収集し、同一原稿および原稿間の参照をリンク構造へ変換する。重複ID、未定義参照または安全に解決できない原稿間パスは診断し、生成済み原稿ツリーを変更しない。詳細は[番号付き画像と画像参照仕様](figure-references.md)を参照する |
 | 見出しの参照 | `:xref[id]{type="heading" format="number"}`、`format="number-title"`または`format="title"` | 実装済み | VFMの明示的なIDを持つ`h1`から`h3`までを参照対象とする。`clono transform`では同一原稿内の参照をリンク構造へ、同一原稿内に参照先がない参照をプレビュー用プレースホルダーへ変換する。`clono build`では掲載Markdown全体から参照対象を収集し、同一原稿および原稿間の参照をリンク構造へ変換する。詳細は[見出し参照仕様](heading-references.md)を参照する |
-| 表の参照 | `:xref[id]{type="table" format="number"}`、`format="number-title"`または`format="title"` | 実装予定 | 画像および見出し参照と共通の`xref`を使用する。同一原稿と原稿間の参照、単一ファイル用プレースホルダー、診断および基盤CSSの契約は[番号付き表と表参照仕様](table-references.md)を参照する |
+| 表の参照 | `:xref[id]{type="table" format="number"}`、`format="number-title"`または`format="title"` | 実装済み | 画像および見出し参照と共通の`xref`を使用する。`clono transform`では同一原稿内の参照をリンク構造へ、同一原稿内に参照先がない参照をプレビュー用プレースホルダーへ変換する。`clono build`では掲載Markdown全体から参照対象を収集し、同一原稿および原稿間の参照をリンク構造へ変換する。詳細は[番号付き表と表参照仕様](table-references.md)を参照する |
 | コードリストの参照 | 未定 | 検討前 | 画像、見出しおよび表の参照と共通の`xref`を使用し、`type`で対象を区別する方針。個別機能の実装前に入力契約を決定する |
 
 ### 生成機能
