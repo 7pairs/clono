@@ -83,6 +83,22 @@
        "![処理](../images/workflow.svg)\n"
        ":::\n"))
 
+(defn- table-chapter-source []
+  (str ":xref[workflow]{type=\"table\" format=\"number-title\"}\n\n"
+       ":::table[実行環境]{#runtime}\n"
+       "| 項目 | 値 |\n"
+       "| --- | --- |\n"
+       "| Node.js | 24 |\n"
+       ":::\n"))
+
+(defn- table-appendix-source []
+  (str ":xref[runtime]{type=\"table\" format=\"title\"}\n\n"
+       ":::table[処理フロー]{#workflow}\n"
+       "| 工程 | 状態 |\n"
+       "| --- | --- |\n"
+       "| 変換 | 完了 |\n"
+       ":::\n"))
+
 (defn- verify-success! [^js result context]
   (ensure! (= 0 (.-status result))
            (str context " failed: " (.-stderr result)))
@@ -295,6 +311,67 @@
                                   expected-files
                                   "Undefined-reference build failure")))))
 
+(defn- verify-table-reference-build! [root]
+  (let [project (.join path root "table-reference-book")
+        source (.join path project "manuscripts")
+        output (.join path project "build" "manuscripts")
+        chapter-output (.join path output "chapters" "one.md")
+        appendix-output (.join path output "appendices" "two.MD")
+        stylesheet-output (.join path output "_clono" "styles" "clono.css")]
+    (write-file! (.join path project "clono.config.mjs")
+                 (reference-config))
+    (write-file! (.join path source "chapters" "one.md")
+                 (table-chapter-source))
+    (write-file! (.join path source "appendices" "two.MD")
+                 (table-appendix-source))
+
+    (verify-success! (run-cli ["build" project] root)
+                     "Release build command with table references")
+    (let [chapter-content (.readFileSync fs chapter-output "utf8")
+          appendix-content (.readFileSync fs appendix-output "utf8")
+          stylesheet-content (.readFileSync fs stylesheet-output "utf8")]
+      (ensure!
+       (.includes chapter-content
+                  (str "<figure class=\"clono-numbered-table\" "
+                       "id=\"table-runtime\">"))
+       "Release build command did not transform the chapter table")
+      (ensure!
+       (.includes
+        chapter-content
+        (str "class=\"clono-xref clono-xref-table "
+             "clono-xref-number-title\" "
+             "href=\"../appendices/two.html#table-workflow\" "
+             "data-title-href=\"../appendices/two.html"
+             "#table-workflow-caption\""))
+       "Release build command did not resolve the appendix table reference")
+      (ensure!
+       (.includes appendix-content
+                  (str "<figure class=\"clono-numbered-table\" "
+                       "id=\"table-workflow\">"))
+       "Release build command did not transform the appendix table")
+      (ensure!
+       (.includes
+        appendix-content
+        (str "class=\"clono-xref clono-xref-table clono-xref-title\" "
+             "href=\"../chapters/one.html#table-runtime\" "
+             "data-title-href=\"../chapters/one.html"
+             "#table-runtime-caption\""))
+       "Release build command did not resolve the chapter table reference")
+      (doseq [content [chapter-content appendix-content]]
+        (ensure! (not (.includes content "clono-xref-placeholder"))
+                 "Release build command emitted a table placeholder"))
+      (ensure!
+       (.includes
+        stylesheet-content
+        (str "a.clono-xref-table.clono-xref-number::before,\n"
+             "a.clono-xref-table.clono-xref-number-title::before"))
+       "Release build command copied a stylesheet without table numbers")
+      (ensure!
+       (.includes
+        stylesheet-content
+        "a.clono-xref-table.clono-xref-title::before")
+       "Release build command copied a stylesheet without table titles"))))
+
 (defn- verify-heading-reference-build! [root]
   (let [project (.join path root "heading-reference-book")
         source (.join path project "manuscripts")
@@ -456,6 +533,7 @@
       (verify-build! root)
       (verify-diagnostics! root)
       (verify-reference-build! root)
+      (verify-table-reference-build! root)
       (verify-heading-reference-build! root)
       (verify-unpositioned-diagnostic! root)
       (finally

@@ -172,6 +172,64 @@
             (is (not (.includes (:content appendix)
                                 "clono-xref-placeholder")))))))))
 
+(deftest cross-document-table-reference-transformation-test
+  (testing "When published Markdown manuscripts refer to each other's tables, then numbered tables and source-relative references are written to both transformed manuscripts"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              publication [{:type :document
+                            :path "chapters/one.md"
+                            :kind "chapter"
+                            :include-in-toc true}
+                           {:type :document
+                            :path "appendices/two.MD"
+                            :kind "appendix"
+                            :include-in-toc true}]]
+          (write-file!
+           (.join path source "chapters" "one.md")
+           (str ":xref[workflow]{type=\"table\" format=\"number-title\"}\n\n"
+                ":::table[実行環境]{#runtime}\n"
+                "| 項目 | 値 |\n"
+                "| --- | --- |\n"
+                "| Node.js | 24 |\n"
+                ":::\n"))
+          (write-file!
+           (.join path source "appendices" "two.MD")
+           (str ":xref[runtime]{type=\"table\" format=\"title\"}\n\n"
+                ":::table[処理フロー]{#workflow}\n"
+                "| 工程 | 状態 |\n"
+                "| --- | --- |\n"
+                "| 変換 | 完了 |\n"
+                ":::\n"))
+          (let [result (book-transform/run (create-plan project publication))
+                operations (:operations (:plan result))
+                chapter (operation-by-path operations "chapters/one.md")
+                appendix (operation-by-path operations "appendices/two.MD")]
+            (is (:ok? result))
+            (is (empty? (:diagnostics result)))
+            (is (.includes
+                 (:content chapter)
+                 (str "<figure class=\"clono-numbered-table\" "
+                      "id=\"table-runtime\">")))
+            (is (.includes
+                 (:content chapter)
+                 (str "href=\"../appendices/two.html#table-workflow\" "
+                      "data-title-href=\"../appendices/two.html"
+                      "#table-workflow-caption\"")))
+            (is (.includes
+                 (:content appendix)
+                 (str "<figure class=\"clono-numbered-table\" "
+                      "id=\"table-workflow\">")))
+            (is (.includes
+                 (:content appendix)
+                 (str "href=\"../chapters/one.html#table-runtime\" "
+                      "data-title-href=\"../chapters/one.html"
+                      "#table-runtime-caption\"")))
+            (is (not (.includes (:content chapter)
+                                "clono-xref-placeholder")))
+            (is (not (.includes (:content appendix)
+                                "clono-xref-placeholder")))))))))
+
 (deftest cross-document-heading-reference-transformation-test
   (testing "When published manuscripts refer to headings in other document kinds, then resolved links contain the target heading metadata"
     (with-temporary-project
