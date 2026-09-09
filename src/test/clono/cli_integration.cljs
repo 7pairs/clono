@@ -12,6 +12,9 @@
   (.mkdirSync fs (.dirname path file-path) #js {:recursive true})
   (.writeFileSync fs file-path content "utf8"))
 
+(defn- normalize-line-endings [value]
+  (.replace value (js/RegExp. "\\r\\n?" "g") "\n"))
+
 (defn- ensure! [condition message]
   (when-not condition
     (throw (js/Error. message))))
@@ -81,6 +84,22 @@
   (str ":xref[overview]{type=\"figure\" format=\"title\"}\n\n"
        ":::figure[処理フロー]{#" figure-id "}\n"
        "![処理](../images/workflow.svg)\n"
+       ":::\n"))
+
+(defn- table-chapter-source []
+  (str ":xref[workflow]{type=\"table\" format=\"number-title\"}\n\n"
+       ":::table[実行環境]{#runtime}\n"
+       "| 項目 | 値 |\n"
+       "| --- | --- |\n"
+       "| Node.js | 24 |\n"
+       ":::\n"))
+
+(defn- table-appendix-source []
+  (str ":xref[runtime]{type=\"table\" format=\"title\"}\n\n"
+       ":::table[処理フロー]{#workflow}\n"
+       "| 工程 | 状態 |\n"
+       "| --- | --- |\n"
+       "| 変換 | 完了 |\n"
        ":::\n"))
 
 (defn- verify-success! [^js result context]
@@ -295,6 +314,69 @@
                                   expected-files
                                   "Undefined-reference build failure")))))
 
+(defn- verify-table-reference-build! [root]
+  (let [project (.join path root "table-reference-book")
+        source (.join path project "manuscripts")
+        output (.join path project "build" "manuscripts")
+        chapter-output (.join path output "chapters" "one.md")
+        appendix-output (.join path output "appendices" "two.MD")
+        stylesheet-output (.join path output "_clono" "styles" "clono.css")]
+    (write-file! (.join path project "clono.config.mjs")
+                 (reference-config))
+    (write-file! (.join path source "chapters" "one.md")
+                 (table-chapter-source))
+    (write-file! (.join path source "appendices" "two.MD")
+                 (table-appendix-source))
+
+    (verify-success! (run-cli ["build" project] root)
+                     "Release build command with table references")
+    (let [chapter-content (.readFileSync fs chapter-output "utf8")
+          appendix-content (.readFileSync fs appendix-output "utf8")
+          stylesheet-content
+          (normalize-line-endings
+           (.readFileSync fs stylesheet-output "utf8"))]
+      (ensure!
+       (.includes chapter-content
+                  (str "<figure class=\"clono-numbered-table\" "
+                       "id=\"table-runtime\">"))
+       "Release build command did not transform the chapter table")
+      (ensure!
+       (.includes
+        chapter-content
+        (str "class=\"clono-xref clono-xref-table "
+             "clono-xref-number-title\" "
+             "href=\"../appendices/two.html#table-workflow\" "
+             "data-title-href=\"../appendices/two.html"
+             "#table-workflow-caption\""))
+       "Release build command did not resolve the appendix table reference")
+      (ensure!
+       (.includes appendix-content
+                  (str "<figure class=\"clono-numbered-table\" "
+                       "id=\"table-workflow\">"))
+       "Release build command did not transform the appendix table")
+      (ensure!
+       (.includes
+        appendix-content
+        (str "class=\"clono-xref clono-xref-table clono-xref-title\" "
+             "href=\"../chapters/one.html#table-runtime\" "
+             "data-title-href=\"../chapters/one.html"
+             "#table-runtime-caption\""))
+       "Release build command did not resolve the chapter table reference")
+      (doseq [content [chapter-content appendix-content]]
+        (ensure! (not (.includes content "clono-xref-placeholder"))
+                 "Release build command emitted a table placeholder"))
+      (ensure!
+       (.includes
+        stylesheet-content
+        (str "a.clono-xref-table.clono-xref-number::before,\n"
+             "a.clono-xref-table.clono-xref-number-title::before"))
+       "Release build command copied a stylesheet without table numbers")
+      (ensure!
+       (.includes
+        stylesheet-content
+        "a.clono-xref-table.clono-xref-title::before")
+       "Release build command copied a stylesheet without table titles"))))
+
 (defn- verify-heading-reference-build! [root]
   (let [project (.join path root "heading-reference-book")
         source (.join path project "manuscripts")
@@ -339,6 +421,8 @@
           backmatter-content (.readFileSync fs backmatter-output "utf8")
           marker-content (.readFileSync fs marker-output "utf8")
           stylesheet-content (.readFileSync fs stylesheet-output "utf8")
+          normalized-stylesheet-content
+          (normalize-line-endings stylesheet-content)
           expected-files {"frontmatter.md" frontmatter-content
                           "chapters/main.md" chapter-content
                           "appendices/details.md" appendix-content
@@ -397,13 +481,13 @@
                  "Release build command emitted a heading placeholder"))
       (ensure!
        (.includes
-        stylesheet-content
+        normalized-stylesheet-content
         (str "a.clono-xref-heading-chapter.clono-xref-heading-h1"
              ".clono-xref-number::before,"))
        "Release build command copied a stylesheet without chapter references")
       (ensure!
        (.includes
-        stylesheet-content
+        normalized-stylesheet-content
         (str "a.clono-xref-heading-appendix.clono-xref-heading-h3"
              ".clono-xref-number-title::before"))
        "Release build command copied a stylesheet without appendix references")
@@ -456,6 +540,7 @@
       (verify-build! root)
       (verify-diagnostics! root)
       (verify-reference-build! root)
+      (verify-table-reference-build! root)
       (verify-heading-reference-build! root)
       (verify-unpositioned-diagnostic! root)
       (finally
