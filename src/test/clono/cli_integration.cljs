@@ -420,9 +420,9 @@
           appendix-content (.readFileSync fs appendix-output "utf8")
           backmatter-content (.readFileSync fs backmatter-output "utf8")
           marker-content (.readFileSync fs marker-output "utf8")
-          stylesheet-content
-          (normalize-line-endings
-           (.readFileSync fs stylesheet-output "utf8"))
+          stylesheet-content (.readFileSync fs stylesheet-output "utf8")
+          normalized-stylesheet-content
+          (normalize-line-endings stylesheet-content)
           expected-files {"frontmatter.md" frontmatter-content
                           "chapters/main.md" chapter-content
                           "appendices/details.md" appendix-content
@@ -481,13 +481,13 @@
                  "Release build command emitted a heading placeholder"))
       (ensure!
        (.includes
-        stylesheet-content
+        normalized-stylesheet-content
         (str "a.clono-xref-heading-chapter.clono-xref-heading-h1"
              ".clono-xref-number::before,"))
        "Release build command copied a stylesheet without chapter references")
       (ensure!
        (.includes
-        stylesheet-content
+        normalized-stylesheet-content
         (str "a.clono-xref-heading-appendix.clono-xref-heading-h3"
              ".clono-xref-number-title::before"))
        "Release build command copied a stylesheet without appendix references")
