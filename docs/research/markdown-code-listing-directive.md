@@ -230,7 +230,7 @@ Container directiveの`listing`で単一のコードフェンスを囲む候補�
 - キャプションがページ末尾の近くに配置される原稿での改ページ
 - コードリスト内の別のブロック要素または入れ子のdirective
 
-Vivliostyleへ委譲するリスト番号、構文強調、複数ページへの分割、同一原稿および原稿間の参照、PDF内部リンクは、既存の[コードリストID・キャプション・連番・相互参照に関する調査](vivliostyle-code-listing-references.md)と[参照機能の結合検証](vivliostyle-reference-integration.md)で確認している。正式な著者向け記法、診断、ID、参照およびCSSは、後続の仕様策定で定める。
+Vivliostyleへ委譲するリスト番号、構文強調、複数ページへの分割、同一原稿および原稿間の参照、PDF内部リンクは、既存の[コードリストID・キャプション・連番・相互参照に関する調査](vivliostyle-code-listing-references.md)と[参照機能の結合検証](vivliostyle-reference-integration.md)で確認している。正式な著者向け記法、診断、ID、参照およびCSSは、[番号付きコードリストとコードリスト参照仕様](../specifications/code-listing-references.md)で定める。
 
 ## 再現方法
 
@@ -248,6 +248,7 @@ Vivliostyleへ委譲するリスト番号、構文強調、複数ページへの
 ## 参照資料
 
 - [プロジェクト憲章](../project-charter.md)
+- [番号付きコードリストとコードリスト参照仕様](../specifications/code-listing-references.md)
 - [VivliostyleのコードリストID・キャプション・連番・相互参照に関する調査](vivliostyle-code-listing-references.md)
 - [参照機能の結合検証](vivliostyle-reference-integration.md)
 - [Markdown AST変換と出力方式に関する調査](markdown-ast-transformation.md)
