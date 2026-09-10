@@ -22,7 +22,7 @@
 }
 
 body {
-  counter-reset: figure;
+  counter-reset: figure table;
 }
 
 .clono-numbered-figure {
@@ -31,6 +31,14 @@ body {
 
 .clono-numbered-figure > .clono-figure-caption::before {
   content: "図" counter(chapter) "." counter(figure) " ";
+}
+
+.clono-numbered-table {
+  counter-increment: table;
+}
+
+.clono-numbered-table > .clono-table-caption::before {
+  content: "表" counter(chapter) "." counter(table) " ";
 }
 
 a.clono-xref-figure.clono-xref-number::before,
@@ -43,6 +51,19 @@ a.clono-xref-figure.clono-xref-number-title::after {
 }
 
 a.clono-xref-figure.clono-xref-title::before {
+  content: target-text(attr(data-title-href url), content);
+}
+
+a.clono-xref-table.clono-xref-number::before,
+a.clono-xref-table.clono-xref-number-title::before {
+  content: "表" target-counter(attr(href url), chapter) "." target-counter(attr(href url), table);
+}
+
+a.clono-xref-table.clono-xref-number-title::after {
+  content: " " target-text(attr(data-title-href url), content);
+}
+
+a.clono-xref-table.clono-xref-title::before {
   content: target-text(attr(data-title-href url), content);
 }
 

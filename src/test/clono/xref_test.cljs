@@ -18,6 +18,13 @@
        "![入力から出力までの構成図](architecture.svg)\n"
        ":::\n"))
 
+(def table-source
+  (str ":::table[実行環境]{#runtime}\n"
+       "| 項目 | 値 |\n"
+       "| --- | --- |\n"
+       "| Node.js | 24 |\n"
+       ":::\n"))
+
 (deftest local-xref-transformation-test
   (testing "When local figure references use every format before and after their target, then each reference is resolved to the expected link structure"
     (let [source (str ":xref[architecture]{type=\"figure\" format=\"number\"}\n\n"
@@ -70,9 +77,9 @@
               :source ":xref[architecture]{format=\"number\"}\n"
               :message "`xref`には`type`属性が必要です。"}
              {:case "unsupported type"
-              :source ":xref[architecture]{type=\"table\" format=\"number\"}\n"
-              :message (str "`xref`の`type`属性には`figure`または"
-                            "`heading`を指定してください。")}
+              :source ":xref[architecture]{type=\"listing\" format=\"number\"}\n"
+              :message (str "`xref`の`type`属性には`figure`、`heading`または"
+                            "`table`を指定してください。")}
              {:case "missing format"
               :source ":xref[architecture]{type=\"figure\"}\n"
               :message "`xref`には`format`属性が必要です。"}
@@ -110,6 +117,106 @@
                   "\"}\n"))]
         (is (:ok? result) format)
         (is (empty? (:diagnostics result)) format)))))
+
+(deftest table-xref-type-validation-test
+  (testing "When table references use a supported format, then analysis accepts their reference type"
+    (doseq [format ["number" "number-title" "title"]]
+      (let [result
+            (pipeline/analyze
+             (transform-context "table-xref.md")
+             (str ":xref[runtime]{type=\"table\" format=\""
+                  format
+                  "\"}\n"))]
+        (is (:ok? result) format)
+        (is (empty? (:diagnostics result)) format)))))
+
+(deftest local-table-xref-transformation-test
+  (testing "When local table references use every format before and after their target, then each reference is resolved to the expected link structure"
+    (let [source
+          (str ":xref[runtime]{type=\"table\" format=\"number\"}\n\n"
+               ":xref[runtime]{type=\"table\" format=\"number-title\"}\n\n"
+               table-source
+               "\n:xref[runtime]{type=\"table\" format=\"title\"}\n")
+          result (pipeline/run (transform-context "table-xref.md") source)
+          output (:output result)
+          tree (markdown/parse output)]
+      (is (:ok? result))
+      (is (empty? (:diagnostics result)))
+      (is (.includes
+           output
+           (str "<a class=\"clono-xref clono-xref-table clono-xref-number\" "
+                "href=\"#table-runtime\"></a>")))
+      (is (.includes
+           output
+           (str "<a class=\"clono-xref clono-xref-table "
+                "clono-xref-number-title\" href=\"#table-runtime\" "
+                "data-title-href=\"#table-runtime-caption\"></a>")))
+      (is (.includes
+           output
+           (str "<a class=\"clono-xref clono-xref-table clono-xref-title\" "
+                "href=\"#table-runtime\" "
+                "data-title-href=\"#table-runtime-caption\"></a>")))
+      (is (nil? (test-support/directive tree "xref"))))))
+
+(deftest table-xref-failure-test
+  (testing "When table and figure references name targets of the other type, then both type mismatches are diagnosed without output"
+    (let [source
+          (str figure-source
+               "\n"
+               table-source
+               "\n:xref[architecture]{type=\"table\" format=\"number\"}\n\n"
+               ":xref[runtime]{type=\"figure\" format=\"title\"}\n")
+          result (pipeline/run (transform-context "mismatched-table-xref.md")
+                               source)]
+      (is (false? (:ok? result)))
+      (is (nil? (:output result)))
+      (is (= [{:file "mismatched-table-xref.md"
+               :line 11
+               :column 1
+               :directive "xref"
+               :message "`xref`の参照種別が参照先と一致しません。"}
+              {:file "mismatched-table-xref.md"
+               :line 13
+               :column 1
+               :directive "xref"
+               :message "`xref`の参照種別が参照先と一致しません。"}]
+             (:diagnostics result)))))
+
+  (testing "When build cannot find a table target, then the unresolved reference is diagnosed instead of becoming a placeholder"
+    (let [result
+          (pipeline/run
+           {:mode :build
+            :source-name "chapter.md"
+            :publication-entry {:type :document
+                                :path "chapter.md"
+                                :kind "chapter"
+                                :include-in-toc true}}
+           ":xref[missing-table]{type=\"table\" format=\"number-title\"}\n")]
+      (is (false? (:ok? result)))
+      (is (nil? (:output result)))
+      (is (= [{:file "chapter.md"
+               :line 1
+               :column 1
+               :directive "xref"
+               :message "`xref`の参照先`missing-table`を解決できません。"}]
+             (:diagnostics result)))))
+
+  (testing "When unlisted Markdown contains a table reference, then build rejects it even when the target is local"
+    (let [result
+          (pipeline/run
+           {:mode :build
+            :source-name "notes.md"}
+           (str table-source
+                "\n:xref[runtime]{type=\"table\" format=\"title\"}\n"))]
+      (is (false? (:ok? result)))
+      (is (nil? (:output result)))
+      (is (= [{:file "notes.md"
+               :line 7
+               :column 1
+               :directive "xref"
+               :message (str "`publication`に掲載されていないMarkdownでは"
+                             "`xref`を使用できません。")}]
+             (:diagnostics result))))))
 
 (deftest local-heading-xref-transformation-test
   (testing "When local heading references use every format before and after their targets, then each reference is resolved with heading metadata"
@@ -214,6 +321,30 @@
         (is (nil? (test-support/directive (markdown/parse output) "xref"))
             format)))))
 
+(deftest unresolved-local-table-xref-test
+  (testing "When transform cannot find a local table target, then each format becomes its fixed table placeholder"
+    (doseq [[format expected-text]
+            [["number" "表X.X"]
+             ["number-title" "表X.X 参照先未解決"]
+             ["title" "参照先未解決"]]]
+      (let [source (str ":xref[external-table]"
+                        "{type=\"table\" format=\"" format "\"}\n")
+            result (pipeline/run
+                    (transform-context "unresolved-table-xref.md")
+                    source)
+            output (:output result)
+            expected (str "<span class=\"clono-xref clono-xref-table "
+                          "clono-xref-" format " clono-xref-placeholder\">"
+                          expected-text
+                          "</span>")]
+        (is (:ok? result) format)
+        (is (empty? (:diagnostics result)) format)
+        (is (.includes output expected) format)
+        (is (not (.includes output "external-table")) format)
+        (is (not (.includes output "href=")) format)
+        (is (nil? (test-support/directive (markdown/parse output) "xref"))
+            format)))))
+
 (deftest unresolved-local-xref-test
   (testing "When transform cannot find a local xref target, then each format becomes a fixed placeholder without link attributes or author input"
     (doseq [[format expected-text]
@@ -279,6 +410,39 @@
                 "  content: target-text(attr(data-title-href url), content);\n"
                 "}\n")))
       (is (not (.includes stylesheet ".clono-xref-placeholder::"))))))
+
+(deftest table-xref-stylesheet-test
+  (testing "When a resolved table reference requests its number, then the target chapter and table counters are displayed"
+    (let [stylesheet (normalize-line-endings
+                      (.readFileSync fs "styles/clono.css" "utf8"))]
+      (is (.includes
+           stylesheet
+           (str "a.clono-xref-table.clono-xref-number::before,\n"
+                "a.clono-xref-table.clono-xref-number-title::before {\n"
+                "  content: \"表\" "
+                "target-counter(attr(href url), chapter) \".\" "
+                "target-counter(attr(href url), table);\n"
+                "}\n")))))
+
+  (testing "When a resolved table reference requests its title, then the target caption text is displayed"
+    (let [stylesheet (normalize-line-endings
+                      (.readFileSync fs "styles/clono.css" "utf8"))]
+      (is (.includes
+           stylesheet
+           (str "a.clono-xref-table.clono-xref-number-title::after {\n"
+                "  content: \" \" "
+                "target-text(attr(data-title-href url), content);\n"
+                "}\n")))
+      (is (.includes
+           stylesheet
+           (str "a.clono-xref-table.clono-xref-title::before {\n"
+                "  content: "
+                "target-text(attr(data-title-href url), content);\n"
+                "}\n")))
+      (is (not (.includes stylesheet
+                          "span.clono-xref-table.clono-xref-number::before")))
+      (is (not (.includes stylesheet
+                          "span.clono-xref-table.clono-xref-title::before"))))))
 
 (deftest heading-xref-stylesheet-test
   (testing "When a numbered chapter or appendix heading is referenced, then its formatted heading number is displayed"

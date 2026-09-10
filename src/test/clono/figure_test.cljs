@@ -136,7 +136,8 @@
   (testing "When the clono stylesheet is inspected, then it provides the required figure counter rules"
     (let [stylesheet (normalize-line-endings
                       (.readFileSync fs "styles/clono.css" "utf8"))]
-      (is (.includes stylesheet "body {\n  counter-reset: figure;\n}\n"))
+      (is (.includes stylesheet
+                     "body {\n  counter-reset: figure table;\n}\n"))
       (is (.includes stylesheet
                      ".clono-numbered-figure {\n  counter-increment: figure;\n}\n"))
       (is (.includes
