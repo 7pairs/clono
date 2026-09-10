@@ -6,6 +6,8 @@ Generic DirectivesのContainer directive内にフェンス付きコードブロ�
 
 このfixtureは、番号付きコードリストの著者向け記法、class名、HTML構造または診断契約を確定するものではない。仕様策定前の技術的な成立性を確認するため、合意した候補記法と出力構造を使用する。
 
+検証結果、評価および未確認事項は、[Generic DirectivesとコードフェンスのMarkdown ASTに関する調査](../../markdown-code-listing-directive.md)を参照する。
+
 ## 検証対象
 
 入力は[`input/numbered-listings.md`](input/numbered-listings.md)に保存している。言語指定のあるコードリストと言語指定のないコードリストを一つずつ記述し、コード内にはdirective風の文字列も含めている。
@@ -101,6 +103,7 @@ Vivliostyleへ委譲する番号表示、キャプション配置、構文強調
 ## 参照資料
 
 - [VivliostyleのコードリストID・キャプション・連番・相互参照に関する調査](../../vivliostyle-code-listing-references.md)
+- [Generic DirectivesとコードフェンスのMarkdown ASTに関する調査](../../markdown-code-listing-directive.md)
 - [Markdown AST変換と出力方式に関する調査](../../markdown-ast-transformation.md)
 - [Generic DirectivesとmdastによるMarkdown変換パイプラインのADR](../../../decisions/0003-adopt-generic-directives-mdast-transformation-pipeline.md)
 - [Generic directives/plugins syntax](https://talk.commonmark.org/t/generic-directives-plugins-syntax/444)

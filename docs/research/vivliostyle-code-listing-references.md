@@ -2,7 +2,7 @@
 
 - 状態: 調査済み
 - 初回調査日: 2026-08-17
-- 最終更新日: 2026-08-20
+- 最終更新日: 2026-09-10
 - 検証環境:
   - 実行環境: macOS、Node.js 24.19.0
   - HTML変換: `@vivliostyle/vfm` 2.7.0
@@ -191,7 +191,6 @@ a.xref-title::after {
 - clonoで使用する番号付きコードリストと参照の著者向け記法
 - キャプションを省略した場合の補完規則
 - キャプション内のMarkdown
-- 言語指定を省略した番号付きコードリスト
 - 行番号
 - 特定行の強調と差分表示
 - 製品用テーマでの長い行の折り返しと禁則処理
@@ -200,6 +199,8 @@ a.xref-title::after {
 - 章として数えない前付・後付などを別のMarkdownファイルとして`entry`へ含める場合のカウンター制御
 
 行番号、特定行の強調、差分表示はThunder Clawの次回作における必須要件ではないため、具体的な必要性が高まるまで調査しない。
+
+[Generic DirectivesとコードフェンスのMarkdown ASTに関する追加調査](markdown-code-listing-directive.md)では、候補となる著者向け記法を使用し、言語指定を省略したコードリストを検証した。mdastでは`code.lang`が`null`となり、VFM 2.7.0によるHTML変換後は`language-text`クラスを持つ`pre`と`code`が生成されることを確認している。
 
 ## 再現方法
 
@@ -215,6 +216,7 @@ a.xref-title::after {
 
 ## 参照資料
 
+- [Generic DirectivesとコードフェンスのMarkdown ASTに関する調査](markdown-code-listing-directive.md)
 - [コード | Vivliostyle Flavored Markdown 2.7.0](https://github.com/vivliostyle/vfm/blob/v2.7.0/docs/ja/vfm.md#コード-code)
 - [チュートリアル⑤カウンタと柱のスタイル | Vivliostyle](https://vivliostyle.org/ja/tutorials/configure-counters-running-heads/)（2026-08-17参照）
 - [Supported CSS Features | Vivliostyle.js 2.44.1](https://github.com/vivliostyle/vivliostyle.js/blob/v2.44.1/docs/ja/supported-css-features.md)
