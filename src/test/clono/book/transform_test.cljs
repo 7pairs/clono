@@ -230,6 +230,64 @@
             (is (not (.includes (:content appendix)
                                 "clono-xref-placeholder")))))))))
 
+(deftest cross-document-listing-reference-transformation-test
+  (testing "When published Markdown manuscripts refer to each other's listings, then numbered listings and source-relative references are written to both transformed manuscripts"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              publication [{:type :document
+                            :path "chapters/one.md"
+                            :kind "chapter"
+                            :include-in-toc true}
+                           {:type :document
+                            :path "appendices/two.MD"
+                            :kind "appendix"
+                            :include-in-toc true}]]
+          (write-file!
+           (.join path source "chapters" "one.md")
+           (str ":xref[workflow]{type=\"listing\" format=\"number-title\"}\n\n"
+                ":::listing[起動処理]{#startup}\n"
+                "```kotlin\n"
+                "fun main() {}\n"
+                "```\n"
+                ":::\n"))
+          (write-file!
+           (.join path source "appendices" "two.MD")
+           (str ":xref[startup]{type=\"listing\" format=\"title\"}\n\n"
+                ":::listing[処理フロー]{#workflow}\n"
+                "```\n"
+                "prepare\nexecute\n"
+                "```\n"
+                ":::\n"))
+          (let [result (book-transform/run (create-plan project publication))
+                operations (:operations (:plan result))
+                chapter (operation-by-path operations "chapters/one.md")
+                appendix (operation-by-path operations "appendices/two.MD")]
+            (is (:ok? result))
+            (is (empty? (:diagnostics result)))
+            (is (.includes
+                 (:content chapter)
+                 (str "<figure class=\"clono-numbered-listing\" "
+                      "id=\"listing-startup\">")))
+            (is (.includes
+                 (:content chapter)
+                 (str "href=\"../appendices/two.html#listing-workflow\" "
+                      "data-title-href=\"../appendices/two.html"
+                      "#listing-workflow-caption\"")))
+            (is (.includes
+                 (:content appendix)
+                 (str "<figure class=\"clono-numbered-listing\" "
+                      "id=\"listing-workflow\">")))
+            (is (.includes
+                 (:content appendix)
+                 (str "href=\"../chapters/one.html#listing-startup\" "
+                      "data-title-href=\"../chapters/one.html"
+                      "#listing-startup-caption\"")))
+            (is (not (.includes (:content chapter)
+                                "clono-xref-placeholder")))
+            (is (not (.includes (:content appendix)
+                                "clono-xref-placeholder")))))))))
+
 (deftest cross-document-heading-reference-transformation-test
   (testing "When published manuscripts refer to headings in other document kinds, then resolved links contain the target heading metadata"
     (with-temporary-project

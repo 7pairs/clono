@@ -14,7 +14,7 @@
                        :include-in-toc true}})
 
 (defn- manuscript [source-name source]
-  {:context (context source-name)
+  {:context (assoc (context source-name) :source source)
    :tree (markdown/parse source)})
 
 (defn- target [logical-id source-name]
@@ -32,6 +32,16 @@
    :type "table"
    :target-id (str "table-" logical-id)
    :title-target-id (str "table-" logical-id "-caption")
+   :numbered? true
+   :source-name source-name
+   :line 1
+   :column 1})
+
+(defn- listing-target [logical-id source-name]
+  {:logical-id logical-id
+   :type "listing"
+   :target-id (str "listing-" logical-id)
+   :title-target-id (str "listing-" logical-id "-caption")
    :numbered? true
    :source-name source-name
    :line 1
@@ -142,6 +152,60 @@
                 "href=\"../chapters/one.html#table-runtime\" "
                 "data-title-href=\"../chapters/one.html"
                 "#table-runtime-caption\"></a>")))
+      (is (not (.includes (:output chapter-result)
+                          "clono-xref-placeholder")))
+      (is (not (.includes (:output appendix-result)
+                          "clono-xref-placeholder"))))))
+
+(deftest cross-document-listing-reference-resolution-test
+  (testing "When published manuscripts refer to each other's listings, then both references resolve to source-relative listing and caption links"
+    (let [chapter-name "chapters/one.md"
+          appendix-name "appendices/two.MD"
+          chapter-source
+          (str ":xref[workflow]{type=\"listing\" format=\"number-title\"}\n\n"
+               ":::listing[起動処理]{#startup}\n"
+               "```kotlin\n"
+               "fun main() {}\n"
+               "```\n"
+               ":::\n")
+          appendix-source
+          (str ":xref[startup]{type=\"listing\" format=\"title\"}\n\n"
+               ":::listing[処理フロー]{#workflow}\n"
+               "```\n"
+               "prepare\nexecute\n"
+               "```\n"
+               ":::\n")
+          result
+          (reference-resolution/resolve-references
+           [(manuscript chapter-name chapter-source)
+            (manuscript appendix-name appendix-source)]
+           [(listing-target "startup" chapter-name)
+            (listing-target "workflow" appendix-name)])
+          resolved (:manuscripts result)
+          chapter-result
+          (pipeline/run-analyzed (get-in resolved [0 :context])
+                                 (get-in resolved [0 :tree]))
+          appendix-result
+          (pipeline/run-analyzed (get-in resolved [1 :context])
+                                 (get-in resolved [1 :tree]))]
+      (is (:ok? result))
+      (is (empty? (:diagnostics result)))
+      (is (:ok? chapter-result))
+      (is (:ok? appendix-result))
+      (is (.includes
+           (:output chapter-result)
+           (str "<a class=\"clono-xref clono-xref-listing "
+                "clono-xref-number-title\" "
+                "href=\"../appendices/two.html#listing-workflow\" "
+                "data-title-href=\"../appendices/two.html"
+                "#listing-workflow-caption\"></a>")))
+      (is (.includes
+           (:output appendix-result)
+           (str "<a class=\"clono-xref clono-xref-listing "
+                "clono-xref-title\" "
+                "href=\"../chapters/one.html#listing-startup\" "
+                "data-title-href=\"../chapters/one.html"
+                "#listing-startup-caption\"></a>")))
       (is (not (.includes (:output chapter-result)
                           "clono-xref-placeholder")))
       (is (not (.includes (:output appendix-result)
