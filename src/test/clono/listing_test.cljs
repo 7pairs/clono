@@ -209,6 +209,105 @@
                :column 1}]
              (transform/collect-reference-targets tree context))))))
 
+(deftest listing-reference-target-collision-test
+  (testing "When listing logical IDs are repeated, then the later listing is diagnosed in the shared namespace"
+    (let [result
+          (pipeline/run
+           (transform-context "duplicate-listings.md")
+           (str ":::listing[最初のコード]{#same}\n"
+                "```kotlin\n"
+                "fun first() {}\n"
+                "```\n"
+                ":::\n\n"
+                ":::listing[次のコード]{#same}\n"
+                "```kotlin\n"
+                "fun second() {}\n"
+                "```\n"
+                ":::\n"))]
+      (is (false? (:ok? result)))
+      (is (nil? (:output result)))
+      (is (= [{:file "duplicate-listings.md"
+               :line 7
+               :column 1
+               :directive "listing"
+               :message "`listing`の論理ID`same`が重複しています。"}]
+             (:diagnostics result)))))
+
+  (testing "When a listing repeats an earlier figure logical ID, then the listing is diagnosed in the shared namespace"
+    (let [result
+          (pipeline/run
+           (transform-context "figure-before-listing.md")
+           (str ":::figure[構成図]{#architecture}\n"
+                "![図](architecture.svg)\n"
+                ":::\n\n"
+                ":::listing[構成コード]{#architecture}\n"
+                "```kotlin\n"
+                "fun architecture() {}\n"
+                "```\n"
+                ":::\n"))]
+      (is (= [{:file "figure-before-listing.md"
+               :line 5
+               :column 1
+               :directive "listing"
+               :message "`listing`の論理ID`architecture`が重複しています。"}]
+             (:diagnostics result)))))
+
+  (testing "When a listing repeats an earlier heading logical ID, then the listing is diagnosed in the shared namespace"
+    (let [result
+          (pipeline/run
+           (transform-context "heading-before-listing.md")
+           (str "# 実行例 {#example}\n\n"
+                ":::listing[実行例]{#example}\n"
+                "```kotlin\n"
+                "fun example() {}\n"
+                "```\n"
+                ":::\n"))]
+      (is (= [{:file "heading-before-listing.md"
+               :line 3
+               :column 1
+               :directive "listing"
+               :message "`listing`の論理ID`example`が重複しています。"}]
+             (:diagnostics result)))))
+
+  (testing "When a listing repeats an earlier table logical ID, then the listing is diagnosed in the shared namespace"
+    (let [result
+          (pipeline/run
+           (transform-context "table-before-listing.md")
+           (str ":::table[実行環境]{#runtime}\n"
+                "| 項目 |\n"
+                "| --- |\n"
+                "| Node.js |\n"
+                ":::\n\n"
+                ":::listing[実行環境の確認]{#runtime}\n"
+                "```text\n"
+                "node --version\n"
+                "```\n"
+                ":::\n"))]
+      (is (= [{:file "table-before-listing.md"
+               :line 7
+               :column 1
+               :directive "listing"
+               :message "`listing`の論理ID`runtime`が重複しています。"}]
+             (:diagnostics result)))))
+
+  (testing "When a generated listing HTML ID collides with an earlier heading ID, then the listing is diagnosed in the shared namespace"
+    (let [result
+          (pipeline/run
+           (transform-context "heading-id-before-listing.md")
+           (str "# 衝突する見出し {#listing-greeting-caption}\n\n"
+                ":::listing[挨拶]{#greeting}\n"
+                "```kotlin\n"
+                "fun greet() {}\n"
+                "```\n"
+                ":::\n"))]
+      (is (= [{:file "heading-id-before-listing.md"
+               :line 3
+               :column 1
+               :directive "listing"
+               :message (str "`listing`から生成するHTML ID`"
+                             "listing-greeting-caption`が重複しています。")}]
+             (:diagnostics result))))))
+
 (deftest listing-document-validation-test
   (testing "When a listing is nested in a non-directive block, then its top-level placement is diagnosed"
     (let [source (str "> :::listing[引用内のコード]{#nested}\n"
