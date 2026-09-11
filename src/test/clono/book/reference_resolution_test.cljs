@@ -211,6 +211,39 @@
       (is (not (.includes (:output appendix-result)
                           "clono-xref-placeholder"))))))
 
+(deftest book-listing-reference-failure-test
+  (testing "When published manuscripts contain missing and mismatched listing references, then every diagnostic is returned in manuscript and source order without resolved manuscripts"
+    (let [result
+          (reference-resolution/resolve-references
+           [(manuscript
+             "chapter-one.md"
+             (str ":xref[missing-listing]"
+                  "{type=\"listing\" format=\"number\"}\n\n"
+                  ":xref[diagram]{type=\"listing\" format=\"title\"}\n"))
+            (manuscript
+             "chapter-two.md"
+             ":xref[startup]{type=\"table\" format=\"number-title\"}\n")]
+           [(target "diagram" "chapter-three.md")
+            (listing-target "startup" "chapter-three.md")])]
+      (is (false? (:ok? result)))
+      (is (nil? (:manuscripts result)))
+      (is (= [{:file "chapter-one.md"
+               :line 1
+               :column 1
+               :directive "xref"
+               :message "`xref`の参照先`missing-listing`を解決できません。"}
+              {:file "chapter-one.md"
+               :line 3
+               :column 1
+               :directive "xref"
+               :message "`xref`の参照種別が参照先と一致しません。"}
+              {:file "chapter-two.md"
+               :line 1
+               :column 1
+               :directive "xref"
+               :message "`xref`の参照種別が参照先と一致しません。"}]
+             (:diagnostics result))))))
+
 (deftest book-table-reference-failure-test
   (testing "When published manuscripts contain missing and mismatched table references, then every diagnostic is returned in manuscript and source order without resolved manuscripts"
     (let [result
