@@ -392,6 +392,31 @@
         (is (nil? (test-support/directive (markdown/parse output) "xref"))
             format)))))
 
+(deftest unresolved-local-listing-xref-test
+  (testing "When transform cannot find a local listing target, then each format becomes its fixed listing placeholder"
+    (doseq [[format expected-text]
+            [["number" "リストX.X"]
+             ["number-title" "リストX.X 参照先未解決"]
+             ["title" "参照先未解決"]]]
+      (let [source (str ":xref[external-listing]"
+                        "{type=\"listing\" format=\"" format "\"}\n")
+            result (pipeline/run
+                    (transform-context "unresolved-listing-xref.md")
+                    source)
+            output (:output result)
+            expected (str "<span class=\"clono-xref clono-xref-listing "
+                          "clono-xref-" format " clono-xref-placeholder\">"
+                          expected-text
+                          "</span>")]
+        (is (:ok? result) format)
+        (is (empty? (:diagnostics result)) format)
+        (is (.includes output expected) format)
+        (is (not (.includes output "external-listing")) format)
+        (is (not (.includes output "href=")) format)
+        (is (not (.includes output "<a")) format)
+        (is (nil? (test-support/directive (markdown/parse output) "xref"))
+            format)))))
+
 (deftest unresolved-local-xref-test
   (testing "When transform cannot find a local xref target, then each format becomes a fixed placeholder without link attributes or author input"
     (doseq [[format expected-text]
