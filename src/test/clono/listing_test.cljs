@@ -4,7 +4,9 @@
    [clono.ast :as ast]
    [clono.markdown :as markdown]
    [clono.pipeline :as pipeline]
-   [clono.test-support :as test-support]))
+   [clono.test-support :as test-support]
+   [clono.transform :as transform]
+   [clono.transform.listing :as listing-transform]))
 
 (def valid-listing-source
   (str ":::listing[A &amp; &quot;B&quot; &lt;C&gt;]{#greeting}\n"
@@ -149,6 +151,63 @@
           (is (= "listing" (:directive problem)) case)
           (is (pos-int? (:line problem)) case)
           (is (pos-int? (:column problem)) case))))))
+
+(deftest listing-reference-target-collection-test
+  (testing "When a numbered listing target is collected, then stable listing and caption IDs are returned at its source position"
+    (let [context (transform-context "unit-listing.md")
+          tree (markdown/parse
+                (str "前置きです。\n\n"
+                     ":::listing[挨拶を表示する関数]{#greeting}\n"
+                     "```kotlin\n"
+                     "fun greet() {}\n"
+                     "```\n"
+                     ":::\n"))]
+      (is (= [{:logical-id "greeting"
+               :type "listing"
+               :target-id "listing-greeting"
+               :title-target-id "listing-greeting-caption"
+               :numbered? true
+               :source-name "unit-listing.md"
+               :line 3
+               :column 1}]
+             (listing-transform/collect-reference-targets
+              (test-support/directive tree "listing")
+              context)))))
+
+  (testing "When a document contains numbered and ordinary code blocks, then only numbered listing targets are collected in source order"
+    (let [context (transform-context "listings.md")
+          tree
+          (markdown/parse
+           (str ":::listing[一つ目のコード]{#first}\n"
+                "```kotlin\n"
+                "fun first() {}\n"
+                "```\n"
+                ":::\n\n"
+                "```text\n"
+                "番号なしコード\n"
+                "```\n\n"
+                ":::listing[二つ目のコード]{#second}\n"
+                "```javascript\n"
+                "function second() {}\n"
+                "```\n"
+                ":::\n"))]
+      (is (= [{:logical-id "first"
+               :type "listing"
+               :target-id "listing-first"
+               :title-target-id "listing-first-caption"
+               :numbered? true
+               :source-name "listings.md"
+               :line 1
+               :column 1}
+              {:logical-id "second"
+               :type "listing"
+               :target-id "listing-second"
+               :title-target-id "listing-second-caption"
+               :numbered? true
+               :source-name "listings.md"
+               :line 11
+               :column 1}]
+             (transform/collect-reference-targets tree context))))))
 
 (deftest listing-document-validation-test
   (testing "When a listing is nested in a non-directive block, then its top-level placement is diagnosed"
