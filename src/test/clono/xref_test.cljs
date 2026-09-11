@@ -25,6 +25,13 @@
        "| Node.js | 24 |\n"
        ":::\n"))
 
+(def listing-source
+  (str ":::listing[挨拶を表示する関数]{#greeting}\n"
+       "```kotlin\n"
+       "fun greet() {}\n"
+       "```\n"
+       ":::\n"))
+
 (deftest local-xref-transformation-test
   (testing "When local figure references use every format before and after their target, then each reference is resolved to the expected link structure"
     (let [source (str ":xref[architecture]{type=\"figure\" format=\"number\"}\n\n"
@@ -77,9 +84,9 @@
               :source ":xref[architecture]{format=\"number\"}\n"
               :message "`xref`には`type`属性が必要です。"}
              {:case "unsupported type"
-              :source ":xref[architecture]{type=\"listing\" format=\"number\"}\n"
-              :message (str "`xref`の`type`属性には`figure`、`heading`または"
-                            "`table`を指定してください。")}
+              :source ":xref[architecture]{type=\"code\" format=\"number\"}\n"
+              :message (str "`xref`の`type`属性には`figure`、`heading`、"
+                            "`table`または`listing`を指定してください。")}
              {:case "missing format"
               :source ":xref[architecture]{type=\"figure\"}\n"
               :message "`xref`には`format`属性が必要です。"}
@@ -130,6 +137,18 @@
         (is (:ok? result) format)
         (is (empty? (:diagnostics result)) format)))))
 
+(deftest listing-xref-type-validation-test
+  (testing "When listing references use a supported format, then analysis accepts their reference type"
+    (doseq [format ["number" "number-title" "title"]]
+      (let [result
+            (pipeline/analyze
+             (transform-context "listing-xref.md")
+             (str ":xref[greeting]{type=\"listing\" format=\""
+                  format
+                  "\"}\n"))]
+        (is (:ok? result) format)
+        (is (empty? (:diagnostics result)) format)))))
+
 (deftest local-table-xref-transformation-test
   (testing "When local table references use every format before and after their target, then each reference is resolved to the expected link structure"
     (let [source
@@ -156,6 +175,34 @@
            (str "<a class=\"clono-xref clono-xref-table clono-xref-title\" "
                 "href=\"#table-runtime\" "
                 "data-title-href=\"#table-runtime-caption\"></a>")))
+      (is (nil? (test-support/directive tree "xref"))))))
+
+(deftest local-listing-xref-transformation-test
+  (testing "When local listing references use every format before and after their target, then each reference is resolved to the expected link structure"
+    (let [source
+          (str ":xref[greeting]{type=\"listing\" format=\"number\"}\n\n"
+               ":xref[greeting]{type=\"listing\" format=\"number-title\"}\n\n"
+               listing-source
+               "\n:xref[greeting]{type=\"listing\" format=\"title\"}\n")
+          result (pipeline/run (transform-context "listing-xref.md") source)
+          output (:output result)
+          tree (markdown/parse output)]
+      (is (:ok? result))
+      (is (empty? (:diagnostics result)))
+      (is (.includes
+           output
+           (str "<a class=\"clono-xref clono-xref-listing "
+                "clono-xref-number\" href=\"#listing-greeting\"></a>")))
+      (is (.includes
+           output
+           (str "<a class=\"clono-xref clono-xref-listing "
+                "clono-xref-number-title\" href=\"#listing-greeting\" "
+                "data-title-href=\"#listing-greeting-caption\"></a>")))
+      (is (.includes
+           output
+           (str "<a class=\"clono-xref clono-xref-listing "
+                "clono-xref-title\" href=\"#listing-greeting\" "
+                "data-title-href=\"#listing-greeting-caption\"></a>")))
       (is (nil? (test-support/directive tree "xref"))))))
 
 (deftest table-xref-failure-test
