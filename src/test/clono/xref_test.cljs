@@ -516,6 +516,39 @@
       (is (not (.includes stylesheet
                           "span.clono-xref-table.clono-xref-title::before"))))))
 
+(deftest listing-xref-stylesheet-test
+  (testing "When a resolved listing reference requests its number, then the target chapter and listing counters are displayed"
+    (let [stylesheet (normalize-line-endings
+                      (.readFileSync fs "styles/clono.css" "utf8"))]
+      (is (.includes
+           stylesheet
+           (str "a.clono-xref-listing.clono-xref-number::before,\n"
+                "a.clono-xref-listing.clono-xref-number-title::before {\n"
+                "  content: \"リスト\" "
+                "target-counter(attr(href url), chapter) \".\" "
+                "target-counter(attr(href url), listing);\n"
+                "}\n")))))
+
+  (testing "When a resolved listing reference requests its title, then the target caption text is displayed"
+    (let [stylesheet (normalize-line-endings
+                      (.readFileSync fs "styles/clono.css" "utf8"))]
+      (is (.includes
+           stylesheet
+           (str "a.clono-xref-listing.clono-xref-number-title::after {\n"
+                "  content: \" \" "
+                "target-text(attr(data-title-href url), content);\n"
+                "}\n")))
+      (is (.includes
+           stylesheet
+           (str "a.clono-xref-listing.clono-xref-title::before {\n"
+                "  content: "
+                "target-text(attr(data-title-href url), content);\n"
+                "}\n")))
+      (is (not (.includes stylesheet
+                          "span.clono-xref-listing.clono-xref-number::before")))
+      (is (not (.includes stylesheet
+                          "span.clono-xref-listing.clono-xref-title::before"))))))
+
 (deftest heading-xref-stylesheet-test
   (testing "When a numbered chapter or appendix heading is referenced, then its formatted heading number is displayed"
     (let [stylesheet (normalize-line-endings
