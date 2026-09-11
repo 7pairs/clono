@@ -135,7 +135,8 @@
                  (pipeline/run context "# 見出し\n"))]
     (testing "When the pipeline runs successfully, then collected targets enrich the context used for reference validation and transformation"
       (is (:ok? result))
-      (is (= context @validation-context))
+      (is (= (assoc context :source "# 見出し\n")
+             @validation-context))
       (is (= (assoc context :source "# 見出し\n")
              @collection-context))
       (is (= (assoc context
