@@ -102,6 +102,23 @@
        "| 変換 | 完了 |\n"
        ":::\n"))
 
+(defn- listing-chapter-source [reference-id]
+  (str ":xref[" reference-id "]"
+       "{type=\"listing\" format=\"number-title\"}\n\n"
+       ":::listing[起動処理]{#startup}\n"
+       "```kotlin\n"
+       "fun main() {}\n"
+       "```\n"
+       ":::\n"))
+
+(defn- listing-appendix-source []
+  (str ":xref[startup]{type=\"listing\" format=\"title\"}\n\n"
+       ":::listing[処理フロー]{#workflow}\n"
+       "```\n"
+       "prepare\nexecute\n"
+       "```\n"
+       ":::\n"))
+
 (defn- verify-success! [^js result context]
   (ensure! (= 0 (.-status result))
            (str context " failed: " (.-stderr result)))
@@ -170,6 +187,62 @@
        "Release transform command did not generate the heading placeholder")
       (ensure! (not (.includes content "external-heading"))
                "Release transform command exposed the unresolved heading ID"))))
+
+(defn- verify-listing-transform! [root]
+  (let [input (.join path root "single-listing.md")
+        output (.join path root "single-listing-output.md")]
+    (write-file!
+     input
+     (str ":xref[greeting]{type=\"listing\" format=\"number\"}\n\n"
+          ":xref[greeting]{type=\"listing\" format=\"number-title\"}\n\n"
+          ":::listing[挨拶を表示する関数]{#greeting}\n"
+          "```kotlin\n"
+          "fun greet() {}\n"
+          "```\n"
+          ":::\n\n"
+          ":xref[greeting]{type=\"listing\" format=\"title\"}\n\n"
+          ":xref[external-listing]"
+          "{type=\"listing\" format=\"number-title\"}\n"))
+    (verify-success!
+     (run-cli ["transform" input "--output" output] root)
+     "Release transform command with listing references")
+    (let [content (.readFileSync fs output "utf8")]
+      (ensure!
+       (.includes content
+                  (str "<figure class=\"clono-numbered-listing\" "
+                       "id=\"listing-greeting\">"))
+       "Release transform command did not transform the numbered listing")
+      (ensure! (.includes content "```kotlin\nfun greet() {}\n```")
+               "Release transform command did not preserve the fenced code")
+      (ensure!
+       (.includes
+        content
+        (str "class=\"clono-xref clono-xref-listing "
+             "clono-xref-number\" href=\"#listing-greeting\""))
+       "Release transform command did not resolve the listing number")
+      (ensure!
+       (.includes
+        content
+        (str "class=\"clono-xref clono-xref-listing "
+             "clono-xref-number-title\" href=\"#listing-greeting\" "
+             "data-title-href=\"#listing-greeting-caption\""))
+       "Release transform command did not resolve the listing number and title")
+      (ensure!
+       (.includes
+        content
+        (str "class=\"clono-xref clono-xref-listing "
+             "clono-xref-title\" href=\"#listing-greeting\" "
+             "data-title-href=\"#listing-greeting-caption\""))
+       "Release transform command did not resolve the listing title")
+      (ensure!
+       (.includes
+        content
+        (str "<span class=\"clono-xref clono-xref-listing "
+             "clono-xref-number-title clono-xref-placeholder\">"
+             "リストX.X 参照先未解決</span>"))
+       "Release transform command did not generate the listing placeholder")
+      (ensure! (not (.includes content "external-listing"))
+               "Release transform command exposed the unresolved listing ID"))))
 
 (defn- verify-build! [root]
   (let [project (.join path root "book")
@@ -377,6 +450,95 @@
         "a.clono-xref-table.clono-xref-title::before")
        "Release build command copied a stylesheet without table titles"))))
 
+(defn- verify-listing-reference-build! [root]
+  (let [project (.join path root "listing-reference-book")
+        source (.join path project "manuscripts")
+        output (.join path project "build" "manuscripts")
+        chapter-input (.join path source "chapters" "one.md")
+        chapter-output (.join path output "chapters" "one.md")
+        appendix-output (.join path output "appendices" "two.MD")
+        marker-output (.join path output ".clono-output.json")
+        stylesheet-output (.join path output "_clono" "styles" "clono.css")]
+    (write-file! (.join path project "clono.config.mjs")
+                 (reference-config))
+    (write-file! chapter-input (listing-chapter-source "workflow"))
+    (write-file! (.join path source "appendices" "two.MD")
+                 (listing-appendix-source))
+
+    (verify-success! (run-cli ["build" project] root)
+                     "Release build command with listing references")
+    (let [chapter-content (.readFileSync fs chapter-output "utf8")
+          appendix-content (.readFileSync fs appendix-output "utf8")
+          marker-content (.readFileSync fs marker-output "utf8")
+          stylesheet-content (.readFileSync fs stylesheet-output "utf8")
+          normalized-stylesheet-content
+          (normalize-line-endings stylesheet-content)
+          expected-files {"chapters/one.md" chapter-content
+                          "appendices/two.MD" appendix-content
+                          "_clono/styles/clono.css" stylesheet-content
+                          ".clono-output.json" marker-content}]
+      (ensure!
+       (.includes chapter-content
+                  (str "<figure class=\"clono-numbered-listing\" "
+                       "id=\"listing-startup\">"))
+       "Release build command did not transform the chapter listing")
+      (ensure! (.includes chapter-content "```kotlin\nfun main() {}\n```")
+               "Release build command did not preserve the chapter code")
+      (ensure!
+       (.includes
+        chapter-content
+        (str "class=\"clono-xref clono-xref-listing "
+             "clono-xref-number-title\" "
+             "href=\"../appendices/two.html#listing-workflow\" "
+             "data-title-href=\"../appendices/two.html"
+             "#listing-workflow-caption\""))
+       "Release build command did not resolve the appendix listing reference")
+      (ensure!
+       (.includes appendix-content
+                  (str "<figure class=\"clono-numbered-listing\" "
+                       "id=\"listing-workflow\">"))
+       "Release build command did not transform the appendix listing")
+      (ensure! (.includes appendix-content "```\nprepare\nexecute\n```")
+               "Release build command did not preserve the appendix code")
+      (ensure!
+       (.includes
+        appendix-content
+        (str "class=\"clono-xref clono-xref-listing clono-xref-title\" "
+             "href=\"../chapters/one.html#listing-startup\" "
+             "data-title-href=\"../chapters/one.html"
+             "#listing-startup-caption\""))
+       "Release build command did not resolve the chapter listing reference")
+      (doseq [content [chapter-content appendix-content]]
+        (ensure! (not (.includes content "clono-xref-placeholder"))
+                 "Release build command emitted a listing placeholder"))
+      (ensure!
+       (.includes
+        normalized-stylesheet-content
+        (str "a.clono-xref-listing.clono-xref-number::before,\n"
+             "a.clono-xref-listing.clono-xref-number-title::before"))
+       "Release build command copied a stylesheet without listing numbers")
+      (ensure!
+       (.includes
+        normalized-stylesheet-content
+        "a.clono-xref-listing.clono-xref-title::before")
+       "Release build command copied a stylesheet without listing titles")
+
+      (write-file! (.join path output "keep.txt") "keep\n")
+      (write-file! chapter-input (listing-chapter-source "missing-listing"))
+      (let [result (run-cli ["build" project] root)]
+        (ensure! (= 1 (.-status result))
+                 "Release build command did not fail for an undefined listing reference")
+        (ensure! (= "" (.-stdout result))
+                 "Undefined listing reference build failure wrote to stdout")
+        (ensure! (= (str "chapters/one.md:1:1: `xref`の参照先"
+                         "`missing-listing`を解決できません。\n")
+                    (.-stderr result))
+                 (str "Undefined listing reference diagnostics were incorrect: "
+                      (.-stderr result)))
+        (verify-unchanged-output! output
+                                  expected-files
+                                  "Undefined listing reference build failure")))))
+
 (defn- verify-heading-reference-build! [root]
   (let [project (.join path root "heading-reference-book")
         source (.join path project "manuscripts")
@@ -537,10 +699,12 @@
     (try
       (verify-transform! root)
       (verify-heading-transform! root)
+      (verify-listing-transform! root)
       (verify-build! root)
       (verify-diagnostics! root)
       (verify-reference-build! root)
       (verify-table-reference-build! root)
+      (verify-listing-reference-build! root)
       (verify-heading-reference-build! root)
       (verify-unpositioned-diagnostic! root)
       (finally
