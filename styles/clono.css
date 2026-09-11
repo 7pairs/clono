@@ -22,7 +22,7 @@
 }
 
 body {
-  counter-reset: figure table;
+  counter-reset: figure table listing;
 }
 
 .clono-numbered-figure {
@@ -39,6 +39,18 @@ body {
 
 .clono-numbered-table > .clono-table-caption::before {
   content: "表" counter(chapter) "." counter(table) " ";
+}
+
+.clono-numbered-listing {
+  counter-increment: listing;
+}
+
+.clono-numbered-listing > .clono-listing-caption {
+  break-after: avoid;
+}
+
+.clono-numbered-listing > .clono-listing-caption::before {
+  content: "リスト" counter(chapter) "." counter(listing) " ";
 }
 
 a.clono-xref-figure.clono-xref-number::before,
