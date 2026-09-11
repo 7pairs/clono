@@ -31,12 +31,12 @@ const fixtures = [
       {
         className: 'xref-listing xref-title',
         href: '#listing-validation',
-        captionHref: '#listing-validation-caption',
+        titleHref: '#listing-validation-caption',
       },
       {
         className: 'xref-listing xref-title',
         href: 'chapter-two.html#listing-device-properties',
-        captionHref: 'chapter-two.html#listing-device-properties-caption',
+        titleHref: 'chapter-two.html#listing-device-properties-caption',
       },
     ],
     numberedListingCount: 2,
@@ -56,7 +56,7 @@ const fixtures = [
       {
         className: 'xref-listing xref-title',
         href: 'chapter-one.html#listing-greeting',
-        captionHref: 'chapter-one.html#listing-greeting-caption',
+        titleHref: 'chapter-one.html#listing-greeting-caption',
       },
     ],
     numberedListingCount: 1,
@@ -80,12 +80,12 @@ function verifyNumberedListing(html, listing, source) {
   assert.match(html, pattern, `${source} must preserve the ${listing.id} listing`);
 }
 
-function verifyLink(html, { captionHref, className, href }, source) {
-  const captionAttribute = captionHref
-    ? ` data-caption-href="${captionHref}"`
+function verifyLink(html, { className, href, titleHref }, source) {
+  const titleAttribute = titleHref
+    ? ` data-title-href="${titleHref}"`
     : '';
   const expected =
-    `<a class="${className}" href="${href}"${captionAttribute}></a>`;
+    `<a class="${className}" href="${href}"${titleAttribute}></a>`;
   assert.ok(html.includes(expected), `${source} must preserve ${expected}`);
 }
 

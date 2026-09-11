@@ -2,7 +2,7 @@
 
 - 状態: 調査済み
 - 初回調査日: 2026-08-17
-- 最終更新日: 2026-09-10
+- 最終更新日: 2026-09-11
 - 検証環境:
   - 実行環境: macOS、Node.js 24.19.0
   - HTML変換: `@vivliostyle/vfm` 2.7.0
@@ -66,12 +66,12 @@ fun greet(name: String): String {
 
 番号なしコードブロックには、通常のコードフェンスを使用する。
 
-参照元には、変換後の出力を模した空の`a`要素を直接記述する。番号とタイトルを参照する要素は、クリック先と番号の取得に使用する`href`と、キャプションの取得に使用する`data-caption-href`を別々に持つ。
+参照元には、変換後の出力を模した空の`a`要素を直接記述する。番号とタイトルを参照する要素は、クリック先と番号の取得に使用する`href`と、タイトル取得先を参照種別で統一する`data-title-href`を別々に持つ。
 
 ```html
 <a class="xref-listing xref-title"
    href="chapter-two.html#listing-device-properties"
-   data-caption-href="chapter-two.html#listing-device-properties-caption"></a>
+   data-title-href="chapter-two.html#listing-device-properties-caption"></a>
 ```
 
 HTMLの検証プログラムは、VFM変換後の番号付きコードリストが、`figure`のIDとclass、IDを持つ`figcaption`、構文強調された`pre`と`code`を保持することを確認する。通常のシェルコードブロックが番号付きの`figure`で囲まれないことと、長いコードリストの検証行が一度ずつ順番どおりに出力されることも確認する。
@@ -130,7 +130,7 @@ a.xref-listing::before {
 }
 
 a.xref-title::after {
-  content: " " target-text(attr(data-caption-href url), content);
+  content: " " target-text(attr(data-title-href url), content);
 }
 ```
 
@@ -138,7 +138,7 @@ a.xref-title::after {
 
 ### 別Markdownファイル間の参照
 
-変換後のHTMLファイル名とコードリストIDを組み合わせた`chapter-two.html#listing-device-properties`のような`href`と、キャプションIDを組み合わせた`data-caption-href`を使用し、別Markdownファイルの番号とキャプションを参照できた。
+変換後のHTMLファイル名とコードリストIDを組み合わせた`chapter-two.html#listing-device-properties`のような`href`と、キャプションIDを組み合わせた`data-title-href`を使用し、別Markdownファイルの番号とキャプションを参照できた。
 
 生成したPDFでは、同一ファイル内、別ファイル間、前方参照、後方参照のすべてが、対象のコードリスト全体を表す`figure`への内部リンクとして解決された。
 
@@ -178,7 +178,7 @@ a.xref-title::after {
 
 各fixtureは`body`の`counter-reset`へ一種類のカウンターだけを指定している。複数の規則を単純に並べると、同じプロパティの後勝ちによって先に指定したカウンターのリセットが失われる。統合テーマでは、必要なカウンターを一つの`counter-reset`へまとめる必要がある。
 
-また、画像はタイトル取得に`href`を使用するが、表とコードリストは`data-caption-href`を使用していた。各fixtureの`.xref-title::after`をそのまま共存させると競合するため、[結合検証](vivliostyle-reference-integration.md)では、すべてのタイトル取得先を`data-title-href`へ統一した。
+個別fixtureでは、画像がタイトル取得に`href`、表とコードリストが`data-caption-href`を使用していた。各fixtureの`.xref-title::after`をそのまま共存させると競合するため、[結合検証](vivliostyle-reference-integration.md)では、すべてのタイトル取得先を`data-title-href`へ統一した。2026年9月11日に、コードリストの個別fixtureも正式な出力契約へ合わせて`data-title-href`へ更新した。
 
 同じ文書とテーマへ各要素を配置し、独立した連番、番号なし要素、同一・別Markdownファイル間の番号とタイトル、前方・後方のPDF内部リンクを検証した。この結果、横断的な連番と参照の責務判断を確定した。
 

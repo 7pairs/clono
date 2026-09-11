@@ -60,7 +60,7 @@ body {
 }
 ```
 
-参照文字列は、`target-counter()`で章番号とリスト番号を取得する。コードリスト全体の`figure`を`target-text()`で参照するとコード内容まで取得するため、`data-caption-href`でキャプションを別に参照する。
+参照文字列は、`target-counter()`で章番号とリスト番号を取得する。コードリスト全体の`figure`を`target-text()`で参照するとコード内容まで取得するため、参照種別で共通の`data-title-href`を使用してキャプションを別に参照する。
 
 ```css
 a.xref-listing::before {
@@ -68,7 +68,7 @@ a.xref-listing::before {
 }
 
 a.xref-title::after {
-  content: " " target-text(attr(data-caption-href url), content);
+  content: " " target-text(attr(data-title-href url), content);
 }
 ```
 
