@@ -28,6 +28,13 @@
        "| 値 |\n"
        ":::\n"))
 
+(defn- listing [id caption]
+  (str ":::listing[" caption "]{#" id "}\n"
+       "```kotlin\n"
+       "fun sample() {}\n"
+       "```\n"
+       ":::\n"))
+
 (deftest book-reference-target-collection-test
   (testing "When published manuscripts contain figures, then their reference targets are collected in manuscript and source order"
     (let [result
@@ -169,6 +176,71 @@
                :column 1}]
              (:targets result))))))
 
+(deftest book-listing-reference-target-collection-test
+  (testing "When published manuscripts contain listings alongside existing target types, then every numbered target is collected in manuscript and source order"
+    (let [result
+          (reference-targets/collect
+           [(manuscript
+             "chapter-one.md"
+             (str "# 概要 {#overview}\n\n"
+                  (figure "architecture" "構成図")
+                  "\n"
+                  (listing "greeting" "挨拶を表示する関数")
+                  "\n"
+                  "```text\n"
+                  "番号なしコード\n"
+                  "```\n"))
+            (manuscript
+             "chapter-two.md"
+             (str (table "runtime" "実行環境")
+                  "\n"
+                  (listing "command" "実行コマンド")))])]
+      (is (:ok? result))
+      (is (empty? (:diagnostics result)))
+      (is (= [{:logical-id "overview"
+               :type "heading"
+               :target-id "overview"
+               :title-target-id "overview"
+               :numbered? true
+               :heading-depth 1
+               :document-kind "chapter"
+               :source-name "chapter-one.md"
+               :line 1
+               :column 1}
+              {:logical-id "architecture"
+               :type "figure"
+               :target-id "figure-architecture"
+               :title-target-id "figure-architecture-caption"
+               :numbered? true
+               :source-name "chapter-one.md"
+               :line 3
+               :column 1}
+              {:logical-id "greeting"
+               :type "listing"
+               :target-id "listing-greeting"
+               :title-target-id "listing-greeting-caption"
+               :numbered? true
+               :source-name "chapter-one.md"
+               :line 7
+               :column 1}
+              {:logical-id "runtime"
+               :type "table"
+               :target-id "table-runtime"
+               :title-target-id "table-runtime-caption"
+               :numbered? true
+               :source-name "chapter-two.md"
+               :line 1
+               :column 1}
+              {:logical-id "command"
+               :type "listing"
+               :target-id "listing-command"
+               :title-target-id "listing-command-caption"
+               :numbered? true
+               :source-name "chapter-two.md"
+               :line 7
+               :column 1}]
+             (:targets result))))))
+
 (deftest book-reference-target-duplicate-test
   (testing "When a logical ID is repeated across published manuscripts, then the later target is diagnosed and no ambiguous collection is returned"
     (let [result
@@ -271,4 +343,20 @@
                :column 1
                :message (str "見出しのHTML ID`table-runtime-caption"
                              "`が重複しています。")}]
+             (:diagnostics result)))))
+
+  (testing "When a listing repeats a table logical ID from another manuscript, then the later listing is diagnosed in the shared namespace"
+    (let [result
+          (reference-targets/collect
+           [(manuscript "chapter-one.md"
+                        (table "runtime" "実行環境"))
+            (manuscript "chapter-two.md"
+                        (listing "runtime" "実行環境の確認"))])]
+      (is (false? (:ok? result)))
+      (is (nil? (:targets result)))
+      (is (= [{:file "chapter-two.md"
+               :line 1
+               :column 1
+               :directive "listing"
+               :message "`listing`の論理ID`runtime`が重複しています。"}]
              (:diagnostics result))))))

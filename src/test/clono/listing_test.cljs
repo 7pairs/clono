@@ -164,6 +164,41 @@
                 "counter(listing) \" \";\n"
                 "}\n"))))))
 
+(deftest listing-pipeline-integration-test
+  (testing "When a numbered listing shares a document with other supported syntax, then every construct is transformed in source order"
+    (let [result
+          (pipeline/run
+           (transform-context "mixed-listing-content.md")
+           (str "# 概要 {#overview}\n\n"
+                ":::figure[構成図]{#architecture}\n"
+                "![図](architecture.svg)\n"
+                ":::\n\n"
+                ":::table[実行環境]{#runtime}\n"
+                "| 項目 | 値 |\n"
+                "| --- | --- |\n"
+                "| Node.js | 24 |\n"
+                ":::\n\n"
+                ":::listing[実行コマンド]{#command}\n"
+                "```shell\n"
+                "npm test\n"
+                "```\n"
+                ":::\n\n"
+                ":::align{position=\"right\"}\n"
+                "署名\n"
+                ":::\n"))
+          output (:output result)
+          expected-in-order
+          ["# 概要 {#overview}"
+           "<figure class=\"clono-numbered-figure\" id=\"figure-architecture\">"
+           "<figure class=\"clono-numbered-table\" id=\"table-runtime\">"
+           "<figure class=\"clono-numbered-listing\" id=\"listing-command\">"
+           "<div class=\"clono-align-right\">"]
+          positions (mapv #(.indexOf output %) expected-in-order)]
+      (is (:ok? result))
+      (is (empty? (:diagnostics result)))
+      (is (every? #(<= 0 %) positions))
+      (is (apply < positions)))))
+
 (deftest invalid-listing-test
   (testing "When a listing directive violates its local contract, then transformation fails with a positioned diagnostic"
     (doseq [{:keys [case source message]} invalid-listing-cases]
