@@ -25,7 +25,7 @@
                        source-name
                        transform/known-directive-names)
                       (heading/diagnostics source tree context)
-                      (transform/validate tree context)))]
+                      (transform/validate tree (assoc context :source source))))]
     (if (seq diagnostics)
       {:ok? false
        :tree nil
