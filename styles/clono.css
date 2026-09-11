@@ -79,6 +79,19 @@ a.clono-xref-table.clono-xref-title::before {
   content: target-text(attr(data-title-href url), content);
 }
 
+a.clono-xref-listing.clono-xref-number::before,
+a.clono-xref-listing.clono-xref-number-title::before {
+  content: "リスト" target-counter(attr(href url), chapter) "." target-counter(attr(href url), listing);
+}
+
+a.clono-xref-listing.clono-xref-number-title::after {
+  content: " " target-text(attr(data-title-href url), content);
+}
+
+a.clono-xref-listing.clono-xref-title::before {
+  content: target-text(attr(data-title-href url), content);
+}
+
 a.clono-xref-heading-chapter.clono-xref-heading-h1.clono-xref-number::before,
 a.clono-xref-heading-chapter.clono-xref-heading-h1.clono-xref-number-title::before {
   content: "第" target-counter(attr(href url), chapter) "章";
