@@ -1,5 +1,6 @@
 (ns clono.listing-test
   (:require
+   ["node:fs" :as fs]
    [cljs.test :refer [deftest is testing]]
    [clono.ast :as ast]
    [clono.markdown :as markdown]
@@ -80,6 +81,9 @@
                          :kind kind
                          :include-in-toc true})})
 
+(defn- normalize-line-endings [value]
+  (.replace value (js/RegExp. "\\r\\n?" "g") "\n"))
+
 (deftest listing-transformation-test
   (let [result (pipeline/run (transform-context "listing.md")
                              valid-listing-source)
@@ -137,6 +141,28 @@
       (is (= (str ":::listing[内側]{#inner}\n"
                   ":xref[target]{type=\"listing\" format=\"number\"}")
              (.-value code))))))
+
+(deftest listing-counter-stylesheet-test
+  (testing "When a numbered listing is rendered, then its chapter-scoped listing number is displayed before a caption kept with the code start"
+    (let [stylesheet (normalize-line-endings
+                      (.readFileSync fs "styles/clono.css" "utf8"))]
+      (is (.includes stylesheet
+                     "body {\n  counter-reset: figure table listing;\n}\n"))
+      (is (.includes stylesheet
+                     (str ".clono-numbered-listing {\n"
+                          "  counter-increment: listing;\n"
+                          "}\n")))
+      (is (.includes
+           stylesheet
+           (str ".clono-numbered-listing > .clono-listing-caption {\n"
+                "  break-after: avoid;\n"
+                "}\n")))
+      (is (.includes
+           stylesheet
+           (str ".clono-numbered-listing > .clono-listing-caption::before {\n"
+                "  content: \"リスト\" counter(chapter) \".\" "
+                "counter(listing) \" \";\n"
+                "}\n"))))))
 
 (deftest invalid-listing-test
   (testing "When a listing directive violates its local contract, then transformation fails with a positioned diagnostic"

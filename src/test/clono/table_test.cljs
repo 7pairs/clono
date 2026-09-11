@@ -144,7 +144,7 @@
     (let [stylesheet (normalize-line-endings
                       (.readFileSync fs "styles/clono.css" "utf8"))]
       (is (.includes stylesheet
-                     "body {\n  counter-reset: figure table;\n}\n"))
+                     "body {\n  counter-reset: figure table listing;\n}\n"))
       (is (.includes stylesheet
                      (str ".clono-numbered-table {\n"
                           "  counter-increment: table;\n"
