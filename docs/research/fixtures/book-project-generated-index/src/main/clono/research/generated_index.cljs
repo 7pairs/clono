@@ -44,6 +44,20 @@
        (not= ".." (.normalize (.-posix path) value))
        (not (string/starts-with? (.normalize (.-posix path) value) "../"))))
 
+(defn- same-or-ancestor-path? [ancestor descendant]
+  (let [posix-path (.-posix path)
+        relative (.relative posix-path
+                            (.normalize posix-path ancestor)
+                            (.normalize posix-path descendant))]
+    (or (string/blank? relative)
+        (and (not (.isAbsolute posix-path relative))
+             (not= ".." relative)
+             (not (string/starts-with? relative "../"))))))
+
+(defn- related-paths? [left right]
+  (or (same-or-ancestor-path? left right)
+      (same-or-ancestor-path? right left)))
+
 (defn index-entry [config]
   (first (filter #(= "index" (:type %)) (:publication config))))
 
@@ -68,9 +82,9 @@
       (when-not (boolean? (:includeInToc entry))
         (fail! :invalid-index-toc-setting
                "Generated index includeInToc must be a boolean"))
-      (when (contains? source-paths (:path entry))
+      (when (some #(related-paths? (:path entry) %) source-paths)
         (fail! :index-path-collision
-               "Generated index path must not collide with an input file"
+               "Generated index path must not equal, contain, or be contained by an input file path"
                {:path (:path entry)}))
       (let [following (rest (drop-while #(not= entry %) publication))
             numbered-after-index

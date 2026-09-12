@@ -59,19 +59,43 @@
              (mapv :path (:publication config))))
       (is (= config (generated-index/validate-config config source-paths))))
 
-    (testing "When generated index entries are duplicated or collide with input, then configuration validation rejects them"
+    (testing "When generated index entries are duplicated, then configuration validation rejects them"
       (is (= :multiple-index-entries
              (:code
               (exception-data
                #(generated-index/validate-config
                  (update config :publication conj index)
-                 source-paths)))))
+                 source-paths))))))
+
+    (testing "When the generated index path equals an input file path, then configuration validation rejects the collision"
       (is (= :index-path-collision
              (:code
               (exception-data
                #(generated-index/validate-config
                  config
                  (conj source-paths "generated/index.md")))))))
+
+    (testing "When an input file path is an ancestor of the generated index path, then configuration validation rejects the collision"
+      (is (= :index-path-collision
+             (:code
+              (exception-data
+               #(generated-index/validate-config
+                 config
+                 (conj source-paths "generated")))))))
+
+    (testing "When an input file path is a descendant of the generated index path, then configuration validation rejects the collision"
+      (is (= :index-path-collision
+             (:code
+              (exception-data
+               #(generated-index/validate-config
+                 config
+                 (conj source-paths "generated/index.md/child.md")))))))
+
+    (testing "When an input file path only shares a prefix with the generated index path, then configuration validation accepts it"
+      (is (= config
+             (generated-index/validate-config
+              config
+              (conj source-paths "generated/index.md-copy")))))
 
     (testing "When a numbered document follows the generated index, then configuration validation rejects the order"
       (let [invalid-config
