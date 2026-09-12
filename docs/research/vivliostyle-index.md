@@ -2,7 +2,7 @@
 
 - 状態: 調査済み
 - 初回調査日: 2026-08-19
-- 最終更新日: 2026-08-21
+- 最終更新日: 2026-09-12
 - 検証環境:
   - 実行環境: macOS、Node.js 24.19.0
   - HTML変換: `@vivliostyle/vfm` 2.7.0
@@ -99,6 +99,8 @@ VFMはこの構造と属性を保持した。索引語の表示内容は指定�
 
 このfixtureは読みの正規化、分類、並べ替えを実行するアルゴリズムを検証しない。あらかじめ与えた正規化済みソートキーと順序をVFMが壊さず、Vivliostyleで組版できることを検証する。
 
+読みの正規化、分類、項目の統合および決定的な並べ替えについては、後続の[索引の読み正規化・分類・並べ替えに関する調査](index-normalization.md)で、Vivliostyleから独立したデータ変換として候補アルゴリズムを検証した。
+
 ### ページ番号とPDF内部リンク
 
 索引の各リンクを空の`a`要素とし、CSSの`target-counter()`でリンク先の`page`カウンターを表示した。
@@ -151,6 +153,7 @@ clonoはVivliostyleによる組版前にMarkdownを変換するため、その�
 - 同じ項目の複数の出現位置を一つの索引項目へ列挙できる
 - `target-counter()`は同一ページにある複数の参照を自動的に統合せず、`2, 2`のように表示する
 - 同一ページ重複の除去は最終的なページ番号に依存するため、組版前のclonoだけでは判断できない
+- 自然な読みから索引用の並べ替えキーを生成し、英数字と五十音の行へ分類して決定的に並べる候補アルゴリズムは、別fixtureで成立を確認した
 
 ## 責務判断
 
@@ -182,11 +185,10 @@ clonoはVivliostyleによる組版前にMarkdownを変換するため、その�
 
 今回の結果は、索引項目とすべての出現位置を持つ索引構造が、Vivliostyleによる組版前に生成されていることを前提とする。
 
+読みの正規化、固定分類、空の分類の省略および並べ替えキーが衝突した場合の決定的な比較規則は、[索引の読み正規化・分類・並べ替えに関する調査](index-normalization.md)で候補アルゴリズムの成立を確認した。著者向け記法、許可文字の最終的な範囲および診断契約は、索引仕様の策定時に決定する。
+
 次の事項は未確認または未決定である。
 
-- 読みを正規化する具体的なアルゴリズムと例外
-- 英数字の大文字・小文字、記号、全角文字を含む場合のソート規則
-- 空の分類見出しを表示するか
 - 索引マーカーがページをまたぐ場合のリンク先
 - 脚注、画像・表・コードリストのキャプション内の索引指定
 - 階層索引、ページ範囲、索引項目間の相互参照、主要ページの強調
@@ -198,7 +200,7 @@ clonoはVivliostyleによる組版前にMarkdownを変換するため、その�
 
 ## 再現方法
 
-検証に使用する入力、Web出版物とPDFの自動検証、同一ページ重複の能力プローブ、PDFの目視確認手順は、[検証用fixtureのREADME](fixtures/vivliostyle-index/README.md)を参照する。fixture内で`npm ci`を実行した後、`npm run verify`で再検証できる。
+検証に使用する入力、Web出版物とPDFの自動検証、同一ページ重複の能力プローブ、PDFの目視確認手順は、[Vivliostyle索引fixtureのREADME](fixtures/vivliostyle-index/README.md)を参照する。fixture内で`npm ci`を実行した後、`npm run verify`で再検証できる。読みの正規化、分類、統合および並べ替えは、[索引正規化fixtureのREADME](fixtures/index-normalization/README.md)に従って独立して再検証できる。
 
 ## 再調査する条件
 
@@ -212,6 +214,7 @@ clonoはVivliostyleによる組版前にMarkdownを変換するため、その�
 
 ## 参照資料
 
+- [索引の読み正規化・分類・並べ替えに関する調査](index-normalization.md)
 - [Vivliostyle Flavored Markdown 2.7.0](https://github.com/vivliostyle/vfm/blob/v2.7.0/docs/ja/vfm.md)
 - [Vivliostyle CLI 11.1.0 Config Reference](https://github.com/vivliostyle/vivliostyle-cli/blob/v11.1.0/docs/config.md)
 - [チュートリアル一覧 | Vivliostyle](https://vivliostyle.org/ja/tutorials/)（2026-08-19参照）
