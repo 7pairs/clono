@@ -2,7 +2,7 @@
 
 - 状態: 実装済み
 - 作成日: 2026-08-25
-- 最終更新日: 2026-09-06
+- 最終更新日: 2026-09-12
 
 ## 目的
 
@@ -23,6 +23,8 @@
 - 原稿間へ挿入する空白ページの管理と資材の生成
 - 掲載Markdownにある番号付き画像の収集と画像参照の解決
 - 掲載Markdownにある明示ID付き見出しの収集と見出し参照の解決
+- 掲載Markdownにある番号付き表の収集と表参照の解決
+- 掲載Markdownにある番号付きコードリストの収集とコードリスト参照の解決
 - 生成済み原稿ツリーの安全な再生成
 - clono基盤CSSの生成済み原稿ツリーへの配置
 
@@ -58,6 +60,8 @@
 | 7 | 書籍構造における空白ページの検証と資材の生成 | 実装済み |
 | 8 | 掲載Markdownにおける番号付き画像の収集と画像参照の解決 | 実装済み |
 | 9 | 掲載Markdownにおける見出しIDの収集と見出し参照の解決 | 実装済み |
+| 10 | 掲載Markdownにおける番号付き表の収集と表参照の解決 | 実装済み |
+| 11 | 掲載Markdownにおける番号付きコードリストの収集とコードリスト参照の解決 | 実装済み |
 
 各実装Pull Requestでは、着手した段階を「実装中」、実装と自動テストが完了した段階を「実装済み」へ更新する。段階の分割、統合または順序を変更する場合も、変更理由と後続段階への影響が分かるように同じPull Requestでこの表を更新する。
 
@@ -230,6 +234,10 @@ HTML、画像、CSSなど、Markdown以外の通常ファイルはclonoの変換
 実装段階8で収集する参照対象は番号付き画像とし、入力記法、論理ID、画像パス、HTML ID、参照形式、単一ファイル変換のプレースホルダー、およびVivliostyleへ渡すHTML構造の契約は、[番号付き画像と画像参照仕様](figure-references.md)で定める。
 
 実装段階9では、VFMの明示的なIDを持つ`h1`から`h3`までを参照対象へ追加する。対象となる見出し構文、文書種別と見出しレベルに応じた番号形式、HTML ID、参照形式、単一ファイル変換のプレースホルダー、およびVivliostyleへ渡すHTML構造の契約は、[見出し参照仕様](heading-references.md)で定める。
+
+実装段階10では、番号付き表を参照対象へ追加する。対象となる表の構文と内容モデル、論理ID、HTML ID、参照形式、単一ファイル変換のプレースホルダー、およびVivliostyleへ渡すHTML構造の契約は、[番号付き表と表参照仕様](table-references.md)で定める。
+
+実装段階11では、番号付きコードリストを参照対象へ追加する。対象となるコードリストの構文と内容モデル、論理ID、HTML ID、参照形式、単一ファイル変換のプレースホルダー、およびVivliostyleへ渡すHTML構造の契約は、[番号付きコードリストとコードリスト参照仕様](code-listing-references.md)で定める。
 
 `publication`に掲載されていないMarkdownも従来どおり変換計画へ含めるが、その原稿にあるIDを書籍全体の名前空間へ登録しない。掲載されていないMarkdownに書籍参照がある場合は診断し、単一ファイル変換用のプレースホルダーへ変換しない。
 
@@ -524,7 +532,7 @@ staging、backupおよび排他ロックは、`outputRoot`と同じ親ディレ�
 - 原稿の指定順での組版
 - 空白ページの物理的な生成とページカウンターの増加
 - 文書種別に応じた章番号と付録番号の生成
-- 図番号、図の参照文字列およびPDF内部リンクの生成
+- 見出し番号、図番号、表番号、リスト番号、各参照文字列およびPDF内部リンクの生成
 - 目次項目、紙面上のページ番号およびリンクの生成
 - clono基盤CSSと利用者テーマの指定順での適用
 - WebPubおよびPDFの生成
@@ -535,7 +543,7 @@ staging、backupおよび排他ロックは、`outputRoot`と同じ親ディレ�
 - `clono.config.mjs`における書籍構造の管理
 - `vivliostyle.config.mjs`におけるVivliostyle設定と利用者テーマの管理
 - clono基盤CSSを利用者テーマより前に指定すること
-- 章と付録のカウンター、および書籍固有の図の表示を利用者テーマで指定すること
+- 章と付録のカウンター、見出し自体への番号表示、および見出し、図、表、コードリストと参照の書籍固有の外観を利用者テーマで指定すること
 - 空白ページで表示するノンブルと非表示にする柱を、利用者テーマの`@page clono-blank`で指定すること
 - clonoが生成しない表紙、奥付およびその他の書籍資材の管理
 
@@ -552,9 +560,15 @@ staging、backupおよび排他ロックは、`outputRoot`と同じ親ディレ�
 - [単一ファイル変換CLI仕様](single-file-cli.md)
 - [clono著者向け記法](authoring-syntax.md)
 - [番号付き画像と画像参照仕様](figure-references.md)
+- [見出し参照仕様](heading-references.md)
+- [番号付き表と表参照仕様](table-references.md)
+- [番号付きコードリストとコードリスト参照仕様](code-listing-references.md)
 - [Generic DirectivesとmdastによるMarkdown変換パイプラインのADR](../decisions/0003-adopt-generic-directives-mdast-transformation-pipeline.md)
 - [書籍プロジェクトの生成済み原稿ツリーに関する調査](../research/book-project-output-tree.md)
 - [Vivliostyleにおけるclono基盤CSSと利用者テーマの統合に関する調査](../research/vivliostyle-clono-stylesheet.md)
 - [Vivliostyleの空白ページに関する調査](../research/vivliostyle-blank-pages.md)
 - [Vivliostyleの画像ID・キャプション・連番・相互参照に関する調査](../research/vivliostyle-figure-references.md)
+- [Vivliostyleの見出しID・連番・相互参照に関する調査](../research/vivliostyle-heading-references.md)
+- [Vivliostyleの表ID・キャプション・連番・相互参照に関する調査](../research/vivliostyle-table-references.md)
+- [VivliostyleのコードリストID・キャプション・連番・相互参照に関する調査](../research/vivliostyle-code-listing-references.md)
 - [Vivliostyleの相互参照に関する結合検証](../research/vivliostyle-reference-integration.md)
