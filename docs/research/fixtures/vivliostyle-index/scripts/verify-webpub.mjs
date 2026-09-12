@@ -15,43 +15,36 @@ const manifestPath = fileURLToPath(
 );
 
 const expectedMarkers = [
-  ['chapter-one.html', 'index-android-1', 'Android', 'Android'],
-  ['chapter-one.html', 'index-android-2', 'Android', 'Android'],
-  ['chapter-one.html', 'index-api-1', 'API', 'API'],
-  ['chapter-one.html', 'index-app-1', 'アプリ', 'あぷり'],
-  ['chapter-one.html', 'index-index-1', '索引', 'さくいん'],
-  ['chapter-two.html', 'index-android-3', 'Android', 'Android'],
-  ['chapter-two.html', 'index-api-2', 'API', 'API'],
-  ['chapter-two.html', 'index-image-1', '画像', 'がぞう'],
-  ['chapter-two.html', 'index-app-2', 'アプリ', 'あぷり'],
-  ['chapter-two.html', 'index-backnumber-1', 'バックナンバー', 'ばっくなんばー'],
-  ['chapter-two.html', 'index-column-1', 'コラム', 'こらむ'],
-].map(([documentPath, id, term, reading]) => ({ documentPath, id, term, reading }));
+  ['chapter-one.html', 'clono-index-marker-1', 'Android'],
+  ['chapter-one.html', 'clono-index-marker-2', 'Android'],
+  ['chapter-one.html', 'clono-index-marker-3', 'API'],
+  ['chapter-one.html', 'clono-index-marker-4', 'アプリ'],
+  ['chapter-one.html', 'clono-index-marker-5', '索引'],
+  ['chapter-two.html', 'clono-index-marker-6', 'Android'],
+  ['chapter-two.html', 'clono-index-marker-7', 'API'],
+  ['chapter-two.html', 'clono-index-marker-8', '画像'],
+  ['chapter-two.html', 'clono-index-marker-9', 'アプリ'],
+  ['chapter-two.html', 'clono-index-marker-10', 'バックナンバー'],
+  ['chapter-two.html', 'clono-index-marker-11', 'コラム'],
+].map(([documentPath, id, term]) => ({ documentPath, id, term }));
 
 const expectedGroups = ['alphanumeric', 'a', 'ka', 'sa', 'ha'];
 const expectedEntries = [
   [
     'Android',
-    'Android',
-    'android',
     [
-      'chapter-one.html#index-android-1',
-      'chapter-one.html#index-android-2',
-      'chapter-two.html#index-android-3',
+      'chapter-one.html#clono-index-marker-1',
+      'chapter-one.html#clono-index-marker-2',
+      'chapter-two.html#clono-index-marker-6',
     ],
   ],
-  ['API', 'API', 'api', ['chapter-one.html#index-api-1', 'chapter-two.html#index-api-2']],
-  ['アプリ', 'あぷり', 'あふり', ['chapter-one.html#index-app-1', 'chapter-two.html#index-app-2']],
-  ['画像', 'がぞう', 'かそう', ['chapter-two.html#index-image-1']],
-  ['コラム', 'こらむ', 'こらむ', ['chapter-two.html#index-column-1']],
-  ['索引', 'さくいん', 'さくいん', ['chapter-one.html#index-index-1']],
-  [
-    'バックナンバー',
-    'ばっくなんばー',
-    'はつくなんはあ',
-    ['chapter-two.html#index-backnumber-1'],
-  ],
-].map(([term, reading, sortKey, targetHrefs]) => ({ term, reading, sortKey, targetHrefs }));
+  ['API', ['chapter-one.html#clono-index-marker-3', 'chapter-two.html#clono-index-marker-7']],
+  ['アプリ', ['chapter-one.html#clono-index-marker-4', 'chapter-two.html#clono-index-marker-9']],
+  ['画像', ['chapter-two.html#clono-index-marker-8']],
+  ['コラム', ['chapter-two.html#clono-index-marker-11']],
+  ['索引', ['chapter-one.html#clono-index-marker-5']],
+  ['バックナンバー', ['chapter-two.html#clono-index-marker-10']],
+].map(([term, targetHrefs]) => ({ term, targetHrefs }));
 
 function extractAttribute(attributes, name) {
   return attributes.match(new RegExp(`${name}="([^"]+)"`, 'u'))?.[1];
@@ -98,36 +91,41 @@ for (const marker of expectedMarkers) {
 
   const [{ attributes, text }] = matchingSpans;
   assert.ok(
-    extractAttribute(attributes, 'class')?.split(/\s+/u).includes('index-marker'),
-    `${marker.id} must retain the index-marker class`,
+    extractAttribute(attributes, 'class')?.split(/\s+/u).includes('clono-index-marker'),
+    `${marker.id} must retain the clono-index-marker class`,
   );
-  assert.equal(extractAttribute(attributes, 'data-index-term'), marker.term);
-  assert.equal(extractAttribute(attributes, 'data-index-reading'), marker.reading);
   assert.equal(text, marker.term, `${marker.id} must display only its source term`);
 }
 
 const indexHtml = htmlByPath.get('index.html');
-assert.match(indexHtml, /<h1 id="book-index">索引<\/h1>/u);
+assert.match(indexHtml, /<h1[^>]*>索引<\/h1>/u);
 
-const actualGroups = [...indexHtml.matchAll(/data-index-group="([^"]+)"/gu)].map(
+for (const [documentPath, html] of htmlByPath) {
+  assert.doesNotMatch(
+    html,
+    /\sdata-index-[a-z-]+=/u,
+    `${documentPath} must not expose index readings or sort keys`,
+  );
+}
+
+const actualGroups = [...indexHtml.matchAll(
+  /<section class="clono-index-group clono-index-group-([^"]+)">/gu,
+)].map(
   ([, group]) => group,
 );
 assert.deepEqual(actualGroups, expectedGroups, 'Index groups must retain their defined order');
 
 const actualEntries = [...indexHtml.matchAll(
-  /<div class="index-entry"([^>]*)>([\s\S]*?)<\/div>/gu,
-)].map(([, attributes, contents]) => ({
-  term: extractAttribute(attributes, 'data-index-term'),
-  reading: extractAttribute(attributes, 'data-index-reading'),
-  sortKey: extractAttribute(attributes, 'data-index-sort-key'),
-  displayedTerm: contents.match(/<dt>([^<]+)<\/dt>/u)?.[1],
+  /<div class="clono-index-entry">([\s\S]*?)<\/div>/gu,
+)].map(([, contents]) => ({
+  term: contents.match(/<dt>([^<]+)<\/dt>/u)?.[1],
   targetHrefs: [...contents.matchAll(/href="([^"]+#[^"]+)"/gu)].map(([, href]) => href),
 }));
 
 assert.deepEqual(
   actualEntries,
-  expectedEntries.map((entry) => ({ ...entry, displayedTerm: entry.term })),
-  'Index entries must preserve grouping input, sort keys, terms, and occurrence links',
+  expectedEntries,
+  'Index entries must preserve the generated order, displayed terms, and occurrence links',
 );
 
 for (const entry of expectedEntries) {

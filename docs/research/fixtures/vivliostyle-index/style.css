@@ -25,22 +25,22 @@ body {
   margin-bottom: 0;
 }
 
-.index-group {
+.clono-index-group {
   margin-block: 1.2em;
 }
 
-.index-group h2 {
+.clono-index-group h2 {
   margin-block: 0 0.4em;
   padding-bottom: 0.15em;
   border-bottom: 1px solid;
   font-size: 1.15em;
 }
 
-.index-list {
+.clono-index-list {
   margin: 0;
 }
 
-.index-entry {
+.clono-index-entry {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   column-gap: 1em;
@@ -48,20 +48,20 @@ body {
   margin-block: 0.25em;
 }
 
-.index-entry dt,
-.index-entry dd {
+.clono-index-entry dt,
+.clono-index-entry dd {
   margin: 0;
 }
 
-.index-entry dd {
+.clono-index-entry dd {
   white-space: nowrap;
 }
 
-.index-page {
+.clono-index-page {
   color: currentcolor;
   text-decoration: none;
 }
 
-.index-page::after {
+.clono-index-page::after {
   content: target-counter(attr(href url), page);
 }
