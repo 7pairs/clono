@@ -1,0 +1,17 @@
+{:source-paths
+ ["src/main"
+  "src/test"
+  "../index-normalization/src/main"]
+
+ :dependencies
+ []
+
+ :builds
+ {:build-project
+  {:target :node-script
+   :output-to "target/build-project.js"
+   :main clono.research.build-project/main}
+
+  :test
+  {:target :node-test
+   :output-to "target/tests.js"}}}
