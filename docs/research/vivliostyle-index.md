@@ -154,6 +154,7 @@ clonoはVivliostyleによる組版前にMarkdownを変換するため、その�
 - `target-counter()`は同一ページにある複数の参照を自動的に統合せず、`2, 2`のように表示する
 - 同一ページ重複の除去は最終的なページ番号に依存するため、組版前のclonoだけでは判断できない
 - 自然な読みから索引用の並べ替えキーを生成し、英数字と五十音の行へ分類して決定的に並べる候補アルゴリズムは、別fixtureで成立を確認した
+- 掲載Markdownから索引指定を収集し、本文マーカーと生成索引Markdownを同じ書籍プロジェクトへ出力する候補パイプラインは、別fixtureで成立を確認した
 
 ## 責務判断
 
@@ -187,6 +188,8 @@ clonoはVivliostyleによる組版前にMarkdownを変換するため、その�
 
 読みの正規化、固定分類、空の分類の省略および並べ替えキーが衝突した場合の決定的な比較規則は、[索引の読み正規化・分類・並べ替えに関する調査](index-normalization.md)で候補アルゴリズムの成立を確認した。著者向け記法、許可文字の最終的な範囲および診断契約は、索引仕様の策定時に決定する。
 
+書籍全体からの収集、本文マーカーへの変換、項目の統合および生成索引Markdownの作成は、[書籍プロジェクトの生成索引に関する調査](book-project-generated-index.md)で候補パイプラインの成立を確認した。この検証はVFM変換後のHTML構造までを対象とし、VivliostyleによるPDFのページ番号と内部リンクは本調査のfixtureで独立して検証している。
+
 次の事項は未確認または未決定である。
 
 - 索引マーカーがページをまたぐ場合のリンク先
@@ -200,7 +203,7 @@ clonoはVivliostyleによる組版前にMarkdownを変換するため、その�
 
 ## 再現方法
 
-検証に使用する入力、Web出版物とPDFの自動検証、同一ページ重複の能力プローブ、PDFの目視確認手順は、[Vivliostyle索引fixtureのREADME](fixtures/vivliostyle-index/README.md)を参照する。fixture内で`npm ci`を実行した後、`npm run verify`で再検証できる。読みの正規化、分類、統合および並べ替えは、[索引正規化fixtureのREADME](fixtures/index-normalization/README.md)に従って独立して再検証できる。
+検証に使用する入力、Web出版物とPDFの自動検証、同一ページ重複の能力プローブ、PDFの目視確認手順は、[Vivliostyle索引fixtureのREADME](fixtures/vivliostyle-index/README.md)を参照する。fixture内で`npm ci`を実行した後、`npm run verify`で再検証できる。読みの正規化、分類、統合および並べ替えは、[索引正規化fixtureのREADME](fixtures/index-normalization/README.md)に従って独立して再検証できる。書籍プロジェクトからの収集と生成索引Markdownの作成は、[書籍プロジェクト生成索引fixtureのREADME](fixtures/book-project-generated-index/README.md)に従って再検証できる。
 
 ## 再調査する条件
 
@@ -215,6 +218,7 @@ clonoはVivliostyleによる組版前にMarkdownを変換するため、その�
 ## 参照資料
 
 - [索引の読み正規化・分類・並べ替えに関する調査](index-normalization.md)
+- [書籍プロジェクトの生成索引に関する調査](book-project-generated-index.md)
 - [Vivliostyle Flavored Markdown 2.7.0](https://github.com/vivliostyle/vfm/blob/v2.7.0/docs/ja/vfm.md)
 - [Vivliostyle CLI 11.1.0 Config Reference](https://github.com/vivliostyle/vivliostyle-cli/blob/v11.1.0/docs/config.md)
 - [チュートリアル一覧 | Vivliostyle](https://vivliostyle.org/ja/tutorials/)（2026-08-19参照）
