@@ -2,7 +2,7 @@
 
 - 状態: 調査済み
 - 調査日: 2026-08-24
-- 最終更新日: 2026-09-01
+- 最終更新日: 2026-09-12
 - 検証環境:
   - OS: macOS 26.5.2
   - Node.js: 24.19.0
@@ -199,6 +199,8 @@ Markdownだけを兄弟ディレクトリへ出力する方式は、特定の配
 
 空白ページを原稿順序へ組み込む方法は、後続の[Vivliostyleの空白ページに関する調査](vivliostyle-blank-pages.md)で検証し、[書籍プロジェクト仕様](../specifications/book-project.md)で`publication`の`blank-page`として定めた。この入力契約と空白ページ資材の生成は実装済みである。
 
+索引を生成済み原稿ツリーへ組み込む候補は、後続の[書籍プロジェクトの生成索引に関する調査](book-project-generated-index.md)で検証した。`publication`に掲載されたMarkdownから索引指定を収集し、変換済み本文と生成索引Markdownを同じ原稿ツリーへ配置できた。この検証は索引固有のデータ処理を対象とし、生成結果を既存のstaging、backup、排他ロックおよび所有マーカーを使って安全に公開する統合までは行っていない。
+
 ## CLIに関する関連方針
 
 fixtureの作成前に、単一ファイル変換と書籍プロジェクト変換を相互排他的なオプションではなく、異なるサブコマンドとして扱う方針へ合意した。
@@ -219,7 +221,7 @@ clono build path/to/book
 
 - 原稿ツリー外にある画像などの静的ファイル
 - 複数OSにおけるファイルの許可ビット、タイムスタンプ、ACLおよび拡張属性
-- 文書全体の情報収集、相互参照、索引および生成文書を挿入する処理段階
+- 索引生成をclono本体の安全な出力公開処理へ統合する実装
 - ロックを無視して出力を変更する外部プロセスとの競合
 - 強制終了後に残ったstagingまたはbackupの検出と回復
 - 強制終了後に残ったロックの判定と回復
@@ -258,6 +260,7 @@ Vivliostyle CLIはPDF生成時にローカルのHTTPサーバーを起動する�
 - [Vivliostyleとclonoの責務整理](../vivliostyle-responsibilities.md)
 - [Vivliostyleの空白ページに関する調査](vivliostyle-blank-pages.md)
 - [Vivliostyleの目次に関する調査](vivliostyle-table-of-contents.md)
+- [書籍プロジェクトの生成索引に関する調査](book-project-generated-index.md)
 - [Markdown AST変換と出力方式に関する調査](markdown-ast-transformation.md)
 - [clono基盤CSSと利用者テーマの統合に関する調査](vivliostyle-clono-stylesheet.md)
 - [検証用fixture](fixtures/book-project-output-tree/)
