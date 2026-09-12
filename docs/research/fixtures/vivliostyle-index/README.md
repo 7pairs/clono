@@ -8,13 +8,13 @@ clonoが収集・整理した索引情報をVivliostyleへ渡す場合に、紙�
 
 2026年8月19日時点の公式ドキュメントでは、VFMに索引項目を指定する構文はなく、Vivliostyle CLIにも目次の`toc`に相当する索引収集・生成設定は確認できない。このfixtureでは、索引項目の収集、読みの正規化、分類、並べ替え、索引文書の構造生成をVivliostyleの責務とみなさない。
 
-一方、Vivliostyleは`target-counter()`とPDF内部リンクを扱える。このfixtureは、clonoの変換後を模した本文マーカーと索引文書を入力し、組版へ委譲できる範囲を検証する。
+一方、Vivliostyleは`target-counter()`とPDF内部リンクを扱える。このfixtureは、[書籍プロジェクト生成索引fixture](../book-project-generated-index/)で確認した候補契約に沿う本文マーカーと索引文書を入力し、組版へ委譲できる範囲を検証する。
 
 ## 検証対象
 
 - 本文とコラム内の索引マーカーが、指定した語だけを通常の本文として表示する
 - 索引項目を「英数字」と五十音の行へ分類して表示する
-- 正規化済みの読みを表すソートキーの順序を保持する
+- clonoが分類・整列した索引項目の順序を保持する
 - 同じ項目を一つへまとめ、複数の出現位置を列挙する
 - 各出現位置の紙面上のページ番号を`target-counter()`で表示する
 - 各ページ番号を、対応する本文中の索引マーカーへのPDF内部リンクにする
@@ -24,32 +24,30 @@ clonoが収集・整理した索引情報をVivliostyleへ渡す場合に、紙�
 
 ## 入力と出力の境界
 
-`chapter-one.md`と`chapter-two.md`には、clonoの変換後を模した索引マーカーを記述する。マーカーは出現ごとに一意なIDを持ち、表示語と読みを属性へ保持する。
+`chapter-one.md`と`chapter-two.md`には、clonoの変換後を模した索引マーカーを記述する。マーカーは書籍全体の収集順に割り当てた一意なIDを持ち、表示する索引語だけを内容に保持する。読みと並べ替えキーは本文へ出力しない。
 
 ```html
 <span
-  id="index-backnumber-1"
-  class="index-marker"
-  data-index-term="バックナンバー"
-  data-index-reading="ばっくなんばー"
+  class="clono-index-marker"
+  id="clono-index-marker-10"
 >バックナンバー</span>
 ```
 
-`index.md`は、clonoが生成する候補となる索引文書を模している。索引項目は読みと正規化済みのソートキーを持ち、各出現位置への空のリンクを列挙する。
+`index.md`は、clonoが生成する候補となる索引文書を模している。分類と項目はclonoが決定した順序で出力済みであり、各項目はすべての出現位置への空のリンクを列挙する。読みと並べ替えキーは生成後の索引文書へ出力しない。
 
 ```html
-<div
-  class="index-entry"
-  data-index-term="バックナンバー"
-  data-index-reading="ばっくなんばー"
-  data-index-sort-key="はつくなんはあ"
->
+<section class="clono-index-group clono-index-group-ha">
+<h2>は行</h2>
+<dl class="clono-index-list">
+<div class="clono-index-entry">
   <dt>バックナンバー</dt>
-  <dd><a class="index-page" href="chapter-two.html#index-backnumber-1"></a></dd>
+  <dd><a class="clono-index-page" href="chapter-two.html#clono-index-marker-10" aria-label="バックナンバーの出現1"></a></dd>
 </div>
+</dl>
+</section>
 ```
 
-このfixtureは、`ばっくなんばー`から`はつくなんはあ`を生成する正規化アルゴリズムを検証しない。正規化済みのソートキーを出力構造へ保持し、その順序と紙面表示をVivliostyleが壊さないことを検証する。
+このfixtureは、`ばっくなんばー`から`はつくなんはあ`を生成する正規化アルゴリズムを検証しない。clonoが分類・整列済みの構造を生成した前提で、その順序と紙面表示をVivliostyleが壊さないことを検証する。
 
 ## 同一ページ重複の能力プローブ
 
