@@ -35,6 +35,12 @@
    "ゕ" "か"
    "ゖ" "け"})
 
+(def extended-katakana
+  {"ヷ" "わ\u3099"
+   "ヸ" "ゐ\u3099"
+   "ヹ" "ゑ\u3099"
+   "ヺ" "を\u3099"})
+
 (def vowel-by-kana
   (into {}
         (mapcat (fn [[vowel kana]]
@@ -56,8 +62,14 @@
   (->> (array-seq (js/Array.from value))
        (map (fn [character]
               (let [code-point (.codePointAt character 0)]
-                (if (<= 0x30a1 code-point 0x30f6)
+                (cond
+                  (<= 0x30a1 code-point 0x30f6)
                   (js/String.fromCodePoint (- code-point 0x60))
+
+                  (contains? extended-katakana character)
+                  (get extended-katakana character)
+
+                  :else
                   character))))
        (apply str)))
 
@@ -75,7 +87,7 @@
     (when (not= normalized (string/trim normalized))
       (fail-reading! :reading-surrounding-whitespace reading
                      "Reading must not contain surrounding whitespace"))
-    (when-not (or (re-matches #"^[ぁ-ゖー]+$" normalized)
+    (when-not (or (re-matches #"^(?:[ぁ-ゖ][゙゚]?|ー)+$" normalized)
                   (re-matches #"^[a-z0-9][a-z0-9 .+@#/_-]*$" normalized))
       (fail-reading! :reading-unsupported-characters reading
                      "Reading contains unsupported characters"))
@@ -86,7 +98,11 @@
          result []]
     (if-let [character (first characters)]
       (if (= "ー" character)
-        (if-let [vowel (get vowel-by-kana (peek result))]
+        (if-let [vowel (->> result
+                            rseq
+                            (remove #{"\u3099" "\u309a"})
+                            first
+                            (get vowel-by-kana))]
           (recur (next characters) (conj result vowel))
           (fail-reading! :reading-invalid-prolonged-mark reading
                          "Prolonged mark must follow kana with a known vowel"))

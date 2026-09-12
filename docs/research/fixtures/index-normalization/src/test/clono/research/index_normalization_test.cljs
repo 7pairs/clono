@@ -24,6 +24,21 @@
     (is (= "かそう"
            (index-normalization/reading-sort-key "ガゾウ"))))
 
+  (testing "When extended katakana readings are normalized, then their decomposed hiragana voicing remains available before sort-key folding"
+    (is (= ["わ\u3099" "ゐ\u3099" "ゑ\u3099" "を\u3099"]
+           (mapv index-normalization/normalize-reading
+                 ["ヷ" "ヸ" "ヹ" "ヺ"])))
+    (is (= ["わ" "ゐ" "ゑ" "を"]
+           (mapv index-normalization/reading-sort-key
+                 ["ヷ" "ヸ" "ヹ" "ヺ"])))
+    (is (= "わ\u3099"
+           (index-normalization/normalize-reading "ﾜﾞ")))
+    (is (= "わあ"
+           (index-normalization/reading-sort-key "ヷー")))
+    (is (= [:wa :wa :wa :wa]
+           (mapv index-normalization/reading-group
+                 ["ヷ" "ヸ" "ヹ" "ヺ"]))))
+
   (testing "When alphanumeric readings are normalized, then full-width characters and ASCII case produce one key"
     (is (= "android 14"
            (index-normalization/normalize-reading "Ａｎｄｒｏｉｄ １４")))
@@ -41,7 +56,12 @@
     (is (= :reading-unsupported-characters
            (:code (exception-data #(index-normalization/normalize-reading "androidあぷり")))))
     (is (= :reading-unsupported-characters
-           (:code (exception-data #(index-normalization/normalize-reading ".gitignore"))))))
+           (:code (exception-data #(index-normalization/normalize-reading ".gitignore")))))
+    (is (= :reading-unsupported-characters
+           (:code (exception-data #(index-normalization/normalize-reading "\u3099")))))
+    (is (= :reading-unsupported-characters
+           (:code (exception-data #(index-normalization/normalize-reading
+                                    "わ\u3099\u3099"))))))
 
   (testing "When a prolonged mark has no preceding vowel, then sort-key generation rejects the reading"
     (is (= :reading-invalid-prolonged-mark
