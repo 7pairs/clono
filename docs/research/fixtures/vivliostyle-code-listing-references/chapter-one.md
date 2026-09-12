@@ -28,6 +28,6 @@ fun requireName(name: String) {
 ```
 </figure>
 
-番号なしのコードを挟んだ後の番号とタイトルは<a class="xref-listing xref-title" href="#listing-validation" data-caption-href="#listing-validation-caption"></a>を期待する。
+番号なしのコードを挟んだ後の番号とタイトルは<a class="xref-listing xref-title" href="#listing-validation" data-title-href="#listing-validation-caption"></a>を期待する。
 
-別文書の番号とタイトルは<a class="xref-listing xref-title" href="chapter-two.html#listing-device-properties" data-caption-href="chapter-two.html#listing-device-properties-caption"></a>を期待する。
+別文書の番号とタイトルは<a class="xref-listing xref-title" href="chapter-two.html#listing-device-properties" data-title-href="chapter-two.html#listing-device-properties-caption"></a>を期待する。

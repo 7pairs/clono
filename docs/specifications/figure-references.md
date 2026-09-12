@@ -2,7 +2,7 @@
 
 - 状態: 実装済み
 - 作成日: 2026-09-01
-- 最終更新日: 2026-09-08
+- 最終更新日: 2026-09-11
 
 ## 目的
 
@@ -86,7 +86,7 @@ clonoは、番号付き画像を参照可能なHTML構造へ変換し、書籍�
 
 論理IDは英小文字で始める。大文字、アンダースコア、日本語、空白またはその他の記号を許可しない。
 
-`clono build`では、clonoが管理する参照対象の種類をまたいで、論理IDを書籍全体で一意とする。見出し参照と番号付き表も同じ名前空間を使用する。将来、コードリストを追加する場合も、この名前空間へ登録する。
+`clono build`では、clonoが管理する見出し、番号付き画像、番号付き表および番号付きコードリストの論理IDを書籍全体で一意とする。
 
 clonoは論理IDから、次のHTML IDを導出する。
 
@@ -158,7 +158,7 @@ HTMLの空白と改行は規範ではない。要素の親子関係、要素名�
 
 `type`または`format`の省略、未知の値、これら以外の属性、空または不正な論理IDはエラーとする。Container directiveまたはLeaf directiveとして記述した`xref`もエラーとする。
 
-`xref`は参照種別で共有する。この仕様では`type="figure"`の契約を定め、`type="heading"`の契約は[見出し参照仕様](heading-references.md)、`type="table"`の契約と実装状態は[番号付き表と表参照仕様](table-references.md)で定める。コードリストの参照種別は、個別仕様を決定するまで許可しない。
+`xref`は参照種別で共有する。この仕様では`type="figure"`の契約を定め、`type="heading"`の契約は[見出し参照仕様](heading-references.md)、`type="table"`の契約と実装状態は[番号付き表と表参照仕様](table-references.md)、`type="listing"`の契約と実装状態は[番号付きコードリストとコードリスト参照仕様](code-listing-references.md)で定める。
 
 ### 番号を持たない対象
 
@@ -299,7 +299,7 @@ clonoが生成する要素名、属性名およびclass名は、この仕様に�
 
 - 番号付き画像または画像参照の構文、内容モデル、ID、URL、HTML、CSS、収集範囲、解決規則または診断契約を変更する場合は、実装と同じPull Requestでこの文書を更新する
 - 実装へ着手した場合は状態を「実装中」、実装と自動テストが完了した場合は「実装済み」へ更新する
-- 新しい参照種別へ`xref`を拡張する場合は、対応する個別仕様を追加し、この文書、[見出し参照仕様](heading-references.md)、[番号付き表と表参照仕様](table-references.md)および[clono著者向け記法](authoring-syntax.md)の共通契約を同時に見直す
+- 新しい参照種別へ`xref`を拡張する場合は、対応する個別仕様を追加し、この文書、[見出し参照仕様](heading-references.md)、[番号付き表と表参照仕様](table-references.md)、[番号付きコードリストとコードリスト参照仕様](code-listing-references.md)および[clono著者向け記法](authoring-syntax.md)の共通契約を同時に見直す
 - Vivliostyleのカウンター、対象参照またはPDF内部リンクの挙動が変わった場合は、調査fixtureを再実行し、調査記録と責務判断を同時に更新する
 
 ## 参照資料
@@ -309,6 +309,7 @@ clonoが生成する要素名、属性名およびclass名は、この仕様に�
 - [書籍プロジェクト仕様](book-project.md)
 - [見出し参照仕様](heading-references.md)
 - [番号付き表と表参照仕様](table-references.md)
+- [番号付きコードリストとコードリスト参照仕様](code-listing-references.md)
 - [Generic DirectivesとmdastによるMarkdown変換パイプラインのADR](../decisions/0003-adopt-generic-directives-mdast-transformation-pipeline.md)
 - [Vivliostyleとclonoの責務整理](../vivliostyle-responsibilities.md)
 - [Vivliostyleの画像ID・キャプション・連番・相互参照に関する調査](../research/vivliostyle-figure-references.md)

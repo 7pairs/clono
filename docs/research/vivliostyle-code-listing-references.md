@@ -2,7 +2,7 @@
 
 - 状態: 調査済み
 - 初回調査日: 2026-08-17
-- 最終更新日: 2026-08-20
+- 最終更新日: 2026-09-11
 - 検証環境:
   - 実行環境: macOS、Node.js 24.19.0
   - HTML変換: `@vivliostyle/vfm` 2.7.0
@@ -66,12 +66,12 @@ fun greet(name: String): String {
 
 番号なしコードブロックには、通常のコードフェンスを使用する。
 
-参照元には、変換後の出力を模した空の`a`要素を直接記述する。番号とタイトルを参照する要素は、クリック先と番号の取得に使用する`href`と、キャプションの取得に使用する`data-caption-href`を別々に持つ。
+参照元には、変換後の出力を模した空の`a`要素を直接記述する。番号とタイトルを参照する要素は、クリック先と番号の取得に使用する`href`と、タイトル取得先を参照種別で統一する`data-title-href`を別々に持つ。
 
 ```html
 <a class="xref-listing xref-title"
    href="chapter-two.html#listing-device-properties"
-   data-caption-href="chapter-two.html#listing-device-properties-caption"></a>
+   data-title-href="chapter-two.html#listing-device-properties-caption"></a>
 ```
 
 HTMLの検証プログラムは、VFM変換後の番号付きコードリストが、`figure`のIDとclass、IDを持つ`figcaption`、構文強調された`pre`と`code`を保持することを確認する。通常のシェルコードブロックが番号付きの`figure`で囲まれないことと、長いコードリストの検証行が一度ずつ順番どおりに出力されることも確認する。
@@ -130,7 +130,7 @@ a.xref-listing::before {
 }
 
 a.xref-title::after {
-  content: " " target-text(attr(data-caption-href url), content);
+  content: " " target-text(attr(data-title-href url), content);
 }
 ```
 
@@ -138,7 +138,7 @@ a.xref-title::after {
 
 ### 別Markdownファイル間の参照
 
-変換後のHTMLファイル名とコードリストIDを組み合わせた`chapter-two.html#listing-device-properties`のような`href`と、キャプションIDを組み合わせた`data-caption-href`を使用し、別Markdownファイルの番号とキャプションを参照できた。
+変換後のHTMLファイル名とコードリストIDを組み合わせた`chapter-two.html#listing-device-properties`のような`href`と、キャプションIDを組み合わせた`data-title-href`を使用し、別Markdownファイルの番号とキャプションを参照できた。
 
 生成したPDFでは、同一ファイル内、別ファイル間、前方参照、後方参照のすべてが、対象のコードリスト全体を表す`figure`への内部リンクとして解決された。
 
@@ -178,7 +178,7 @@ a.xref-title::after {
 
 各fixtureは`body`の`counter-reset`へ一種類のカウンターだけを指定している。複数の規則を単純に並べると、同じプロパティの後勝ちによって先に指定したカウンターのリセットが失われる。統合テーマでは、必要なカウンターを一つの`counter-reset`へまとめる必要がある。
 
-また、画像はタイトル取得に`href`を使用するが、表とコードリストは`data-caption-href`を使用していた。各fixtureの`.xref-title::after`をそのまま共存させると競合するため、[結合検証](vivliostyle-reference-integration.md)では、すべてのタイトル取得先を`data-title-href`へ統一した。
+個別fixtureでは、画像がタイトル取得に`href`、表とコードリストが`data-caption-href`を使用していた。各fixtureの`.xref-title::after`をそのまま共存させると競合するため、[結合検証](vivliostyle-reference-integration.md)では、すべてのタイトル取得先を`data-title-href`へ統一した。2026年9月11日に、コードリストの個別fixtureも正式な出力契約へ合わせて`data-title-href`へ更新した。
 
 同じ文書とテーマへ各要素を配置し、独立した連番、番号なし要素、同一・別Markdownファイル間の番号とタイトル、前方・後方のPDF内部リンクを検証した。この結果、横断的な連番と参照の責務判断を確定した。
 
@@ -188,10 +188,6 @@ a.xref-title::after {
 
 次の事項は未確認または未決定である。
 
-- clonoで使用する番号付きコードリストと参照の著者向け記法
-- キャプションを省略した場合の補完規則
-- キャプション内のMarkdown
-- 言語指定を省略した番号付きコードリスト
 - 行番号
 - 特定行の強調と差分表示
 - 製品用テーマでの長い行の折り返しと禁則処理
@@ -200,6 +196,10 @@ a.xref-title::after {
 - 章として数えない前付・後付などを別のMarkdownファイルとして`entry`へ含める場合のカウンター制御
 
 行番号、特定行の強調、差分表示はThunder Clawの次回作における必須要件ではないため、具体的な必要性が高まるまで調査しない。
+
+[Generic DirectivesとコードフェンスのMarkdown ASTに関する追加調査](markdown-code-listing-directive.md)では、候補となる著者向け記法を使用し、言語指定を省略したコードリストを検証した。mdastでは`code.lang`が`null`となり、VFM 2.7.0によるHTML変換後は`language-text`クラスを持つ`pre`と`code`が生成されることを確認している。
+
+著者向け記法、必須キャプション、キャプション内のMarkdownを許可しないこと、および前付と後付で番号付きコードリストを扱わないことは、[番号付きコードリストとコードリスト参照仕様](../specifications/code-listing-references.md)で決定した。
 
 ## 再現方法
 
@@ -215,6 +215,8 @@ a.xref-title::after {
 
 ## 参照資料
 
+- [番号付きコードリストとコードリスト参照仕様](../specifications/code-listing-references.md)
+- [Generic DirectivesとコードフェンスのMarkdown ASTに関する調査](markdown-code-listing-directive.md)
 - [コード | Vivliostyle Flavored Markdown 2.7.0](https://github.com/vivliostyle/vfm/blob/v2.7.0/docs/ja/vfm.md#コード-code)
 - [チュートリアル⑤カウンタと柱のスタイル | Vivliostyle](https://vivliostyle.org/ja/tutorials/configure-counters-running-heads/)（2026-08-17参照）
 - [Supported CSS Features | Vivliostyle.js 2.44.1](https://github.com/vivliostyle/vivliostyle.js/blob/v2.44.1/docs/ja/supported-css-features.md)

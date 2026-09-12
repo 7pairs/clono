@@ -69,4 +69,4 @@ fun collectDeviceProperties() {
 ```
 </figure>
 
-前の文書の番号とタイトルは<a class="xref-listing xref-title" href="chapter-one.html#listing-greeting" data-caption-href="chapter-one.html#listing-greeting-caption"></a>を期待する。
+前の文書の番号とタイトルは<a class="xref-listing xref-title" href="chapter-one.html#listing-greeting" data-title-href="chapter-one.html#listing-greeting-caption"></a>を期待する。

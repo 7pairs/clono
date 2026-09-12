@@ -6,6 +6,7 @@
    [clono.reference-id :as reference-id]
    [clono.transform.xref.figure :as figure-reference]
    [clono.transform.xref.heading :as heading-reference]
+   [clono.transform.xref.listing :as listing-reference]
    [clono.transform.xref.table :as table-reference]
    [goog.string :as gstring]
    [goog.object :as gobj]))
@@ -16,7 +17,8 @@
 (def ^:private reference-type-rules
   [figure-reference/rule
    heading-reference/rule
-   table-reference/rule])
+   table-reference/rule
+   listing-reference/rule])
 
 (def ^:private reference-type-rules-by-name
   (->> reference-type-rules

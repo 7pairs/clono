@@ -230,6 +230,64 @@
             (is (not (.includes (:content appendix)
                                 "clono-xref-placeholder")))))))))
 
+(deftest cross-document-listing-reference-transformation-test
+  (testing "When published Markdown manuscripts refer to each other's listings, then numbered listings and source-relative references are written to both transformed manuscripts"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              publication [{:type :document
+                            :path "chapters/one.md"
+                            :kind "chapter"
+                            :include-in-toc true}
+                           {:type :document
+                            :path "appendices/two.MD"
+                            :kind "appendix"
+                            :include-in-toc true}]]
+          (write-file!
+           (.join path source "chapters" "one.md")
+           (str ":xref[workflow]{type=\"listing\" format=\"number-title\"}\n\n"
+                ":::listing[起動処理]{#startup}\n"
+                "```kotlin\n"
+                "fun main() {}\n"
+                "```\n"
+                ":::\n"))
+          (write-file!
+           (.join path source "appendices" "two.MD")
+           (str ":xref[startup]{type=\"listing\" format=\"title\"}\n\n"
+                ":::listing[処理フロー]{#workflow}\n"
+                "```\n"
+                "prepare\nexecute\n"
+                "```\n"
+                ":::\n"))
+          (let [result (book-transform/run (create-plan project publication))
+                operations (:operations (:plan result))
+                chapter (operation-by-path operations "chapters/one.md")
+                appendix (operation-by-path operations "appendices/two.MD")]
+            (is (:ok? result))
+            (is (empty? (:diagnostics result)))
+            (is (.includes
+                 (:content chapter)
+                 (str "<figure class=\"clono-numbered-listing\" "
+                      "id=\"listing-startup\">")))
+            (is (.includes
+                 (:content chapter)
+                 (str "href=\"../appendices/two.html#listing-workflow\" "
+                      "data-title-href=\"../appendices/two.html"
+                      "#listing-workflow-caption\"")))
+            (is (.includes
+                 (:content appendix)
+                 (str "<figure class=\"clono-numbered-listing\" "
+                      "id=\"listing-workflow\">")))
+            (is (.includes
+                 (:content appendix)
+                 (str "href=\"../chapters/one.html#listing-startup\" "
+                      "data-title-href=\"../chapters/one.html"
+                      "#listing-startup-caption\"")))
+            (is (not (.includes (:content chapter)
+                                "clono-xref-placeholder")))
+            (is (not (.includes (:content appendix)
+                                "clono-xref-placeholder")))))))))
+
 (deftest cross-document-heading-reference-transformation-test
   (testing "When published manuscripts refer to headings in other document kinds, then resolved links contain the target heading metadata"
     (with-temporary-project
@@ -499,6 +557,70 @@
                        :column 1
                        :directive "xref"
                        :message "`xref`の参照先`missing`を解決できません。"}]
+                     (:diagnostics result))))))))))
+
+(deftest listing-reference-preflight-failure-test
+  (testing "When published manuscripts contain missing and mismatched listing references, then no published or unlisted manuscript is transformed"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              publication [{:type :document
+                            :path "chapter-one.md"
+                            :kind "chapter"
+                            :include-in-toc true}
+                           {:type :document
+                            :path "chapter-two.md"
+                            :kind "chapter"
+                            :include-in-toc true}]
+              transformed (atom [])]
+          (write-file!
+           (.join path source "chapter-one.md")
+           (str ":xref[missing-listing]"
+                "{type=\"listing\" format=\"number\"}\n\n"
+                ":xref[runtime]{type=\"listing\" format=\"title\"}\n"))
+          (write-file!
+           (.join path source "chapter-two.md")
+           (str ":xref[startup]{type=\"table\" format=\"number-title\"}\n\n"
+                ":::table[実行環境]{#runtime}\n"
+                "| 項目 | 値 |\n"
+                "| --- | --- |\n"
+                "| Node.js | 24 |\n"
+                ":::\n\n"
+                ":::listing[起動処理]{#startup}\n"
+                "```kotlin\n"
+                "fun main() {}\n"
+                "```\n"
+                ":::\n"))
+          (write-file! (.join path source "notes.md") "# 非掲載\n")
+          (with-redefs [pipeline/run-analyzed
+                        (fn [context _tree]
+                          (swap! transformed conj (:source-name context))
+                          {:ok? true :output "published\n" :diagnostics []})
+                        pipeline/run
+                        (fn [context _source]
+                          (swap! transformed conj (:source-name context))
+                          {:ok? true :output "unlisted\n" :diagnostics []})]
+            (let [result (book-transform/run
+                          (create-plan project publication))]
+              (is (false? (:ok? result)))
+              (is (nil? (:plan result)))
+              (is (= [] @transformed))
+              (is (= [{:file "chapter-one.md"
+                       :line 1
+                       :column 1
+                       :directive "xref"
+                       :message (str "`xref`の参照先`missing-listing`"
+                                     "を解決できません。")}
+                      {:file "chapter-one.md"
+                       :line 3
+                       :column 1
+                       :directive "xref"
+                       :message "`xref`の参照種別が参照先と一致しません。"}
+                      {:file "chapter-two.md"
+                       :line 1
+                       :column 1
+                       :directive "xref"
+                       :message "`xref`の参照種別が参照先と一致しません。"}]
                      (:diagnostics result))))))))))
 
 (deftest book-specific-figure-validation-test

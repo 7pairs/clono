@@ -25,6 +25,13 @@
        "| Node.js | 24 |\n"
        ":::\n"))
 
+(def listing-source
+  (str ":::listing[挨拶を表示する関数]{#greeting}\n"
+       "```kotlin\n"
+       "fun greet() {}\n"
+       "```\n"
+       ":::\n"))
+
 (deftest local-xref-transformation-test
   (testing "When local figure references use every format before and after their target, then each reference is resolved to the expected link structure"
     (let [source (str ":xref[architecture]{type=\"figure\" format=\"number\"}\n\n"
@@ -77,9 +84,9 @@
               :source ":xref[architecture]{format=\"number\"}\n"
               :message "`xref`には`type`属性が必要です。"}
              {:case "unsupported type"
-              :source ":xref[architecture]{type=\"listing\" format=\"number\"}\n"
-              :message (str "`xref`の`type`属性には`figure`、`heading`または"
-                            "`table`を指定してください。")}
+              :source ":xref[architecture]{type=\"code\" format=\"number\"}\n"
+              :message (str "`xref`の`type`属性には`figure`、`heading`、"
+                            "`table`または`listing`を指定してください。")}
              {:case "missing format"
               :source ":xref[architecture]{type=\"figure\"}\n"
               :message "`xref`には`format`属性が必要です。"}
@@ -130,6 +137,18 @@
         (is (:ok? result) format)
         (is (empty? (:diagnostics result)) format)))))
 
+(deftest listing-xref-type-validation-test
+  (testing "When listing references use a supported format, then analysis accepts their reference type"
+    (doseq [format ["number" "number-title" "title"]]
+      (let [result
+            (pipeline/analyze
+             (transform-context "listing-xref.md")
+             (str ":xref[greeting]{type=\"listing\" format=\""
+                  format
+                  "\"}\n"))]
+        (is (:ok? result) format)
+        (is (empty? (:diagnostics result)) format)))))
+
 (deftest local-table-xref-transformation-test
   (testing "When local table references use every format before and after their target, then each reference is resolved to the expected link structure"
     (let [source
@@ -156,6 +175,34 @@
            (str "<a class=\"clono-xref clono-xref-table clono-xref-title\" "
                 "href=\"#table-runtime\" "
                 "data-title-href=\"#table-runtime-caption\"></a>")))
+      (is (nil? (test-support/directive tree "xref"))))))
+
+(deftest local-listing-xref-transformation-test
+  (testing "When local listing references use every format before and after their target, then each reference is resolved to the expected link structure"
+    (let [source
+          (str ":xref[greeting]{type=\"listing\" format=\"number\"}\n\n"
+               ":xref[greeting]{type=\"listing\" format=\"number-title\"}\n\n"
+               listing-source
+               "\n:xref[greeting]{type=\"listing\" format=\"title\"}\n")
+          result (pipeline/run (transform-context "listing-xref.md") source)
+          output (:output result)
+          tree (markdown/parse output)]
+      (is (:ok? result))
+      (is (empty? (:diagnostics result)))
+      (is (.includes
+           output
+           (str "<a class=\"clono-xref clono-xref-listing "
+                "clono-xref-number\" href=\"#listing-greeting\"></a>")))
+      (is (.includes
+           output
+           (str "<a class=\"clono-xref clono-xref-listing "
+                "clono-xref-number-title\" href=\"#listing-greeting\" "
+                "data-title-href=\"#listing-greeting-caption\"></a>")))
+      (is (.includes
+           output
+           (str "<a class=\"clono-xref clono-xref-listing "
+                "clono-xref-title\" href=\"#listing-greeting\" "
+                "data-title-href=\"#listing-greeting-caption\"></a>")))
       (is (nil? (test-support/directive tree "xref"))))))
 
 (deftest table-xref-failure-test
@@ -345,6 +392,31 @@
         (is (nil? (test-support/directive (markdown/parse output) "xref"))
             format)))))
 
+(deftest unresolved-local-listing-xref-test
+  (testing "When transform cannot find a local listing target, then each format becomes its fixed listing placeholder"
+    (doseq [[format expected-text]
+            [["number" "リストX.X"]
+             ["number-title" "リストX.X 参照先未解決"]
+             ["title" "参照先未解決"]]]
+      (let [source (str ":xref[external-listing]"
+                        "{type=\"listing\" format=\"" format "\"}\n")
+            result (pipeline/run
+                    (transform-context "unresolved-listing-xref.md")
+                    source)
+            output (:output result)
+            expected (str "<span class=\"clono-xref clono-xref-listing "
+                          "clono-xref-" format " clono-xref-placeholder\">"
+                          expected-text
+                          "</span>")]
+        (is (:ok? result) format)
+        (is (empty? (:diagnostics result)) format)
+        (is (.includes output expected) format)
+        (is (not (.includes output "external-listing")) format)
+        (is (not (.includes output "href=")) format)
+        (is (not (.includes output "<a")) format)
+        (is (nil? (test-support/directive (markdown/parse output) "xref"))
+            format)))))
+
 (deftest unresolved-local-xref-test
   (testing "When transform cannot find a local xref target, then each format becomes a fixed placeholder without link attributes or author input"
     (doseq [[format expected-text]
@@ -443,6 +515,39 @@
                           "span.clono-xref-table.clono-xref-number::before")))
       (is (not (.includes stylesheet
                           "span.clono-xref-table.clono-xref-title::before"))))))
+
+(deftest listing-xref-stylesheet-test
+  (testing "When a resolved listing reference requests its number, then the target chapter and listing counters are displayed"
+    (let [stylesheet (normalize-line-endings
+                      (.readFileSync fs "styles/clono.css" "utf8"))]
+      (is (.includes
+           stylesheet
+           (str "a.clono-xref-listing.clono-xref-number::before,\n"
+                "a.clono-xref-listing.clono-xref-number-title::before {\n"
+                "  content: \"リスト\" "
+                "target-counter(attr(href url), chapter) \".\" "
+                "target-counter(attr(href url), listing);\n"
+                "}\n")))))
+
+  (testing "When a resolved listing reference requests its title, then the target caption text is displayed"
+    (let [stylesheet (normalize-line-endings
+                      (.readFileSync fs "styles/clono.css" "utf8"))]
+      (is (.includes
+           stylesheet
+           (str "a.clono-xref-listing.clono-xref-number-title::after {\n"
+                "  content: \" \" "
+                "target-text(attr(data-title-href url), content);\n"
+                "}\n")))
+      (is (.includes
+           stylesheet
+           (str "a.clono-xref-listing.clono-xref-title::before {\n"
+                "  content: "
+                "target-text(attr(data-title-href url), content);\n"
+                "}\n")))
+      (is (not (.includes stylesheet
+                          "span.clono-xref-listing.clono-xref-number::before")))
+      (is (not (.includes stylesheet
+                          "span.clono-xref-listing.clono-xref-title::before"))))))
 
 (deftest heading-xref-stylesheet-test
   (testing "When a numbered chapter or appendix heading is referenced, then its formatted heading number is displayed"

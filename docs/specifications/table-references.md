@@ -2,7 +2,7 @@
 
 - 状態: 実装済み
 - 作成日: 2026-09-08
-- 最終更新日: 2026-09-09
+- 最終更新日: 2026-09-11
 
 ## 目的
 
@@ -120,7 +120,7 @@ GFM表として解析できるヘッダー、行、列または空のセルに�
 
 論理IDは英小文字で始める。大文字、アンダースコア、日本語、空白またはその他の記号を許可しない。
 
-`clono build`では、clonoが管理する見出し、番号付き画像、番号付き表、および将来追加するコードリストを含め、論理IDを書籍全体で一意とする。
+`clono build`では、clonoが管理する見出し、番号付き画像、番号付き表および番号付きコードリストの論理IDを書籍全体で一意とする。
 
 clonoは論理IDから、次のHTML IDを導出する。
 
@@ -271,7 +271,7 @@ clono基盤CSSは、固定classに対して次の機能上必要な規則を提�
 - `clono-xref-number`と`clono-xref-number-title`で参照先の表番号を表示する
 - `clono-xref-number-title`と`clono-xref-title`で参照先のキャプションを表示する
 
-CSSカウンター名には、調査fixtureと同じ`table`を使用する。既存の`figure`カウンターと同じ要素で初期化するため、`body`の`counter-reset`へ`table`を追加し、既存のカウンターを上書きしない。将来コードリストを追加する場合も、同じ宣言へカウンターを統合する。
+CSSカウンター名には、調査fixtureと同じ`table`を使用する。既存の`figure`カウンターと同じ要素で初期化するため、`body`の`counter-reset`へ`table`を追加し、既存のカウンターを上書きしない。番号付きコードリストを実装する場合も、[番号付きコードリストとコードリスト参照仕様](code-listing-references.md)に従って同じ宣言へカウンターを統合する。
 
 clono基盤CSSは本文用の10進数による表示を既定とする。付録の英字による章番号、章および付録ごとの`chapter`カウンターの設定、表の幅、罫線、セルの余白、背景、フォント、配置、および複数ページにまたがる表の見た目は利用者テーマの責務とする。利用者テーマは、書籍の`kind`に応じてclono基盤CSSのカウンター表示を上書きできる。
 
@@ -314,7 +314,7 @@ clonoが生成する要素名、属性名およびclass名は、この仕様に�
 
 - 番号付き表または表参照の構文、内容モデル、ID、HTML、CSS、収集範囲、解決規則または診断契約を変更する場合は、実装と同じPull Requestでこの文書を更新する
 - 実装へ着手した場合は状態を「実装中」、実装と自動テストが完了した場合は「実装済み」へ更新する
-- `xref`の共通契約を変更する場合は、[番号付き画像と画像参照仕様](figure-references.md)、[見出し参照仕様](heading-references.md)および[clono著者向け記法](authoring-syntax.md)を同時に見直す
+- `xref`の共通契約を変更する場合は、[番号付き画像と画像参照仕様](figure-references.md)、[見出し参照仕様](heading-references.md)、[番号付きコードリストとコードリスト参照仕様](code-listing-references.md)および[clono著者向け記法](authoring-syntax.md)を同時に見直す
 - VFMのMarkdown表、Markdown AST、Vivliostyleのカウンター、対象参照またはPDF内部リンクの挙動が変わった場合は、調査fixtureを再実行し、調査記録と責務判断を同時に更新する
 
 ## 参照資料
@@ -324,6 +324,7 @@ clonoが生成する要素名、属性名およびclass名は、この仕様に�
 - [書籍プロジェクト仕様](book-project.md)
 - [番号付き画像と画像参照仕様](figure-references.md)
 - [見出し参照仕様](heading-references.md)
+- [番号付きコードリストとコードリスト参照仕様](code-listing-references.md)
 - [Generic DirectivesとmdastによるMarkdown変換パイプラインのADR](../decisions/0003-adopt-generic-directives-mdast-transformation-pipeline.md)
 - [Vivliostyleとclonoの責務整理](../vivliostyle-responsibilities.md)
 - [Vivliostyleの表ID・キャプション・連番・相互参照に関する調査](../research/vivliostyle-table-references.md)

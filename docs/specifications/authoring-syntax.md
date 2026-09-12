@@ -2,7 +2,7 @@
 
 - 状態: 策定中
 - 作成日: 2026-08-22
-- 最終更新日: 2026-09-09
+- 最終更新日: 2026-09-11
 
 ## 目的
 
@@ -46,12 +46,12 @@ Vivliostyleと`clono`の責務分担は、[Vivliostyleとclonoの責務整理](.
 | 見出しID | `# 見出し {#identifier}` | 対象外 | clono独自のID記法は設けず、VFMの明示的なID記法を使用する。初期仕様では`h1`から`h3`までのIDを見出し参照の対象として収集し、HTMLへのID出力はVFMへ委譲する |
 | 番号付き画像 | `:::figure[キャプション]{#id}`と`:::`でMarkdown画像を囲む | 実装済み | `clono`が論理ID、画像、代替テキスト、キャプションを持つ`figure`構造へ変換する。番号なし画像には標準Markdownを使用する。詳細は[番号付き画像と画像参照仕様](figure-references.md)を参照する |
 | 番号付き表 | `:::table[キャプション]{#id}`と`:::`でGFM形式のMarkdown表を囲む | 実装済み | `clono`が論理ID、Markdown表、キャプションを持つ`figure`構造へ変換する。番号なし表には通常のMarkdown表を使用する。詳細は[番号付き表と表参照仕様](table-references.md)を参照する |
-| 番号付きコードリスト | 未定 | 検討前 | `clono`がID、コードフェンス、キャプションを持つ`figure`構造へ変換する候補。番号なしコードブロックには標準Markdownを使用する |
+| 番号付きコードリスト | `:::listing[キャプション]{#id}`と`:::`でコードフェンスを囲む | 実装済み | `clono`が論理ID、コードフェンス、上側のキャプションを持つ`figure`構造へ変換する。言語指定は任意とし、番号なしコードブロックには標準Markdownを使用する。詳細は[番号付きコードリストとコードリスト参照仕様](code-listing-references.md)を参照する |
 | 見出し、画像、表、コードリストの連番 | なし | 対象外 | 番号の生成をVivliostyleとテーマCSSのカウンターへ委譲する |
 | 画像の参照 | `:xref[id]{type="figure" format="number"}`、`format="number-title"`または`format="title"` | 実装済み | `clono transform`では、参照種別、表示形式および論理IDを検証し、同一原稿内の参照をリンク構造へ、同一原稿内に参照先がない参照をプレビュー用プレースホルダーへ変換する。`clono build`では、掲載Markdown全体から参照対象を収集し、同一原稿および原稿間の参照をリンク構造へ変換する。重複ID、未定義参照または安全に解決できない原稿間パスは診断し、生成済み原稿ツリーを変更しない。詳細は[番号付き画像と画像参照仕様](figure-references.md)を参照する |
 | 見出しの参照 | `:xref[id]{type="heading" format="number"}`、`format="number-title"`または`format="title"` | 実装済み | VFMの明示的なIDを持つ`h1`から`h3`までを参照対象とする。`clono transform`では同一原稿内の参照をリンク構造へ、同一原稿内に参照先がない参照をプレビュー用プレースホルダーへ変換する。`clono build`では掲載Markdown全体から参照対象を収集し、同一原稿および原稿間の参照をリンク構造へ変換する。詳細は[見出し参照仕様](heading-references.md)を参照する |
 | 表の参照 | `:xref[id]{type="table" format="number"}`、`format="number-title"`または`format="title"` | 実装済み | 画像および見出し参照と共通の`xref`を使用する。`clono transform`では同一原稿内の参照をリンク構造へ、同一原稿内に参照先がない参照をプレビュー用プレースホルダーへ変換する。`clono build`では掲載Markdown全体から参照対象を収集し、同一原稿および原稿間の参照をリンク構造へ変換する。詳細は[番号付き表と表参照仕様](table-references.md)を参照する |
-| コードリストの参照 | 未定 | 検討前 | 画像、見出しおよび表の参照と共通の`xref`を使用し、`type`で対象を区別する方針。個別機能の実装前に入力契約を決定する |
+| コードリストの参照 | `:xref[id]{type="listing" format="number"}`、`format="number-title"`または`format="title"` | 実装済み | 画像、見出しおよび表の参照と共通の`xref`を使用する。`clono transform`では同一原稿内の参照をリンク構造へ、同一原稿内に参照先がない参照をプレビュー用プレースホルダーへ変換する。`clono build`では掲載Markdown全体から参照対象を収集し、同一原稿および原稿間の参照をリンク構造へ変換する。詳細は[番号付きコードリストとコードリスト参照仕様](code-listing-references.md)を参照する |
 
 ### 生成機能
 

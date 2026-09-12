@@ -2,7 +2,7 @@
 
 - 状態: 実装済み
 - 作成日: 2026-09-05
-- 最終更新日: 2026-09-08
+- 最終更新日: 2026-09-11
 
 ## 目的
 
@@ -78,7 +78,7 @@ clono独自の見出しID記法は追加しない。見出しの末尾に一個�
 
 VFMが見出し要素へ出力するHTML IDには、論理IDを接頭辞なしでそのまま使用する。clonoは見出しIDを削除、変更または別のIDへ置換しない。
 
-`clono build`では、clonoが管理する見出し、番号付き画像、番号付き表、および将来追加するコードリストを含め、論理IDを書籍全体で一意とする。また、論理IDが異なる場合も、次のように見出しのHTML IDと他の参照対象から導出したHTML IDが衝突する場合はエラーとする。
+`clono build`では、clonoが管理する見出し、番号付き画像、番号付き表および番号付きコードリストの論理IDを書籍全体で一意とする。また、論理IDが異なる場合も、次のように見出しのHTML IDと他の参照対象から導出したHTML IDが衝突する場合はエラーとする。
 
 ```text
 # 見出し {#figure-architecture}
@@ -267,7 +267,7 @@ clonoが生成する要素名、属性名およびclass名は、この仕様に�
 
 - 見出しIDまたは見出し参照の構文、対象レベル、文書種別、番号形式、HTML、CSS、収集範囲、解決規則または診断契約を変更する場合は、実装と同じPull Requestでこの文書を更新する
 - 実装へ着手した場合は状態を「実装中」、実装と自動テストが完了した場合は「実装済み」へ更新する
-- `xref`の共通契約を変更する場合は、[番号付き画像と画像参照仕様](figure-references.md)、[番号付き表と表参照仕様](table-references.md)および[clono著者向け記法](authoring-syntax.md)を同時に見直す
+- `xref`の共通契約を変更する場合は、[番号付き画像と画像参照仕様](figure-references.md)、[番号付き表と表参照仕様](table-references.md)、[番号付きコードリストとコードリスト参照仕様](code-listing-references.md)および[clono著者向け記法](authoring-syntax.md)を同時に見直す
 - VFMの見出しID、Markdown AST、Vivliostyleのカウンター、対象参照またはPDF内部リンクの挙動が変わった場合は、調査fixtureを再実行し、調査記録と責務判断を同時に更新する
 
 ## 参照資料
@@ -277,6 +277,7 @@ clonoが生成する要素名、属性名およびclass名は、この仕様に�
 - [書籍プロジェクト仕様](book-project.md)
 - [番号付き画像と画像参照仕様](figure-references.md)
 - [番号付き表と表参照仕様](table-references.md)
+- [番号付きコードリストとコードリスト参照仕様](code-listing-references.md)
 - [Generic DirectivesとmdastによるMarkdown変換パイプラインのADR](../decisions/0003-adopt-generic-directives-mdast-transformation-pipeline.md)
 - [Vivliostyleとclonoの責務整理](../vivliostyle-responsibilities.md)
 - [Vivliostyleの見出しID・連番・相互参照に関する調査](../research/vivliostyle-heading-references.md)
