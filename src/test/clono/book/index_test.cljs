@@ -154,3 +154,43 @@
       (is (:ok? result))
       (is (= [] (:entries result)))
       (is (empty? (:diagnostics result))))))
+
+(deftest generated-book-index-test
+  (testing "When a book index is generated, then its plan data contains the configured path and complete Markdown"
+    (let [publication [{:type :index
+                        :path "generated/index.md"
+                        :title "索引"
+                        :include-in-toc true}]
+          result (book-index/generate
+                  publication
+                  [{:term "Android"
+                    :normalized-term "Android"
+                    :normalized-reading "android"
+                    :sort-key "android"
+                    :group-id :alphanumeric
+                    :source-name "chapter.md"
+                    :marker-id "clono-index-marker-1"}])]
+      (is (= "generated/index.md" (:path result)))
+      (is (.includes (:content result) "# 索引"))
+      (is (.includes (:content result) "<dt>Android</dt>"))
+      (is (.includes
+           (:content result)
+           "href=\"../chapter.html#clono-index-marker-1\""))))
+
+  (testing "When a configured book index has no occurrences, then its plan data contains a title-only Markdown document"
+    (is (= {:path "index.md"
+            :content "# 索引\n\n"}
+           (book-index/generate
+            [{:type :index
+              :path "index.md"
+              :title "索引"
+              :include-in-toc true}]
+            []))))
+
+  (testing "When no book index is configured, then no generated index is added to the plan"
+    (is (nil? (book-index/generate
+               [{:type :document
+                 :path "chapter.md"
+                 :kind "chapter"
+                 :include-in-toc true}]
+               [])))))

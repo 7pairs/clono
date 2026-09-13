@@ -58,9 +58,11 @@
           (write-file! (.join path source "images" "diagram.svg")
                        "<svg></svg>\n")
           (let [result (book-transform/run (create-plan project publication))
-                operations (:operations (:plan result))]
+                transformed-plan (:plan result)
+                operations (:operations transformed-plan)]
             (is (:ok? result))
             (is (empty? (:diagnostics result)))
+            (is (not (contains? transformed-plan :generated-index)))
             (is (= ["appendix.MD"
                     "chapter.md"
                     "images"
@@ -866,7 +868,9 @@
           (write-file! (.join path source "notes.md")
                        ":index[掲載外]{reading=\"けいさいかい\"}です。\n")
           (let [result (book-transform/run (create-plan project publication))
-                operations (:operations (:plan result))]
+                transformed-plan (:plan result)
+                operations (:operations transformed-plan)
+                generated-index (:generated-index transformed-plan)]
             (is (:ok? result))
             (is (empty? (:diagnostics result)))
             (is (.includes
@@ -877,7 +881,37 @@
                  "id=\"clono-index-marker-2\">後の原稿</span>"))
             (is (.includes
                  (:content (operation-by-path operations "notes.md"))
-                 "id=\"clono-index-marker-1\">掲載外</span>")))))))
+                 "id=\"clono-index-marker-1\">掲載外</span>"))
+            (is (= "generated/index.md" (:path generated-index)))
+            (is (.includes (:content generated-index) "# 索引"))
+            (is (< (.indexOf (:content generated-index) "<dt>後の原稿</dt>")
+                   (.indexOf (:content generated-index) "<dt>先の原稿</dt>")))
+            (is (.includes
+                 (:content generated-index)
+                 "href=\"../a.html#clono-index-marker-2\""))
+            (is (.includes
+                 (:content generated-index)
+                 "href=\"../b.html#clono-index-marker-1\""))
+            (is (not (.includes (:content generated-index) "掲載外"))))))))
+
+  (testing "When a configured book index has no occurrences, then the transformed plan contains a title-only index"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              publication [{:type :document
+                            :path "chapter.md"
+                            :kind "chapter"
+                            :include-in-toc true}
+                           {:type :index
+                            :path "index.md"
+                            :title "空の索引"
+                            :include-in-toc true}]]
+          (write-file! (.join path source "chapter.md") "# 本文\n")
+          (let [result (book-transform/run (create-plan project publication))]
+            (is (:ok? result))
+            (is (= {:path "index.md"
+                    :content "# 空の索引\n\n"}
+                   (:generated-index (:plan result)))))))))
 
   (testing "When published manuscripts lack an index output and contain conflicting readings, then every issue is diagnosed before any manuscript is transformed"
     (with-temporary-project
