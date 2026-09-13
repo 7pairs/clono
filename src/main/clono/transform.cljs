@@ -6,6 +6,7 @@
    [clono.transform.column :as column]
    [clono.transform.figure :as figure]
    [clono.transform.heading :as heading]
+   [clono.transform.index :as index]
    [clono.transform.listing :as listing]
    [clono.transform.page-break :as page-break]
    [clono.transform.table :as table]
@@ -15,6 +16,7 @@
   {"align" align/rule
    "column" column/rule
    "figure" figure/rule
+   "index" index/rule
    "listing" listing/rule
    "page-break" page-break/rule
    "table" table/rule

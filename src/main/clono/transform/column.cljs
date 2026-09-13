@@ -94,6 +94,10 @@
           unknown-directive?
           (recur (next remaining) invalid)
 
+          (and (= "textDirective" type)
+               (= "index" (.-name node)))
+          (recur (next remaining) invalid)
+
           (contains? allowed-content-node-types type)
           (recur (concat (ast/children node) (next remaining)) invalid)
 
