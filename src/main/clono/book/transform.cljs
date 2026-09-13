@@ -166,6 +166,7 @@
     (if (seq diagnostics)
       {:ok? false
        :prepared-operations nil
+       :index-entries nil
        :diagnostics diagnostics}
       (let [manuscripts (analyzed-manuscripts prepared-operations)
             collection (reference-targets/collect manuscripts)
@@ -176,6 +177,7 @@
         (if-not (:ok? collection)
           {:ok? false
            :prepared-operations nil
+           :index-entries nil
            :diagnostics (into (:diagnostics collection)
                               (:diagnostics index-preparation))}
           (let [resolution
@@ -188,6 +190,7 @@
             (if (seq preflight-diagnostics)
               {:ok? false
                :prepared-operations nil
+               :index-entries nil
                :diagnostics preflight-diagnostics}
               {:ok? true
                :prepared-operations
@@ -195,6 +198,7 @@
                                         (book-index/add-entries
                                          (:manuscripts resolution)
                                          (:entries index-preparation)))
+               :index-entries (:entries index-preparation)
                :diagnostics []})))))))
 
 (defn- transform-prepared-operations [prepared-operations]
@@ -227,6 +231,11 @@
           {:ok? false
            :plan nil
            :diagnostics (:diagnostics result)}
-          {:ok? true
-           :plan (assoc plan :operations (:operations result))
-           :diagnostics []})))))
+          (let [generated-index
+                (book-index/generate (:publication plan)
+                                     (:index-entries preflight-result))]
+            {:ok? true
+             :plan (cond-> (assoc plan :operations (:operations result))
+                     generated-index
+                     (assoc :generated-index generated-index))
+             :diagnostics []}))))))

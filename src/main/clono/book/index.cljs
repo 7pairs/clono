@@ -2,6 +2,7 @@
   (:require
    [clojure.string :as string]
    [clono.diagnostic :as diagnostic]
+   [clono.index.generator :as generator]
    [clono.transform :as transform]))
 
 (defn- published-markdown? [entry]
@@ -61,3 +62,8 @@
   (mapv (fn [manuscript]
           (update manuscript :context transform/add-index-entries entries))
         manuscripts))
+
+(defn generate [publication entries]
+  (when-let [entry (index-entry publication)]
+    {:path (:path entry)
+     :content (generator/generate-markdown entry entries)}))
