@@ -60,7 +60,7 @@
   (let [source (str ":::third-party\n"
                     ":nested[内部の未知記法]\n"
                     ":::\n\n"
-                    ":index[独立した未知記法]\n")
+                    ":orphan[独立した未知記法]\n")
         collection-called? (atom false)
         transform-called? (atom false)
         result (with-redefs [transform/collect-reference-targets
@@ -85,8 +85,8 @@
               {:file "unknown.md"
                :line 5
                :column 1
-               :directive "index"
-               :message "`index`は登録されていないdirectiveです。"}]
+               :directive "orphan"
+               :message "`orphan`は登録されていないdirectiveです。"}]
              (:diagnostics result))))
 
     (testing "When diagnostics are returned, then collection and transformation are skipped and output is omitted"
