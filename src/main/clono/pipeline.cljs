@@ -38,6 +38,7 @@
 
 (defn run-analyzed [context tree]
   (let [provided-reference-targets? (contains? context :reference-targets)
+        provided-index-entries? (contains? context :index-entries)
         collected-targets
         (if provided-reference-targets?
           (:reference-targets context)
@@ -52,20 +53,41 @@
       {:ok? false
        :output nil
        :diagnostics (:diagnostics target-validation)}
-      (let [transformation-context
-            (assoc context :reference-targets (:targets target-validation))
-            reference-diagnostics
-            (diagnostic/finalize
-             (transform/reference-diagnostics tree transformation-context))]
-        (if (seq reference-diagnostics)
+      (let [collected-index-entries
+            (if provided-index-entries?
+              (:index-entries context)
+              (transform/collect-index-entries tree context))
+            index-validation
+            (if provided-index-entries?
+              {:ok? true
+               :entries collected-index-entries
+               :diagnostics []}
+              (transform/prepare-index-entries
+               collected-index-entries
+               (:targets target-validation)))]
+        (if-not (:ok? index-validation)
           {:ok? false
            :output nil
-           :diagnostics reference-diagnostics}
-          {:ok? true
-           :output (-> tree
-                       (transform/transform transformation-context)
-                       markdown/serialize)
-           :diagnostics []})))))
+           :diagnostics (diagnostic/finalize
+                         (:diagnostics index-validation))}
+          (let [transformation-context
+                (-> context
+                    (assoc :reference-targets (:targets target-validation))
+                    (transform/add-index-entries
+                     (:entries index-validation)))
+                reference-diagnostics
+                (diagnostic/finalize
+                 (transform/reference-diagnostics tree
+                                                  transformation-context))]
+            (if (seq reference-diagnostics)
+              {:ok? false
+               :output nil
+               :diagnostics reference-diagnostics}
+              {:ok? true
+               :output (-> tree
+                           (transform/transform transformation-context)
+                           markdown/serialize)
+               :diagnostics []})))))))
 
 (defn run [context source]
   (let [analysis (analyze context source)]

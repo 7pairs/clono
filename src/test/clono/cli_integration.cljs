@@ -149,6 +149,55 @@
       (ensure! (not (.includes content "external-figure"))
                "Release transform command exposed the unresolved logical ID"))))
 
+(defn- verify-index-transform! [root]
+  (let [input (.join path root "single-index.md")
+        output (.join path root "single-index-output.md")
+        first-marker (str "<span class=\"clono-index-marker\" "
+                          "id=\"clono-index-marker-1\">"
+                          "A &amp; &quot;B&quot;</span>")
+        second-marker (str "<span class=\"clono-index-marker\" "
+                           "id=\"clono-index-marker-2\">"
+                           "バックナンバー</span>")]
+    (write-file!
+     input
+     (str "これは:index[A &amp; &quot;B&quot;]"
+          "{reading=\"えーあんどびー\"}です。\n\n"
+          ":index[バックナンバー]{reading=\"ばっくなんばー\"}\n"))
+    (verify-success!
+     (run-cli ["transform" input "--output" output] root)
+     "Release transform command with index markers")
+    (let [content (.readFileSync fs output "utf8")]
+      (ensure! (.includes content first-marker)
+               "Release transform command did not generate the first index marker")
+      (ensure! (.includes content second-marker)
+               "Release transform command did not generate the second index marker")
+      (ensure! (< (.indexOf content first-marker)
+                  (.indexOf content second-marker))
+               "Release transform command changed the index marker order")
+      (ensure! (not (.includes content ":index["))
+               "Release transform command preserved an index directive")
+      (ensure! (not (.includes content "reading="))
+               "Release transform command exposed an index reading"))
+
+    (write-file! output "keep\n")
+    (write-file!
+     input
+     (str ":index[橋]{reading=\"はし\"}\n\n"
+          ":index[橋]{reading=\"ばし\"}\n"))
+    (let [result (run-cli ["transform" input "--output" output] root)]
+      (ensure! (= 1 (.-status result))
+               "Release transform command accepted conflicting index readings")
+      (ensure! (= "" (.-stdout result))
+               "Invalid index transform wrote to stdout")
+      (ensure!
+       (= (str input
+               ":3:1: `index`の索引語`橋`には異なる読みを指定できません。\n")
+          (.-stderr result))
+       (str "Invalid index transform diagnostics were incorrect: "
+            (.-stderr result)))
+      (ensure! (= "keep\n" (.readFileSync fs output "utf8"))
+               "Invalid index transform changed existing output"))))
+
 (defn- verify-heading-transform! [root]
   (let [input (.join path root "single-heading.md")
         output (.join path root "single-heading-output.md")]
@@ -698,6 +747,7 @@
                                       "clono-cli-integration-"))]
     (try
       (verify-transform! root)
+      (verify-index-transform! root)
       (verify-heading-transform! root)
       (verify-listing-transform! root)
       (verify-build! root)

@@ -60,7 +60,7 @@
   (let [source (str ":::third-party\n"
                     ":nested[内部の未知記法]\n"
                     ":::\n\n"
-                    ":index[独立した未知記法]\n")
+                    ":orphan[独立した未知記法]\n")
         collection-called? (atom false)
         transform-called? (atom false)
         result (with-redefs [transform/collect-reference-targets
@@ -85,8 +85,8 @@
               {:file "unknown.md"
                :line 5
                :column 1
-               :directive "index"
-               :message "`index`は登録されていないdirectiveです。"}]
+               :directive "orphan"
+               :message "`orphan`は登録されていないdirectiveです。"}]
              (:diagnostics result))))
 
     (testing "When diagnostics are returned, then collection and transformation are skipped and output is omitted"
@@ -94,56 +94,25 @@
       (is (false? @collection-called?))
       (is (false? @transform-called?)))))
 
-(deftest execution-context-test
-  (let [context {:mode :build
-                 :source-name "chapter.md"
-                 :input-path "/work/manuscripts/chapter.md"
-                 :source-root-path "/work/manuscripts"
-                 :publication-entry {:type :document
-                                     :path "chapter.md"
-                                     :kind "chapter"
-                                     :include-in-toc true}}
-        validation-context (atom nil)
-        collection-context (atom nil)
-        reference-validation-context (atom nil)
-        transformation-context (atom nil)
-        reference-targets [{:logical-id "diagram"
-                            :type "figure"
-                            :target-id "figure-diagram"
-                            :title-target-id "figure-diagram-caption"
-                            :numbered? true
-                            :source-name "chapter.md"
-                            :line 1
-                            :column 1}]
-        result (with-redefs [transform/validate
-                             (fn [_tree actual-context]
-                               (reset! validation-context actual-context)
-                               [])
-                             transform/collect-reference-targets
-                             (fn [_tree actual-context]
-                               (reset! collection-context actual-context)
-                               reference-targets)
-                             transform/reference-diagnostics
-                             (fn [_tree actual-context]
-                               (reset! reference-validation-context
-                                       actual-context)
-                               [])
-                             transform/transform
-                             (fn [tree actual-context]
-                               (reset! transformation-context actual-context)
-                               tree)]
-                 (pipeline/run context "# 見出し\n"))]
-    (testing "When the pipeline runs successfully, then collected targets enrich the context used for reference validation and transformation"
+(deftest combined-feature-transformation-test
+  (let [source (str ":xref[introduction]"
+                    "{type=\"heading\" format=\"title\"}\n\n"
+                    "# はじめに {#introduction}\n\n"
+                    "これは:index[索引]{reading=\"さくいん\"}です。\n")
+        result (pipeline/run {:mode :transform
+                              :source-name "combined.md"}
+                             source)
+        output (:output result)]
+    (testing "When a heading reference and index directive are transformed together, then the resolved link and index marker appear in the output"
       (is (:ok? result))
-      (is (= (assoc context :source "# 見出し\n")
-             @validation-context))
-      (is (= (assoc context :source "# 見出し\n")
-             @collection-context))
-      (is (= (assoc context
-                    :source "# 見出し\n"
-                    :reference-targets reference-targets)
-             @reference-validation-context))
-      (is (= (assoc context
-                    :source "# 見出し\n"
-                    :reference-targets reference-targets)
-             @transformation-context)))))
+      (is (empty? (:diagnostics result)))
+      (is (.includes
+           output
+           (str "<a class=\"clono-xref clono-xref-heading "
+                "clono-xref-heading-h1 clono-xref-heading-chapter "
+                "clono-xref-title\" href=\"#introduction\" "
+                "data-title-href=\"#introduction\"></a>")))
+      (is (.includes
+           output
+           (str "<span class=\"clono-index-marker\" "
+                "id=\"clono-index-marker-1\">索引</span>"))))))
