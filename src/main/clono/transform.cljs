@@ -73,6 +73,12 @@
        (sort-by (juxt :line :column))
        vec))
 
+(defn prepare-index-entries [entries reference-targets]
+  (index/prepare-index-entries entries reference-targets))
+
+(defn add-index-entries [context entries]
+  (index/add-index-entries context entries))
+
 (defn reference-diagnostics [tree context]
   (->> (directive-validation/validation-nodes tree known-directive-names)
        (keep (fn [node]

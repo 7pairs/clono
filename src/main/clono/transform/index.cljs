@@ -4,9 +4,11 @@
    [clono.ast :as ast]
    [clono.diagnostic :as diagnostic]
    [clono.directive-validation :as directive-validation]
+   [clono.index.marker :as marker]
    [clono.index.reading :as reading]
    [clono.index.sorting :as sorting]
-   [goog.object :as gobj]))
+   [goog.object :as gobj]
+   [goog.string :as gstring]))
 
 (def ^:private allowed-ancestor-node-types
   #{"paragraph" "list" "listItem" "blockquote"})
@@ -159,8 +161,95 @@
       :offset (ast/property start "offset")
       :node node}]))
 
-(defn transform [node _context]
-  [node])
+(defn- entry-diagnostic [entry message]
+  (diagnostic/at-point
+   (:source-name entry)
+   "index"
+   (ast/property (:node entry) "position" "start")
+   message))
+
+(defn- reading-conflict-diagnostics [entries]
+  (:diagnostics
+   (reduce
+    (fn [{:keys [readings] :as result} entry]
+      (let [source-term (:term entry)
+            normalized-reading (:normalized-reading entry)]
+        (if-let [first-reading (get readings source-term)]
+          (cond-> result
+            (not= first-reading normalized-reading)
+            (update :diagnostics
+                    conj
+                    (entry-diagnostic
+                     entry
+                     (str "`index`の索引語`" source-term
+                          "`には異なる読みを指定できません。"))))
+          (assoc-in result [:readings source-term] normalized-reading))))
+    {:readings {}
+     :diagnostics []}
+    entries)))
+
+(defn- generated-html-ids [reference-targets]
+  (into #{}
+        (mapcat #(keep % [:target-id :title-target-id]))
+        reference-targets))
+
+(defn- marker-collision-diagnostics [entries reference-targets]
+  (let [existing-ids (generated-html-ids reference-targets)]
+    (->> entries
+         (keep (fn [entry]
+                 (when (contains? existing-ids (:marker-id entry))
+                   (entry-diagnostic
+                    entry
+                    (str "`index`から生成するHTML ID`" (:marker-id entry)
+                         "`が重複しています。")))))
+         vec)))
+
+(defn prepare-index-entries [entries reference-targets]
+  (let [numbered-entries
+        (mapv (fn [index entry]
+                (assoc entry :marker-id (marker/id (inc index))))
+              (range)
+              entries)
+        diagnostics
+        (vec (concat (reading-conflict-diagnostics numbered-entries)
+                     (marker-collision-diagnostics numbered-entries
+                                                   reference-targets)))]
+    (if (seq diagnostics)
+      {:ok? false
+       :entries nil
+       :diagnostics diagnostics}
+      {:ok? true
+       :entries numbered-entries
+       :diagnostics []})))
+
+(defn add-index-entries [context entries]
+  (assoc context
+         :index-entries entries
+         :index-entries-by-location
+         (into {}
+               (map (fn [entry]
+                      [[(:source-name entry) (:offset entry)] entry]))
+               entries)))
+
+(defn- index-entry [node context]
+  (get (:index-entries-by-location context)
+       [(:source-name context)
+        (ast/property node "position" "start" "offset")]))
+
+(defn- html-node [value]
+  #js {:type "html" :value value})
+
+(defn transform [node context]
+  (if-let [entry (index-entry node context)]
+    [(html-node
+      (str "<span class=\"clono-index-marker\" id=\""
+           (:marker-id entry)
+           "\">"
+           (gstring/htmlEscape (:term entry))
+           "</span>"))]
+    (throw (ex-info "Index entry is missing from the transformation context"
+                    {:source-name (:source-name context)
+                     :offset (ast/property node "position" "start" "offset")}))))
 
 (def rule
   {:node-type "textDirective"
