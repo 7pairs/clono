@@ -2,7 +2,7 @@
 
 - 状態: 調査済み
 - 作成日: 2026-08-15
-- 最終更新日: 2026-09-11
+- 最終更新日: 2026-09-13
 
 ## 目的
 
@@ -49,7 +49,7 @@ Thunder Clawの書籍制作に必要な機能について、現在のVivliostyle
 | 参照用IDを使った見出し、画像、表、コードリストの番号とタイトルの参照 | 必須 | すべて`target-counter()`と`target-text()`で同一・別原稿ファイルの番号とタイトルを参照できる。統合テーマではタイトル取得先を`data-title-href`へ統一できる | 著者向け記法を、番号とクリック先を示す`href`、タイトル取得先を示す`data-title-href`、参照種別に応じたclassを持つ`a`要素へ変換する。未定義参照は`clono build`で診断し、`clono transform`では同一ファイルにない画像、見出し、表またはコードリストの参照を種別ごとの固定プレースホルダーへ変換する。番号とタイトルの生成はVivliostyleへ委譲する。画像、見出し、表およびコードリストの参照は実装済みである | 調査済み | [見出し](research/vivliostyle-heading-references.md)、[画像](research/vivliostyle-figure-references.md)、[表](research/vivliostyle-table-references.md)、[コードリスト](research/vivliostyle-code-listing-references.md)、[コードリストのAST](research/markdown-code-listing-directive.md)、[結合検証](research/vivliostyle-reference-integration.md)、[画像参照仕様](specifications/figure-references.md)、[見出し参照仕様](specifications/heading-references.md)、[表参照仕様](specifications/table-references.md)、[コードリスト参照仕様](specifications/code-listing-references.md) |
 | 表へのキャプションの付与 | 必須 | Markdown表を含む`figure`と`figcaption`をVFMが保持し、CSSで表番号を付けたキャプションを表の下へ表示できる | 番号付き表の著者向け記法を、IDを持つ`figure`、Markdown表、タイトル参照用IDを持つ`figcaption`へ変換する | 調査済み | [調査記録](research/vivliostyle-table-references.md)、[AST調査](research/markdown-table-directive.md)、[仕様](specifications/table-references.md) |
 | 目次の生成 | 必須 | Vivliostyle CLIの自動目次で指定階層の見出し、タイトル、リンク先を抽出できる。設定の変換関数とテーマCSSを組み合わせ、掲載文書の選別、本文・付録・番号なし文書の番号、連続する紙面上のページ番号、PDF内部リンクを生成できる | 見出し一覧、番号、ページ番号、目次Markdownは生成せずVivliostyleへ委譲する。原稿順序、文書種別、目次への掲載有無を`clono.config.mjs`の一つの書籍構造として管理する。初期仕様では設定ヘルパーを提供せず、利用者がVivliostyle設定からこの構造を参照する | 調査済み | [調査記録](research/vivliostyle-table-of-contents.md)、[書籍プロジェクト仕様](specifications/book-project.md) |
-| 索引へ掲載するキーワードの指定と索引の生成 | 必須 | 文書化されたVFMとVivliostyle CLIには索引記法や自動生成設定を確認できない。生成済みの索引構造は保持でき、`target-counter()`による紙面上のページ番号と各索引マーカーへのPDF内部リンクを生成できる。同一ページの複数参照は自動統合されず、`2, 2`のように表示される | 索引語と読みの指定、読みの正規化、分類、並べ替え、項目の統合、索引マーカーと索引文書の生成を担う候補とする。初期仕様ではすべての出現位置を保持し、同一ページ番号の重複表示を許容する | 調査済み | [調査記録](research/vivliostyle-index.md) |
+| 索引へ掲載するキーワードの指定と索引の生成 | 必須 | 文書化されたVFMとVivliostyle CLIには索引記法や自動生成設定を確認できない。生成済みの索引構造は保持でき、`target-counter()`による紙面上のページ番号と各索引マーカーへのPDF内部リンクを生成できる。同一ページの複数参照は自動統合されず、`2, 2`のように表示される | 索引語と読みの指定、読みの正規化、分類、並べ替え、項目の統合、本文マーカーおよび索引Markdownの生成を担う。初期仕様ではすべての出現位置を保持し、同一ページ番号の重複表示を許容する。紙面上のページ番号とPDF内部リンクはVivliostyleへ、索引の外観は利用者テーマへ委譲する | 調査済み | [Vivliostyle調査](research/vivliostyle-index.md)、[正規化調査](research/index-normalization.md)、[書籍プロジェクト調査](research/book-project-generated-index.md)、[仕様](specifications/index.md) |
 
 ## 更新方針
 
