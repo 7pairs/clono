@@ -1,7 +1,8 @@
 (ns clono.index-test
   (:require
    [cljs.test :refer [deftest is testing]]
-   [clono.pipeline :as pipeline]))
+   [clono.pipeline :as pipeline]
+   [clono.transform :as transform]))
 
 (defn- transform-context [source-name]
   {:mode :transform
@@ -114,3 +115,61 @@
         (is (some #{"`index`は許可された通常の段落の直接の子として記述してください。"}
                   (mapv :message (:diagnostics result)))
             case)))))
+
+(deftest index-entry-collection-test
+  (let [source (str "これは:index[Ａｎｄｒｏｉｄ]{reading=\"ＡＮＤＲＯＩＤ\"}です。\n\n"
+                    "> :index[A &amp; B]{reading=\"えーあんどびー\"}\n\n"
+                    ":::column[雑談]\n"
+                    "- :index[バックナンバー]{reading=\"ばっくなんばー\"}\n"
+                    ":::\n")
+        context (transform-context "chapter.md")
+        analysis (pipeline/analyze context source)
+        entries (transform/collect-index-entries (:tree analysis) context)]
+    (testing "When index directives are collected, then their source values and derived reading data remain in document order"
+      (is (:ok? analysis))
+      (is (= [{:term "Ａｎｄｒｏｉｄ"
+               :normalized-term "Android"
+               :reading "ＡＮＤＲＯＩＤ"
+               :normalized-reading "android"
+               :sort-key "android"
+               :group-id :alphanumeric
+               :source-name "chapter.md"
+               :line 1
+               :column 4}
+              {:term "A & B"
+               :normalized-term "A & B"
+               :reading "えーあんどびー"
+               :normalized-reading "えーあんどびー"
+               :sort-key "ええあんとひい"
+               :group-id :a
+               :source-name "chapter.md"
+               :line 3
+               :column 3}
+              {:term "バックナンバー"
+               :normalized-term "バックナンバー"
+               :reading "ばっくなんばー"
+               :normalized-reading "ばっくなんばー"
+               :sort-key "はつくなんはあ"
+               :group-id :ha
+               :source-name "chapter.md"
+               :line 6
+               :column 3}]
+             (mapv #(dissoc % :offset :node) entries))))
+
+    (testing "When index directives are collected, then each occurrence reports its original source offset"
+      (is (= (mapv #(.indexOf source %)
+                   [":index[Ａｎｄｒｏｉｄ]"
+                    ":index[A &amp; B]"
+                    ":index[バックナンバー]"])
+             (mapv :offset entries)))))
+
+  (testing "When a document has no index directive, then its collected index entries are empty"
+    (let [source (str "通常の本文です。\n\n"
+                      "```markdown\n"
+                      ":index[コード内]{reading=\"こおとない\"}\n"
+                      "```\n")
+          context (transform-context "without-index.md")
+          analysis (pipeline/analyze context source)]
+      (is (:ok? analysis))
+      (is (empty? (transform/collect-index-entries (:tree analysis)
+                                                   context))))))
