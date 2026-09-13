@@ -4,6 +4,7 @@
    [clono.ast :as ast]
    [clono.diagnostic :as diagnostic]
    [clono.directive-validation :as directive-validation]
+   [clono.index.reading :as reading]
    [clono.index.sorting :as sorting]
    [goog.object :as gobj]))
 
@@ -141,6 +142,23 @@
                     "`index`は許可された通常の段落の直接の子として記述してください。"))))
          vec)))
 
+(defn collect-index-entries [node context]
+  (let [source-term (term node)
+        source-reading (gobj/get (attributes node) "reading")
+        normalized-reading (reading/normalize source-reading)
+        start (ast/property node "position" "start")]
+    [{:term source-term
+      :normalized-term (.normalize source-term "NFKC")
+      :reading source-reading
+      :normalized-reading normalized-reading
+      :sort-key (sorting/sort-key normalized-reading)
+      :group-id (sorting/group-id normalized-reading)
+      :source-name (:source-name context)
+      :line (ast/property start "line")
+      :column (ast/property start "column")
+      :offset (ast/property start "offset")
+      :node node}]))
+
 (defn transform [node _context]
   [node])
 
@@ -150,4 +168,5 @@
    :required-text-attributes? true
    :diagnostics diagnostics
    :document-diagnostics document-diagnostics
+   :collect-index-entries collect-index-entries
    :transform transform})

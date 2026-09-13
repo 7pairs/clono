@@ -62,6 +62,17 @@
          (sort-by (juxt :line :column))
          vec)))
 
+(defn collect-index-entries [tree context]
+  (->> (directive-validation/validation-nodes tree known-directive-names)
+       (keep (fn [node]
+               (when-let [collector
+                          (:collect-index-entries
+                           (get rules (.-name node)))]
+                 (collector node context))))
+       (mapcat identity)
+       (sort-by (juxt :line :column))
+       vec))
+
 (defn reference-diagnostics [tree context]
   (->> (directive-validation/validation-nodes tree known-directive-names)
        (keep (fn [node]
