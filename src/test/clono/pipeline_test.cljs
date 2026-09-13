@@ -105,6 +105,7 @@
                                      :include-in-toc true}}
         validation-context (atom nil)
         collection-context (atom nil)
+        index-collection-context (atom nil)
         reference-validation-context (atom nil)
         transformation-context (atom nil)
         reference-targets [{:logical-id "diagram"
@@ -123,6 +124,10 @@
                              (fn [_tree actual-context]
                                (reset! collection-context actual-context)
                                reference-targets)
+                             transform/collect-index-entries
+                             (fn [_tree actual-context]
+                               (reset! index-collection-context actual-context)
+                               [])
                              transform/reference-diagnostics
                              (fn [_tree actual-context]
                                (reset! reference-validation-context
@@ -133,17 +138,23 @@
                                (reset! transformation-context actual-context)
                                tree)]
                  (pipeline/run context "# 見出し\n"))]
-    (testing "When the pipeline runs successfully, then collected targets enrich the context used for reference validation and transformation"
+    (testing "When the pipeline runs successfully, then collected targets and index entries enrich the validation and transformation context"
       (is (:ok? result))
       (is (= (assoc context :source "# 見出し\n")
              @validation-context))
       (is (= (assoc context :source "# 見出し\n")
              @collection-context))
+      (is (= (assoc context :source "# 見出し\n")
+             @index-collection-context))
       (is (= (assoc context
                     :source "# 見出し\n"
-                    :reference-targets reference-targets)
+                    :reference-targets reference-targets
+                    :index-entries []
+                    :index-entries-by-location {})
              @reference-validation-context))
       (is (= (assoc context
                     :source "# 見出し\n"
-                    :reference-targets reference-targets)
+                    :reference-targets reference-targets
+                    :index-entries []
+                    :index-entries-by-location {})
              @transformation-context)))))

@@ -1,8 +1,10 @@
 (ns clono.index-test
   (:require
    [cljs.test :refer [deftest is testing]]
+   [clono.markdown :as markdown]
    [clono.pipeline :as pipeline]
-   [clono.transform :as transform]))
+   [clono.transform :as transform]
+   [clono.test-support :as test-support]))
 
 (defn- transform-context [source-name]
   {:mode :transform
@@ -173,3 +175,86 @@
       (is (:ok? analysis))
       (is (empty? (transform/collect-index-entries (:tree analysis)
                                                    context))))))
+
+(deftest index-marker-transformation-test
+  (let [source (str "これは:index[A &amp; &quot;B&quot;]{reading=\"えーあんどびー\"}です。\n\n"
+                    ":index[バックナンバー]{reading=\"ばっくなんばー\"}も参照します。\n")
+        result (pipeline/run (transform-context "markers.md") source)
+        output (:output result)
+        output-tree (markdown/parse output)]
+    (testing "When index directives are transformed, then numbered marker spans preserve their visible terms in document order"
+      (is (:ok? result))
+      (is (empty? (:diagnostics result)))
+      (is (.includes
+           output
+           (str "<span class=\"clono-index-marker\" "
+                "id=\"clono-index-marker-1\">A &amp; &quot;B&quot;</span>")))
+      (is (.includes
+           output
+           (str "<span class=\"clono-index-marker\" "
+                "id=\"clono-index-marker-2\">バックナンバー</span>")))
+      (is (nil? (test-support/directive output-tree "index")))
+      (is (not (.includes output "reading="))))
+
+    (testing "When another document is transformed, then its local marker numbering starts at one"
+      (let [next-result
+            (pipeline/run
+             (transform-context "next.md")
+             ":index[次]{reading=\"つぎ\"}\n")]
+        (is (:ok? next-result))
+        (is (.includes
+             (:output next-result)
+             "id=\"clono-index-marker-1\">次</span>")))))
+
+  (testing "When an index directive is inside a column, then its marker remains inside the transformed column content"
+    (let [result
+          (pipeline/run
+           (transform-context "column-index.md")
+           (str ":::column[雑談]\n"
+                "これは:index[麻雀]{reading=\"まーじゃん\"}の話です。\n"
+                ":::\n"))
+          output (:output result)]
+      (is (:ok? result))
+      (is (< (.indexOf output "<aside class=\"clono-column\">")
+             (.indexOf output "id=\"clono-index-marker-1\">麻雀</span>")
+             (.indexOf output "</aside>"))))))
+
+(deftest index-marker-failure-test
+  (testing "When one index term has conflicting normalized readings, then the later occurrence is diagnosed without output"
+    (let [result
+          (pipeline/run
+           (transform-context "conflicting-index.md")
+           (str ":index[橋]{reading=\"はし\"}\n\n"
+                ":index[橋]{reading=\"ばし\"}\n"))]
+      (is (false? (:ok? result)))
+      (is (nil? (:output result)))
+      (is (= [{:file "conflicting-index.md"
+               :line 3
+               :column 1
+               :directive "index"
+               :message "`index`の索引語`橋`には異なる読みを指定できません。"}]
+             (:diagnostics result)))))
+
+  (testing "When equivalent readings are repeated for one index term, then every occurrence receives a marker"
+    (let [result
+          (pipeline/run
+           (transform-context "repeated-index.md")
+           (str ":index[Android]{reading=\"ＡＮＤＲＯＩＤ\"}\n\n"
+                ":index[Android]{reading=\"android\"}\n"))]
+      (is (:ok? result))
+      (is (.includes (:output result) "id=\"clono-index-marker-1\""))
+      (is (.includes (:output result) "id=\"clono-index-marker-2\""))))
+
+  (testing "When a managed heading ID uses the index marker prefix, then the reserved namespace is diagnosed without output"
+    (let [result
+          (pipeline/run
+           (transform-context "reserved-index-id.md")
+           "# 見出し {#clono-index-marker-custom}\n")]
+      (is (false? (:ok? result)))
+      (is (nil? (:output result)))
+      (is (= [{:file "reserved-index-id.md"
+               :line 1
+               :column 1
+               :message (str "見出しのHTML ID`clono-index-marker-custom`には"
+                             "clonoの予約接頭辞`clono-index-marker-`を使用できません。")}]
+             (:diagnostics result))))))
