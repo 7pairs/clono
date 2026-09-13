@@ -776,8 +776,14 @@
                        (mapv :source-name @unlisted-contexts)))
                 (is (= chapter-analysis-context
                        (dissoc chapter-transformation-context
-                               :reference-targets)))
+                               :reference-targets
+                               :index-entries
+                               :index-entries-by-location)))
                 (is (= [] (:reference-targets
+                           chapter-transformation-context)))
+                (is (= [] (:index-entries
+                           chapter-transformation-context)))
+                (is (= {} (:index-entries-by-location
                            chapter-transformation-context)))
                 (is (= :build (:mode chapter-analysis-context)))
                 (is (= (.join path source "chapter.md")
@@ -835,3 +841,81 @@
                       [:transform "b.md"]
                       [:run "notes.md"]]
                      @events)))))))))
+
+(deftest book-index-preflight-integration-test
+  (testing "When published manuscripts contain index directives, then their markers use one publication-ordered sequence"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              publication [{:type :document
+                            :path "b.md"
+                            :kind "chapter"
+                            :include-in-toc true}
+                           {:type :document
+                            :path "a.md"
+                            :kind "chapter"
+                            :include-in-toc true}
+                           {:type :index
+                            :path "generated/index.md"
+                            :title "索引"
+                            :include-in-toc true}]]
+          (write-file! (.join path source "a.md")
+                       ":index[後の原稿]{reading=\"あとのけんこう\"}です。\n")
+          (write-file! (.join path source "b.md")
+                       ":index[先の原稿]{reading=\"さきのけんこう\"}です。\n")
+          (write-file! (.join path source "notes.md")
+                       ":index[掲載外]{reading=\"けいさいかい\"}です。\n")
+          (let [result (book-transform/run (create-plan project publication))
+                operations (:operations (:plan result))]
+            (is (:ok? result))
+            (is (empty? (:diagnostics result)))
+            (is (.includes
+                 (:content (operation-by-path operations "b.md"))
+                 "id=\"clono-index-marker-1\">先の原稿</span>"))
+            (is (.includes
+                 (:content (operation-by-path operations "a.md"))
+                 "id=\"clono-index-marker-2\">後の原稿</span>"))
+            (is (.includes
+                 (:content (operation-by-path operations "notes.md"))
+                 "id=\"clono-index-marker-1\">掲載外</span>")))))))
+
+  (testing "When published manuscripts lack an index output and contain conflicting readings, then every issue is diagnosed before any manuscript is transformed"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              publication [{:type :document
+                            :path "a.md"
+                            :kind "chapter"
+                            :include-in-toc true}
+                           {:type :document
+                           :path "b.md"
+                           :kind "chapter"
+                            :include-in-toc true}]
+              transformed (atom [])]
+          (write-file! (.join path source "a.md")
+                       ":index[橋]{reading=\"はし\"}です。\n")
+          (write-file! (.join path source "b.md")
+                       ":index[橋]{reading=\"ばし\"}です。\n")
+          (write-file! (.join path source "notes.md") "# 掲載外\n")
+          (with-redefs [pipeline/run-analyzed
+                        (fn [context _tree]
+                          (swap! transformed conj (:source-name context))
+                          {:ok? true :output "published\n" :diagnostics []})
+                        pipeline/run
+                        (fn [context _source]
+                          (swap! transformed conj (:source-name context))
+                          {:ok? true :output "unlisted\n" :diagnostics []})]
+            (let [result (book-transform/run
+                          (create-plan project publication))]
+              (is (false? (:ok? result)))
+              (is (nil? (:plan result)))
+              (is (= [] @transformed))
+              (is (= [{:file (.join path project "clono.config.mjs")
+                       :message (str "`publication`には、掲載Markdownの索引指定を出力する"
+                                     "`index`が必要です。")}
+                      {:file "b.md"
+                       :line 1
+                       :column 1
+                       :directive "index"
+                       :message "`index`の索引語`橋`には異なる読みを指定できません。"}]
+                     (:diagnostics result))))))))))

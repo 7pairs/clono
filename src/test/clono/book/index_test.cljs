@@ -74,3 +74,83 @@
                         :include-in-toc true}]
           manuscripts [(analyzed-manuscript "chapter.md" "# 本文\n")]]
       (is (empty? (book-index/collect publication manuscripts))))))
+
+(deftest book-index-preflight-test
+  (let [index-entry {:type :index
+                     :path "generated/index.md"
+                     :title "索引"
+                     :include-in-toc true}
+        documents [{:type :document
+                    :path "chapter-one.md"
+                    :kind "chapter"
+                    :include-in-toc true}
+                   {:type :document
+                    :path "chapter-two.md"
+                    :kind "chapter"
+                    :include-in-toc true}]
+        manuscripts
+        [(analyzed-manuscript
+          "chapter-two.md"
+          ":index[後]{reading=\"あと\"}です。\n")
+         (analyzed-manuscript
+          "chapter-one.md"
+          ":index[先]{reading=\"さき\"}です。\n")]
+        config {:config-path "/book/clono.config.mjs"
+                :publication (conj documents index-entry)}]
+    (testing "When a valid book index passes preflight, then its markers are numbered in publication order"
+      (let [result (book-index/prepare config manuscripts [])]
+        (is (:ok? result))
+        (is (empty? (:diagnostics result)))
+        (is (= [{:term "先"
+                 :source-name "chapter-one.md"
+                 :marker-id "clono-index-marker-1"}
+                {:term "後"
+                 :source-name "chapter-two.md"
+                 :marker-id "clono-index-marker-2"}]
+               (mapv #(select-keys % [:term :source-name :marker-id])
+                     (:entries result))))))
+
+    (testing "When published Markdown contains an index directive without an index output, then book preflight rejects it"
+      (let [result (book-index/prepare
+                    (assoc config :publication documents)
+                    manuscripts
+                    [])]
+        (is (false? (:ok? result)))
+        (is (nil? (:entries result)))
+        (is (= [{:file "/book/clono.config.mjs"
+                 :message (str "`publication`には、掲載Markdownの索引指定を出力する"
+                               "`index`が必要です。")}]
+               (:diagnostics result)))))
+
+    (testing "When one index term has conflicting readings across manuscripts, then the later occurrence is diagnosed"
+      (let [conflicting-manuscripts
+            [(analyzed-manuscript
+              "chapter-one.md"
+              ":index[橋]{reading=\"はし\"}です。\n")
+             (analyzed-manuscript
+              "chapter-two.md"
+              ":index[橋]{reading=\"ばし\"}です。\n")]
+            result (book-index/prepare config conflicting-manuscripts [])]
+        (is (false? (:ok? result)))
+        (is (nil? (:entries result)))
+        (is (= [{:file "chapter-two.md"
+                 :line 1
+                 :column 1
+                 :directive "index"
+                 :message "`index`の索引語`橋`には異なる読みを指定できません。"}]
+               (:diagnostics result)))))))
+
+(deftest optional-empty-book-index-test
+  (testing "When published Markdown has no index directive or index output, then book preflight succeeds with no entries"
+    (let [publication [{:type :document
+                        :path "chapter.md"
+                        :kind "chapter"
+                        :include-in-toc true}]
+          result (book-index/prepare
+                  {:config-path "/book/clono.config.mjs"
+                   :publication publication}
+                  [(analyzed-manuscript "chapter.md" "# 本文\n")]
+                  [])]
+      (is (:ok? result))
+      (is (= [] (:entries result)))
+      (is (empty? (:diagnostics result))))))

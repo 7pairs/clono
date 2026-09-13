@@ -68,6 +68,8 @@
                    (mapv operation-contract
                          (:operations (:plan result)))))
             (is (= publication (:publication (:plan result))))
+            (is (= (.join path project "clono.config.mjs")
+                   (:config-path (:plan result))))
             (is (every? #(.isAbsolute path (:source-path %))
                         (:operations (:plan result))))
             (is (false? (.existsSync fs output)))))))))
