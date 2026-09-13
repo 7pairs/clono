@@ -10,9 +10,12 @@
 (def ^:private top-level-fields
   #{"sourceRoot" "outputRoot" "publication"})
 (def ^:private publication-fields
+  #{"type" "path" "kind" "title" "includeInToc"})
+(def ^:private document-fields
   #{"type" "path" "kind" "includeInToc"})
-(def ^:private document-fields publication-fields)
 (def ^:private blank-page-fields #{"type"})
+(def ^:private index-fields
+  #{"type" "path" "title" "includeInToc"})
 (def ^:private document-kinds
   #{"frontmatter" "chapter" "appendix" "backmatter"})
 ;; Closure cannot transpile a dynamic import expression in a node-script release.
@@ -238,6 +241,58 @@
               {:type :blank-page})
      :diagnostics diagnostics}))
 
+(defn- reserved-index-path? [value]
+  (or (= "_clono" value)
+      (.startsWith value "_clono/")))
+
+(defn- index-entry-structure [config-path index entry]
+  (let [context (str "`publication[" index "]`")
+        field-names (own-field-names entry)
+        path-value (gobj/get entry "path")
+        title (gobj/get entry "title")
+        include-in-toc (gobj/get entry "includeInToc")
+        path-result (if (contains? field-names "path")
+                      (relative-path-result config-path
+                                            (str "publication[" index "].path")
+                                            path-value)
+                      {:diagnostics []})
+        normalized-path (:value path-result)
+        diagnostics
+        (into (into (unknown-field-diagnostics config-path
+                                                context
+                                                index-fields
+                                                entry)
+                    (required-field-diagnostics config-path
+                                                context
+                                                index-fields
+                                                entry))
+              (concat
+               (:diagnostics path-result)
+               (when (and normalized-path
+                          (not= ".md" (.toLowerCase (.extname path normalized-path))))
+                 [(diagnostic config-path
+                              (str "`publication[" index "].path`には`.md`のファイルを指定してください。"))])
+               (when (and (string? path-value) (.endsWith path-value "/"))
+                 [(diagnostic config-path
+                              (str "`publication[" index "].path`にはディレクトリではなくファイルパスを指定してください。"))])
+               (when (and normalized-path (reserved-index-path? normalized-path))
+                 [(diagnostic config-path
+                              (str "`publication[" index "].path`にclonoの予約領域`_clono/`は指定できません。"))])
+               (when (and (contains? field-names "title")
+                          (not (and (string? title) (not (string/blank? title)))))
+                 [(diagnostic config-path
+                              (str "`publication[" index "].title`には空でない文字列を指定してください。"))])
+               (when (and (contains? field-names "includeInToc")
+                          (not (boolean? include-in-toc)))
+                 [(diagnostic config-path
+                              (str "`publication[" index "].includeInToc`には真偽値を指定してください。"))])))]
+    {:entry (when (empty? diagnostics)
+              {:type :index
+               :path normalized-path
+               :title title
+               :include-in-toc include-in-toc})
+     :diagnostics diagnostics}))
+
 (defn- publication-entry-structure [config-path index entry]
   (let [context (str "`publication[" index "]`")]
     (if-not (javascript-object? entry)
@@ -259,6 +314,9 @@
           (= "blank-page" entry-type)
           (blank-page-entry-structure config-path index entry)
 
+          (= "index" entry-type)
+          (index-entry-structure config-path index entry)
+
           :else
           {:entry nil
            :diagnostics
@@ -267,7 +325,33 @@
                                             publication-fields
                                             entry)
                  [(diagnostic config-path
-                              (str "`publication[" index "].type`には`document`または`blank-page`を指定してください。"))])})))))
+                              (str "`publication[" index "].type`には`document`、`blank-page`または`index`を指定してください。"))])})))))
+
+(defn- index-order-diagnostics [config-path entries]
+  (let [indexes (keep-indexed #(when (= :index (:type %2)) %1) entries)]
+    (cond
+      (< 1 (count indexes))
+      [(diagnostic config-path "`publication`に`index`は一件だけ指定できます。")]
+
+      (= 1 (count indexes))
+      (let [index-position (first indexes)
+            before (subvec entries 0 index-position)
+            after (subvec entries (inc index-position))]
+        (cond-> []
+          (some #(and (= :document (:type %))
+                      (= "backmatter" (:kind %)))
+                before)
+          (conj (diagnostic config-path
+                            "`publication`の`index`はすべての`backmatter`より前に配置してください。"))
+
+          (some #(and (= :document (:type %))
+                      (contains? #{"chapter" "appendix"} (:kind %)))
+                after)
+          (conj (diagnostic config-path
+                            "`publication`の`index`はすべての`chapter`および`appendix`より後に配置してください。"))))
+
+      :else
+      [])))
 
 (defn- validate-publication-files [config-path source-path entries]
   (loop [remaining entries
@@ -275,7 +359,7 @@
          validated []
          diagnostics []]
     (if-let [entry (first remaining)]
-      (if (= :blank-page (:type entry))
+      (if (not= :document (:type entry))
         (recur (next remaining)
                seen
                (conj validated entry)
@@ -370,8 +454,13 @@
             [(diagnostic config-path
                          "`publication`には一件以上の`document`を指定してください。")]
             [])
-          structural-diagnostics (into base-structural-diagnostics
-                                       document-required-diagnostics)
+          index-diagnostics
+          (if (and publication-array? (every? some? structured-entries))
+            (index-order-diagnostics config-path structured-entries)
+            [])
+          structural-diagnostics (into (into base-structural-diagnostics
+                                             document-required-diagnostics)
+                                       index-diagnostics)
           files-result (if (and (empty? structural-diagnostics)
                                 (every? some? structured-entries))
                          (validate-publication-files config-path
