@@ -16,6 +16,60 @@
    :source-name source-name
    :marker-id marker-id})
 
+(deftest index-markdown-generation-contract-test
+  (testing "When representative index occurrences are generated, then the complete Markdown follows the public structure contract"
+    (let [output
+          (generator/generate-markdown
+           {:path "generated/index.md" :title "索引"}
+           [(occurrence "バックナンバー"
+                        "ばっくなんばー"
+                        "はつくなんはあ"
+                        :ha
+                        "nested/chapter-two.md"
+                        "clono-index-marker-3")
+            (occurrence "Android"
+                        "android"
+                        "android"
+                        :alphanumeric
+                        "chapter-one.md"
+                        "clono-index-marker-1")
+            (occurrence "Android"
+                        "android"
+                        "android"
+                        :alphanumeric
+                        "nested/chapter-two.md"
+                        "clono-index-marker-2")])
+          expected
+          (str "# 索引\n\n"
+               "<section class=\"clono-index-group "
+               "clono-index-group-alphanumeric\">\n"
+               "<h2>英数字</h2>\n"
+               "<dl class=\"clono-index-list\">\n"
+               "<div class=\"clono-index-entry\">\n"
+               "<dt>Android</dt>\n"
+               "<dd><a class=\"clono-index-page\" "
+               "href=\"../chapter-one.html#clono-index-marker-1\" "
+               "aria-label=\"Androidの出現1\"></a>"
+               "<span class=\"clono-index-separator\">,&nbsp;</span>"
+               "<a class=\"clono-index-page\" "
+               "href=\"../nested/chapter-two.html#clono-index-marker-2\" "
+               "aria-label=\"Androidの出現2\"></a></dd>\n"
+               "</div>\n"
+               "</dl>\n"
+               "</section>\n\n"
+               "<section class=\"clono-index-group clono-index-group-ha\">\n"
+               "<h2>は行</h2>\n"
+               "<dl class=\"clono-index-list\">\n"
+               "<div class=\"clono-index-entry\">\n"
+               "<dt>バックナンバー</dt>\n"
+               "<dd><a class=\"clono-index-page\" "
+               "href=\"../nested/chapter-two.html#clono-index-marker-3\" "
+               "aria-label=\"バックナンバーの出現1\"></a></dd>\n"
+               "</div>\n"
+               "</dl>\n"
+               "</section>\n")]
+      (is (= expected output)))))
+
 (deftest generated-index-markdown-test
   (let [index-entry {:path "generated/index.md"
                      :title "索引 *draft*"}
