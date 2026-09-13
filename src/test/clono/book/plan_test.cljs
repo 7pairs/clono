@@ -133,6 +133,60 @@
             (is (= ["`publication`の原稿を変換計画に含められません: missing.md"]
                    (mapv :message (:diagnostics result))))))))))
 
+(deftest index-path-collision-test
+  (with-temporary-project
+    (fn [project]
+      (let [source (.join path project "manuscripts")
+            index-publication
+            (fn [index-path]
+              [{:type :document
+                :path "chapter.md"
+                :kind "chapter"
+                :include-in-toc true}
+               {:type :index
+                :path index-path
+                :title "索引"
+                :include-in-toc true}])
+            create-plan
+            (fn [index-path]
+              (plan/create (book-config project (index-publication index-path))))]
+        (write-file! (.join path source "chapter.md") "# 本文\n")
+        (write-file! (.join path source "same.md") "# 既存原稿\n")
+        (write-file! (.join path source "parent") "existing file\n")
+        (write-file! (.join path source "descendant.md" "child.txt") "existing file\n")
+        (write-file! (.join path source "generated" "index.md-copy") "existing file\n")
+
+        (testing "When an index path equals a file output, then the conflicting plan is rejected"
+          (let [result (create-plan "same.md")]
+            (is (false? (:ok? result)))
+            (is (nil? (:plan result)))
+            (is (= ["`publication`の索引生成先が変換計画の出力先と衝突しています: same.md (`transform-markdown`: same.md)"]
+                   (mapv :message (:diagnostics result))))))
+
+        (testing "When a file output is an ancestor of the index path, then the conflicting plan is rejected"
+          (let [result (create-plan "parent/index.md")]
+            (is (false? (:ok? result)))
+            (is (nil? (:plan result)))
+            (is (= ["`publication`の索引生成先が変換計画の出力先と衝突しています: parent/index.md (`copy-file`: parent)"]
+                   (mapv :message (:diagnostics result))))))
+
+        (testing "When the index path equals a directory output, then the conflicting plan is rejected"
+          (let [result (create-plan "descendant.md")]
+            (is (false? (:ok? result)))
+            (is (nil? (:plan result)))
+            (is (= ["`publication`の索引生成先が変換計画の出力先と衝突しています: descendant.md (`create-directory`: descendant.md)"]
+                   (mapv :message (:diagnostics result))))))
+
+        (testing "When only a directory ancestor and a path prefix exist, then the index path is accepted"
+          (let [result (create-plan "generated/index.md")]
+            (is (:ok? result))
+            (is (empty? (:diagnostics result)))
+            (is (= "generated/index.md"
+                   (->> (:publication (:plan result))
+                        (filter #(= :index (:type %)))
+                        first
+                        :path)))))))))
+
 (deftest unsupported-file-type-test
   (testing "When an unsupported file type occurs in the manuscript tree, then it is diagnosed on POSIX"
     (when-not (= "win32" (.-platform js/process))
