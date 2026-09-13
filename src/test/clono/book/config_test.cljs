@@ -70,6 +70,7 @@
                 "  publication: [\n"
                 "    { type: 'document', path: './chapter.md', kind: 'chapter', includeInToc: true },\n"
                 "    { type: 'blank-page' },\n"
+                "    { type: 'index', path: './generated/index.MD', title: '索引', includeInToc: true },\n"
                 "    { type: 'document', path: 'colophon.html', kind: 'backmatter', includeInToc: false },\n"
                 "  ],\n"
                 "};\n")))
@@ -88,6 +89,10 @@
                      :kind "chapter"
                      :include-in-toc true}
                     {:type :blank-page}
+                    {:type :index
+                     :path "generated/index.MD"
+                     :title "索引"
+                     :include-in-toc true}
                     {:type :document
                      :path "colophon.html"
                      :kind "backmatter"
@@ -163,8 +168,90 @@
           (is (= #{"`publication[0]`に必須の設定項目`type`がありません。"
                    "`publication[1]`に未知の設定項目`path`があります。"
                    "`publication[2]`に未知の設定項目`extra`があります。"
-                   "`publication[2].type`には`document`または`blank-page`を指定してください。"}
+                   "`publication[2].type`には`document`、`blank-page`または`index`を指定してください。"}
                  (set (messages result)))))
+        done))))
+
+(deftest index-entry-validation-test
+  (async done
+    (testing "When generated index fields violate the schema, then all index diagnostics are returned"
+      (with-project
+        (fn [project]
+          (write-file! (.join path project "manuscripts" "chapter.md") "# 本文\n")
+          (write-file!
+           (.join path project "clono.config.mjs")
+           (str "export default {\n"
+                "  sourceRoot: 'manuscripts',\n"
+                "  outputRoot: 'build/manuscripts',\n"
+                "  publication: [\n"
+                "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+                "    { type: 'index', path: '_clono/index.html/', title: '   ', includeInToc: 'yes', kind: 'backmatter' },\n"
+                "    { type: 'index' },\n"
+                "  ],\n"
+                "};\n")))
+        (fn [result]
+          (is (false? (:ok? result)))
+          (is (nil? (:config result)))
+          (is (= #{"`publication[1]`に未知の設定項目`kind`があります。"
+                   "`publication[1].path`には`.md`のファイルを指定してください。"
+                   "`publication[1].path`にはディレクトリではなくファイルパスを指定してください。"
+                   "`publication[1].path`にclonoの予約領域`_clono/`は指定できません。"
+                   "`publication[1].title`には空でない文字列を指定してください。"
+                   "`publication[1].includeInToc`には真偽値を指定してください。"
+                   "`publication[2]`に必須の設定項目`includeInToc`がありません。"
+                   "`publication[2]`に必須の設定項目`path`がありません。"
+                   "`publication[2]`に必須の設定項目`title`がありません。"}
+                 (set (messages result)))))
+        done))))
+
+(deftest index-count-validation-test
+  (async done
+    (testing "When publication contains multiple generated indexes, then the configuration is rejected"
+      (with-project
+        (fn [project]
+          (write-file! (.join path project "manuscripts" "chapter.md") "# 本文\n")
+          (write-file!
+           (.join path project "clono.config.mjs")
+           (str "export default {\n"
+                "  sourceRoot: 'manuscripts',\n"
+                "  outputRoot: 'build/manuscripts',\n"
+                "  publication: [\n"
+                "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+                "    { type: 'index', path: 'generated/subject.md', title: '事項索引', includeInToc: true },\n"
+                "    { type: 'index', path: 'generated/name.md', title: '人名索引', includeInToc: true },\n"
+                "  ],\n"
+                "};\n")))
+        (fn [result]
+          (is (false? (:ok? result)))
+          (is (= ["`publication`に`index`は一件だけ指定できます。"]
+                 (messages result))))
+        done))))
+
+(deftest index-order-validation-test
+  (async done
+    (testing "When a generated index is outside the numbered-document and backmatter boundary, then both order violations are diagnosed"
+      (with-project
+        (fn [project]
+          (write-file! (.join path project "manuscripts" "colophon.html") "<p>奥付</p>\n")
+          (write-file! (.join path project "manuscripts" "chapter.md") "# 本文\n")
+          (write-file!
+           (.join path project "clono.config.mjs")
+           (str "export default {\n"
+                "  sourceRoot: 'manuscripts',\n"
+                "  outputRoot: 'build/manuscripts',\n"
+                "  publication: [\n"
+                "    { type: 'document', path: 'colophon.html', kind: 'backmatter', includeInToc: false },\n"
+                "    { type: 'blank-page' },\n"
+                "    { type: 'index', path: 'generated/index.md', title: '索引', includeInToc: true },\n"
+                "    { type: 'blank-page' },\n"
+                "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+                "  ],\n"
+                "};\n")))
+        (fn [result]
+          (is (false? (:ok? result)))
+          (is (= ["`publication`の`index`はすべての`backmatter`より前に配置してください。"
+                  "`publication`の`index`はすべての`chapter`および`appendix`より後に配置してください。"]
+                 (messages result))))
         done))))
 
 (deftest document-required-test
