@@ -1,8 +1,8 @@
 # 書籍プロジェクト仕様
 
-- 状態: 実装済み
+- 状態: 拡張予定
 - 作成日: 2026-08-25
-- 最終更新日: 2026-09-12
+- 最終更新日: 2026-09-13
 
 ## 目的
 
@@ -25,6 +25,7 @@
 - 掲載Markdownにある明示ID付き見出しの収集と見出し参照の解決
 - 掲載Markdownにある番号付き表の収集と表参照の解決
 - 掲載Markdownにある番号付きコードリストの収集とコードリスト参照の解決
+- 掲載Markdownにある索引指定の収集と索引Markdownの生成
 - 生成済み原稿ツリーの安全な再生成
 - clono基盤CSSの生成済み原稿ツリーへの配置
 
@@ -33,7 +34,7 @@
 - Vivliostyle設定の生成または変更
 - 利用者テーマの管理またはコピー
 - clono設定をVivliostyle設定へ変換するヘルパー
-- 目次または索引文書の生成
+- 目次文書の生成
 - watchモードと差分ビルド
 - シンボリックリンクの追跡またはコピー
 - 複数の入力原稿ルートまたは出力形式
@@ -62,6 +63,7 @@
 | 9 | 掲載Markdownにおける見出しIDの収集と見出し参照の解決 | 実装済み |
 | 10 | 掲載Markdownにおける番号付き表の収集と表参照の解決 | 実装済み |
 | 11 | 掲載Markdownにおける番号付きコードリストの収集とコードリスト参照の解決 | 実装済み |
+| 12 | 掲載Markdownにおける索引指定の収集と索引Markdownの生成 | 実装予定 |
 
 各実装Pull Requestでは、着手した段階を「実装中」、実装と自動テストが完了した段階を「実装済み」へ更新する。段階の分割、統合または順序を変更する場合も、変更理由と後続段階への影響が分かるように同じPull Requestでこの表を更新する。
 
@@ -120,9 +122,9 @@ export default {
     },
     { type: "blank-page" },
     {
-      type: "document",
-      path: "index.md",
-      kind: "backmatter",
+      type: "index",
+      path: "generated/index.md",
+      title: "索引",
       includeInToc: true,
     },
     {
@@ -154,14 +156,15 @@ export default {
 
 ### 書籍構造
 
-`publication`は、書籍を構成する原稿と空白ページを掲載順に並べた空でない配列とする。書籍構造と原稿順序の正本は`clono.config.mjs`の`publication`であり、同じ一覧を`vivliostyle.config.mjs`へ重複して記述しない。
+`publication`は、書籍を構成する原稿、空白ページおよび生成索引を掲載順に並べた空でない配列とする。書籍構造と原稿順序の正本は`clono.config.mjs`の`publication`であり、同じ一覧を`vivliostyle.config.mjs`へ重複して記述しない。
 
-各要素は、要素の種類を示す`type`を必須項目として持つ。初期仕様で許可する`type`は、次の二種類とする。
+各要素は、要素の種類を示す`type`を必須項目として持つ。初期仕様で許可する`type`は、次の三種類とする。
 
 | 値 | 意味 |
 | --- | --- | --- |
 | `document` | `sourceRoot`に存在するMarkdownまたはHTML原稿 |
 | `blank-page` | 原稿間へ一ページ挿入する空白ページ |
+| `index` | 掲載Markdownからclonoが生成する索引Markdown |
 
 実装段階7の完了後は、既存の原稿要素にも`type: "document"`を必須とする。`type`を持たない従来形式との後方互換性は設けず、従来形式は設定エラーとする。
 
@@ -181,7 +184,7 @@ export default {
 | `frontmatter` | 前付 |
 | `chapter` | 本文の章 |
 | `appendix` | 付録 |
-| `backmatter` | 索引を含む後付 |
+| `backmatter` | 後付 |
 
 `path`には、拡張子を小文字化した結果が`.md`または`.html`となる通常ファイルを指定できる。絶対パス、`sourceRoot`の外側へ出るパス、ディレクトリ、存在しないファイル、重複したパス、および途中のパス要素を含めてシンボリックリンクを経由するパスはエラーとする。
 
@@ -191,7 +194,9 @@ export default {
 
 書籍の先頭、原稿間および末尾へ空白ページを指定できる。一つの`blank-page`は一ページを表し、複数ページを挿入する場合は`blank-page`を必要な数だけ連続して記述する。`count`など、一つの要素で複数ページを指定する項目は初期仕様に設けない。
 
-`publication`には、`document`を一件以上含めなければならない。空白ページだけからなる書籍構造は、原稿の指定漏れである可能性が高いため設定エラーとする。
+`type`が`index`の要素は、`path`、`title`および`includeInToc`を必須項目として持つ。入力原稿には対応せず、`path`が示す生成済み原稿ツリー内の位置へ索引Markdownを生成する。`kind`は持たず、章番号または付録番号を進めない。最大件数、配置、パスの衝突、タイトルおよび生成内容の契約は、[索引仕様](index.md)で定める。
+
+`publication`には、`document`を一件以上含めなければならない。空白ページまたは生成索引だけからなる書籍構造は、原稿の指定漏れである可能性が高いため設定エラーとする。
 
 ## 入力原稿ツリーの処理
 
@@ -213,6 +218,7 @@ HTML、画像、CSSなど、Markdown以外の通常ファイルはclonoの変換
 - 各操作は入力原稿ルートからの相対パスと入力元の絶対パスを持ち、正式な出力先への書き込みは行わない
 - 各ディレクトリの項目を名前順に走査し、ディレクトリ作成をその子孫の操作より前に記録することで、ファイルシステムの列挙順に依存しない決定的な計画を作成する
 - `publication`に含まれるすべての`document`に対応するMarkdown変換またはファイルコピーの操作が計画に含まれることを確認し、含まれない場合は診断を返して部分的な変換計画を公開しない
+- `publication`に`index`がある場合は、生成先がMarkdown変換または通常ファイルのコピー先と同一、祖先または子孫の関係にならないことを確認する。ディレクトリの作成先とは同一、または索引パスがその祖先となる関係を禁止し、ディレクトリの作成先が索引パスの祖先となる関係は許可する。詳細は[索引仕様](index.md)に従う
 - 予約パス、シンボリックリンク、対応していないファイル種別、ディレクトリ列挙または項目情報の取得失敗を検出した場合は診断を返し、部分的な変換計画を公開しない
 
 変換計画に含まれる掲載Markdownは、書籍全体の参照対象を収集および解決してから各原稿を変換する。掲載されていないMarkdownは、各原稿を独立して単一文書用の変換パイプラインへ渡す。正常に変換できたMarkdownは対応する操作へ保持し、この段階では正式な`outputRoot`へ書き込まない。
@@ -221,7 +227,7 @@ HTML、画像、CSSなど、Markdown以外の通常ファイルはclonoの変換
 
 診断が一件でもある場合は、正常に変換できた原稿を含む部分的な変換計画を公開しない。すべてのMarkdown変換操作が成功した場合だけ、変換後のMarkdownを保持した計画を後続の生成処理へ渡す。
 
-変換計画との整合性を確認した後も、後続の生成処理では、`publication`に含まれるすべての`document`に対応するファイルと、必要な空白ページ資材が生成済み原稿ツリーに存在することを公開前に改めて確認する。
+変換計画との整合性を確認した後も、後続の生成処理では、`publication`に含まれるすべての`document`に対応するファイル、必要な空白ページ資材、および設定された生成索引が生成済み原稿ツリーに存在することを公開前に改めて確認する。
 
 ## 書籍全体の参照解決
 
@@ -242,6 +248,16 @@ HTML、画像、CSSなど、Markdown以外の通常ファイルはclonoの変換
 `publication`に掲載されていないMarkdownも従来どおり変換計画へ含めるが、その原稿にあるIDを書籍全体の名前空間へ登録しない。掲載されていないMarkdownに書籍参照がある場合は診断し、単一ファイル変換用のプレースホルダーへ変換しない。
 
 参照情報の事前検査では、診断が発生しても可能な範囲で残りの掲載Markdown原稿を検査し、未定義参照、重複ID、参照種別の不一致、掲載文書の種別に適合しない参照対象、および解決できない原稿間パスの診断を操作順に収集する。事前検査の診断が一件でもある場合は、いずれの原稿についてもAST変換とMarkdownの直列化を開始せず、部分的な変換計画を後続処理へ渡さない。診断がない場合に限り、文書単位の変換を開始する。
+
+## 書籍全体の索引生成
+
+実装段階12では、`publication`で`type`が`document`であり、拡張子を小文字化した結果が`.md`となる原稿だけを索引収集の対象とする。掲載されていないMarkdownは単一文書として索引マーカーへ変換できるが、その索引指定を書籍全体の収集結果または生成索引へ含めない。
+
+掲載Markdownを個別に変換する前に各原稿のASTを解析し、`publication`順、その中では入力位置順に索引指定を収集する。読みを正規化し、固定分類への分類、項目の統合および決定的な並べ替えを行った後、本文マーカーと索引Markdownを生成する。著者向け記法、正規化規則、生成するIDとHTML構造、索引設定、相対URLおよび診断の詳細は、[索引仕様](index.md)で定める。
+
+掲載Markdownに索引指定がある場合は、`publication`に`index`を一件必要とする。`index`があり、索引指定が一件もない場合は、執筆途中の書籍を変換できるようにタイトルだけを持つ空の索引Markdownを生成する。
+
+索引の事前検査では、診断が発生しても可能な範囲で残りの掲載Markdownを検査する。索引診断が一件でもある場合は、いずれの掲載Markdownについても索引マーカーへのAST変換とMarkdownの直列化を開始せず、索引Markdownも生成しない。部分的な変換計画を後続処理へ渡さず、正式な`outputRoot`と既存の生成済み原稿ツリーを変更しない。
 
 ## 空白ページ
 
@@ -329,8 +345,9 @@ clonoが生成するHTML構造には、用途を示す固定の`clono-`接頭辞
 - `document`の`path`は、`outputRoot`以下にある生成済み原稿の`entry`へ変換する
 - `document`の`kind`は、本文・付録などの原稿別テーマの選択と、目次項目の文書種別を示すメタデータへ変換する
 - `document`の`includeInToc`が`false`の場合は、`kind`にかかわらず`transformDocumentList`で目次から除外する
+- `index`の`path`は、`outputRoot`以下にある生成索引の`entry`へ変換し、`includeInToc`を目次への掲載判定へ使用する。生成索引に文書種別を示す`kind`は付与しない
 - `blank-page`は、生成した共通の空白ページHTMLを参照し、出現順に一意な`output`を持つ独立`entry`へ変換する
-- clono基盤CSSは、文書と空白ページを含むすべての`entry`で利用者テーマより前に指定する
+- clono基盤CSSは、文書、空白ページおよび生成索引を含むすべての`entry`で利用者テーマより前に指定する
 
 次の例は、この変換の要点を示す。`element`と`text`は、Vivliostyle CLIの目次変換関数が扱うhastノードを生成するためのローカル関数であり、clonoが提供するヘルパーではない。
 
@@ -351,14 +368,16 @@ function outputHtmlPath(sourcePath) {
   return sourcePath.replace(/\.md$/iu, ".html");
 }
 
-const documents = publication.filter(({ type }) => type === "document");
+const tocItems = publication.filter(
+  ({ type }) => type === "document" || type === "index",
+);
 
-const documentByOutput = new Map(
-  documents.map((document) => [outputHtmlPath(document.path), document]),
+const itemByOutput = new Map(
+  tocItems.map((item) => [outputHtmlPath(item.path), item]),
 );
 
 function addDocumentKind(node, kind) {
-  if (node.type !== "element" || node.tagName !== "li") return node;
+  if (!kind || node.type !== "element" || node.tagName !== "li") return node;
   return {
     ...node,
     properties: {
@@ -374,7 +393,7 @@ function transformDocumentList(nodeList) {
       "ol",
       {},
       nodeList.flatMap((document, index) => {
-        const metadata = documentByOutput.get(document.href);
+        const metadata = itemByOutput.get(document.href);
         if (!metadata?.includeInToc) return [];
 
         const children = [propsList[index].children].flat(2);
@@ -386,8 +405,11 @@ function transformDocumentList(nodeList) {
           );
         }
 
+        const properties = metadata.kind
+          ? { "data-document-kind": metadata.kind }
+          : {};
         return [
-          element("li", { "data-document-kind": metadata.kind }, [
+          element("li", properties, [
             element("a", { href: document.href }, [text(document.title)]),
             ...children,
           ]),
@@ -439,7 +461,7 @@ export default {
 
 例の`_clono-blank-page-<n>.html`は、一意な`output`を割り当てる方法を示すローカルな命名規則であり、clonoの公開契約ではない。利用者は、同じ空白ページHTMLを参照する各`entry`の`output`が互いに衝突しない限り、書籍プロジェクトに適した名前を使用できる。
 
-`includeInToc`による選別、`kind`に応じた本文・付録の番号、および目次項目への文書種別の付与は、[Vivliostyleの目次に関する調査](../research/vivliostyle-table-of-contents.md)とそのfixtureでWebPubおよびPDFまで検証している。空白ページの独立`entry`、同じ資材を複数回参照する場合の一意な`output`、連続するノンブルおよび柱の非表示は、[Vivliostyleの空白ページに関する調査](../research/vivliostyle-blank-pages.md)とそのfixtureで検証している。書籍固有の目次テンプレート、CSSおよび`transformSectionList`は、利用者が`vivliostyle.config.mjs`で管理する。
+`includeInToc`による選別、`kind`に応じた本文・付録の番号、および目次項目への文書種別の付与は、[Vivliostyleの目次に関する調査](../research/vivliostyle-table-of-contents.md)とそのfixtureでWebPubおよびPDFまで検証している。空白ページの独立`entry`、同じ資材を複数回参照する場合の一意な`output`、連続するノンブルおよび柱の非表示は、[Vivliostyleの空白ページに関する調査](../research/vivliostyle-blank-pages.md)とそのfixtureで検証している。生成索引を`entry`と目次へ接続する部分は、[索引仕様](index.md)に従って利用者が明示的に変換する。書籍固有の目次テンプレート、CSSおよび`transformSectionList`は、利用者が`vivliostyle.config.mjs`で管理する。
 
 利用者テーマを指定しない場合も、生成した構造を機能させるため基盤CSSはVivliostyle設定へ指定する。clonoは`vivliostyle.config.mjs`を生成、変更または検証しない。
 
@@ -477,9 +499,9 @@ clonoは、所有マーカーのない空でないディレクトリを削除、
 
 ### stagingと排他制御
 
-Markdownの変換、通常ファイルのコピー、空白ページ資材、基盤CSSと所有マーカーの生成、および`publication`の検証は、正式な`outputRoot`とは別のstagingディレクトリで完了させる。いずれかが失敗した場合はstagingを可能な範囲で削除し、既存の`outputRoot`を変更しない。
+Markdownの変換、通常ファイルのコピー、空白ページ資材、索引Markdown、基盤CSSと所有マーカーの生成、および`publication`の検証は、正式な`outputRoot`とは別のstagingディレクトリで完了させる。いずれかが失敗した場合はstagingを可能な範囲で削除し、既存の`outputRoot`を変更しない。
 
-生成処理には、存在しないパスまたは空のディレクトリをstagingとして渡す。変換計画の順にディレクトリ、変換済みMarkdownおよび通常ファイルを生成し、必要な空白ページ資材を生成してclono基盤CSSをコピーした後、すべての`document`に対応する通常ファイルと必要な空白ページ資材が存在することを確認する。所有マーカーは、これらの生成と確認がすべて成功した場合にだけ最後に書き込む。
+生成処理には、存在しないパスまたは空のディレクトリをstagingとして渡す。変換計画の順にディレクトリ、変換済みMarkdownおよび通常ファイルを生成し、必要な空白ページ資材と索引Markdownを生成してclono基盤CSSをコピーした後、すべての`document`に対応する通常ファイル、必要な空白ページ資材および設定された生成索引が存在することを確認する。所有マーカーは、これらの生成と確認がすべて成功した場合にだけ最後に書き込む。
 
 公開前には、出力先ごとの排他ロックを取得する。ロック取得後に`outputRoot`の状態と所有マーカーを再確認し、公開処理が成功または失敗するまでロックを保持する。同じ規約に従う別のclonoプロセスがロックを保持している場合は、既存出力を変更せずエラーにする。
 
@@ -497,7 +519,7 @@ staging、backupおよび排他ロックは、`outputRoot`と同じ親ディレ�
 
 ## 失敗時の契約
 
-設定、パス、原稿、参照対象、参照解決、変換、コピー、空白ページ資材、予約領域、所有マーカーまたは排他ロックに問題がある場合は、問題の対象と理由を標準エラーへ出力し、終了コード`1`で終了する。通常の利用者向けエラーではJavaScriptのスタックトレースを表示しない。
+設定、パス、原稿、参照対象、参照解決、索引指定、索引生成、変換、コピー、空白ページ資材、予約領域、所有マーカーまたは排他ロックに問題がある場合は、問題の対象と理由を標準エラーへ出力し、終了コード`1`で終了する。通常の利用者向けエラーではJavaScriptのスタックトレースを表示しない。
 
 一件以上のMarkdown診断がある場合は、その診断をファイル名、行、列とともに表示し、部分的な生成済み原稿ツリーを公開しない。位置を特定できる診断は次の形式で表示する。
 
@@ -520,10 +542,11 @@ staging、backupおよび排他ロックは、`outputRoot`と同じ親ディレ�
 ### clonoが担う責務
 
 - 書籍プロジェクト設定の読み込みと検証
-- 原稿順序、空白ページ、文書種別および目次掲載指定の管理
+- 原稿順序、空白ページ、生成索引、文書種別および目次掲載指定の管理
 - Markdownの解析、検証、変換および直列化
 - 掲載Markdownにある参照対象の収集、重複検査および参照解決
-- 空白ページ資材、通常ファイルおよび基盤CSSを含む生成済み原稿ツリーの作成
+- 掲載Markdownにある索引指定の収集、正規化、分類、統合、本文マーカーへの変換および索引Markdownの生成
+- 空白ページ資材、索引Markdown、通常ファイルおよび基盤CSSを含む生成済み原稿ツリーの作成
 - 出力先の所有確認、排他制御および安全な置き換え
 
 ### Vivliostyleへ委譲する責務
@@ -534,6 +557,7 @@ staging、backupおよび排他ロックは、`outputRoot`と同じ親ディレ�
 - 文書種別に応じた章番号と付録番号の生成
 - 見出し番号、図番号、表番号、リスト番号、各参照文字列およびPDF内部リンクの生成
 - 目次項目、紙面上のページ番号およびリンクの生成
+- 生成索引における各出現位置の紙面上のページ番号とPDF内部リンクの生成
 - clono基盤CSSと利用者テーマの指定順での適用
 - WebPubおよびPDFの生成
 
@@ -546,6 +570,7 @@ staging、backupおよび排他ロックは、`outputRoot`と同じ親ディレ�
 - 章と付録のカウンター、見出し自体への番号表示、および見出し、図、表、コードリストと参照の書籍固有の外観を利用者テーマで指定すること
 - 空白ページで表示するノンブルと非表示にする柱を、利用者テーマの`@page clono-blank`で指定すること
 - clonoが生成しない表紙、奥付およびその他の書籍資材の管理
+- 生成索引の分類、項目、ページ番号およびリンクに関する紙面デザインの管理
 
 ## 更新方針
 
@@ -563,6 +588,7 @@ staging、backupおよび排他ロックは、`outputRoot`と同じ親ディレ�
 - [見出し参照仕様](heading-references.md)
 - [番号付き表と表参照仕様](table-references.md)
 - [番号付きコードリストとコードリスト参照仕様](code-listing-references.md)
+- [索引仕様](index.md)
 - [Generic DirectivesとmdastによるMarkdown変換パイプラインのADR](../decisions/0003-adopt-generic-directives-mdast-transformation-pipeline.md)
 - [書籍プロジェクトの生成済み原稿ツリーに関する調査](../research/book-project-output-tree.md)
 - [Vivliostyleにおけるclono基盤CSSと利用者テーマの統合に関する調査](../research/vivliostyle-clono-stylesheet.md)
@@ -572,3 +598,6 @@ staging、backupおよび排他ロックは、`outputRoot`と同じ親ディレ�
 - [Vivliostyleの表ID・キャプション・連番・相互参照に関する調査](../research/vivliostyle-table-references.md)
 - [VivliostyleのコードリストID・キャプション・連番・相互参照に関する調査](../research/vivliostyle-code-listing-references.md)
 - [Vivliostyleの相互参照に関する結合検証](../research/vivliostyle-reference-integration.md)
+- [索引の読み正規化・分類・並べ替えに関する調査](../research/index-normalization.md)
+- [書籍プロジェクトの生成索引に関する調査](../research/book-project-generated-index.md)
+- [Vivliostyleの索引に関する調査](../research/vivliostyle-index.md)
