@@ -1,6 +1,7 @@
 (ns clono.book.index
   (:require
    [clojure.string :as string]
+   [clono.diagnostic :as diagnostic]
    [clono.transform :as transform]))
 
 (defn- published-markdown? [entry]
@@ -19,3 +20,44 @@
          (mapcat (fn [{:keys [tree context]}]
                    (transform/collect-index-entries tree context)))
          vec)))
+
+(defn- index-entry [publication]
+  (first (filter #(= :index (:type %)) publication)))
+
+(defn- entry-diagnostics [publication diagnostics]
+  (let [source-ranks
+        (->> publication
+             (filter published-markdown?)
+             (map-indexed (fn [index entry]
+                            [(:path entry) index]))
+             (into {}))]
+    (->> diagnostics
+         (sort-by (juxt #(get source-ranks (:file %) js/Number.MAX_SAFE_INTEGER)
+                        #(get % diagnostic/offset-key js/Number.MAX_SAFE_INTEGER)))
+         (mapv #(dissoc % diagnostic/offset-key)))))
+
+(defn prepare [config manuscripts reference-targets]
+  (let [publication (:publication config)
+        entries (collect publication manuscripts)
+        missing-index-diagnostics
+        (if (and (seq entries) (nil? (index-entry publication)))
+          [{:file (:config-path config)
+            :message (str "`publication`には、掲載Markdownの索引指定を出力する"
+                          "`index`が必要です。")}]
+          [])
+        preparation (transform/prepare-index-entries entries reference-targets)
+        diagnostics
+        (into missing-index-diagnostics
+              (entry-diagnostics publication (:diagnostics preparation)))]
+    (if (seq diagnostics)
+      {:ok? false
+       :entries nil
+       :diagnostics diagnostics}
+      {:ok? true
+       :entries (:entries preparation)
+       :diagnostics []})))
+
+(defn add-entries [manuscripts entries]
+  (mapv (fn [manuscript]
+          (update manuscript :context transform/add-index-entries entries))
+        manuscripts))

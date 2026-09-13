@@ -153,6 +153,7 @@
        :diagnostics diagnostics}
       {:ok? true
        :plan {:project-root (:project-root config)
+              :config-path (:config-path config)
               :source-root (:source-root config)
               :source-path (:source-path config)
               :output-root (:output-root config)
