@@ -94,67 +94,25 @@
       (is (false? @collection-called?))
       (is (false? @transform-called?)))))
 
-(deftest execution-context-test
-  (let [context {:mode :build
-                 :source-name "chapter.md"
-                 :input-path "/work/manuscripts/chapter.md"
-                 :source-root-path "/work/manuscripts"
-                 :publication-entry {:type :document
-                                     :path "chapter.md"
-                                     :kind "chapter"
-                                     :include-in-toc true}}
-        validation-context (atom nil)
-        collection-context (atom nil)
-        index-collection-context (atom nil)
-        reference-validation-context (atom nil)
-        transformation-context (atom nil)
-        reference-targets [{:logical-id "diagram"
-                            :type "figure"
-                            :target-id "figure-diagram"
-                            :title-target-id "figure-diagram-caption"
-                            :numbered? true
-                            :source-name "chapter.md"
-                            :line 1
-                            :column 1}]
-        result (with-redefs [transform/validate
-                             (fn [_tree actual-context]
-                               (reset! validation-context actual-context)
-                               [])
-                             transform/collect-reference-targets
-                             (fn [_tree actual-context]
-                               (reset! collection-context actual-context)
-                               reference-targets)
-                             transform/collect-index-entries
-                             (fn [_tree actual-context]
-                               (reset! index-collection-context actual-context)
-                               [])
-                             transform/reference-diagnostics
-                             (fn [_tree actual-context]
-                               (reset! reference-validation-context
-                                       actual-context)
-                               [])
-                             transform/transform
-                             (fn [tree actual-context]
-                               (reset! transformation-context actual-context)
-                               tree)]
-                 (pipeline/run context "# 見出し\n"))]
-    (testing "When the pipeline runs successfully, then collected targets and index entries enrich the validation and transformation context"
+(deftest combined-feature-transformation-test
+  (let [source (str ":xref[introduction]"
+                    "{type=\"heading\" format=\"title\"}\n\n"
+                    "# はじめに {#introduction}\n\n"
+                    "これは:index[索引]{reading=\"さくいん\"}です。\n")
+        result (pipeline/run {:mode :transform
+                              :source-name "combined.md"}
+                             source)
+        output (:output result)]
+    (testing "When a heading reference and index directive are transformed together, then the resolved link and index marker appear in the output"
       (is (:ok? result))
-      (is (= (assoc context :source "# 見出し\n")
-             @validation-context))
-      (is (= (assoc context :source "# 見出し\n")
-             @collection-context))
-      (is (= (assoc context :source "# 見出し\n")
-             @index-collection-context))
-      (is (= (assoc context
-                    :source "# 見出し\n"
-                    :reference-targets reference-targets
-                    :index-entries []
-                    :index-entries-by-location {})
-             @reference-validation-context))
-      (is (= (assoc context
-                    :source "# 見出し\n"
-                    :reference-targets reference-targets
-                    :index-entries []
-                    :index-entries-by-location {})
-             @transformation-context)))))
+      (is (empty? (:diagnostics result)))
+      (is (.includes
+           output
+           (str "<a class=\"clono-xref clono-xref-heading "
+                "clono-xref-heading-h1 clono-xref-heading-chapter "
+                "clono-xref-title\" href=\"#introduction\" "
+                "data-title-href=\"#introduction\"></a>")))
+      (is (.includes
+           output
+           (str "<span class=\"clono-index-marker\" "
+                "id=\"clono-index-marker-1\">索引</span>"))))))
