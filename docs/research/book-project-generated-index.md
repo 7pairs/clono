@@ -201,7 +201,7 @@ fixtureでは、次の条件を変換と索引生成の前に検出した。
 
 ## 成立条件と未確認事項
 
-この調査は、候補となる索引Markdownの生成とVFM変換後のHTML構造までを検証した。紙面上のページ番号、PDF内部リンクおよび同一ページ番号の重複表示は、既存の[Vivliostyle索引fixture](fixtures/vivliostyle-index/)で独立して検証している。
+この調査は、候補となる索引Markdownの生成とVFM変換後のHTML構造までを検証した。紙面上のページ番号、PDF内部リンクおよび同一ページ番号の重複表示は、[Vivliostyle索引fixture](fixtures/vivliostyle-index/)を同じ候補構造へ更新したうえで再検証している。二つのfixtureは独立しており、生成索引fixtureの成果物をVivliostyle索引fixtureへ直接渡す単一の実行パイプラインではない。
 
 次の事項は対象外とした。
 
