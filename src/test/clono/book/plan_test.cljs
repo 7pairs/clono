@@ -165,6 +165,14 @@
             (is (= ["`publication`の索引生成先が変換計画の出力先と衝突しています: same.md (`transform-markdown`: same.md)"]
                    (mapv :message (:diagnostics result))))))
 
+        (testing "When an index path differs from a file output only by letter case, then the conflicting plan is rejected on Windows"
+          (when (= "win32" (.-platform js/process))
+            (let [result (create-plan "CHAPTER.md")]
+              (is (false? (:ok? result)))
+              (is (nil? (:plan result)))
+              (is (= ["`publication`の索引生成先が変換計画の出力先と衝突しています: CHAPTER.md (`transform-markdown`: chapter.md)"]
+                     (mapv :message (:diagnostics result)))))))
+
         (testing "When a file output is an ancestor of the index path, then the conflicting plan is rejected"
           (let [result (create-plan "parent/index.md")]
             (is (false? (:ok? result)))

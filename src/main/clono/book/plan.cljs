@@ -112,7 +112,13 @@
 
 (defn- same-or-ancestor-path? [ancestor descendant]
   (let [posix-path (.-posix path)
-        relative (.relative posix-path ancestor descendant)]
+        comparison-key (fn [file-path]
+                         (if (= "win32" (.-platform js/process))
+                           (string/lower-case file-path)
+                           file-path))
+        relative (.relative posix-path
+                            (comparison-key ancestor)
+                            (comparison-key descendant))]
     (or (empty? relative)
         (and (not= relative "..")
              (not (.startsWith relative "../"))
