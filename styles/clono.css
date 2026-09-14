@@ -129,3 +129,7 @@ a.clono-xref-heading.clono-xref-number-title::after {
 a.clono-xref-heading.clono-xref-title::before {
   content: target-text(attr(data-title-href url), content);
 }
+
+.clono-index-page::after {
+  content: target-counter(attr(href url), page);
+}
