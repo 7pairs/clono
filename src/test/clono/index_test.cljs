@@ -1,10 +1,14 @@
 (ns clono.index-test
   (:require
+   ["node:fs" :as fs]
    [cljs.test :refer [deftest is testing]]
    [clono.markdown :as markdown]
    [clono.pipeline :as pipeline]
    [clono.transform :as transform]
    [clono.test-support :as test-support]))
+
+(defn- normalize-line-endings [value]
+  (.replace value (js/RegExp. "\\r\\n?" "g") "\n"))
 
 (defn- transform-context [source-name]
   {:mode :transform
@@ -258,3 +262,13 @@
                :message (str "見出しのHTML ID`clono-index-marker-custom`には"
                              "clonoの予約接頭辞`clono-index-marker-`を使用できません。")}]
              (:diagnostics result))))))
+
+(deftest index-page-stylesheet-test
+  (testing "When an index page link is rendered, then the target page counter is displayed"
+    (let [stylesheet (normalize-line-endings
+                      (.readFileSync fs "styles/clono.css" "utf8"))]
+      (is (.includes
+           stylesheet
+           (str ".clono-index-page::after {\n"
+                "  content: target-counter(attr(href url), page);\n"
+                "}\n"))))))

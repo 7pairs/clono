@@ -24,6 +24,9 @@
   (.mkdirSync fs (.dirname path file-path) #js {:recursive true})
   (.writeFileSync fs file-path content "utf8"))
 
+(defn- normalize-line-endings [value]
+  (.replace value (js/RegExp. "\\r\\n?" "g") "\n"))
+
 (defn- book-config [project]
   {:project-root project
    :config-path (.join path project "clono.config.mjs")
@@ -38,6 +41,13 @@
 
 (defn- transformed-plan [project]
   (-> (plan/create (book-config project))
+      :plan
+      book-transform/run
+      :plan))
+
+(defn- transformed-plan-for [project publication]
+  (-> (plan/create (assoc (book-config project)
+                          :publication publication))
       :plan
       book-transform/run
       :plan))
@@ -145,6 +155,81 @@
               (is (.includes (:message (first (:diagnostics result)))
                              "既存出力を復元しました"))
               (is (empty? (temporary-artifacts project))))))))))
+
+(deftest generated-index-publication-test
+  (testing "When a book contains an index, then transformed markers, generated index links, the stylesheet, and the ownership marker are published together"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              output (output-path project)
+              publication [{:type :document
+                            :path "chapters/one.md"
+                            :kind "chapter"
+                            :include-in-toc true}
+                           {:type :document
+                            :path "appendices/two.md"
+                            :kind "appendix"
+                            :include-in-toc true}
+                           {:type :index
+                            :path "generated/index.md"
+                            :title "索引"
+                            :include-in-toc true}]]
+          (write-file! (.join path source "chapters" "one.md")
+                       (str ":index[Android]{reading=\"android\"}\n\n"
+                            ":index[一気]{reading=\"いっき\"}\n"))
+          (write-file! (.join path source "appendices" "two.md")
+                       (str ":index[Android]{reading=\"ＡＮＤＲＯＩＤ\"}\n\n"
+                            ":index[五木]{reading=\"いつき\"}\n"))
+          (let [result (publish/run
+                        (transformed-plan-for project publication))
+                chapter-content
+                (.readFileSync fs
+                               (.join path output "chapters" "one.md")
+                               "utf8")
+                appendix-content
+                (.readFileSync fs
+                               (.join path output "appendices" "two.md")
+                               "utf8")
+                index-content
+                (.readFileSync fs
+                               (.join path output "generated" "index.md")
+                               "utf8")
+                stylesheet-content
+                (normalize-line-endings
+                 (.readFileSync fs
+                                (.join path output "_clono" "styles" "clono.css")
+                                "utf8"))]
+            (is (:ok? result))
+            (is (.includes chapter-content
+                           "id=\"clono-index-marker-1\">Android</span>"))
+            (is (.includes chapter-content
+                           "id=\"clono-index-marker-2\">一気</span>"))
+            (is (.includes appendix-content
+                           "id=\"clono-index-marker-3\">Android</span>"))
+            (is (.includes appendix-content
+                           "id=\"clono-index-marker-4\">五木</span>"))
+            (is (= 1 (count (re-seq #"<dt>Android</dt>" index-content))))
+            (is (< (.indexOf index-content "<dt>Android</dt>")
+                   (.indexOf index-content "<dt>一気</dt>")
+                   (.indexOf index-content "<dt>五木</dt>")))
+            (is (.includes
+                 index-content
+                 "href=\"../chapters/one.html#clono-index-marker-1\""))
+            (is (.includes
+                 index-content
+                 "href=\"../appendices/two.html#clono-index-marker-3\""))
+            (is (.includes
+                 stylesheet-content
+                 (str ".clono-index-page::after {\n"
+                      "  content: target-counter(attr(href url), page);\n"
+                      "}\n")))
+            (is (.isFile (.statSync fs (.join path output
+                                              ".clono-output.json"))))
+            (is (false? (.existsSync fs
+                                      (.join path source
+                                             "generated"
+                                             "index.md"))))
+            (is (empty? (temporary-artifacts project)))))))))
 
 (deftest unowned-output-test
   (testing "When output is non-empty without an ownership marker, then it is preserved and staging is removed"

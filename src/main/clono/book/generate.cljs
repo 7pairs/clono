@@ -132,6 +132,32 @@
       {:ok? true
        :diagnostics []})))
 
+(defn- generate-index [generation-path generated-index]
+  (if-not generated-index
+    {:ok? true
+     :diagnostics []}
+    (let [index-path (:path generated-index)
+          destination (descendant-path generation-path index-path)]
+      (if-not destination
+        {:ok? false
+         :diagnostics
+         [(diagnostic index-path
+                      "索引Markdownの生成先は生成先の内側でなければなりません。")]}
+        (try
+          (.mkdirSync fs (.dirname path destination) #js {:recursive true})
+          (.writeFileSync fs
+                          destination
+                          (:content generated-index)
+                          #js {:encoding "utf8" :flag "wx"})
+          {:ok? true
+           :diagnostics []}
+          (catch :default error
+            {:ok? false
+             :diagnostics
+             [(diagnostic index-path
+                          (str "索引Markdownを生成できません: "
+                               (error-message error)))]}))))))
+
 (defn- copy-stylesheet [generation-path]
   (let [source (stylesheet-path)
         destination (descendant-path generation-path stylesheet-relative-path)]
@@ -214,9 +240,36 @@
                        (str "生成した空白ページ資材を確認できません: "
                             (error-message error)))])))))
 
+(defn- index-diagnostics [generation-path publication]
+  (reduce
+   (fn [diagnostics entry]
+     (let [entry-path (:path entry)
+           generated-path (descendant-path generation-path entry-path)]
+       (if-not generated-path
+         (conj diagnostics
+               (diagnostic entry-path
+                           "`publication`の索引生成先が生成先の外側を指しています。"))
+         (try
+           (let [entry-stat (when (.existsSync fs generated-path)
+                              (.lstatSync fs generated-path))]
+             (if (and entry-stat (.isFile entry-stat))
+               diagnostics
+               (conj diagnostics
+                     (diagnostic entry-path
+                                 "`publication`の索引Markdownを生成できませんでした。"))))
+           (catch :default error
+             (conj diagnostics
+                   (diagnostic entry-path
+                               (str "生成した索引Markdownを確認できません: "
+                                    (error-message error)))))))))
+   []
+   (filter #(= :index (:type %)) publication)))
+
 (defn- verify-publication [generation-path publication]
-  (let [diagnostics (into (publication-diagnostics generation-path publication)
-                          (blank-page-diagnostics generation-path publication))]
+  (let [diagnostics
+        (-> (publication-diagnostics generation-path publication)
+            (into (blank-page-diagnostics generation-path publication))
+            (into (index-diagnostics generation-path publication)))]
     {:ok? (empty? diagnostics)
      :diagnostics diagnostics}))
 
@@ -262,6 +315,9 @@
       (loop [remaining [(fn []
                          (execute-operations generation-path
                                              (:operations plan)))
+                        (fn []
+                          (generate-index generation-path
+                                          (:generated-index plan)))
                         (fn []
                           (generate-blank-page generation-path
                                                (:publication plan)))

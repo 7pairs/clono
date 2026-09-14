@@ -1,6 +1,7 @@
 (ns clono.book.transform
   (:require
    ["node:fs" :as fs]
+   [clono.book.index :as book-index]
    [clono.book.reference-resolution :as reference-resolution]
    [clono.book.reference-targets :as reference-targets]
    [clono.pipeline :as pipeline]))
@@ -160,30 +161,44 @@
               prepared))
           prepared-operations)))
 
-(defn- preflight [prepared-operations]
+(defn- preflight [plan prepared-operations]
   (let [diagnostics (analysis-diagnostics prepared-operations)]
     (if (seq diagnostics)
       {:ok? false
        :prepared-operations nil
+       :index-entries nil
        :diagnostics diagnostics}
       (let [manuscripts (analyzed-manuscripts prepared-operations)
-            collection (reference-targets/collect manuscripts)]
+            collection (reference-targets/collect manuscripts)
+            index-preparation
+            (book-index/prepare plan
+                                manuscripts
+                                (or (:targets collection) []))]
         (if-not (:ok? collection)
           {:ok? false
            :prepared-operations nil
-           :diagnostics (:diagnostics collection)}
+           :index-entries nil
+           :diagnostics (into (:diagnostics collection)
+                              (:diagnostics index-preparation))}
           (let [resolution
                 (reference-resolution/resolve-references
                  manuscripts
-                 (:targets collection))]
-            (if-not (:ok? resolution)
+                 (:targets collection))
+                preflight-diagnostics
+                (into (:diagnostics index-preparation)
+                      (:diagnostics resolution))]
+            (if (seq preflight-diagnostics)
               {:ok? false
                :prepared-operations nil
-               :diagnostics (:diagnostics resolution)}
+               :index-entries nil
+               :diagnostics preflight-diagnostics}
               {:ok? true
                :prepared-operations
                (apply-resolved-contexts prepared-operations
-                                        (:manuscripts resolution))
+                                        (book-index/add-entries
+                                         (:manuscripts resolution)
+                                         (:entries index-preparation)))
+               :index-entries (:entries index-preparation)
                :diagnostics []})))))))
 
 (defn- transform-prepared-operations [prepared-operations]
@@ -204,7 +219,7 @@
         prepared-operations
         (mapv #(prepare-operation plan publication-documents %)
               (:operations plan))
-        preflight-result (preflight prepared-operations)]
+        preflight-result (preflight plan prepared-operations)]
     (if-not (:ok? preflight-result)
       {:ok? false
        :plan nil
@@ -216,6 +231,11 @@
           {:ok? false
            :plan nil
            :diagnostics (:diagnostics result)}
-          {:ok? true
-           :plan (assoc plan :operations (:operations result))
-           :diagnostics []})))))
+          (let [generated-index
+                (book-index/generate (:publication plan)
+                                     (:index-entries preflight-result))]
+            {:ok? true
+             :plan (cond-> (assoc plan :operations (:operations result))
+                     generated-index
+                     (assoc :generated-index generated-index))
+             :diagnostics []}))))))
