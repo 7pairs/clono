@@ -149,6 +149,106 @@
                                 "  min-block-size: 1px;\n"
                                 "}")))))))))
 
+(deftest index-generation-test
+  (testing "When a transformed plan contains an index, then its Markdown and the ownership marker are written"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              generation-path (.join path project "staging")
+              publication [{:type :document
+                            :path "chapter.md"
+                            :kind "chapter"
+                            :include-in-toc true}
+                           {:type :index
+                            :path "generated/index.md"
+                            :title "索引"
+                            :include-in-toc true}]
+              index-path (.join path generation-path "generated" "index.md")]
+          (write-file! (.join path source "chapter.md")
+                       ":index[Android]{reading=\"Ａｎｄｒｏｉｄ\"}を使います。\n")
+          (let [result (generate/run
+                        (transformed-plan project publication)
+                        generation-path)
+                index-markdown (.readFileSync fs index-path "utf8")]
+            (is (:ok? result))
+            (is (.includes index-markdown "# 索引"))
+            (is (.includes index-markdown "<dt>Android</dt>"))
+            (is (.includes
+                 index-markdown
+                 "href=\"../chapter.html#clono-index-marker-1\""))
+            (is (.isFile (.statSync fs (.join path generation-path
+                                              ".clono-output.json")))))))))
+
+  (testing "When a configured index has no occurrences, then a title-only Markdown document is generated"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              generation-path (.join path project "staging")
+              publication [{:type :document
+                            :path "chapter.md"
+                            :kind "chapter"
+                            :include-in-toc true}
+                           {:type :index
+                            :path "index.md"
+                            :title "空の索引"
+                            :include-in-toc true}]]
+          (write-file! (.join path source "chapter.md") "# 本文\n")
+          (let [result (generate/run
+                        (transformed-plan project publication)
+                        generation-path)]
+            (is (:ok? result))
+            (is (= "# 空の索引\n\n"
+                   (.readFileSync fs
+                                  (.join path generation-path "index.md")
+                                  "utf8"))))))))
+
+  (testing "When a configured index is absent from the transformed plan, then generation fails before writing the ownership marker"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              generation-path (.join path project "staging")
+              publication [{:type :document
+                            :path "chapter.md"
+                            :kind "chapter"
+                            :include-in-toc true}
+                           {:type :index
+                            :path "index.md"
+                            :title "索引"
+                            :include-in-toc true}]]
+          (write-file! (.join path source "chapter.md") "# 本文\n")
+          (let [plan (dissoc (transformed-plan project publication)
+                             :generated-index)
+                result (generate/run plan generation-path)]
+            (is (false? (:ok? result)))
+            (is (= [{:file "index.md"
+                     :message "`publication`の索引Markdownを生成できませんでした。"}]
+                   (:diagnostics result)))
+            (is (false? (.existsSync fs
+                                      (.join path generation-path
+                                             ".clono-output.json"))))))))))
+
+(deftest unsafe-index-generation-test
+  (testing "When a generated index path escapes the generation root, then generation fails without writing outside it"
+    (with-temporary-project
+      (fn [project]
+        (let [generation-path (.join path project "staging")
+              outside (.join path project "outside.md")
+              result (generate/run
+                      {:source-root "manuscripts"
+                       :output-root "build/manuscripts"
+                       :publication []
+                       :operations []
+                       :generated-index {:path "../outside.md"
+                                         :content "# 索引\n\n"}}
+                      generation-path)]
+          (is (false? (:ok? result)))
+          (is (= ["索引Markdownの生成先は生成先の内側でなければなりません。"]
+                 (mapv :message (:diagnostics result))))
+          (is (false? (.existsSync fs outside)))
+          (is (false? (.existsSync fs
+                                    (.join path generation-path
+                                           ".clono-output.json")))))))))
+
 (deftest empty-existing-generation-root-test
   (testing "When the generation root is an existing empty directory, then the generated tree is created there"
     (with-temporary-project
