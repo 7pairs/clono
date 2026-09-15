@@ -110,18 +110,56 @@
                  (str "`publication`の原稿を変換計画に含められません: "
                       (:path %)))))))
 
+(defn- same-or-ancestor-path? [ancestor descendant]
+  (let [posix-path (.-posix path)
+        comparison-key (fn [file-path]
+                         (if (= "win32" (.-platform js/process))
+                           (string/lower-case file-path)
+                           file-path))
+        relative (.relative posix-path
+                            (comparison-key ancestor)
+                            (comparison-key descendant))]
+    (or (empty? relative)
+        (and (not= relative "..")
+             (not (.startsWith relative "../"))
+             (not (.isAbsolute posix-path relative))))))
+
+(defn- index-path-collision? [index-path operation]
+  (let [operation-path (:path operation)]
+    (if (= :create-directory (:action operation))
+      (same-or-ancestor-path? index-path operation-path)
+      (or (same-or-ancestor-path? index-path operation-path)
+          (same-or-ancestor-path? operation-path index-path)))))
+
+(defn- index-path-diagnostics [config operations]
+  (if-let [index-entry (first (filter #(= :index (:type %))
+                                     (:publication config)))]
+    (if-let [collision (first (filter #(index-path-collision?
+                                        (:path index-entry)
+                                        %)
+                                     operations))]
+      [(diagnostic
+        (:config-path config)
+        (str "`publication`の索引生成先が変換計画の出力先と衝突しています: "
+             (:path index-entry) " (`" (name (:action collision)) "`: "
+             (:path collision) ")"))]
+      [])
+    []))
+
 (defn create [config]
   (let [walk-result (walk-directory (:source-path config)
                                     [])
-        diagnostics (into (:diagnostics walk-result)
-                          (publication-diagnostics config
-                                                   (:operations walk-result)))]
+        operations (:operations walk-result)
+        diagnostics (into (into (:diagnostics walk-result)
+                                (publication-diagnostics config operations))
+                          (index-path-diagnostics config operations))]
     (if (seq diagnostics)
       {:ok? false
        :plan nil
        :diagnostics diagnostics}
       {:ok? true
        :plan {:project-root (:project-root config)
+              :config-path (:config-path config)
               :source-root (:source-root config)
               :source-path (:source-path config)
               :output-root (:output-root config)

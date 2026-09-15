@@ -14,17 +14,17 @@ const outputDirectory = fileURLToPath(new URL('../output/', import.meta.url));
 const outputPath = fileURLToPath(new URL('../output/index.pdf', import.meta.url));
 
 const expectedOccurrences = [
-  ['index-android-1', 1, 2, '最初の出現では、Androidを実機で確認する。'],
-  ['index-android-2', 1, 2, '同じページの二つ目の出現でも、Androidを通常の本文として表示する。'],
-  ['index-api-1', 1, 2, 'この章では、APIの基本的な使い方を説明する。'],
-  ['index-app-1', 1, 2, '日本語の例として、アプリを索引へ登録する。'],
-  ['index-index-1', 1, 2, '最後に、索引そのものも登録する。'],
-  ['index-android-3', 2, 3, '別のページでも、Androidを参照できることを確認する。'],
-  ['index-api-2', 2, 3, '二つ目の章では、APIをもう一度登録する。'],
-  ['index-image-1', 2, 3, '濁音を含む画像は、正規化済みの読みを使ってか行へ分類する。'],
-  ['index-app-2', 2, 3, '半濁音を含むアプリは、別ページの出現として登録する。'],
-  ['index-backnumber-1', 2, 3, '濁音、促音、音引きを含むバックナンバーは、は行へ分類する。'],
-  ['index-column-1', 2, 3, '囲み枠の中でも、コラムを通常の本文として表示する。'],
+  ['clono-index-marker-1', 1, 2, '最初の出現では、Androidを実機で確認する。'],
+  ['clono-index-marker-2', 1, 2, '同じページの二つ目の出現でも、Androidを通常の本文として表示する。'],
+  ['clono-index-marker-3', 1, 2, 'この章では、APIの基本的な使い方を説明する。'],
+  ['clono-index-marker-4', 1, 2, '日本語の例として、アプリを索引へ登録する。'],
+  ['clono-index-marker-5', 1, 2, '最後に、索引そのものも登録する。'],
+  ['clono-index-marker-6', 2, 3, '別のページでも、Androidを参照できることを確認する。'],
+  ['clono-index-marker-7', 2, 3, '二つ目の章では、APIをもう一度登録する。'],
+  ['clono-index-marker-8', 2, 3, '濁音を含む画像は、正規化済みの読みを使ってか行へ分類する。'],
+  ['clono-index-marker-9', 2, 3, '半濁音を含むアプリは、別ページの出現として登録する。'],
+  ['clono-index-marker-10', 2, 3, '濁音、促音、音引きを含むバックナンバーは、は行へ分類する。'],
+  ['clono-index-marker-11', 2, 3, '囲み枠の中でも、コラムを通常の本文として表示する。'],
 ].map(([targetId, targetPage, displayedPageNumber, destinationText]) => ({
   targetId,
   targetPage,
@@ -33,13 +33,13 @@ const expectedOccurrences = [
 }));
 
 const expectedIndexRows = [
-  ['Android', ['index-android-1', 'index-android-2', 'index-android-3'], 'Android2,2,3'],
-  ['API', ['index-api-1', 'index-api-2'], 'API2,3'],
-  ['アプリ', ['index-app-1', 'index-app-2'], 'アプリ2,3'],
-  ['画像', ['index-image-1'], '画像3'],
-  ['コラム', ['index-column-1'], 'コラム3'],
-  ['索引', ['index-index-1'], '索引2'],
-  ['バックナンバー', ['index-backnumber-1'], 'バックナンバー3'],
+  ['Android', ['clono-index-marker-1', 'clono-index-marker-2', 'clono-index-marker-6'], 'Android2,2,3'],
+  ['API', ['clono-index-marker-3', 'clono-index-marker-7'], 'API2,3'],
+  ['アプリ', ['clono-index-marker-4', 'clono-index-marker-9'], 'アプリ2,3'],
+  ['画像', ['clono-index-marker-8'], '画像3'],
+  ['コラム', ['clono-index-marker-11'], 'コラム3'],
+  ['索引', ['clono-index-marker-5'], '索引2'],
+  ['バックナンバー', ['clono-index-marker-10'], 'バックナンバー3'],
 ].map(([term, targetIds, displayedText]) => ({ term, targetIds, displayedText }));
 
 function compactText(value) {
@@ -256,7 +256,7 @@ for (const row of expectedIndexRows) {
   );
 }
 
-for (const targetId of ['index-android-1', 'index-android-2']) {
+for (const targetId of ['clono-index-marker-1', 'clono-index-marker-2']) {
   assert.equal(
     compactText(textInsideBounds(indexPage.textCharacters, linksByTarget.get(targetId).bounds)),
     '2',
@@ -264,8 +264,8 @@ for (const targetId of ['index-android-1', 'index-android-2']) {
   );
 }
 assert.notDeepEqual(
-  linksByTarget.get('index-android-1').bounds,
-  linksByTarget.get('index-android-2').bounds,
+  linksByTarget.get('clono-index-marker-1').bounds,
+  linksByTarget.get('clono-index-marker-2').bounds,
   'Same-page occurrences must remain separate links in the generated index',
 );
 

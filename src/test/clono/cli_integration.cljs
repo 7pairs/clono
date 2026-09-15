@@ -73,6 +73,17 @@
        "  ],\n"
        "};\n"))
 
+(defn- index-config []
+  (str "export default {\n"
+       "  sourceRoot: 'manuscripts',\n"
+       "  outputRoot: 'build/manuscripts',\n"
+       "  publication: [\n"
+       "    { type: 'document', path: 'chapters/one.md', kind: 'chapter', includeInToc: true },\n"
+       "    { type: 'document', path: 'appendices/two.md', kind: 'appendix', includeInToc: true },\n"
+       "    { type: 'index', path: 'generated/index.md', title: '索引', includeInToc: true },\n"
+       "  ],\n"
+       "};\n"))
+
 (defn- chapter-source [reference-id figure-id]
   (str ":xref[" reference-id "]"
        "{type=\"figure\" format=\"number-title\"}\n\n"
@@ -148,6 +159,55 @@
                "Release transform command did not generate the xref placeholder")
       (ensure! (not (.includes content "external-figure"))
                "Release transform command exposed the unresolved logical ID"))))
+
+(defn- verify-index-transform! [root]
+  (let [input (.join path root "single-index.md")
+        output (.join path root "single-index-output.md")
+        first-marker (str "<span class=\"clono-index-marker\" "
+                          "id=\"clono-index-marker-1\">"
+                          "A &amp; &quot;B&quot;</span>")
+        second-marker (str "<span class=\"clono-index-marker\" "
+                           "id=\"clono-index-marker-2\">"
+                           "バックナンバー</span>")]
+    (write-file!
+     input
+     (str "これは:index[A &amp; &quot;B&quot;]"
+          "{reading=\"えーあんどびー\"}です。\n\n"
+          ":index[バックナンバー]{reading=\"ばっくなんばー\"}\n"))
+    (verify-success!
+     (run-cli ["transform" input "--output" output] root)
+     "Release transform command with index markers")
+    (let [content (.readFileSync fs output "utf8")]
+      (ensure! (.includes content first-marker)
+               "Release transform command did not generate the first index marker")
+      (ensure! (.includes content second-marker)
+               "Release transform command did not generate the second index marker")
+      (ensure! (< (.indexOf content first-marker)
+                  (.indexOf content second-marker))
+               "Release transform command changed the index marker order")
+      (ensure! (not (.includes content ":index["))
+               "Release transform command preserved an index directive")
+      (ensure! (not (.includes content "reading="))
+               "Release transform command exposed an index reading"))
+
+    (write-file! output "keep\n")
+    (write-file!
+     input
+     (str ":index[橋]{reading=\"はし\"}\n\n"
+          ":index[橋]{reading=\"ばし\"}\n"))
+    (let [result (run-cli ["transform" input "--output" output] root)]
+      (ensure! (= 1 (.-status result))
+               "Release transform command accepted conflicting index readings")
+      (ensure! (= "" (.-stdout result))
+               "Invalid index transform wrote to stdout")
+      (ensure!
+       (= (str input
+               ":3:1: `index`の索引語`橋`には異なる読みを指定できません。\n")
+          (.-stderr result))
+       (str "Invalid index transform diagnostics were incorrect: "
+            (.-stderr result)))
+      (ensure! (= "keep\n" (.readFileSync fs output "utf8"))
+               "Invalid index transform changed existing output"))))
 
 (defn- verify-heading-transform! [root]
   (let [input (.join path root "single-heading.md")
@@ -312,6 +372,98 @@
   (ensure! (= "keep\n"
               (.readFileSync fs (.join path output "keep.txt") "utf8"))
            (str context " replaced the existing output directory")))
+
+(defn- verify-index-build! [root]
+  (let [project (.join path root "index-book")
+        source (.join path project "manuscripts")
+        output (.join path project "build" "manuscripts")
+        chapter-input (.join path source "chapters" "one.md")
+        appendix-input (.join path source "appendices" "two.md")
+        chapter-output (.join path output "chapters" "one.md")
+        appendix-output (.join path output "appendices" "two.md")
+        index-output (.join path output "generated" "index.md")
+        stylesheet-output (.join path output "_clono" "styles" "clono.css")
+        marker-output (.join path output ".clono-output.json")]
+    (write-file! (.join path project "clono.config.mjs")
+                 (index-config))
+    (write-file! chapter-input
+                 (str ":index[Android]{reading=\"android\"}\n\n"
+                      ":index[一気]{reading=\"いっき\"}\n"))
+    (write-file! appendix-input
+                 (str ":index[Android]{reading=\"ＡＮＤＲＯＩＤ\"}\n\n"
+                      ":index[五木]{reading=\"いつき\"}\n"))
+
+    (verify-success! (run-cli ["build" project] root)
+                     "Release build command with a generated index")
+    (let [chapter-content (.readFileSync fs chapter-output "utf8")
+          appendix-content (.readFileSync fs appendix-output "utf8")
+          index-content (.readFileSync fs index-output "utf8")
+          stylesheet-content (.readFileSync fs stylesheet-output "utf8")
+          normalized-stylesheet-content
+          (normalize-line-endings stylesheet-content)
+          marker-content (.readFileSync fs marker-output "utf8")
+          expected-files {"chapters/one.md" chapter-content
+                          "appendices/two.md" appendix-content
+                          "generated/index.md" index-content
+                          "_clono/styles/clono.css" stylesheet-content
+                          ".clono-output.json" marker-content}]
+      (ensure! (.includes chapter-content
+                          "id=\"clono-index-marker-1\">Android</span>")
+               "Release build command did not generate the first index marker")
+      (ensure! (.includes chapter-content
+                          "id=\"clono-index-marker-2\">一気</span>")
+               "Release build command did not generate the second index marker")
+      (ensure! (.includes appendix-content
+                          "id=\"clono-index-marker-3\">Android</span>")
+               "Release build command did not continue index marker numbering")
+      (ensure! (.includes appendix-content
+                          "id=\"clono-index-marker-4\">五木</span>")
+               "Release build command did not generate the last index marker")
+      (ensure! (= 1 (count (re-seq #"<dt>Android</dt>" index-content)))
+               "Release build command did not merge repeated index terms")
+      (ensure! (< (.indexOf index-content "<dt>Android</dt>")
+                  (.indexOf index-content "<dt>一気</dt>")
+                  (.indexOf index-content "<dt>五木</dt>"))
+               "Release build command did not sort index terms deterministically")
+      (ensure!
+       (.includes
+        index-content
+        "href=\"../chapters/one.html#clono-index-marker-1\"")
+       "Release build command did not link the index to the chapter marker")
+      (ensure!
+       (.includes
+        index-content
+        "href=\"../appendices/two.html#clono-index-marker-3\"")
+       "Release build command did not link the index to the appendix marker")
+      (ensure!
+       (.includes
+        normalized-stylesheet-content
+        (str ".clono-index-page::after {\n"
+             "  content: target-counter(attr(href url), page);\n"
+             "}\n"))
+       "Release build command copied a stylesheet without index page numbers")
+      (ensure! (false? (.existsSync fs
+                                    (.join path source "generated" "index.md")))
+               "Release build command wrote the index into the source tree")
+
+      (write-file! (.join path output "keep.txt") "keep\n")
+      (write-file! appendix-input
+                   (str ":index[Android]{reading=\"えー\"}\n\n"
+                        ":index[五木]{reading=\"いつき\"}\n"))
+      (let [result (run-cli ["build" project] root)]
+        (ensure! (= 1 (.-status result))
+                 "Release build command accepted conflicting index readings")
+        (ensure! (= "" (.-stdout result))
+                 "Conflicting index build failure wrote to stdout")
+        (ensure!
+         (= (str "appendices/two.md:1:1: `index`の索引語"
+                 "`Android`には異なる読みを指定できません。\n")
+            (.-stderr result))
+         (str "Conflicting index diagnostics were incorrect: "
+              (.-stderr result)))
+        (verify-unchanged-output! output
+                                  expected-files
+                                  "Conflicting index build failure")))))
 
 (defn- verify-reference-build! [root]
   (let [project (.join path root "reference-book")
@@ -698,10 +850,12 @@
                                       "clono-cli-integration-"))]
     (try
       (verify-transform! root)
+      (verify-index-transform! root)
       (verify-heading-transform! root)
       (verify-listing-transform! root)
       (verify-build! root)
       (verify-diagnostics! root)
+      (verify-index-build! root)
       (verify-reference-build! root)
       (verify-table-reference-build! root)
       (verify-listing-reference-build! root)

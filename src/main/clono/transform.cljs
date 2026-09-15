@@ -6,6 +6,7 @@
    [clono.transform.column :as column]
    [clono.transform.figure :as figure]
    [clono.transform.heading :as heading]
+   [clono.transform.index :as index]
    [clono.transform.listing :as listing]
    [clono.transform.page-break :as page-break]
    [clono.transform.table :as table]
@@ -15,6 +16,7 @@
   {"align" align/rule
    "column" column/rule
    "figure" figure/rule
+   "index" index/rule
    "listing" listing/rule
    "page-break" page-break/rule
    "table" table/rule
@@ -59,6 +61,23 @@
     (->> (concat directive-targets heading-targets)
          (sort-by (juxt :line :column))
          vec)))
+
+(defn collect-index-entries [tree context]
+  (->> (directive-validation/validation-nodes tree known-directive-names)
+       (keep (fn [node]
+               (when-let [collector
+                          (:collect-index-entries
+                           (get rules (.-name node)))]
+                 (collector node context))))
+       (mapcat identity)
+       (sort-by (juxt :line :column))
+       vec))
+
+(defn prepare-index-entries [entries reference-targets]
+  (index/prepare-index-entries entries reference-targets))
+
+(defn add-index-entries [context entries]
+  (index/add-index-entries context entries))
 
 (defn reference-diagnostics [tree context]
   (->> (directive-validation/validation-nodes tree known-directive-names)

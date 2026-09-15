@@ -2,7 +2,7 @@
 
 - 状態: 調査済み
 - 初回調査日: 2026-08-19
-- 最終更新日: 2026-08-21
+- 最終更新日: 2026-09-12
 - 検証環境:
   - 実行環境: macOS、Node.js 24.19.0
   - HTML変換: `@vivliostyle/vfm` 2.7.0
@@ -56,55 +56,58 @@ VivliostyleはCSSの`target-counter()`とPDF内部リンクをサポートする
 
 fixtureでは、表紙相当、第1章、第2章、索引、後付の5文書を一冊として構成した。第1章と第2章へ11個の索引指定を配置し、clonoの変換後を模した索引文書を本文の後、後付の前へ置いた。
 
+2026年9月12日に、[書籍プロジェクトの生成索引に関する調査](book-project-generated-index.md)で確認した候補契約へfixtureを更新し、Web出版物とPDFを再検証した。本文マーカーのIDとclass、生成索引の構造および出現位置へのリンクは、両fixtureで同じ候補契約を使用する。
+
 ### 本文中の索引マーカー
 
-本文中の索引指定は、出現ごとに一意なID、表示語、読みを持つ`span`へ変換された状態を模した。
+本文中の索引指定は、書籍全体の収集順から採番した一意なID、clono用のclassおよび表示語だけを持つ`span`へ変換された状態を模した。読みと並べ替えキーはclonoの内部データとして使用し、本文マーカーへ出力しない。
 
 ```html
 <span
-  id="index-backnumber-1"
-  class="index-marker"
-  data-index-term="バックナンバー"
-  data-index-reading="ばっくなんばー"
+  class="clono-index-marker"
+  id="clono-index-marker-10"
 >バックナンバー</span>
 ```
 
-VFMはこの構造と属性を保持した。索引語の表示内容は指定した語だけになり、索引用の追加情報は紙面へ表示されなかった。通常の本文と、HTMLの`aside`で模したコラムのどちらでも、索引語を周囲と同じ見た目で表示できた。
+VFMはこのclass、IDおよび表示語を保持した。通常の本文と、HTMLの`aside`で模したコラムのどちらでも、索引語を周囲と同じ見た目で表示できた。Web出版物には読みや並べ替えキーを表す`data-index-*`属性が出力されないことも確認した。
 
 このfixtureはコラムの著者向け記法や最終的な出力構造を決定するものではない。コラム内でも通常のインライン要素として索引マーカーを保持できることだけを確認した。
 
 ### 索引文書の構造
 
-索引文書は、clonoが生成する候補となるHTML構造を原稿へ直接記述した。分類は「英数字」「あ行」「か行」「さ行」「は行」とし、各項目へ表示語、読み、正規化済みのソートキー、すべての出現位置へのリンクを持たせた。
+索引文書は、clonoが生成する候補となるHTML構造を原稿へ直接記述した。分類は「英数字」「あ行」「か行」「さ行」「は行」とし、clonoが分類・整列した順序で、各項目の表示語とすべての出現位置へのリンクを持たせた。分類結果はグループの構造とclassに反映し、生成後に不要となる読みと並べ替えキーはHTML属性へ出力しない。
 
 ```html
-<div
-  class="index-entry"
-  data-index-term="バックナンバー"
-  data-index-reading="ばっくなんばー"
-  data-index-sort-key="はつくなんはあ"
->
+<section class="clono-index-group clono-index-group-ha">
+<h2>は行</h2>
+<dl class="clono-index-list">
+<div class="clono-index-entry">
   <dt>バックナンバー</dt>
-  <dd><a class="index-page" href="chapter-two.html#index-backnumber-1"></a></dd>
+  <dd><a class="clono-index-page" href="chapter-two.html#clono-index-marker-10" aria-label="バックナンバーの出現1"></a></dd>
 </div>
+</dl>
+</section>
 ```
 
 この構造はVFM変換後のWeb出版物にも保持された。Web出版物の自動検証では、次を確認した。
 
-- 本文とコラム内の11個の索引マーカーがID、表示語、読みを保持する
+- 本文とコラム内の11個の索引マーカーが、書籍全体の収集順によるID、classおよび表示語を保持する
+- 本文マーカーと索引文書に読みや並べ替えキーの`data-index-*`属性が出力されない
 - 索引の分類と項目が定義した順序で出力される
-- 各索引項目が読み、正規化済みソートキー、すべての出現位置を保持する
+- 各索引項目が表示語とすべての出現位置を保持する
 - 各リンクの完全な`documentPath#targetId`が期待値と一致し、リンク先のHTML文書に索引マーカーIDが存在する
 - 索引が本文の後、後付の前に配置される
 
-このfixtureは読みの正規化、分類、並べ替えを実行するアルゴリズムを検証しない。あらかじめ与えた正規化済みソートキーと順序をVFMが壊さず、Vivliostyleで組版できることを検証する。
+このfixtureは読みの正規化、分類、並べ替えを実行するアルゴリズムを検証しない。clonoが分類・整列済みの構造を生成した前提で、その順序をVFMが壊さず、Vivliostyleで組版できることを検証する。
+
+読みの正規化、分類、項目の統合および決定的な並べ替えについては、後続の[索引の読み正規化・分類・並べ替えに関する調査](index-normalization.md)で、Vivliostyleから独立したデータ変換として候補アルゴリズムを検証した。
 
 ### ページ番号とPDF内部リンク
 
 索引の各リンクを空の`a`要素とし、CSSの`target-counter()`でリンク先の`page`カウンターを表示した。
 
 ```css
-.index-page::after {
+.clono-index-page::after {
   content: target-counter(attr(href url), page);
 }
 ```
@@ -145,12 +148,14 @@ clonoはVivliostyleによる組版前にMarkdownを変換するため、その�
 ## 調査結果
 
 - VFMとVivliostyle CLIの文書化された公開インターフェースには、要件を満たす索引記法や索引自動生成設定は確認できない
-- 本文とコラム内の索引マーカーは、VFM変換後もID、表示語、読みを保持できる
-- 生成済みの分類、項目、読み、ソートキー、出現位置を持つ索引構造をVFMが保持できる
+- 本文とコラム内の索引マーカーは、VFM変換後も書籍全体の収集順によるID、clono用のclassおよび表示語を保持できる
+- 読みと並べ替えキーを出力へ含めず、生成済みの分類、項目、表示語および出現位置を持つ索引構造をVFMが保持できる
 - VivliostyleとテーマCSSへ、紙面上のページ番号生成とPDF内部リンクを委譲できる
 - 同じ項目の複数の出現位置を一つの索引項目へ列挙できる
 - `target-counter()`は同一ページにある複数の参照を自動的に統合せず、`2, 2`のように表示する
 - 同一ページ重複の除去は最終的なページ番号に依存するため、組版前のclonoだけでは判断できない
+- 自然な読みから索引用の並べ替えキーを生成し、英数字と五十音の行へ分類して決定的に並べる候補アルゴリズムは、別fixtureで成立を確認した
+- 掲載Markdownから索引指定を収集し、本文マーカーと生成索引Markdownを同じ書籍プロジェクトへ出力する候補パイプラインは、別fixtureで成立を確認した
 
 ## 責務判断
 
@@ -162,7 +167,7 @@ clonoはVivliostyleによる組版前にMarkdownを変換するため、その�
 
 ### Vivliostyleへ委譲する責務
 
-- 本文中の索引マーカーと属性を保持する
+- 本文中の索引マーカーのclass、IDおよび表示語を保持する
 - 生成済みの分類、索引項目、出現位置へのリンクを持つ索引構造を組版する
 - `target-counter()`で各出現位置の紙面上のページ番号を生成する
 - 各ページ番号を、対応する索引マーカーへのPDF内部リンクとして保持する
@@ -171,22 +176,25 @@ clonoはVivliostyleによる組版前にMarkdownを変換するため、その�
 ### clonoが担う候補となる責務
 
 - 索引語と読みを指定できる著者向け記法を提供する
-- 著者向け記法を、一意なID、表示語、読みを持つ索引マーカーへ変換する
-- 読みを索引用に正規化する
+- 著者向け記法を、一意なID、clono用のclassおよび表示語だけを持つ索引マーカーへ変換する
+- 読みを索引用に正規化し、生成処理の内部データとして管理する
 - 英数字と五十音の行へ分類し、正規化済みの読みで項目を並べ替える
 - 同じ索引項目を一つへまとめ、すべての出現位置を管理する
-- 分類、表示語、読み、ソートキー、出現位置へのリンクを持つ索引文書を生成する
+- 分類、表示語および出現位置へのリンクを持つ索引文書を生成する
 - 読みの不足、不正な指定、IDの重複などを診断する候補とする
 
 ## 成立条件と未確認事項
 
 今回の結果は、索引項目とすべての出現位置を持つ索引構造が、Vivliostyleによる組版前に生成されていることを前提とする。
 
+読みの正規化、固定分類、空の分類の省略および並べ替えキーが衝突した場合の決定的な比較規則は、[索引の読み正規化・分類・並べ替えに関する調査](index-normalization.md)で候補アルゴリズムの成立を確認した。著者向け記法、許可文字の最終的な範囲および診断契約は、索引仕様の策定時に決定する。
+
+書籍全体からの収集、本文マーカーへの変換、項目の統合および生成索引Markdownの作成は、[書籍プロジェクトの生成索引に関する調査](book-project-generated-index.md)で候補パイプラインの成立を確認した。本調査のfixtureを同じ候補構造へ更新したうえで、VFM変換後のWeb出版物、VivliostyleによるPDFのページ番号および内部リンクを再検証した。
+
+二つのfixtureは同じ候補契約を個別の入力として保持しており、生成索引fixtureの成果物をVivliostyle索引fixtureへ直接渡す単一の実行パイプラインではない。clono本体へ実装するときは、生成結果と組版入力の間で構造がずれないよう、仕様と結合テストで契約を固定する必要がある。
+
 次の事項は未確認または未決定である。
 
-- 読みを正規化する具体的なアルゴリズムと例外
-- 英数字の大文字・小文字、記号、全角文字を含む場合のソート規則
-- 空の分類見出しを表示するか
 - 索引マーカーがページをまたぐ場合のリンク先
 - 脚注、画像・表・コードリストのキャプション内の索引指定
 - 階層索引、ページ範囲、索引項目間の相互参照、主要ページの強調
@@ -198,7 +206,7 @@ clonoはVivliostyleによる組版前にMarkdownを変換するため、その�
 
 ## 再現方法
 
-検証に使用する入力、Web出版物とPDFの自動検証、同一ページ重複の能力プローブ、PDFの目視確認手順は、[検証用fixtureのREADME](fixtures/vivliostyle-index/README.md)を参照する。fixture内で`npm ci`を実行した後、`npm run verify`で再検証できる。
+検証に使用する入力、Web出版物とPDFの自動検証、同一ページ重複の能力プローブ、PDFの目視確認手順は、[Vivliostyle索引fixtureのREADME](fixtures/vivliostyle-index/README.md)を参照する。fixture内で`npm ci`を実行した後、`npm run verify`で再検証できる。読みの正規化、分類、統合および並べ替えは、[索引正規化fixtureのREADME](fixtures/index-normalization/README.md)に従って独立して再検証できる。書籍プロジェクトからの収集と生成索引Markdownの作成は、[書籍プロジェクト生成索引fixtureのREADME](fixtures/book-project-generated-index/README.md)に従って再検証できる。
 
 ## 再調査する条件
 
@@ -212,6 +220,8 @@ clonoはVivliostyleによる組版前にMarkdownを変換するため、その�
 
 ## 参照資料
 
+- [索引の読み正規化・分類・並べ替えに関する調査](index-normalization.md)
+- [書籍プロジェクトの生成索引に関する調査](book-project-generated-index.md)
 - [Vivliostyle Flavored Markdown 2.7.0](https://github.com/vivliostyle/vfm/blob/v2.7.0/docs/ja/vfm.md)
 - [Vivliostyle CLI 11.1.0 Config Reference](https://github.com/vivliostyle/vivliostyle-cli/blob/v11.1.0/docs/config.md)
 - [チュートリアル一覧 | Vivliostyle](https://vivliostyle.org/ja/tutorials/)（2026-08-19参照）
