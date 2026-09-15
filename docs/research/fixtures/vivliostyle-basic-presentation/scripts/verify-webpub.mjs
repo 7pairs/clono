@@ -54,16 +54,19 @@ assert.equal(
   'The manuscript must contain exactly one hard break',
 );
 
-const blankLineAttributes = manuscriptHtml.match(
-  /<div([^>]*)id="blank-line"([^>]*)><\/div>/u,
+const verticalSpaceAttributes = manuscriptHtml.match(
+  /<div([^>]*)id="vertical-space"([^>]*)><\/div>/u,
 );
-assert.ok(blankLineAttributes, 'The blank-line element must remain empty');
-const combinedBlankLineAttributes = `${blankLineAttributes[1]} ${blankLineAttributes[2]}`;
+assert.ok(verticalSpaceAttributes, 'The vertical-space element must remain empty');
+const combinedVerticalSpaceAttributes =
+  `${verticalSpaceAttributes[1]} ${verticalSpaceAttributes[2]}`;
 assert.ok(
-  extractAttribute(combinedBlankLineAttributes, 'class')?.split(/\s+/u).includes('blank-line'),
-  'The blank-line element must retain its class',
+  extractAttribute(combinedVerticalSpaceAttributes, 'class')
+    ?.split(/\s+/u)
+    .includes('clono-space'),
+  'The vertical-space element must retain its clono-space class',
 );
-assert.equal(extractAttribute(combinedBlankLineAttributes, 'aria-hidden'), 'true');
+assert.equal(extractAttribute(combinedVerticalSpaceAttributes, 'aria-hidden'), 'true');
 
 const signature = manuscriptHtml.match(
   /<div([^>]*)id="signature"([^>]*)>([\s\S]*?)<\/div>/u,

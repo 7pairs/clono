@@ -89,13 +89,15 @@ const normalGap = verticalGap(
   findUniqueLine(pages, '通常間隔の前。'),
   findUniqueLine(pages, '通常間隔の後。'),
 );
-const intentionalBlankGap = verticalGap(
-  findUniqueLine(pages, '空行の前。'),
-  findUniqueLine(pages, '空行の後。'),
+const verticalSpaceGap = verticalGap(
+  findUniqueLine(pages, '垂直余白の前。'),
+  findUniqueLine(pages, '垂直余白の後。'),
 );
+const lineAdvance = hardBreakAfter.bounds[1] - hardBreakBefore.bounds[1];
+const addedVerticalSpace = verticalSpaceGap - normalGap;
 assert.ok(
-  intentionalBlankGap >= normalGap + 10,
-  'The intentional blank line must create more vertical space than ordinary paragraphs',
+  Math.abs(addedVerticalSpace - lineAdvance) <= 2,
+  'The vertical-space element must add approximately one line of space',
 );
 
 const leftAlignedReference = findUniqueLine(pages, '左寄せの基準。');

@@ -5,17 +5,17 @@
 改行前の行。\
 改行後の行。
 
-## 空行 {#blank-line-heading}
+## 垂直余白 {#vertical-space-heading}
 
 通常間隔の前。
 
 通常間隔の後。
 
-空行の前。
+垂直余白の前。
 
-<div id="blank-line" class="blank-line" aria-hidden="true"></div>
+<div id="vertical-space" class="clono-space" aria-hidden="true"></div>
 
-空行の後。
+垂直余白の後。
 
 ## 段落の右寄せ {#right-alignment}
 

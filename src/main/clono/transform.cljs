@@ -9,6 +9,7 @@
    [clono.transform.index :as index]
    [clono.transform.listing :as listing]
    [clono.transform.page-break :as page-break]
+   [clono.transform.space :as space]
    [clono.transform.table :as table]
    [clono.transform.xref :as xref]))
 
@@ -19,6 +20,7 @@
    "index" index/rule
    "listing" listing/rule
    "page-break" page-break/rule
+   "space" space/rule
    "table" table/rule
    "xref" xref/rule})
 
