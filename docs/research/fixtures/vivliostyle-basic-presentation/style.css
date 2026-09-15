@@ -21,8 +21,8 @@ p {
   margin-block: 0 0.5rem;
 }
 
-.blank-line {
-  block-size: 1.5rem;
+.clono-space {
+  block-size: 1lh;
 }
 
 .text-align-right {
