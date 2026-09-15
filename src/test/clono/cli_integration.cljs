@@ -142,7 +142,10 @@
   (let [input (.join path root "single.md")
         output (.join path root "single-output.md")]
     (write-file! input
-                 (str ":::align{position=\"right\"}\n署名\n:::\n\n"
+                 (str "導入の段落。\n\n"
+                      "::space\n\n"
+                      "決めの段落。\n\n"
+                      ":::align{position=\"right\"}\n署名\n:::\n\n"
                       ":xref[external-figure]"
                       "{type=\"figure\" format=\"number-title\"}\n"))
     (verify-success!
@@ -151,6 +154,10 @@
     (let [content (.readFileSync fs output "utf8")]
       (ensure! (.includes content "<div class=\"clono-align-right\">")
                "Release transform command did not transform the manuscript")
+      (ensure! (.includes
+                content
+                "<div class=\"clono-space\" aria-hidden=\"true\"></div>")
+               "Release transform command did not generate vertical space")
       (ensure! (.includes
                 content
                 (str "<span class=\"clono-xref clono-xref-figure "
@@ -309,7 +316,10 @@
         output (.join path project "build" "manuscripts")]
     (write-file! (.join path project "clono.config.mjs") (valid-config))
     (write-file! (.join path project "manuscripts" "chapter.md")
-                 ":::align{position=\"right\"}\nThunder Claw\n:::\n")
+                 (str "導入の段落。\n\n"
+                      "::space\n\n"
+                      "決めの段落。\n\n"
+                      ":::align{position=\"right\"}\nThunder Claw\n:::\n"))
     (write-file! (.join path project "manuscripts" "images" "logo.txt")
                  "static asset\n")
 
@@ -318,6 +328,10 @@
     (ensure! (.includes (.readFileSync fs (.join path output "chapter.md") "utf8")
                         "<div class=\"clono-align-right\">")
              "Release build command did not transform the manuscript")
+    (ensure! (.includes
+              (.readFileSync fs (.join path output "chapter.md") "utf8")
+              "<div class=\"clono-space\" aria-hidden=\"true\"></div>")
+             "Release build command did not generate vertical space")
     (ensure! (= "static asset\n"
                 (.readFileSync fs (.join path output "images" "logo.txt") "utf8"))
              "Release build command did not copy a static file")
@@ -328,6 +342,9 @@
       (ensure! (.includes (.readFileSync fs stylesheet "utf8")
                           ".clono-blank-page")
                "Release build command copied a stylesheet without the blank page rule")
+      (ensure! (.includes (.readFileSync fs stylesheet "utf8")
+                          ".clono-space")
+               "Release build command copied a stylesheet without the vertical-space rule")
       (ensure! (.existsSync fs blank-page)
                "Release build command did not generate the blank page resource")
       (ensure! (.includes (.readFileSync fs blank-page "utf8")
