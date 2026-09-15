@@ -2,7 +2,7 @@
 
 - 状態: 調査済み
 - 作成日: 2026-08-15
-- 最終更新日: 2026-09-14
+- 最終更新日: 2026-09-16
 
 ## 目的
 
@@ -30,7 +30,7 @@ Thunder Clawの書籍制作に必要な機能について、現在のVivliostyle
 
 | 機能 | 制作上の必要性 | Vivliostyleの対応 | `clono`の責務 | 調査状態 | 詳細 |
 | --- | --- | --- | --- | --- | --- |
-| 空行 | 可能性あり | 通常のMarkdown空行は可視要素として保持されない。空のHTML要素はVFMが保持し、CSSで一行相当の空白を表示できる | 著者向け記法を空白用の構造へ変換する候補とする。空白の寸法と表示はテーマCSSへ委譲する | 調査済み | [調査記録](research/vivliostyle-basic-presentation.md) |
+| 垂直余白 | 可能性あり | 通常のMarkdown空行は可視要素として保持されない。空のHTML要素をVFMが保持し、VivliostyleがCSSの`1lh`を一行相当の寸法として反映できる | 著者向け記法を垂直余白用の空要素へ変換し、一行相当の既定値を持つ基盤CSSを同梱する。利用者テーマによる寸法の上書きを許可し、ページ境界での配置はVivliostyleへ委譲する | 調査済み | [調査記録](research/vivliostyle-basic-presentation.md)、[著者向け仕様](specifications/authoring-syntax.md#垂直余白記法) |
 | 強制改行 | 現時点では不要 | 標準Markdownのバックスラッシュによる強制改行を`br`へ変換できる | 標準記法を壊さずVFMへ渡す。独自記法や変換は実装しない | 調査済み | [調査記録](research/vivliostyle-basic-presentation.md) |
 | 強制改ページ | 可能性あり | 空のHTML要素をVFMが保持し、CSSの`break-before: page`で後続の見出しまたは通常段落を次ページから開始できる | 著者向け記法を改ページ用の空要素へ変換し、改ページとして機能する最小限の基盤CSSを同梱する。物理的なページ分割はVivliostyleへ委譲する | 調査済み | [調査記録](research/vivliostyle-basic-presentation.md) |
 | 空白ページ | 必須 | 独立したHTMLを`entry`として配置し、名前付きページとCSSで指定1回につき一ページを生成できる。空白ページでもページ番号を連続させ、通常の柱だけを非表示にできる | 原稿内の著者向け記法は設けず、`publication`の空白ページ指定から共通HTML資材を生成する。同じ資材を参照する各`entry`へ衝突しない`output`を割り当てる変換契約を提供する。物理的なページ生成とページカウンターはVivliostyleへ、ノンブルと柱の表示は利用者テーマへ委譲する | 調査済み | [調査記録](research/vivliostyle-blank-pages.md)、[書籍プロジェクト仕様](specifications/book-project.md) |
