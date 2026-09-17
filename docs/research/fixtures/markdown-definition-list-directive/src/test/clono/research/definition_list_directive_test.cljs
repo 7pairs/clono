@@ -18,29 +18,50 @@
         definitions (vec (definition-list-directive/definition-directives
                           (first lists)))
         ready (first definitions)
-        done (second definitions)]
+        done (second definitions)
+        ready-terms (vec (definition-list-directive/term-directives ready))
+        done-terms (vec (definition-list-directive/term-directives done))]
     (testing "When a definition list contains multiple definitions, then each term and description has an explicit AST boundary"
       (is (= 1 (count lists)))
       (is (= 2 (count definitions)))
+      (is (= 1 (count ready-terms)))
+      (is (= 1 (count done-terms)))
       (is (= ["inlineCode"]
              (mapv #(.-type %)
-                   (definition-list-directive/children
-                    (definition-list-directive/label-node ready)))))
+                   (definition-list-directive/children (first ready-terms)))))
       (is (= "READY"
              (.-value
               (first
-               (definition-list-directive/children
-                (definition-list-directive/label-node ready))))))
+               (definition-list-directive/children (first ready-terms))))))
       (is (= ["text"]
              (mapv #(.-type %)
-                   (definition-list-directive/children
-                    (definition-list-directive/label-node done)))))
+                   (definition-list-directive/children (first done-terms)))))
       (is (= ["paragraph"]
              (mapv #(.-type %)
                    (definition-list-directive/body-children ready))))
       (is (= ["paragraph"]
              (mapv #(.-type %)
                    (definition-list-directive/body-children done)))))))
+
+(deftest multiple-term-extension-test
+  (let [source (str "::::definition-list\n"
+                    ":::definition\n"
+                    "::term[一塁手]\n"
+                    "::term[二塁手]\n\n"
+                    "内野手です。\n"
+                    ":::\n"
+                    "::::\n")
+        markdown (definition-list-directive/transformed-markdown source)
+        html (stringify markdown #js {:partial true})
+        document (parse html)
+        item (.querySelector document "div.clono-definition-item")]
+    (testing "When one definition contains multiple term directives, then every term shares one generated description"
+      (is (= ["一塁手" "二塁手"]
+             (mapv #(.-textContent %)
+                   (query-all item ":scope > dt"))))
+      (is (= 1 (count (query-all item ":scope > dd"))))
+      (is (= "内野手です。"
+             (.-textContent (.querySelector item "dd > p")))))))
 
 (deftest definition-list-transformation-test
   (let [output (definition-list-directive/transformed-markdown (read-input))
@@ -71,9 +92,8 @@
       (is (= "READY" (.-textContent (.querySelector ready "dt > code"))))
       (is (= "DONE" (.-textContent (.querySelector done "dt")))))
 
-    (testing "When descriptions contain inline Markdown, then VFM preserves code, emphasis, and links inside their definition items"
+    (testing "When descriptions contain inline Markdown, then VFM preserves code, strong emphasis, and links inside their definition items"
       (is (= "待機状態" (.-textContent (.querySelector ready "dd strong"))))
       (is (= "https://example.com/state"
              (.getAttribute (.querySelector ready "dd a") "href")))
       (is (= "0" (.-textContent (.querySelector done "dd code")))))))
-

@@ -4,7 +4,6 @@
    ["mdast-util-from-markdown" :refer [fromMarkdown]]
    ["mdast-util-to-markdown" :refer [toMarkdown]]
    ["micromark-extension-directive" :refer [directive]]
-   [goog.object :as gobj]
    [goog.string :as gstring]))
 
 (defn parse [source]
@@ -23,10 +22,6 @@
 (defn nodes [tree]
   (tree-seq #(some? (children %)) children tree))
 
-(defn directive-label? [node]
-  (and (some? (.-data node))
-       (true? (gobj/get (.-data node) "directiveLabel"))))
-
 (defn definition-list-directive? [node]
   (and (= "containerDirective" (.-type node))
        (= "definition-list" (.-name node))))
@@ -35,17 +30,21 @@
   (and (= "containerDirective" (.-type node))
        (= "definition" (.-name node))))
 
+(defn term-directive? [node]
+  (and (= "leafDirective" (.-type node))
+       (= "term" (.-name node))))
+
 (defn definition-list-directives [tree]
   (filter definition-list-directive? (nodes tree)))
 
 (defn definition-directives [definition-list]
   (filter definition-directive? (children definition-list)))
 
-(defn label-node [definition]
-  (first (filter directive-label? (children definition))))
+(defn term-directives [definition]
+  (filter term-directive? (children definition)))
 
 (defn body-children [definition]
-  (remove directive-label? (children definition)))
+  (remove term-directive? (children definition)))
 
 (defn html-node [value]
   #js {:type "html" :value value})
@@ -63,16 +62,16 @@
     "emphasis" (str "<em>" (child-inline-html node) "</em>")
     (throw (js/Error. (str "Unsupported definition term node: " (.-type node))))))
 
-(defn term-html [definition]
-  (child-inline-html (label-node definition)))
+(defn term-html [term]
+  (child-inline-html term))
 
 (defn transformed-definition-nodes [definition]
   (concat
    [(html-node
      (str "<div class=\"clono-definition-item\">\n"
-          "<dt>"
-          (term-html definition)
-          "</dt>\n"
+          (apply str
+                 (map #(str "<dt>" (term-html %) "</dt>\n")
+                      (term-directives definition)))
           "<dd>"))]
    (body-children definition)
    [(html-node "</dd>\n</div>")]))
@@ -95,4 +94,3 @@
 
 (defn transformed-markdown [source]
   (-> source parse transform serialize))
-

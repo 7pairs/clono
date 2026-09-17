@@ -2,27 +2,44 @@
 
 ## 目的
 
-Generic Directivesの入れ子を使用して、複数の用語と説明を持つ定義リストをclono本体と同じ低レベルAPIで解析、変換および再直列化できるか検証する。変換後MarkdownをVFMとVivliostyleへ渡し、定義リストの意味構造、説明内のインラインMarkdown、および項目単位の改ページ制御が保持されることも確認する。
+Generic Directivesの入れ子を使用して、複数の用語と説明を持つ定義リストをclono本体と同じ低レベルAPIで解析、変換および再直列化できるか検証する。変換後MarkdownをVFMとVivliostyleへ渡し、定義リストの意味構造、説明内のインラインMarkdown、および自然なページ境界における項目単位の分断防止も確認する。
 
-このfixtureは、定義リストの著者向け記法、class名、HTML構造または診断契約を確定するものではない。仕様策定前の技術的な成立性を確認するため、候補記法と候補出力を使用する。
+このfixtureは、定義リストの正式な著者向け記法、class名、HTML構造または診断契約を確定するものではない。仕様策定前の技術的な成立性を確認するため、候補記法と候補出力を使用する。
 
 検証結果、評価および未確認事項は、[Generic Directivesと定義リストのMarkdown ASTに関する調査](../../markdown-definition-list-directive.md)を参照する。
 
 ## 候補記法
 
-入力は[`input/definition-list.md`](input/definition-list.md)へ保存している。外側の`definition-list`がリスト全体、内側の各`definition`が一つの用語と説明を表す。内側に3個のコロンを使用するため、外側は4個のコロンで囲む。
+入力は[`input/definition-list.md`](input/definition-list.md)へ保存している。外側の`definition-list`がリスト全体、内側の各`definition`が一組の用語と説明を表す。用語は`definition`直下の`term` Leaf directive、説明はその後の段落へ記述する。
+
+内側に3個のコロンを使用するため、外側は4個のコロンで囲む。
 
 ````markdown
 ::::definition-list
-:::definition[`READY`]
+:::definition
+::term[`READY`]
+
 処理を開始できる**待機状態**。詳細は[状態遷移の仕様](https://example.com/state)を参照する。
 :::
 
-:::definition[DONE]
+:::definition
+::term[DONE]
+
 処理が正常に完了した状態を表す。終了コードは`0`となる。
 :::
 ::::
 ````
+
+初期仕様では各`definition`へ`term`を一つだけ許可する想定である。将来、同じ説明を共有する複数の用語が必要になった場合は、`term`の個数制約だけを緩められることも別の入力で検証する。
+
+```markdown
+:::definition
+::term[一塁手]
+::term[二塁手]
+
+内野手です。
+:::
+```
 
 ## 検証する変換
 
@@ -41,16 +58,17 @@ Generic Directivesの入れ子を使用して、複数の用語と説明を持�
 </dl>
 ```
 
-用語は`dt`へ、説明の段落は`dd`へ配置する。各組を`div.clono-definition-item`で囲み、用語と説明へ項目単位のCSSを適用できるようにする。
+各`term`は`dt`へ、説明の段落は一つの`dd`へ配置する。各組を`div.clono-definition-item`で囲み、用語と説明へ項目単位のCSSを適用できるようにする。複数の`term`がある場合は、同じ項目内へ複数の`dt`と一つの`dd`を生成する。
 
 ## 検証結果
 
 - 外側の記法は一つの`containerDirective`として解析され、その子に二つの`definition` Container directiveを保持できる
-- 各`definition`のラベルと本文は、`directiveLabel`を持つ段落と通常段落として区別できる
+- 各`term`は`leafDirective`として解析され、説明の通常段落と明確に区別できる
 - 用語に記述したインラインコードは`inlineCode`として解析される
+- 一つの`definition`へ複数の`term`を記述し、複数の`dt`が一つの`dd`を共有する構造へ変換できる
 - 複数の項目を、一つの`dl`と項目ごとの`div`、`dt`、`dd`を持つVFM向けMarkdownへ直列化できる
-- VFM 2.7.0は候補HTML構造を保持し、説明内の強調、インラインコードおよびリンクをHTMLへ変換できる
-- Vivliostyle.js 2.44.1は項目コンテナへ指定した改ページ規則を反映し、用語と説明を同じページへ配置できる
+- VFM 2.7.0は候補HTML構造を保持し、説明内の強い強調、インラインコードおよびリンクをHTMLへ変換できる
+- Vivliostyle.js 2.44.1は`break-inside: avoid`がない基準版ではページ末尾の用語と説明を分断し、同規則がある保護版では項目全体を次ページへ移動する
 
 ## 検証環境
 
@@ -77,7 +95,7 @@ npm ci
 npm run verify
 ```
 
-`npm test`はAST、変換後MarkdownおよびVFM変換後HTMLを検証する。`npm run verify:pdf`は`generate:manuscript`で変換後Markdownを再生成した上でPDFを検証する。
+`npm test`はAST、変換後MarkdownおよびVFM変換後HTMLを検証する。`npm run verify:pdf`は`generate:manuscript`で変換後Markdownを再生成した上で、基準版と保護版のPDFを検証する。
 
 `target/`、`output/`、`.shadow-cljs/`および`node_modules/`は生成物であり、Gitの管理対象には含めない。
 
@@ -86,24 +104,27 @@ npm run verify
 `src/test/clono/research/definition_list_directive_test.cljs`は、次を確認する。
 
 - 入れ子のContainer directiveからリストと各項目を区別できる
-- 用語のインラインコードと、各項目の単一の説明段落を参照できる
+- `term` Leaf directiveと説明段落を明確に区別できる
+- 用語のインラインコードを参照できる
+- 一つの項目に複数の`term`がある場合、複数の`dt`が一つの`dd`を共有する
 - 一つの`dl`と二つの項目を持つVFM向けMarkdownへ変換できる
 - VFM変換後に`dl`、項目単位の`div`、`dt`および`dd`が保持される
-- 説明内の強調、インラインコードおよびリンクが変換される
+- 説明内の強い強調、インラインコードおよびリンクが変換される
 
-`scripts/verify-pdf.mjs`は、次を確認する。
+`scripts/verify-pdf.mjs`は、同じ変換後Markdownから次の二つのPDFを生成して比較する。
 
-- Vivliostyle CLIが空でないPDFを生成する
-- 各項目の用語と説明が同じページにある
-- fixture専用の改ページ規則により、二番目の項目が一番目より後のページへ移動する
+- `style-baseline.css`を使用し、項目の分断防止を指定しない基準版
+- `style.css`を使用し、`.clono-definition-item`へ`break-inside: avoid`を指定する保護版
 
-PDF検証はページ数、絶対座標または特定フォントのメトリクスを固定しない。項目内の用語と説明の相対的なページ関係だけを検証する。
+ページ末尾の残り領域は、fixture専用の空要素で決定的に不足させる。基準版では`READY`の用語と説明が別ページに分かれ、保護版では両方が同じ次ページへ移動することを確認する。`DONE`の用語と説明も保護版で同じページにあることを確認する。
+
+PDF検証は絶対座標や特定フォントのメトリクスを固定しない。項目内の用語と説明、および基準版と保護版の相対的なページ関係を検証する。
 
 ## 検証範囲の境界
 
 このfixtureは、候補記法の意味検証、エラー診断、空のリスト、空の用語、空の説明、複数段落、リスト、コードブロック、属性、入れ子の制限または基盤CSSの最終的な内容を検証しない。
 
-`style.css`の`break-before: page`は、項目単位の改ページを決定的に確認するためのfixture専用規則であり、clonoの基盤CSS候補ではない。`break-inside: avoid`を基盤CSSへ含めるかは、仕様策定時に決定する。
+`style-base.css`の固定したページ寸法、行高および空要素は、比較可能なページ境界を作るためのfixture専用設定であり、clonoの基盤CSS候補ではない。`style.css`にある`.clono-definition-item { break-inside: avoid; }`だけが分断防止の候補規則である。項目自体が一ページより長い場合の挙動と製品用テーマとの統合は検証していない。
 
 ## 参照資料
 

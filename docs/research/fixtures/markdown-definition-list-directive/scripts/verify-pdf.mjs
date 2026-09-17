@@ -9,9 +9,19 @@ const fixtureDirectory = fileURLToPath(new URL('..', import.meta.url));
 const cliPath = fileURLToPath(
   new URL('../node_modules/@vivliostyle/cli/dist/cli.js', import.meta.url),
 );
-const configPath = fileURLToPath(new URL('../vivliostyle.config.mjs', import.meta.url));
+const baselineConfigPath = fileURLToPath(
+  new URL('../vivliostyle.baseline.config.mjs', import.meta.url),
+);
+const protectedConfigPath = fileURLToPath(
+  new URL('../vivliostyle.config.mjs', import.meta.url),
+);
 const outputDirectory = fileURLToPath(new URL('../output/', import.meta.url));
-const outputPath = fileURLToPath(new URL('../output/definition-list.pdf', import.meta.url));
+const baselineOutputPath = fileURLToPath(
+  new URL('../output/definition-list-baseline.pdf', import.meta.url),
+);
+const protectedOutputPath = fileURLToPath(
+  new URL('../output/definition-list-protected.pdf', import.meta.url),
+);
 
 function textByPage(document) {
   return Array.from({ length: document.countPages() }, (_, pageNumber) => {
@@ -33,31 +43,54 @@ function uniquePageContaining(pages, expectedText) {
   return matches[0].pageNumber;
 }
 
-await mkdir(outputDirectory, { recursive: true });
-await rm(outputPath, { force: true });
+async function buildPdf(configPath, outputPath) {
+  await rm(outputPath, { force: true });
+  const result = spawnSync(
+    process.execPath,
+    [cliPath, 'build', '--config', configPath, '--output', outputPath],
+    {
+      cwd: fixtureDirectory,
+      stdio: 'inherit',
+      timeout: 120_000,
+    },
+  );
 
-const buildResult = spawnSync(
-  process.execPath,
-  [cliPath, 'build', '--config', configPath, '--output', outputPath],
-  {
-    cwd: fixtureDirectory,
-    stdio: 'inherit',
-    timeout: 120_000,
-  },
+  if (result.error) throw result.error;
+  assert.equal(result.status, 0, 'Vivliostyle CLI must finish successfully');
+  const outputStat = await stat(outputPath);
+  assert.ok(outputStat.size > 0, 'Vivliostyle CLI must produce a non-empty PDF');
+}
+
+function pagesFromPdf(outputPath) {
+  return textByPage(mupdf.Document.openDocument(outputPath));
+}
+
+await mkdir(outputDirectory, { recursive: true });
+await buildPdf(baselineConfigPath, baselineOutputPath);
+await buildPdf(protectedConfigPath, protectedOutputPath);
+
+const baselinePages = pagesFromPdf(baselineOutputPath);
+const baselineReadyTermPage = uniquePageContaining(baselinePages, 'READY');
+const baselineReadyDescriptionPage = uniquePageContaining(
+  baselinePages,
+  '処理を開始できる待機状態',
+);
+assert.ok(
+  baselineReadyTermPage < baselineReadyDescriptionPage,
+  'The baseline layout must split the READY term from its description',
 );
 
-if (buildResult.error) throw buildResult.error;
-assert.equal(buildResult.status, 0, 'Vivliostyle CLI must finish successfully');
-
-const outputStat = await stat(outputPath);
-assert.ok(outputStat.size > 0, 'Vivliostyle CLI must produce a non-empty PDF');
-
-const document = mupdf.Document.openDocument(outputPath);
-const pages = textByPage(document);
-const readyTermPage = uniquePageContaining(pages, 'READY');
-const readyDescriptionPage = uniquePageContaining(pages, '処理を開始できる待機状態');
-const doneTermPage = uniquePageContaining(pages, 'DONE');
-const doneDescriptionPage = uniquePageContaining(pages, '処理が正常に完了した状態');
+const protectedPages = pagesFromPdf(protectedOutputPath);
+const readyTermPage = uniquePageContaining(protectedPages, 'READY');
+const readyDescriptionPage = uniquePageContaining(
+  protectedPages,
+  '処理を開始できる待機状態',
+);
+const doneTermPage = uniquePageContaining(protectedPages, 'DONE');
+const doneDescriptionPage = uniquePageContaining(
+  protectedPages,
+  '処理が正常に完了した状態',
+);
 
 assert.equal(
   readyTermPage,
@@ -70,9 +103,9 @@ assert.equal(
   'The DONE term and description must remain on the same page',
 );
 assert.ok(
-  doneTermPage > readyTermPage,
-  'The fixture page rule must move the second definition item to a later page',
+  readyTermPage > baselineReadyTermPage,
+  'The protected layout must move the whole READY item to the following page',
 );
 
-console.log(`Verified definition-list layout in ${outputPath}`);
-
+console.log(`Verified baseline definition-list layout in ${baselineOutputPath}`);
+console.log(`Verified protected definition-list layout in ${protectedOutputPath}`);
