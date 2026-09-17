@@ -12,6 +12,9 @@
 (defn query-all [root selector]
   (array-seq (.querySelectorAll root selector)))
 
+(defn transformed-output [source source-name]
+  (:output (definition-list-directive/transform-markdown source source-name)))
+
 (deftest definition-list-directive-ast-test
   (let [tree (definition-list-directive/parse (read-input))
         lists (vec (definition-list-directive/definition-list-directives tree))
@@ -51,7 +54,7 @@
                     "内野手です。\n"
                     ":::\n"
                     "::::\n")
-        markdown (definition-list-directive/transformed-markdown source)
+        markdown (transformed-output source "input/multiple-terms.md")
         html (stringify markdown #js {:partial true})
         document (parse html)
         item (.querySelector document "div.clono-definition-item")]
@@ -64,9 +67,14 @@
              (.-textContent (.querySelector item "dd > p")))))))
 
 (deftest definition-list-transformation-test
-  (let [output (definition-list-directive/transformed-markdown (read-input))
+  (let [result (definition-list-directive/transform-markdown
+                (read-input)
+                "input/definition-list.md")
+        output (:output result)
         reparsed (definition-list-directive/parse output)]
     (testing "When a definition list is transformed, then VFM-compatible Markdown contains one list with two grouped items"
+      (is (true? (:ok? result)))
+      (is (empty? (:diagnostics result)))
       (is (= 1 (count (re-seq #"<dl class=\"clono-definition-list\">" output))))
       (is (= 2 (count (re-seq #"<div class=\"clono-definition-item\">" output))))
       (is (.includes output "<dt><code>READY</code></dt>"))
@@ -74,8 +82,49 @@
       (is (empty?
            (definition-list-directive/definition-list-directives reparsed))))))
 
+(deftest invalid-term-label-test
+  (let [source (str "::::definition-list\n"
+                    ":::definition\n"
+                    "::term[[READY](https://example.com/state)]\n\n"
+                    "処理を開始できる状態。\n"
+                    ":::"
+                    "\n::::\n")
+        result (definition-list-directive/transform-markdown
+                source
+                "input/invalid-term.md")
+        empty-source (str "::::definition-list\n"
+                          ":::definition\n"
+                          "::term[]\n\n"
+                          "用語のない説明。\n"
+                          ":::\n"
+                          "::::\n")
+        empty-result (definition-list-directive/transform-markdown
+                      empty-source
+                      "input/empty-term.md")]
+    (testing "When a term label contains a link, then transformation fails with a diagnostic and no output"
+      (is (false? (:ok? result)))
+      (is (nil? (:output result)))
+      (is (= [{:file "input/invalid-term.md"
+               :line 3
+               :column 1
+               :directive "term"
+               :message "`term`のラベルには通常テキストとインラインコードだけを指定できます。"}]
+             (:diagnostics result))))
+
+    (testing "When a term label is empty, then transformation fails with a diagnostic and no output"
+      (is (false? (:ok? empty-result)))
+      (is (nil? (:output empty-result)))
+      (is (= [{:file "input/empty-term.md"
+               :line 3
+               :column 1
+               :directive "term"
+               :message "`term`には空でないラベルが必要です。"}]
+             (:diagnostics empty-result))))))
+
 (deftest vfm-integration-test
-  (let [markdown (definition-list-directive/transformed-markdown (read-input))
+  (let [markdown (transformed-output
+                  (read-input)
+                  "input/definition-list.md")
         html (stringify markdown #js {:partial true})
         document (parse html)
         list (.querySelector document "dl.clono-definition-list")

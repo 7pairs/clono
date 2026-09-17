@@ -4,7 +4,12 @@
    ["mdast-util-from-markdown" :refer [fromMarkdown]]
    ["mdast-util-to-markdown" :refer [toMarkdown]]
    ["micromark-extension-directive" :refer [directive]]
+   [clojure.string :as string]
+   [goog.object :as gobj]
    [goog.string :as gstring]))
+
+(def allowed-term-node-types
+  #{"text" "inlineCode"})
 
 (defn parse [source]
   (fromMarkdown
@@ -46,6 +51,36 @@
 (defn body-children [definition]
   (remove term-directive? (children definition)))
 
+(defn property [object & names]
+  (reduce gobj/get object names))
+
+(defn diagnostic [source-name node message]
+  {:file source-name
+   :line (property node "position" "start" "line")
+   :column (property node "position" "start" "column")
+   :directive (.-name node)
+   :message message})
+
+(defn term-text [term]
+  (apply str (map #(or (.-value %) "") (children term))))
+
+(defn term-validation-message [term]
+  (cond
+    (some #(not (contains? allowed-term-node-types (.-type %)))
+          (children term))
+    "`term`のラベルには通常テキストとインラインコードだけを指定できます。"
+
+    (string/blank? (term-text term))
+    "`term`には空でないラベルが必要です。"))
+
+(defn validate [tree source-name]
+  (->> (nodes tree)
+       (filter term-directive?)
+       (keep (fn [term]
+               (when-let [message (term-validation-message term)]
+                 (diagnostic source-name term message))))
+       vec))
+
 (defn html-node [value]
   #js {:type "html" :value value})
 
@@ -58,8 +93,6 @@
   (case (.-type node)
     "text" (gstring/htmlEscape (.-value node))
     "inlineCode" (str "<code>" (gstring/htmlEscape (.-value node)) "</code>")
-    "strong" (str "<strong>" (child-inline-html node) "</strong>")
-    "emphasis" (str "<em>" (child-inline-html node) "</em>")
     (throw (js/Error. (str "Unsupported definition term node: " (.-type node))))))
 
 (defn term-html [term]
@@ -92,5 +125,13 @@
                  (children tree))))
   tree)
 
-(defn transformed-markdown [source]
-  (-> source parse transform serialize))
+(defn transform-markdown [source source-name]
+  (let [tree (parse source)
+        diagnostics (validate tree source-name)]
+    (if (seq diagnostics)
+      {:ok? false
+       :output nil
+       :diagnostics diagnostics}
+      {:ok? true
+       :output (-> tree transform serialize)
+       :diagnostics []})))

@@ -79,6 +79,11 @@ assert.ok(
   baselineReadyTermPage < baselineReadyDescriptionPage,
   'The baseline layout must split the READY term from its description',
 );
+assert.equal(
+  baselineReadyDescriptionPage,
+  baselineReadyTermPage + 1,
+  'The baseline READY description must continue on the immediately following page',
+);
 
 const protectedPages = pagesFromPdf(protectedOutputPath);
 const readyTermPage = uniquePageContaining(protectedPages, 'READY');
@@ -102,9 +107,10 @@ assert.equal(
   doneDescriptionPage,
   'The DONE term and description must remain on the same page',
 );
-assert.ok(
-  readyTermPage > baselineReadyTermPage,
-  'The protected layout must move the whole READY item to the following page',
+assert.equal(
+  readyTermPage,
+  baselineReadyDescriptionPage,
+  'The protected layout must move the whole READY item to the baseline description page',
 );
 
 console.log(`Verified baseline definition-list layout in ${baselineOutputPath}`);
