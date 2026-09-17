@@ -1,0 +1,12 @@
+# 定義リスト候補
+
+::::definition-list
+:::definition[`READY`]
+処理を開始できる**待機状態**。詳細は[状態遷移の仕様](https://example.com/state)を参照する。
+:::
+
+:::definition[DONE]
+処理が正常に完了した状態を表す。終了コードは`0`となる。
+:::
+::::
+
