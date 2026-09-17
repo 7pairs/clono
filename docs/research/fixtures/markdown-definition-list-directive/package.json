@@ -1,0 +1,29 @@
+{
+  "name": "@clono/research-markdown-definition-list-directive",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^22.13.0 || ^24.0.0"
+  },
+  "scripts": {
+    "build:generate": "shadow-cljs compile generate",
+    "generate:manuscript": "npm run build:generate && node target/generate.cjs",
+    "test": "shadow-cljs compile test && node target/tests.cjs",
+    "verify": "npm test && npm run verify:pdf",
+    "verify:pdf": "npm run generate:manuscript && node scripts/verify-pdf.mjs"
+  },
+  "dependencies": {
+    "mdast-util-directive": "3.1.0",
+    "mdast-util-from-markdown": "2.0.3",
+    "mdast-util-to-markdown": "2.1.2",
+    "micromark-extension-directive": "4.0.0"
+  },
+  "devDependencies": {
+    "@vivliostyle/cli": "11.1.0",
+    "@vivliostyle/vfm": "2.7.0",
+    "mupdf": "1.28.0",
+    "node-html-parser": "9.0.1",
+    "shadow-cljs": "3.4.12"
+  }
+}

@@ -1,0 +1,5 @@
+@import url("./style-base.css");
+
+.clono-definition-item {
+  break-inside: avoid;
+}

@@ -2,7 +2,7 @@
 
 - 状態: 策定中
 - 作成日: 2026-08-22
-- 最終更新日: 2026-09-16
+- 最終更新日: 2026-09-17
 
 ## 目的
 
@@ -35,7 +35,7 @@ Vivliostyleと`clono`の責務分担は、[Vivliostyleとclonoの責務整理](.
 | 強制改ページ | `::page-break` | 実装済み | `clono`が著者向け記法を改ページ用の空要素へ変換し、改ページに必要な基盤CSSを同梱する |
 | 空白ページ | なし（`publication`へ`{ type: "blank-page" }`を指定） | 対象外 | 原稿内の記法は設けず、書籍プロジェクトの構成要素として指定する。`clono`は共通の空白ページHTMLを生成する。物理的なページ生成とページカウンターはVivliostyleへ、ノンブルと柱の表示は利用者テーマへ委譲する。実装状態は[書籍プロジェクト仕様](book-project.md)の実装段階表で管理する |
 | 文字揃え | `:::align{position="right"}`と`:::`で囲む | 実装済み | `clono`が複数段落を保持する文字揃え用コンテナへ変換し、初期仕様では右寄せだけに対応する |
-| 定義リスト | 未定 | 検討前 | `clono`が著者向け記法を`dl`、`dt`、`dd`構造へ変換する候補 |
+| 定義リスト | `::::definition-list`の内側へ`:::definition`と`::term[用語]`を記述 | 実装予定 | `clono`が用語と説明を持つ著者向け記法を、項目単位の分断を抑制できる`dl`、`div`、`dt`、`dd`構造へ変換する |
 | コラム | `:::column[タイトル]`と`:::`で囲む | 実装済み | `clono`が必須タイトルと複数のブロックを保持するコラム用コンテナへ変換し、分割制御に必要な基盤CSSを同梱する。外観は利用者のテーマCSSへ委譲する |
 
 ### 脚注、ID、番号、参照
@@ -287,6 +287,136 @@ Thunder Claw
 構文、directiveの種類、属性または内容モデルがこの仕様に適合しない場合は、[ADR 0003](../decisions/0003-adopt-generic-directives-mdast-transformation-pipeline.md)に従ってファイル名、行、列、directive名、問題の説明を持つ診断を生成する。
 
 診断が一件でもある場合はAST変換を実行せず、部分的な出力Markdownも返さない。同じ文書に複数の独立した問題がある場合は、可能な範囲で入力位置の順に診断を収集する。
+
+## 定義リスト記法
+
+### 目的
+
+定義リスト記法は、複数の用語とそれぞれの説明を、一つの定義リストとして記述する。enumの値や専門用語など、表のセルへ収めるには説明が長い項目を列挙する用途を想定する。
+
+初期仕様では、一つの項目を一つの用語と一つの説明で構成する。複数の用語が同じ説明を共有する記法は初期仕様に含めないが、将来は記法を変更せず、項目内に許可する用語の個数を増やすことで対応できる構造とする。
+
+### 構文
+
+リスト全体にはContainer directiveの`definition-list`、各項目にはContainer directiveの`definition`、各項目の用語にはLeaf directiveの`term`を使用する。
+
+内側の`definition`を3個のコロンで囲むため、外側の`definition-list`は4個のコロンで囲む。
+
+````markdown
+::::definition-list
+:::definition
+::term[`READY`]
+
+処理を開始できる**待機状態**。詳細は[状態遷移の仕様](https://example.com/state)を参照する。
+:::
+
+:::definition
+::term[DONE]
+
+処理が正常に完了した状態を表す。終了コードは`0`となる。
+:::
+::::
+````
+
+`definition-list`と`definition`はContainer directive、`term`はLeaf directiveとして記述する。同じ名前をText directiveとして使用した場合や、異なる種類のdirectiveとして記述した場合はエラーとする。
+
+`definition-list`、`definition`および`term`には属性を一つも許可しない。`id`、`class`および`style`を含め、属性が一つでも指定された場合はエラーとする。`definition-list`と`definition`にはラベルを許可しない。
+
+`term`のラベルは必須とし、空文字または空白だけの用語はエラーとする。項目を識別するID、用語への参照および定義リストの入れ子は初期仕様に含めない。同じ用語を複数の項目へ記述することは許可する。
+
+### 内容モデル
+
+`definition-list`の直下には、1個以上の`definition`だけを許可する。空の`definition-list`と、段落など`definition`以外の子要素を持つ`definition-list`はエラーとする。
+
+各`definition`の直下には、次の順序で子要素を記述する。
+
+1. 用語を表す`term`を1個
+2. 説明を表す通常のMarkdown段落を1個
+
+`term`がない場合、2個以上ある場合、説明段落がない場合、複数の説明段落がある場合、または順序が異なる場合はエラーとする。将来、複数の用語が同じ説明を共有する必要性が確認された場合は、説明段落の前へ1個以上の`term`を許可するよう個数制約を見直す。
+
+用語のラベルには、次のmdastノードに対応するインラインMarkdownだけを許可する。
+
+- `text`
+- `inlineCode`
+
+一つの用語内で通常テキストとインラインコードを組み合わせることも許可する。強調、太字、リンク、画像、raw HTML、改行およびdirectiveなど、この一覧にないmdastノードはエラーとする。
+
+説明段落では、次のmdastノードに対応するインラインMarkdownを許可する。子要素を持つノードは再帰的に検証する。
+
+- `text`
+- `emphasis`
+- `strong`
+- `inlineCode`
+- `link`
+- `linkReference`
+- `break`
+
+説明内の画像、脚注参照、raw HTMLおよびdirectiveは初期仕様では許可しない。この一覧にないmdastノードも、許可する仕様を追加するまではエラーとする。参照形式のリンクを使用する場合、その定義は`definition-list`の外へ記述する。
+
+### 配置
+
+`definition-list`はMarkdown文書のルート直下に記述する。段落、リスト項目、引用、文字揃え、コラム、脚注定義または他のdirectiveの内部に記述した場合はエラーとする。
+
+`definition`は`definition-list`の直接の子としてだけ使用できる。`term`は`definition`の直接の子としてだけ使用できる。`definition`または`term`を単独で使用した場合や、別の親要素へ配置した場合はエラーとする。
+
+`definition-list`、`definition`および説明内へ、定義リスト自身を含むdirectiveを入れ子にすることは許可しない。
+
+### 変換結果
+
+`clono`は`definition-list`を一つの`dl.clono-definition-list`へ変換する。各`definition`は`div.clono-definition-item`で囲み、`term`の用語を`dt`へ、説明段落を一つの`dd`へ配置する。
+
+前述の入力例は、次のraw HTMLとMarkdownを含む構造へ変換する。
+
+```markdown
+<dl class="clono-definition-list">
+
+<div class="clono-definition-item">
+<dt><code>READY</code></dt>
+<dd>
+
+処理を開始できる**待機状態**。詳細は[状態遷移の仕様](https://example.com/state)を参照する。
+
+</dd>
+</div>
+
+<div class="clono-definition-item">
+<dt>DONE</dt>
+<dd>
+
+処理が正常に完了した状態を表す。終了コードは`0`となる。
+
+</dd>
+</div>
+
+</dl>
+```
+
+要素名とclass名は固定する。用語の通常テキストとインラインコードは、それぞれHTMLのテキスト内容と`code`要素へ変換し、動的なテキストをHTMLのテキスト内容としてエンコードする。著者が指定した値を要素名、属性名またはclass名へ埋め込まず、自動生成IDも付与しない。
+
+説明の段落と許可されたインラインMarkdownは、`dd`内へMarkdownのまま保持する。説明内のMarkdownからHTMLへの変換と、定義リストの意味構造の保持はVFMへ委譲する。変換後のMarkdownは解析と直列化によって空白や改行が正規化される可能性があるが、許可された構造と意味を保持する。
+
+### CSSとページ分割
+
+`clono`は、一つの用語と説明がページ境界で分断されることを可能な限り避けるため、次の規則を基盤CSSへ追加する。
+
+```css
+.clono-definition-item {
+  break-inside: avoid;
+}
+```
+
+基盤CSSは、npmパッケージ内の`styles/clono.css`として同梱する。書籍プロジェクト変換での配置、利用者テーマとの読み込み順、および上書き可能性の保証範囲は、[書籍プロジェクト仕様](book-project.md)に従う。
+
+定義項目が一ページに収まらない場合は、Vivliostyleが項目内を分割することを許容する。用語と説明を常に同じページへ配置できることは保証しない。
+
+字下げ、項目間の余白、フォント、罫線、背景色などの外観は基盤CSSで指定せず、利用者のテーマCSSへ委譲する。
+
+### 診断と出力
+
+構文、directiveの種類、ラベル、属性、内容モデルまたは配置がこの仕様に適合しない場合は、[ADR 0003](../decisions/0003-adopt-generic-directives-mdast-transformation-pipeline.md)に従ってファイル名、行、列、directive名、問題の説明を持つ診断を生成する。
+
+診断が一件でもある場合はAST変換を実行せず、部分的な出力Markdownも返さない。同じ文書に複数の独立した問題がある場合は、可能な範囲で入力位置の順に診断を収集する。`clono transform`と`clono build`は同じ定義リストの変換および診断契約を使用する。
 
 ## コラム記法
 
