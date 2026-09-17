@@ -6,6 +6,8 @@ Generic Directivesの入れ子を使用して、複数の用語と説明を持�
 
 このfixtureは、定義リストの著者向け記法、class名、HTML構造または診断契約を確定するものではない。仕様策定前の技術的な成立性を確認するため、候補記法と候補出力を使用する。
 
+検証結果、評価および未確認事項は、[Generic Directivesと定義リストのMarkdown ASTに関する調査](../../markdown-definition-list-directive.md)を参照する。
+
 ## 候補記法
 
 入力は[`input/definition-list.md`](input/definition-list.md)へ保存している。外側の`definition-list`がリスト全体、内側の各`definition`が一つの用語と説明を表す。内側に3個のコロンを使用するため、外側は4個のコロンで囲む。
@@ -105,6 +107,7 @@ PDF検証はページ数、絶対座標または特定フォントのメトリ�
 
 ## 参照資料
 
+- [Generic Directivesと定義リストのMarkdown ASTに関する調査](../../markdown-definition-list-directive.md)
 - [Vivliostyleの基本表現機能に関する調査](../../vivliostyle-basic-presentation.md)
 - [Markdown AST変換と出力方式に関する調査](../../markdown-ast-transformation.md)
 - [Generic DirectivesとmdastによるMarkdown変換パイプラインのADR](../../../decisions/0003-adopt-generic-directives-mdast-transformation-pipeline.md)
