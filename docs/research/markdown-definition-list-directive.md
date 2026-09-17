@@ -225,7 +225,7 @@ PDF検証では、同じ変換後Markdownから次の二つのPDFを生成した
 - 製品用テーマで使用する字下げ、余白、罫線または背景などの外観
 - スクリーンリーダーなどによるアクセシビリティ上の読み上げ
 
-今回使用したdirective名、class名、HTML構造およびCSSは候補であり、clonoの最終的な出力契約ではない。正式な著者向け記法、診断契約および基盤CSSは、後続の仕様策定で決定する。
+今回の結果をもとに決定した正式な著者向け記法、診断契約および基盤CSSは、[clono著者向け記法](../specifications/authoring-syntax.md#定義リスト記法)を正本とする。
 
 ## 再現方法
 
@@ -248,6 +248,7 @@ PDF検証では、同じ変換後Markdownから次の二つのPDFを生成した
 - [Markdown AST変換と出力方式に関する調査](markdown-ast-transformation.md)
 - [Generic DirectivesとmdastによるMarkdown変換パイプラインのADR](../decisions/0003-adopt-generic-directives-mdast-transformation-pipeline.md)
 - [検証用fixture](fixtures/markdown-definition-list-directive/)
+- [clono著者向け記法](../specifications/authoring-syntax.md#定義リスト記法)
 - [Generic directives/plugins syntax](https://talk.commonmark.org/t/generic-directives-plugins-syntax/444)
 - [`mdast-util-from-markdown` 2.0.3](https://github.com/syntax-tree/mdast-util-from-markdown/tree/2.0.3)
 - [`mdast-util-to-markdown` 2.1.2](https://github.com/syntax-tree/mdast-util-to-markdown/tree/2.1.2)
