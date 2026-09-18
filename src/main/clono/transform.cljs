@@ -4,6 +4,7 @@
    [clono.directive-validation :as directive-validation]
    [clono.transform.align :as align]
    [clono.transform.column :as column]
+   [clono.transform.definition-list :as definition-list]
    [clono.transform.figure :as figure]
    [clono.transform.heading :as heading]
    [clono.transform.index :as index]
@@ -16,12 +17,15 @@
 (def rules
   {"align" align/rule
    "column" column/rule
+   "definition" definition-list/definition-rule
+   "definition-list" definition-list/definition-list-rule
    "figure" figure/rule
    "index" index/rule
    "listing" listing/rule
    "page-break" page-break/rule
    "space" space/rule
    "table" table/rule
+   "term" definition-list/term-rule
    "xref" xref/rule})
 
 (def known-directive-names

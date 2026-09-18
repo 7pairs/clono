@@ -147,7 +147,13 @@
                       "決めの段落。\n\n"
                       ":::align{position=\"right\"}\n署名\n:::\n\n"
                       ":xref[external-figure]"
-                      "{type=\"figure\" format=\"number-title\"}\n"))
+                      "{type=\"figure\" format=\"number-title\"}\n\n"
+                      "::::definition-list\n"
+                      ":::definition\n"
+                      "::term[`READY`]\n\n"
+                      "処理を開始できる**待機状態**です。\n"
+                      ":::\n"
+                      "::::\n"))
     (verify-success!
      (run-cli ["transform" input "--output" output] root)
      "Release transform command")
@@ -164,6 +170,12 @@
                      "clono-xref-number-title clono-xref-placeholder\">"
                      "図X.X 参照先未解決</span>"))
                "Release transform command did not generate the xref placeholder")
+      (ensure! (.includes content "<dl class=\"clono-definition-list\">")
+               "Release transform command did not generate a definition list")
+      (ensure! (.includes content "<dt><code>READY</code></dt>")
+               "Release transform command did not generate a definition term")
+      (ensure! (.includes content "処理を開始できる**待機状態**です。")
+               "Release transform command did not preserve a definition description")
       (ensure! (not (.includes content "external-figure"))
                "Release transform command exposed the unresolved logical ID"))))
 
@@ -319,7 +331,13 @@
                  (str "導入の段落。\n\n"
                       "::space\n\n"
                       "決めの段落。\n\n"
-                      ":::align{position=\"right\"}\nThunder Claw\n:::\n"))
+                      ":::align{position=\"right\"}\nThunder Claw\n:::\n\n"
+                      "::::definition-list\n"
+                      ":::definition\n"
+                      "::term[READY]\n\n"
+                      "処理を開始できる状態です。\n"
+                      ":::\n"
+                      "::::\n"))
     (write-file! (.join path project "manuscripts" "images" "logo.txt")
                  "static asset\n")
 
@@ -332,6 +350,10 @@
               (.readFileSync fs (.join path output "chapter.md") "utf8")
               "<div class=\"clono-space\" aria-hidden=\"true\"></div>")
              "Release build command did not generate vertical space")
+    (ensure! (.includes
+              (.readFileSync fs (.join path output "chapter.md") "utf8")
+              "<dl class=\"clono-definition-list\">")
+             "Release build command did not generate a definition list")
     (ensure! (= "static asset\n"
                 (.readFileSync fs (.join path output "images" "logo.txt") "utf8"))
              "Release build command did not copy a static file")
@@ -345,6 +367,9 @@
       (ensure! (.includes (.readFileSync fs stylesheet "utf8")
                           ".clono-space")
                "Release build command copied a stylesheet without the vertical-space rule")
+      (ensure! (.includes (.readFileSync fs stylesheet "utf8")
+                          ".clono-definition-item")
+               "Release build command copied a stylesheet without the definition-list rule")
       (ensure! (.existsSync fs blank-page)
                "Release build command did not generate the blank page resource")
       (ensure! (.includes (.readFileSync fs blank-page "utf8")
