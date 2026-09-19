@@ -6,4 +6,12 @@ globalThis[evaluationKey] = evaluationCount;
 export default {
   marker: "cached",
   evaluationCount,
+  name: "research-cached-plugin",
+  version: "0.0.0",
+  apiVersion: 1,
+  renderers: {
+    column(input) {
+      return `cached:${input.title}:${input.body}`;
+    },
+  },
 };

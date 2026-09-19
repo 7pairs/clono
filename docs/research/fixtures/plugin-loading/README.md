@@ -32,6 +32,8 @@ plugin-loading/
 
 `src/main/clono/research/plugin_loading.cljs`は、ファイルシステム上の絶対パスを`file:` URLへ変換してから`import()`へ渡す。プラグイン候補のdefault exportは検証せず、ES Module namespace objectのまま結果へ保持する。
 
+各候補モジュールのdefault exportには、相互運用を検証するため、`name`、`version`、`apiVersion`および`renderers.column`を持つJavaScriptオブジェクトを使用する。ClojureScriptは、このオブジェクトと関数をClojureScriptのデータ構造へ変換せずに参照する。これらの項目名、値、必須性およびrendererの入出力は正式な契約ではない。
+
 ## 検証環境
 
 - 実行確認: macOS、Node.js 24.19.0、Temurin JDK 21.0.12
@@ -62,13 +64,17 @@ npm run verify
 - 候補設定に記述した順序でモジュールを返す
 - 設定ファイルとプラグインモジュール内のtop-level awaitを評価できる
 - 同じURLのモジュールを繰り返し読み込んでも、Node.jsのimportキャッシュによって一度だけ評価される
+- ClojureScriptから候補プラグインの`name`、`version`および`apiVersion`を読み取れる
+- ClojureScriptから`renderers.column`を複数回呼び出し、日本語を含むJavaScriptオブジェクトを渡して文字列を受け取れる
+- 凍結した入力オブジェクトを変更せずにrendererを実行できる
+- 同じモジュールを繰り返し読み込んだ場合にrenderer関数の同一性が保たれる
 
 ## 検証範囲の境界
 
 このfixtureはclono本体から参照しない。現時点では、次の事項を検証または決定しない。
 
 - `plugins`配列を含む候補設定を正式な`clono.config.mjs`へ採用するか
-- プラグインモジュールのexport形式と基本情報
+- 候補としたdefault export、`name`、`version`、`apiVersion`および`renderers`を正式な契約へ採用するか
 - プラグインパスの許可範囲
 - rendererへ渡すデータと戻り値
 - rendererの同期実行と失敗契約
