@@ -14,6 +14,14 @@
   break-before: page;
 }
 
+.clono-space {
+  block-size: 1lh;
+}
+
+.clono-definition-item {
+  break-inside: avoid;
+}
+
 .clono-blank-page {
   page: clono-blank;
   break-before: page;
