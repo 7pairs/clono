@@ -20,6 +20,45 @@
      :version (gobj/get plugin "version")
      :api-version (gobj/get plugin "apiVersion")}))
 
+(defn inspect-candidate-export [entry]
+  (let [plugin (candidate-plugin entry)]
+    (if (and (= "object" (goog/typeOf plugin))
+             (not (nil? plugin))
+             (not (array? plugin)))
+      {:status :accepted}
+      {:status :rejected
+       :reason :invalid-default-export
+       :actual-type (goog/typeOf plugin)})))
+
+(defn- candidate-renderer-names [entry]
+  (let [plugin (candidate-plugin entry)
+        renderers (when (= {:status :accepted}
+                           (inspect-candidate-export entry))
+                    (gobj/get plugin "renderers"))]
+    (if (and (= "object" (goog/typeOf renderers))
+             (not (nil? renderers))
+             (not (array? renderers)))
+      (vec (array-seq (js/Object.keys renderers)))
+      [])))
+
+(defn duplicate-candidate-renderers [entries]
+  (->> entries
+       (reduce (fn [renderer-entries entry]
+                 (reduce (fn [result renderer-name]
+                           (update result
+                                   renderer-name
+                                   (fnil conj [])
+                                   (:specifier entry)))
+                         renderer-entries
+                         (candidate-renderer-names entry)))
+               {})
+       (keep (fn [[renderer-name specifiers]]
+               (when (< 1 (count specifiers))
+                 {:renderer-name renderer-name
+                  :specifiers specifiers})))
+       (sort-by :renderer-name)
+       vec))
+
 (defn candidate-renderer [entry renderer-name]
   (gobj/get (gobj/get (candidate-plugin entry) "renderers") renderer-name))
 

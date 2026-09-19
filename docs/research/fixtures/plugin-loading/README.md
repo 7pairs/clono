@@ -16,11 +16,14 @@ plugin-loading/
 ├── package-lock.json
 ├── project with space#hash/
 │   ├── clono.config.mjs
+│   ├── invalid-export.config.mjs
+│   ├── missing-plugin.config.mjs
 │   ├── renderer-behaviors.config.mjs
 │   └── plugins/
 │       ├── basic plugin.mjs
 │       ├── cached-plugin.mjs
 │       ├── invalid-return-plugin.mjs
+│       ├── named-export-only-plugin.mjs
 │       ├── promise-return-plugin.mjs
 │       ├── throwing-plugin.mjs
 │       └── top-level-await#plugin.mjs
@@ -39,6 +42,8 @@ plugin-loading/
 各候補モジュールのdefault exportには、相互運用を検証するため、`name`、`version`、`apiVersion`および`renderers.column`を持つJavaScriptオブジェクトを使用する。ClojureScriptは、このオブジェクトと関数をClojureScriptのデータ構造へ変換せずに参照する。これらの項目名、値、必須性およびrendererの入出力は正式な契約ではない。
 
 `renderer-behaviors.config.mjs`は、rendererが例外を投げる候補、文字列以外を返す候補、およびPromiseを返す候補を列挙する。調査用の呼び出し処理は同期的に文字列を返すrendererだけを受理し、これら3種類を互いに区別できる結果として返す。結果のキー、値および診断文言は正式な失敗契約ではない。
+
+通常の候補設定にある3つのプラグインは、いずれも`column` rendererを公開する。これにより、renderer名の重複と各プラグインの指定順を検出できるか確認する。`invalid-export.config.mjs`はdefault exportを持たないモジュールを、`missing-plugin.config.mjs`は存在しないモジュールを参照する。これらの検出結果とNode.jsの読み込みエラーを区別できることを確認するが、正式な検証範囲や診断文言は決定しない。
 
 ## 検証環境
 
@@ -78,17 +83,20 @@ npm run verify
 - rendererが同期的に投げた例外を捕捉し、元の例外を保持できる
 - JavaScriptオブジェクトを返すrendererを不正な戻り値として識別できる
 - Promiseを返すrendererを待機せず、非同期の戻り値として識別できる
+- 同じrenderer名を公開するプラグインと、その設定順を検出できる
+- 存在しないプラグインファイルの読み込み失敗から、Node.jsのエラーコードと対象ファイルを取得できる
+- default exportを持たないモジュールを、読み込み失敗とは異なる不正なexportとして識別できる
 
 ## 検証範囲の境界
 
 このfixtureはclono本体から参照しない。現時点では、次の事項を検証または決定しない。
 
 - `plugins`配列を含む候補設定を正式な`clono.config.mjs`へ採用するか
-- 候補としたdefault export、`name`、`version`、`apiVersion`および`renderers`を正式な契約へ採用するか
-- プラグインパスの許可範囲
+- 候補としたdefault export、`name`、`version`、`apiVersion`および`renderers`を正式な契約へ採用するか、および各項目の詳細な検証規則
+- プラグインパスの許可範囲と、読み込み失敗に対する正式な診断
 - rendererへ渡す正式なデータ構造と、raw HTML文字列に課す制約
 - rendererの例外、不正な戻り値およびPromiseに対する正式な診断と失敗契約
-- 複数プラグインの競合規則
+- 複数プラグインの競合に対する正式な診断と失敗契約
 - `clono transform`および`clono build`との統合
 
 これらはfixtureへ再現可能な検証ケースを追加した後、調査記録、仕様およびADRで段階的に決定する。

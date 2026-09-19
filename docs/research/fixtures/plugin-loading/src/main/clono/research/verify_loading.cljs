@@ -24,6 +24,14 @@
                                     fixture-root
                                     "project with space#hash"
                                     "renderer-behaviors.config.mjs")
+        invalid-export-config-path (.join path
+                                          fixture-root
+                                          "project with space#hash"
+                                          "invalid-export.config.mjs")
+        missing-plugin-config-path (.join path
+                                          fixture-root
+                                          "project with space#hash"
+                                          "missing-plugin.config.mjs")
         first-renderer (atom nil)]
     (.chdir js/process (.tmpdir os))
     (-> (plugin-loading/load-candidate-plugins config-path)
@@ -39,6 +47,13 @@
            (assert! (= ["basic" "top-level-await" "cached"]
                        (plugin-markers first-result))
                     "The candidate plugin modules were not loaded in configuration order")
+           (assert! (= [{:renderer-name "column"
+                         :specifiers ["./plugins/basic plugin.mjs"
+                                      "./plugins/top-level-await#plugin.mjs"
+                                      "./plugins/cached-plugin.mjs"]}]
+                       (plugin-loading/duplicate-candidate-renderers
+                        (:plugins first-result)))
+                    "Duplicate candidate renderers were not reported in configuration order")
            (assert! (= [{:name "research-basic-plugin"
                          :version "0.0.0"
                          :api-version 1}
@@ -141,7 +156,33 @@
              (assert! (= {:status :rejected
                           :reason :promise-returned}
                          promise-result)
-                      "A Promise renderer result was not rejected"))))
+                      "A Promise renderer result was not rejected"))
+           (plugin-loading/load-candidate-plugins invalid-export-config-path)))
+        (.then
+         (fn [invalid-export-result]
+           (assert! (= {:status :rejected
+                        :reason :invalid-default-export
+                        :actual-type "undefined"}
+                       (plugin-loading/inspect-candidate-export
+                        (first (:plugins invalid-export-result))))
+                    "A module without a default export was not rejected")
+           (-> (plugin-loading/load-candidate-plugins
+                missing-plugin-config-path)
+               (.then (fn [_]
+                        {:loaded? true})
+                      (fn [error]
+                        {:loaded? false
+                         :error error})))))
+        (.then
+         (fn [missing-plugin-result]
+           (assert! (false? (:loaded? missing-plugin-result))
+                    "A missing plugin file was loaded successfully")
+           (assert! (= "ERR_MODULE_NOT_FOUND"
+                       (.-code (:error missing-plugin-result)))
+                    "A missing plugin file did not preserve the Node.js error code")
+           (assert! (.includes (.-message (:error missing-plugin-result))
+                               "missing-plugin.mjs")
+                    "A missing plugin error did not identify the requested file")))
         (.catch
          (fn [error]
            (.error js/console (or (.-stack error) (.-message error) (str error)))
