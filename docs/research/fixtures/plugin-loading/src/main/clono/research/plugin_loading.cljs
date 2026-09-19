@@ -1,0 +1,118 @@
+(ns clono.research.plugin-loading
+  (:require
+   ["node:path" :as path]
+   ["node:url" :refer [pathToFileURL]]
+   [goog.object :as gobj]))
+
+;; Closure cannot transpile a dynamic import expression in a node-script release.
+(def ^:private dynamic-import
+  (js/Function. "specifier" "return import(specifier);"))
+
+(defn- import-file [file-path]
+  (dynamic-import (.-href (pathToFileURL file-path))))
+
+(defn candidate-plugin [entry]
+  (gobj/get (:module entry) "default"))
+
+(defn candidate-plugin-info [entry]
+  (let [plugin (candidate-plugin entry)]
+    {:name (gobj/get plugin "name")
+     :version (gobj/get plugin "version")
+     :api-version (gobj/get plugin "apiVersion")}))
+
+(defn inspect-candidate-export [entry]
+  (let [plugin (candidate-plugin entry)]
+    (if (and (= "object" (goog/typeOf plugin))
+             (not (nil? plugin))
+             (not (array? plugin)))
+      {:status :accepted}
+      {:status :rejected
+       :reason :invalid-default-export
+       :actual-type (goog/typeOf plugin)})))
+
+(defn- candidate-renderer-names [entry]
+  (let [plugin (candidate-plugin entry)
+        renderers (when (= {:status :accepted}
+                           (inspect-candidate-export entry))
+                    (gobj/get plugin "renderers"))]
+    (if (and (= "object" (goog/typeOf renderers))
+             (not (nil? renderers))
+             (not (array? renderers)))
+      (vec (array-seq (js/Object.keys renderers)))
+      [])))
+
+(defn duplicate-candidate-renderers [entries]
+  (->> entries
+       (reduce (fn [renderer-entries entry]
+                 (reduce (fn [result renderer-name]
+                           (update result
+                                   renderer-name
+                                   (fnil conj [])
+                                   (:specifier entry)))
+                         renderer-entries
+                         (candidate-renderer-names entry)))
+               {})
+       (keep (fn [[renderer-name specifiers]]
+               (when (< 1 (count specifiers))
+                 {:renderer-name renderer-name
+                  :specifiers specifiers})))
+       (sort-by :renderer-name)
+       vec))
+
+(defn candidate-renderer [entry renderer-name]
+  (gobj/get (gobj/get (candidate-plugin entry) "renderers") renderer-name))
+
+(defn invoke-candidate-renderer [entry renderer-name input]
+  ((candidate-renderer entry renderer-name) input))
+
+(defn- thenable? [value]
+  (and (contains? #{"object" "function"} (goog/typeOf value))
+       (fn? (gobj/get value "then"))))
+
+(defn inspect-candidate-renderer-call [entry renderer-name input]
+  (let [invocation (try
+                     {:output
+                      (invoke-candidate-renderer entry renderer-name input)}
+                     (catch :default error
+                       {:error error}))]
+    (if (contains? invocation :error)
+      {:status :rejected
+       :reason :renderer-threw
+       :error (:error invocation)}
+      (let [output (:output invocation)]
+        (cond
+          (thenable? output)
+          {:status :rejected
+           :reason :promise-returned}
+
+          (string? output)
+          {:status :accepted
+           :output output}
+
+          :else
+          {:status :rejected
+           :reason :invalid-return-value
+           :actual-type (goog/typeOf output)})))))
+
+(defn load-candidate-plugins [config-path]
+  (let [resolved-config-path (.resolve path config-path)]
+    (-> (import-file resolved-config-path)
+        (.then
+         (fn [config-module]
+           (let [config (gobj/get config-module "default")
+                 specifiers (array-seq (gobj/get config "plugins"))
+                 config-directory (.dirname path resolved-config-path)
+                 entries (mapv (fn [specifier]
+                                 {:specifier specifier
+                                  :file-path (.resolve path config-directory specifier)})
+                               specifiers)
+                 imports (to-array (map #(import-file (:file-path %)) entries))]
+             (-> (js/Promise.all imports)
+                 (.then
+                  (fn [modules]
+                    {:config-path resolved-config-path
+                     :plugins
+                     (mapv (fn [entry module]
+                             (assoc entry :module module))
+                           entries
+                           (array-seq modules))})))))))))
