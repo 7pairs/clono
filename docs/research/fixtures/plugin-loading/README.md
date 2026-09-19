@@ -4,7 +4,7 @@
 
 ローカルのES Moduleをclonoのプラグイン候補として読み込み、ClojureScriptから検証および呼び出しできるかを調査するための独立したfixtureである。
 
-このコミットでは、調査に使用するNode.jsとClojureScriptの実行環境、テストの入口、および再現手順だけを用意する。プラグインモジュール、候補設定、読み込み処理および正式なプラグイン契約はまだ実装しない。
+このfixtureでは、候補設定に列挙したローカルのES Moduleを、設定ファイルがあるディレクトリを基準に読み込めることを検証する。候補設定とモジュールの形は読み込み方式を調査するための入力であり、正式なプラグイン契約ではない。
 
 ## 現在の構成
 
@@ -14,15 +14,23 @@ plugin-loading/
 ├── README.md
 ├── package.json
 ├── package-lock.json
+├── project with space#hash/
+│   ├── clono.config.mjs
+│   └── plugins/
+│       ├── basic plugin.mjs
+│       ├── cached-plugin.mjs
+│       └── top-level-await#plugin.mjs
 ├── shadow-cljs.edn
 └── src/
-    └── test/
-        └── clono/
-            └── research/
-                └── plugin_loading_test.cljs
+    ├── main/clono/research/
+    │   ├── plugin_loading.cljs
+    │   └── verify_loading.cljs
+    └── test/clono/research/plugin_loading_test.cljs
 ```
 
-後続の検証では、このfixtureへ候補となる書籍プロジェクト、プラグインモジュール、およびClojureScriptの読み込み処理を追加する。
+`project with space#hash/clono.config.mjs`は、候補となる`plugins`配列をtop-level awaitで作成する。各相対パスは、設定ファイルと同じディレクトリを基準に解決する。プラグイン候補には、通常のdefault export、top-level awaitを使用するモジュール、および評価回数を記録するモジュールを用意する。
+
+`src/main/clono/research/plugin_loading.cljs`は、ファイルシステム上の絶対パスを`file:` URLへ変換してから`import()`へ渡す。プラグイン候補のdefault exportは検証せず、ES Module namespace objectのまま結果へ保持する。
 
 ## 検証環境
 
@@ -44,13 +52,22 @@ npm run verify
 
 ## 現在の自動検証
 
-`src/test/clono/research/plugin_loading_test.cljs`は、fixtureのテストがNode.js上で実行されることだけを確認する。プラグイン読み込みに関する検証ケースは、後続のコミットで追加する。
+`src/test/clono/research/plugin_loading_test.cljs`は、fixtureのテストがNode.js上で実行されることを確認する。
+
+実際の`import()`は、Shadow CLJSの`:node-test`ターゲットが使用するVM評価ではなく、releaseビルドした通常のNode.jsスクリプトで検証する。`src/main/clono/research/verify_loading.cljs`をビルドした`target/verify-loading.cjs`は、次を確認する。
+
+- 起動時のカレントディレクトリと異なる場所にある候補設定を読み込める
+- 空白と`#`を含むファイルシステム上のパスを安全な`file:` URLとして読み込める
+- 設定ファイルの場所を基準に、候補設定へ記述した相対パスを解決する
+- 候補設定に記述した順序でモジュールを返す
+- 設定ファイルとプラグインモジュール内のtop-level awaitを評価できる
+- 同じURLのモジュールを繰り返し読み込んでも、Node.jsのimportキャッシュによって一度だけ評価される
 
 ## 検証範囲の境界
 
 このfixtureはclono本体から参照しない。現時点では、次の事項を検証または決定しない。
 
-- `clono.config.mjs`におけるプラグイン設定の形式
+- `plugins`配列を含む候補設定を正式な`clono.config.mjs`へ採用するか
 - プラグインモジュールのexport形式と基本情報
 - プラグインパスの許可範囲
 - rendererへ渡すデータと戻り値

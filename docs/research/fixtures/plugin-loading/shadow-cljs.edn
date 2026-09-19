@@ -6,6 +6,12 @@
  []
 
  :builds
- {:test
+ {:loading
+  {:target :node-script
+   :output-to "target/verify-loading.cjs"
+   :output-feature-set :es2020
+   :main clono.research.verify-loading/main}
+
+  :test
   {:target :node-test
    :output-to "target/tests.cjs"}}}
