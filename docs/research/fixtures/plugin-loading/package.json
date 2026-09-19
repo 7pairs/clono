@@ -1,0 +1,16 @@
+{
+  "name": "@clono/research-plugin-loading",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^22.13.0 || ^24.0.0"
+  },
+  "scripts": {
+    "test": "shadow-cljs compile test && node target/tests.cjs",
+    "verify": "npm test"
+  },
+  "devDependencies": {
+    "shadow-cljs": "3.4.12"
+  }
+}
