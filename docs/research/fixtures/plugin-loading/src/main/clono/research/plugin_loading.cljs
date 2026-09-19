@@ -26,6 +26,35 @@
 (defn invoke-candidate-renderer [entry renderer-name input]
   ((candidate-renderer entry renderer-name) input))
 
+(defn- thenable? [value]
+  (and (contains? #{"object" "function"} (goog/typeOf value))
+       (fn? (gobj/get value "then"))))
+
+(defn inspect-candidate-renderer-call [entry renderer-name input]
+  (let [invocation (try
+                     {:output
+                      (invoke-candidate-renderer entry renderer-name input)}
+                     (catch :default error
+                       {:error error}))]
+    (if (contains? invocation :error)
+      {:status :rejected
+       :reason :renderer-threw
+       :error (:error invocation)}
+      (let [output (:output invocation)]
+        (cond
+          (thenable? output)
+          {:status :rejected
+           :reason :promise-returned}
+
+          (string? output)
+          {:status :accepted
+           :output output}
+
+          :else
+          {:status :rejected
+           :reason :invalid-return-value
+           :actual-type (goog/typeOf output)})))))
+
 (defn load-candidate-plugins [config-path]
   (let [resolved-config-path (.resolve path config-path)]
     (-> (import-file resolved-config-path)

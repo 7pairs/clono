@@ -16,9 +16,13 @@ plugin-loading/
 ├── package-lock.json
 ├── project with space#hash/
 │   ├── clono.config.mjs
+│   ├── renderer-behaviors.config.mjs
 │   └── plugins/
 │       ├── basic plugin.mjs
 │       ├── cached-plugin.mjs
+│       ├── invalid-return-plugin.mjs
+│       ├── promise-return-plugin.mjs
+│       ├── throwing-plugin.mjs
 │       └── top-level-await#plugin.mjs
 ├── shadow-cljs.edn
 └── src/
@@ -33,6 +37,8 @@ plugin-loading/
 `src/main/clono/research/plugin_loading.cljs`は、ファイルシステム上の絶対パスを`file:` URLへ変換してから`import()`へ渡す。プラグイン候補のdefault exportは検証せず、ES Module namespace objectのまま結果へ保持する。
 
 各候補モジュールのdefault exportには、相互運用を検証するため、`name`、`version`、`apiVersion`および`renderers.column`を持つJavaScriptオブジェクトを使用する。ClojureScriptは、このオブジェクトと関数をClojureScriptのデータ構造へ変換せずに参照する。これらの項目名、値、必須性およびrendererの入出力は正式な契約ではない。
+
+`renderer-behaviors.config.mjs`は、rendererが例外を投げる候補、文字列以外を返す候補、およびPromiseを返す候補を列挙する。調査用の呼び出し処理は同期的に文字列を返すrendererだけを受理し、これら3種類を互いに区別できる結果として返す。結果のキー、値および診断文言は正式な失敗契約ではない。
 
 ## 検証環境
 
@@ -68,6 +74,10 @@ npm run verify
 - ClojureScriptから`renderers.column`を複数回呼び出し、日本語を含むJavaScriptオブジェクトを渡して文字列を受け取れる
 - 凍結した入力オブジェクトを変更せずにrendererを実行できる
 - 同じモジュールを繰り返し読み込んだ場合にrenderer関数の同一性が保たれる
+- 同期的に文字列を返すrendererを受理できる
+- rendererが同期的に投げた例外を捕捉し、元の例外を保持できる
+- JavaScriptオブジェクトを返すrendererを不正な戻り値として識別できる
+- Promiseを返すrendererを待機せず、非同期の戻り値として識別できる
 
 ## 検証範囲の境界
 
@@ -76,8 +86,8 @@ npm run verify
 - `plugins`配列を含む候補設定を正式な`clono.config.mjs`へ採用するか
 - 候補としたdefault export、`name`、`version`、`apiVersion`および`renderers`を正式な契約へ採用するか
 - プラグインパスの許可範囲
-- rendererへ渡すデータと戻り値
-- rendererの同期実行と失敗契約
+- rendererへ渡す正式なデータ構造と、raw HTML文字列に課す制約
+- rendererの例外、不正な戻り値およびPromiseに対する正式な診断と失敗契約
 - 複数プラグインの競合規則
 - `clono transform`および`clono build`との統合
 

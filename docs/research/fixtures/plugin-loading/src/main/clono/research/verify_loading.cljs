@@ -20,6 +20,10 @@
                            fixture-root
                            "project with space#hash"
                            "clono.config.mjs")
+        behavior-config-path (.join path
+                                    fixture-root
+                                    "project with space#hash"
+                                    "renderer-behaviors.config.mjs")
         first-renderer (atom nil)]
     (.chdir js/process (.tmpdir os))
     (-> (plugin-loading/load-candidate-plugins config-path)
@@ -96,7 +100,48 @@
                                 (plugin-loading/candidate-renderer
                                  (first (:plugins second-result))
                                  "column"))
-                    "The repeated import changed the renderer function identity")))
+                    "The repeated import changed the renderer function identity")
+           (let [sync-result
+                 (plugin-loading/inspect-candidate-renderer-call
+                  (first (:plugins second-result))
+                  "column"
+                  #js {:title "同期呼び出し"
+                       :body "文字列を返します。"})]
+             (assert! (= {:status :accepted
+                          :output "basic:同期呼び出し:文字列を返します。"}
+                         sync-result)
+                      (str "A synchronous string renderer was not accepted: "
+                           (pr-str sync-result))))
+           (plugin-loading/load-candidate-plugins behavior-config-path)))
+        (.then
+         (fn [behavior-result]
+           (let [[throwing-entry invalid-entry promise-entry]
+                 (:plugins behavior-result)
+                 throwing-result
+                 (plugin-loading/inspect-candidate-renderer-call
+                  throwing-entry "column" #js {})
+                 invalid-result
+                 (plugin-loading/inspect-candidate-renderer-call
+                  invalid-entry "column" #js {})
+                 promise-result
+                 (plugin-loading/inspect-candidate-renderer-call
+                  promise-entry "column" #js {})]
+             (assert! (= {:status :rejected
+                          :reason :renderer-threw}
+                         (dissoc throwing-result :error))
+                      "A renderer exception was not distinguished from other failures")
+             (assert! (= "The renderer deliberately failed"
+                         (.-message (:error throwing-result)))
+                      "The renderer exception was not preserved")
+             (assert! (= {:status :rejected
+                          :reason :invalid-return-value
+                          :actual-type "object"}
+                         invalid-result)
+                      "A non-string renderer result was not rejected")
+             (assert! (= {:status :rejected
+                          :reason :promise-returned}
+                         promise-result)
+                      "A Promise renderer result was not rejected"))))
         (.catch
          (fn [error]
            (.error js/console (or (.-stack error) (.-message error) (str error)))
