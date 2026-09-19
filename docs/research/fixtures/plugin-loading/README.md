@@ -100,3 +100,11 @@ npm run verify
 - `clono transform`および`clono build`との統合
 
 これらはfixtureへ再現可能な検証ケースを追加した後、調査記録、仕様およびADRで段階的に決定する。
+
+## 参照資料
+
+- [ローカルES Moduleによるプラグイン読み込み方式に関する調査](../../plugin-loading.md)
+- [プロジェクト憲章](../../../project-charter.md)
+- [0002: Node.js向けClojureScript開発基盤を採用する](../../../decisions/0002-adopt-nodejs-clojurescript-development-platform.md)
+- [0003: Generic DirectivesとmdastによるMarkdown変換パイプラインを採用する](../../../decisions/0003-adopt-generic-directives-mdast-transformation-pipeline.md)
+- [Node.js v24.x: ECMAScript modules](https://nodejs.org/docs/latest-v24.x/api/esm.html)
