@@ -17,6 +17,7 @@ plugin-renderer-contract/
 ├── shadow-cljs.edn
 └── src/
     ├── main/clono/research/
+    │   ├── custom_column_renderer.js
     │   └── plugin_renderer_contract.cljs
     └── test/clono/research/
         └── plugin_renderer_contract_test.cljs
@@ -49,6 +50,32 @@ plugin-renderer-contract/
 
 戻り値は完成したHTML文書でも、コラム本文をHTMLへ変換した文字列でもない。コラム用のraw HTMLと、VFMへ委譲する本文Markdownを組み合わせたMarkdown断片である。
 
+## 候補となるカスタムrenderer
+
+`custom_column_renderer.js`は、既定rendererと同じ入力を受け取り、印刷用テーマで外観を細かく制御する用途を模した次のMarkdown断片を返す。
+
+```markdown
+<aside class="clono-column custom-column">
+<div class="custom-column-outer">
+<div class="custom-column-inner">
+<p class="clono-column-title custom-column-title">
+<span class="custom-column-title-mark" aria-hidden="true">COLUMN</span>
+<span class="custom-column-title-text">ちょっと休憩</span>
+</p>
+<div class="custom-column-body">
+
+本文には**強調**がある。
+
+</div>
+</div>
+</div>
+</aside>
+```
+
+既存の基盤CSSが対象とする`clono-column`と`clono-column-title`は残し、利用者固有の外観に使用するclassを追加する。タイトルはカスタムrenderer自身がHTMLのテキスト内容としてエンコードし、装飾用の文字列と著者が指定したタイトルを別々の`span`へ配置する。本文Markdownは内側の`div`へ置くが、renderer内ではHTMLへ変換しない。
+
+このJavaScriptファイルはfixtureのClojureScriptビルドへ直接含める。ローカル`.mjs`の動的読み込みは[プラグイン読み込み方式のfixture](../plugin-loading/)で検証済みであり、この段階では読み込み方式ではなく、既定rendererとカスタムrendererが同じ入出力境界を共有できることに検証対象を絞る。
+
 ## 検証環境
 
 - 実行確認: macOS、Node.js 24.19.0、Temurin JDK 21.0.12
@@ -75,12 +102,15 @@ npm run verify
 - タイトルに含まれるHTML上の特殊文字を、現在のコラム変換と同じ文字参照へエンコードする
 - 複数ブロックを含む本文Markdownを変更しない
 - 凍結した入力オブジェクトを変更しない
+- 同じ呼び出し境界でJavaScript製のカスタムrendererを実行できる
+- カスタムrendererが二重・三重のラッパーと複数の`span`を含むMarkdown断片を返せる
+- カスタムrendererでもタイトルをHTMLエンコードし、本文Markdownを変更しない
 
 ## 検証範囲の境界
 
 現時点では、次の事項を検証または決定しない。
 
-- 外部プラグインのrendererによる差し替え
+- 動的に読み込んだ外部プラグインのrendererによる差し替え
 - rendererへ本文Markdownを渡す処理と、戻り値をmdastへ戻す処理
 - コラム本文に含まれる索引指定、脚注、画像、表、コードブロックなどとの結合
 - 戻り値に含まれるraw HTMLとMarkdownの構造検証

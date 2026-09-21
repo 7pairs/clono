@@ -3,6 +3,9 @@
    [goog.object :as gobj]
    [goog.string :as gstring]))
 
+(defn render-column [renderer input]
+  (renderer input))
+
 (defn default-column-renderer [input]
   (let [title (gobj/get input "title")
         body (gobj/get input "body")]
