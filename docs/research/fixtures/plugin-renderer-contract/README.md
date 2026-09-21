@@ -175,6 +175,7 @@ npm run verify
 
 ## 参照資料
 
+- [コラムrenderer契約に関する調査](../../plugin-renderer-contract.md)
 - [clono著者向け記法](../../../specifications/authoring-syntax.md#コラム記法)
 - [Vivliostyleのコラム表現に関する調査](../../vivliostyle-column.md)
 - [ローカルES Moduleによるプラグイン読み込み方式に関する調査](../../plugin-loading.md)
