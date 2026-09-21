@@ -10,7 +10,8 @@
     "build:markdown": "shadow-cljs release generate-markdown",
     "generate:markdown": "npm run build:markdown && node target/generate-markdown.cjs",
     "test": "shadow-cljs compile test && node target/tests.cjs",
-    "verify": "npm test && npm run verify:vfm",
+    "verify": "npm test && npm run verify:vfm && npm run verify:transform-config",
+    "verify:transform-config": "shadow-cljs release verify-transform-config && node target/verify-transform-config.cjs",
     "verify:vfm": "npm run generate:markdown && node scripts/verify-vfm.mjs"
   },
   "devDependencies": {
