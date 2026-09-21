@@ -110,6 +110,9 @@ npm run verify
 - 同じ呼び出し境界でJavaScript製のカスタムrendererを実行できる
 - カスタムrendererが二重・三重のラッパーと複数の`span`を含むMarkdown断片を返せる
 - カスタムrendererでもタイトルをHTMLエンコードし、本文Markdownを変更しない
+- 複数のコラムを変換している途中でrendererが例外を投げた場合は、部分的な出力を返さず、後続のrenderer呼び出しを行わない
+- rendererの例外を、失敗した原稿位置と元のメッセージを含む診断へ変換する
+- rendererが文字列以外の値またはPromiseを返した場合も、部分的な出力を返さず、失敗理由を区別した診断へ変換する
 
 `src/main/clono/research/generate_markdown.cljs`は、既定rendererとカスタムrendererを使用して`output/`へ二つのMarkdown断片を生成する。`scripts/verify-vfm.mjs`はそれらをVFM 2.7.0でHTMLへ変換し、次を確認する。
 
@@ -131,7 +134,7 @@ npm run verify
 - コラム本文に含まれる索引指定、脚注、画像、表、コードブロックなどとの結合
 - rendererが返す任意のraw HTMLとMarkdownに対する一般的な構造検証
 - `title`と`body`以外に公開する情報
-- rendererの正式な関数シグネチャ、診断および失敗契約
+- rendererの正式な関数シグネチャ、診断コード、診断文言および処理継続規則
 - `clono transform`または`clono build`との統合
 
 後続の検証では、rendererの戻り値をmdastへ安全に戻せるかと、変換済みの索引指定、脚注などを含む実際のコラム本文を同じ境界で扱えるかを確認する。
