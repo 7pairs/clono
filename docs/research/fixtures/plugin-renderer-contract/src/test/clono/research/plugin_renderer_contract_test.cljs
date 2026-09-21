@@ -9,30 +9,34 @@
        "- 箇条書き\n"
        "- 二つ目"))
 
+(def unsafe-title
+  "A & </p><script data-clono-probe=\"title\">alert('x')</script> \"quoted\" 'single'")
+
 (def expected-markdown
   (str "<aside class=\"clono-column\">\n\n"
        "<p class=\"clono-column-title\">"
-       "A &amp; B &lt;unsafe&gt; &quot;quoted&quot; &#39;single&#39;"
+       "A &amp; &lt;/p&gt;&lt;script data-clono-probe=&quot;title&quot;&gt;"
+       "alert(&#39;x&#39;)&lt;/script&gt; &quot;quoted&quot; &#39;single&#39;"
        "</p>\n\n"
        body-markdown
        "\n\n</aside>"))
 
 (deftest default-column-renderer-test
-  (testing "When the default column renderer receives a title and body, then the current column Markdown is returned"
+  (testing "When the default renderer receives HTML syntax in a title, then encoded title text and unchanged body Markdown are returned"
     (let [input (js/Object.freeze
-                 #js {:title "A & B <unsafe> \"quoted\" 'single'"
+                 #js {:title unsafe-title
                       :body body-markdown})
           output (renderer-contract/render-column
                   renderer-contract/default-column-renderer
                   input)]
       (is (= expected-markdown output))
-      (is (= "A & B <unsafe> \"quoted\" 'single'" (.-title input)))
+      (is (= unsafe-title (.-title input)))
       (is (= body-markdown (.-body input))))))
 
 (deftest custom-column-renderer-test
-  (testing "When a custom column renderer receives a title and body, then nested wrappers and title spans are returned"
+  (testing "When the custom renderer receives HTML syntax in a title, then encoded title text and unchanged body Markdown are returned in nested wrappers"
     (let [input (js/Object.freeze
-                 #js {:title "休憩 & <雑談>"
+                 #js {:title unsafe-title
                       :body body-markdown})
           output (renderer-contract/render-column customColumnRenderer input)
           expected
@@ -43,7 +47,8 @@
                "<span class=\"custom-column-title-mark\" "
                "aria-hidden=\"true\">COLUMN</span>\n"
                "<span class=\"custom-column-title-text\">"
-               "休憩 &amp; &lt;雑談&gt;</span>\n"
+               "A &amp; &lt;/p&gt;&lt;script data-clono-probe=&quot;title&quot;&gt;"
+               "alert(&#39;x&#39;)&lt;/script&gt; &quot;quoted&quot; &#39;single&#39;</span>\n"
                "</p>\n"
                "<div class=\"custom-column-body\">\n\n"
                body-markdown
@@ -52,5 +57,5 @@
                "</div>\n"
                "</aside>")]
       (is (= expected output))
-      (is (= "休憩 & <雑談>" (.-title input)))
+      (is (= unsafe-title (.-title input)))
       (is (= body-markdown (.-body input))))))

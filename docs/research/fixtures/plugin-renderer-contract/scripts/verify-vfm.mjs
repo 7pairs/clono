@@ -19,6 +19,9 @@ const fixtures = [
   },
 ];
 
+const titleText =
+  '休憩 & </span><script data-clono-probe="title">alert(\'x\')</script> "quoted" \'single\'';
+
 function verifyMarkdownBody(container, name) {
   const paragraph = container.querySelector('p:not(.clono-column-title)');
   assert.ok(paragraph, `${name} renderer must retain the body paragraph`);
@@ -66,14 +69,24 @@ for (const fixture of fixtures) {
   const root = parse(html);
   const column = root.querySelector('aside.clono-column');
   assert.ok(column, `${fixture.name} renderer must retain the column wrapper`);
-  const titleText = column
+  const renderedTitle = column
     .querySelector('.clono-column-title')
     ?.textContent.trim()
     .replace(/\s+/gu, ' ');
   assert.equal(
-    titleText,
-    fixture.custom ? 'COLUMN 休憩 & <雑談>' : '休憩 & <雑談>',
+    renderedTitle,
+    fixture.custom ? `COLUMN ${titleText}` : titleText,
     `${fixture.name} renderer must retain the decoded title`,
+  );
+  assert.equal(
+    column.querySelectorAll('script').length,
+    0,
+    `${fixture.name} renderer must not interpret the title as a script element`,
+  );
+  assert.equal(
+    column.querySelectorAll('[data-clono-probe]').length,
+    0,
+    `${fixture.name} renderer must not interpret title text as HTML attributes`,
   );
 
   if (fixture.custom) {
@@ -93,7 +106,7 @@ for (const fixture of fixtures) {
     );
     assert.equal(
       column.querySelector('.custom-column-title-text')?.textContent,
-      '休憩 & <雑談>',
+      titleText,
       'Custom renderer must retain the title text span',
     );
     verifyMarkdownBody(body, fixture.name);

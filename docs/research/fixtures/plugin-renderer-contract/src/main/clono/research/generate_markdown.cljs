@@ -11,9 +11,12 @@
        "- 最初の項目\n"
        "- 次の項目"))
 
+(def title-text
+  "休憩 & </span><script data-clono-probe=\"title\">alert('x')</script> \"quoted\" 'single'")
+
 (defn- write-rendered-markdown! [output-directory file-name renderer]
   (let [input (js/Object.freeze
-               #js {:title "休憩 & <雑談>"
+               #js {:title title-text
                     :body body-markdown})
         output (renderer-contract/render-column renderer input)]
     (.writeFileSync fs (.join path output-directory file-name) output "utf8")))

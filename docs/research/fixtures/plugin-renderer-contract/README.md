@@ -114,6 +114,7 @@ npm run verify
 `src/main/clono/research/generate_markdown.cljs`は、既定rendererとカスタムrendererを使用して`output/`へ二つのMarkdown断片を生成する。`scripts/verify-vfm.mjs`はそれらをVFM 2.7.0でHTMLへ変換し、次を確認する。
 
 - 既定rendererとカスタムrendererの両方で、コラムのタイトルと本文が保持される
+- 閉じタグ、`script`要素に見える文字列および引用符を含む動的なタイトルがHTMLのテキスト内容としてエンコードされ、VFM変換後も要素や属性として解釈されない
 - 強い強調、強調、インラインコードおよび外部リンクが、対応するHTML要素へ変換される
 - 箇条書きと二つの項目が保持される
 - カスタムrendererの外枠、内枠、本文枠およびタイトル用`span`が、期待する親子関係で保持される
