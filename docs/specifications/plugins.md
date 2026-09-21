@@ -10,7 +10,7 @@
 
 clonoの主要な出力は引き続きVFMが処理できるMarkdownとし、完成したHTMLやPDFの生成はVivliostyleへ委譲する。組み込みの既定出力も外部rendererと同じ境界で扱えるようにする。
 
-この文書は策定中であり、ここに記す拡張機能はまだ利用できない。現時点の動作は[コラム記法の仕様](authoring-syntax.md)と、各CLI・書籍プロジェクト仕様を正本とする。調査fixtureの設定項目、関数名、入出力例は正式な公開APIではない。
+この文書は策定中であり、ここに記す拡張機能はまだ利用できない。現時点の動作は[コラム記法の仕様](authoring-syntax.md)と、各CLI・書籍プロジェクト仕様を正本とする。調査fixtureの設定項目、関数名、入出力例は、この文書で明示的に採用した部分を除き、正式な公開APIではない。
 
 ## 初期対象と対象外
 
@@ -26,6 +26,57 @@ clonoの主要な出力は引き続きVFMが処理できるMarkdownとし、完�
 
 これらを将来追加できる可能性は残すが、初期契約だけを理由にAPIを先行公開しない。
 
+## 設定と読み込み
+
+### `clono.config.mjs`での指定
+
+プラグインは、`clono.config.mjs`のdefault exportにある省略可能な`plugins`配列へ、使用する順に明示する。省略した場合と空配列を指定した場合は、外部プラグインを読み込まず、組み込みの既定rendererを使用する。自動探索や暗黙の登録は行わない。
+
+```javascript
+export default {
+  sourceRoot: "manuscripts",
+  outputRoot: "build/manuscripts",
+  publication: [
+    { type: "document", path: "chapter-one.md", kind: "chapter", includeInToc: true },
+  ],
+  plugins: ["./plugins/column-theme.mjs"],
+};
+```
+
+配列の各要素は、設定ファイルがあるディレクトリを基準とする、ローカルの`.mjs`ファイルへの相対パス文字列とする。`./`で始まり、区切り文字にはOSにかかわらず`/`を使用する。パスはプロジェクトルート内に収め、`..`による外部への移動、絶対パス、`file:`などのURL、npmパッケージ名、globおよび空文字列は受理しない。途中のパス要素を含めてシンボリックリンクを経由せず、読み取り可能な通常ファイルを指定する。設定を起動時のカレントディレクトリとは異なる場所から読み込んでも、プラグインパスの基準は変わらない。
+
+`plugins`を指定した場合、その値は配列とし、各要素の型、パス形式、実在とファイル種別を原稿の変換前に確認する。同じパスを重複指定しない。既存の書籍設定と同様、定義していないトップレベルの設定項目は受理しない。`plugins`の追加によって、`sourceRoot`、`outputRoot`および`publication`の既存の必須条件は変えない。
+
+### プラグインモジュール
+
+各ファイルはNode.jsのES Moduleとし、default exportに次の形のJavaScriptオブジェクトを置く。
+
+```javascript
+import { renderColumn } from "./render-column.mjs";
+
+export default {
+  name: "column-theme",
+  version: "1.0.0",
+  apiVersion: 1,
+  renderers: {
+    column: renderColumn,
+  },
+};
+```
+
+| 項目 | 初期契約 |
+| --- | --- |
+| `name` | 空でない文字列。診断でプラグインを識別するための名前 |
+| `version` | 空でない文字列。プラグイン自身のバージョン。初期契約では書式を検証しない |
+| `apiVersion` | 数値の`1`。対応するclonoプラグインAPIの版 |
+| `renderers` | `column`というキーに関数を持つオブジェクト |
+
+default exportが存在しない場合、オブジェクトでない場合、必須項目の欠落・型の不一致、対応外の`apiVersion`、または未知の項目・renderer名がある場合は受理しない。`name`の一意性とrendererの競合、失敗時の診断契約は後続の節で定める。`column`関数へ渡す値と戻り値も、この段階では定めない。
+
+設定とモジュールはNode.jsの標準ES Moduleとして評価し、top-level awaitを使用できる。ファイルシステム上のパスは`file:` URLを文字列連結で組み立てず、`pathToFileURL()`で変換してから動的`import()`へ渡す。読み込み後のプラグイン一覧は設定に列挙した順序で扱う。ただし、モジュール評価時の副作用やtop-level awaitの完了順は保証しない。Node.jsの通常のモジュールキャッシュに従い、同一プロセス内のホットリロードは提供しない。
+
+プラグインモジュールの評価では利用者のコードが実行される。clonoはその権限を制限せず、設定値や戻り値の検証によって副作用を取り消すこともできない。信頼できるローカルファイルだけを指定する。
+
 ## 仕様を確定する順序
 
 以下の表は、この文書で確定していく契約と現在の状態を示す。各項目の詳細は対応する作業で追記し、調査で使用した候補を無条件に正式採用しない。
@@ -33,7 +84,7 @@ clonoの主要な出力は引き続きVFMが処理できるMarkdownとし、完�
 | 順序 | 確定する契約 | 状態 |
 | --- | --- | --- |
 | 1 | この文書の目的、初期対象と対象外 | 決定済み |
-| 2 | `clono.config.mjs`のプラグイン設定と読み込み規則 | 未決定 |
+| 2 | `clono.config.mjs`のプラグイン設定と読み込み規則 | 決定済み |
 | 3 | コラムrendererへ渡す記法固有データ | 未決定 |
 | 4 | rendererの戻り値とHTML安全条件 | 未決定 |
 | 5 | 競合、読み込み失敗、実行時例外の診断と失敗契約 | 未決定 |
@@ -45,4 +96,4 @@ clonoの主要な出力は引き続きVFMが処理できるMarkdownとし、完�
 
 [プラグイン読み込み方式の調査](../research/plugin-loading.md)では、ローカルES Moduleの読み込みとClojureScriptからのrenderer呼び出し、主な失敗形の識別を確認した。[コラムrenderer契約の調査](../research/plugin-renderer-contract.md)では、既定出力の再現、多重ラッパーを持つ出力、本文MarkdownとVFMの結合、失敗時の部分出力停止、単一ファイル変換からの設定選択を候補として検証した。
 
-これらは技術的な成立性を示す資料であり、設定構造、公開API、診断形式、CLIオプションを決定する資料ではない。上表の各契約は、既存の[変換パイプラインのADR](../decisions/0003-adopt-generic-directives-mdast-transformation-pipeline.md)および[プロジェクト憲章](../project-charter.md)との整合性を確認しながら、この文書で確定する。
+これらは技術的な成立性を示す資料であり、資料中の候補がそのまま正式な設定構造や公開APIになるわけではない。上表の各契約は、既存の[変換パイプラインのADR](../decisions/0003-adopt-generic-directives-mdast-transformation-pipeline.md)および[プロジェクト憲章](../project-charter.md)との整合性を確認しながら、この文書で確定する。
