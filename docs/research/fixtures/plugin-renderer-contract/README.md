@@ -14,10 +14,13 @@ plugin-renderer-contract/
 ├── README.md
 ├── package.json
 ├── package-lock.json
+├── scripts/
+│   └── verify-vfm.mjs
 ├── shadow-cljs.edn
 └── src/
     ├── main/clono/research/
     │   ├── custom_column_renderer.js
+    │   ├── generate_markdown.cljs
     │   └── plugin_renderer_contract.cljs
     └── test/clono/research/
         └── plugin_renderer_contract_test.cljs
@@ -72,7 +75,7 @@ plugin-renderer-contract/
 </aside>
 ```
 
-既存の基盤CSSが対象とする`clono-column`と`clono-column-title`は残し、利用者固有の外観に使用するclassを追加する。タイトルはカスタムrenderer自身がHTMLのテキスト内容としてエンコードし、装飾用の文字列と著者が指定したタイトルを別々の`span`へ配置する。本文Markdownは内側の`div`へ置くが、renderer内ではHTMLへ変換しない。
+既存の基盤CSSが対象とする`clono-column`と`clono-column-title`は残し、利用者固有の外観に使用するclassを追加する。タイトルはカスタムrenderer自身がHTMLのテキスト内容としてエンコードし、装飾用の文字列と著者が指定したタイトルを別々の`span`へ配置する。本文Markdownは内側の`div`へ置くが、renderer内ではHTMLへ変換しない。候補形式では、本文枠の開始タグ直後と終了タグ直前に空行を置き、raw HTMLの内側にある本文をVFMがMarkdownとして処理できる境界を作る。
 
 このJavaScriptファイルはfixtureのClojureScriptビルドへ直接含める。ローカル`.mjs`の動的読み込みは[プラグイン読み込み方式のfixture](../plugin-loading/)で検証済みであり、この段階では読み込み方式ではなく、既定rendererとカスタムrendererが同じ入出力境界を共有できることに検証対象を絞る。
 
@@ -81,6 +84,8 @@ plugin-renderer-contract/
 - 実行確認: macOS、Node.js 24.19.0、Temurin JDK 21.0.12
 - 対応範囲: Node.js 22.13.0以降の22系、または24系
 - shadow-cljs 3.4.12
+- HTML変換: `@vivliostyle/vfm` 2.7.0
+- HTML検証: `node-html-parser` 9.0.1
 
 正確な依存関係は`package.json`と`package-lock.json`で固定する。
 
@@ -106,19 +111,29 @@ npm run verify
 - カスタムrendererが二重・三重のラッパーと複数の`span`を含むMarkdown断片を返せる
 - カスタムrendererでもタイトルをHTMLエンコードし、本文Markdownを変更しない
 
+`src/main/clono/research/generate_markdown.cljs`は、既定rendererとカスタムrendererを使用して`output/`へ二つのMarkdown断片を生成する。`scripts/verify-vfm.mjs`はそれらをVFM 2.7.0でHTMLへ変換し、次を確認する。
+
+- 既定rendererとカスタムrendererの両方で、コラムのタイトルと本文が保持される
+- 強い強調、強調、インラインコードおよび外部リンクが、対応するHTML要素へ変換される
+- 箇条書きと二つの項目が保持される
+- カスタムrendererの外枠、内枠、本文枠およびタイトル用`span`が、期待する親子関係で保持される
+- カスタムrendererの本文Markdownが、最も内側の本文枠でHTMLへ変換される
+
+生成したMarkdownとHTMLは`output/`へ保存するが、Gitの管理対象には含めない。
+
 ## 検証範囲の境界
 
 現時点では、次の事項を検証または決定しない。
 
 - 動的に読み込んだ外部プラグインのrendererによる差し替え
-- rendererへ本文Markdownを渡す処理と、戻り値をmdastへ戻す処理
+- clono本体のmdastからrendererへ本文Markdownを渡す処理と、戻り値をmdastへ戻す処理
 - コラム本文に含まれる索引指定、脚注、画像、表、コードブロックなどとの結合
-- 戻り値に含まれるraw HTMLとMarkdownの構造検証
+- rendererが返す任意のraw HTMLとMarkdownに対する一般的な構造検証
 - `title`と`body`以外に公開する情報
 - rendererの正式な関数シグネチャ、診断および失敗契約
 - `clono transform`または`clono build`との統合
 
-後続の検証では、同じ境界を使用して外部rendererによる多重ラッパーを試作し、VFM変換後のHTML構造と本文Markdownの保持を確認する。
+後続の検証では、rendererの戻り値をmdastへ安全に戻せるかと、変換済みの索引指定、脚注などを含む実際のコラム本文を同じ境界で扱えるかを確認する。
 
 ## 参照資料
 

@@ -6,6 +6,12 @@
  []
 
  :builds
- {:test
+ {:generate-markdown
+  {:target :node-script
+   :output-to "target/generate-markdown.cjs"
+   :output-feature-set :es2020
+   :main clono.research.generate-markdown/main}
+
+  :test
   {:target :node-test
    :output-to "target/tests.cjs"}}}
