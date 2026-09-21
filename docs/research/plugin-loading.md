@@ -2,7 +2,7 @@
 
 - 状態: 調査済み
 - 調査日: 2026-09-20
-- 最終更新日: 2026-09-20
+- 最終更新日: 2026-09-21
 - 検証環境:
   - OS: macOS 26.6.2
   - Node.js: 24.19.0
@@ -167,7 +167,7 @@ ClojureScriptからJavaScriptの基本情報とrenderer関数を直接扱い、�
 - JavaScriptオブジェクトと関数を不要にClojureScriptのデータ構造へ変換しない
 - プラグインを信頼されたローカルコードとして扱い、サンドボックスを初期契約に含めない
 
-これらは正式な決定ではない。設定を`clono transform`へ渡す方法、コラムrendererへ渡すデータ、raw HTMLの安全条件などと合わせて、後続の仕様およびADRで決定する。
+これらは正式な決定ではない。後続の[コラムrenderer契約に関する調査](plugin-renderer-contract.md)では、コラムrendererへ渡す候補データ、raw HTMLとMarkdownを組み合わせる戻り値、失敗時の変換停止、および設定を`clono transform`へ明示する候補を検証した。両調査の結果をもとに、仕様およびADRで正式な契約を決定する。
 
 ## 成立条件と未確認事項
 
@@ -190,7 +190,7 @@ ClojureScriptからJavaScriptの基本情報とrenderer関数を直接扱い、�
 - プラグインのホットリロードとES Moduleキャッシュの無効化
 - プラグインの依存関係、配布、探索、インストールまたは更新
 - サンドボックス、権限制限、署名または信頼性の検証
-- `clono transform`へプロジェクト設定を指定する方法
+- `clono transform`でプロジェクト設定を明示する候補を正式採用するか
 - `clono build`の設定読み込み、変換パイプラインおよび診断との統合
 - Node.js 22系、WindowsおよびLinuxでの実行
 
@@ -214,5 +214,6 @@ ClojureScriptからJavaScriptの基本情報とrenderer関数を直接扱い、�
 - [0002: Node.js向けClojureScript開発基盤を採用する](../decisions/0002-adopt-nodejs-clojurescript-development-platform.md)
 - [0003: Generic DirectivesとmdastによるMarkdown変換パイプラインを採用する](../decisions/0003-adopt-generic-directives-mdast-transformation-pipeline.md)
 - [検証用fixture](fixtures/plugin-loading/)
+- [コラムrenderer契約に関する調査](plugin-renderer-contract.md)
 - [Node.js v24.x: ECMAScript modules](https://nodejs.org/docs/latest-v24.x/api/esm.html)
 - [Node.js v24.x: URL](https://nodejs.org/docs/latest-v24.x/api/url.html)

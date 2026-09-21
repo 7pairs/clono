@@ -1,0 +1,23 @@
+{:source-paths
+ ["src/main"
+  "src/test"]
+
+ :dependencies
+ []
+
+ :builds
+ {:generate-markdown
+  {:target :node-script
+   :output-to "target/generate-markdown.cjs"
+   :output-feature-set :es2020
+   :main clono.research.generate-markdown/main}
+
+  :verify-transform-config
+  {:target :node-script
+   :output-to "target/verify-transform-config.cjs"
+   :output-feature-set :es2020
+   :main clono.research.verify-transform-config/main}
+
+  :test
+  {:target :node-test
+   :output-to "target/tests.cjs"}}}
