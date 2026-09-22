@@ -8,6 +8,8 @@
 
 (def ^:private config-file-name "clono.config.mjs")
 (def ^:private top-level-fields
+  #{"sourceRoot" "outputRoot" "publication" "plugins"})
+(def ^:private required-top-level-fields
   #{"sourceRoot" "outputRoot" "publication"})
 (def ^:private publication-fields
   #{"type" "path" "kind" "title" "includeInToc"})
@@ -94,6 +96,55 @@
 
 (defn- resolve-portable-path [root relative-path]
   (.resolve path root (string/replace relative-path "/" (.-sep path))))
+
+(defn- glob-pattern? [value]
+  (boolean (re-find #"[\*\?\[\]\{\}]" value)))
+
+(defn- plugin-path-structure [config-path index value]
+  (let [field-name (str "plugins[" index "]")]
+    (cond
+      (not (string? value))
+      {:diagnostics
+       [(diagnostic config-path
+                    (str "`" field-name "`には文字列を指定してください。"))]}
+
+      (empty? value)
+      {:diagnostics
+       [(diagnostic config-path
+                    (str "`" field-name "`に空文字列は指定できません。"))]}
+
+      (.includes value "\\")
+      {:diagnostics
+       [(diagnostic config-path
+                    (str "`" field-name "`の区切り文字には`/`を使用してください。"))]}
+
+      (not (.startsWith value "./"))
+      {:diagnostics
+       [(diagnostic config-path
+                    (str "`" field-name "`には`./`で始まるローカルパスを指定してください。"))]}
+
+      (glob-pattern? value)
+      {:diagnostics
+       [(diagnostic config-path
+                    (str "`" field-name "`にglobパターンは指定できません。"))]}
+
+      :else
+      (let [normalized (.normalize (.-posix path) value)]
+        (cond
+          (or (= normalized "..") (.startsWith normalized "../"))
+          {:diagnostics
+           [(diagnostic config-path
+                        (str "`" field-name "`にプロジェクトルートの外側へ出るパスは指定できません。"))]}
+
+          (not= ".mjs" (.extname (.-posix path) normalized))
+          {:diagnostics
+           [(diagnostic config-path
+                        (str "`" field-name "`には`.mjs`ファイルを指定してください。"))]}
+
+          :else
+          {:plugin {:specifier value
+                    :path normalized}
+           :diagnostics []})))))
 
 (defn- lstat-if-present [candidate]
   (try
@@ -400,6 +451,67 @@
       {:publication validated
        :diagnostics diagnostics})))
 
+(defn- validate-plugin-files [config-path project-root plugins]
+  (loop [remaining plugins
+         index 0
+         seen #{}
+         validated []
+         diagnostics []]
+    (if-let [plugin (first remaining)]
+      (let [plugin-path (:path plugin)
+            file-path (resolve-portable-path project-root plugin-path)
+            comparison-key (if (= "win32" (.-platform js/process))
+                             (.toLowerCase plugin-path)
+                             plugin-path)
+            duplicate? (contains? seen comparison-key)
+            path-diagnostics
+            (try
+              (let [symlink (existing-symlink project-root plugin-path)
+                    file-stat (lstat-if-present file-path)]
+                (cond-> []
+                  duplicate?
+                  (conj (diagnostic config-path
+                                    (str "`plugins`に同じプラグインパスが重複しています: "
+                                         (:specifier plugin))))
+
+                  symlink
+                  (conj (diagnostic config-path
+                                    (str "`plugins[" index "]`はシンボリックリンクを経由できません: "
+                                         (:specifier plugin))))
+
+                  (and (nil? symlink) (nil? file-stat))
+                  (conj (diagnostic config-path
+                                    (str "`plugins[" index "]`のプラグインが存在しません: "
+                                         (:specifier plugin))))
+
+                  (and (nil? symlink) file-stat (not (.isFile file-stat)))
+                  (conj (diagnostic config-path
+                                    (str "`plugins[" index "]`には通常ファイルを指定してください: "
+                                         (:specifier plugin))))
+
+                  (and (nil? symlink) file-stat (.isFile file-stat))
+                  (into
+                   (try
+                     (.accessSync fs file-path (.-R_OK (.-constants fs)))
+                     []
+                     (catch :default error
+                       [(diagnostic config-path
+                                    (str "`plugins[" index "]`のプラグインを読み取れません: "
+                                         (:specifier plugin) ": "
+                                         (error-message error)))])))))
+              (catch :default error
+                [(diagnostic config-path
+                             (str "`plugins[" index "]`のプラグインを確認できません: "
+                                  (:specifier plugin) ": "
+                                  (error-message error)))]))]
+        (recur (next remaining)
+               (inc index)
+               (conj seen comparison-key)
+               (conj validated (assoc plugin :file-path file-path))
+               (into diagnostics path-diagnostics)))
+      {:plugins validated
+       :diagnostics diagnostics})))
+
 (defn- validate-config [project-root config-path value]
   (if-not (javascript-object? value)
     {:ok? false
@@ -421,6 +533,13 @@
           publication-present? (contains? field-names "publication")
           publication-array? (and publication-present?
                                   (js/Array.isArray publication-value))
+          plugins-value (gobj/get value "plugins")
+          plugins-present? (contains? field-names "plugins")
+          plugins-array? (and plugins-present? (js/Array.isArray plugins-value))
+          plugin-results (if plugins-array?
+                           (map-indexed #(plugin-path-structure config-path %1 %2)
+                                        (array-seq plugins-value))
+                           [])
           publication-results (if publication-array?
                                 (map-indexed #(publication-entry-structure
                                               config-path %1 %2)
@@ -437,13 +556,16 @@
                                                   value)
                       (required-field-diagnostics config-path
                                                   "設定"
-                                                  top-level-fields
+                                                  required-top-level-fields
                                                   value))
                 (concat
                  (:diagnostics source-result)
                  (:diagnostics output-result)
                  (when (and publication-present? (not publication-array?))
                    [(diagnostic config-path "`publication`には配列を指定してください。")])
+                 (when (and plugins-present? (not plugins-array?))
+                   [(diagnostic config-path "`plugins`には配列を指定してください。")])
+                 (mapcat :diagnostics plugin-results)
                  (mapcat :diagnostics publication-results)
                  (:diagnostics root-result)))
           structured-entries (mapv :entry publication-results)
@@ -461,6 +583,14 @@
           structural-diagnostics (into (into base-structural-diagnostics
                                              document-required-diagnostics)
                                        index-diagnostics)
+          structured-plugins (mapv :plugin plugin-results)
+          plugins-result (if (and plugins-array?
+                                  (every? some? structured-plugins))
+                           (validate-plugin-files config-path
+                                                  project-root
+                                                  structured-plugins)
+                           {:plugins []
+                            :diagnostics []})
           files-result (if (and (empty? structural-diagnostics)
                                 (every? some? structured-entries))
                          (validate-publication-files config-path
@@ -468,7 +598,9 @@
                                                      structured-entries)
                          {:publication []
                           :diagnostics []})
-          diagnostics (into structural-diagnostics (:diagnostics files-result))]
+          diagnostics (into (into structural-diagnostics
+                                  (:diagnostics plugins-result))
+                            (:diagnostics files-result))]
       (if (seq diagnostics)
         {:ok? false
          :config nil
@@ -480,6 +612,7 @@
                   :source-path (:source-path root-result)
                   :output-root (:value output-result)
                   :output-path (:output-path root-result)
+                  :plugins (:plugins plugins-result)
                   :publication (:publication files-result)}
          :diagnostics []}))))
 
