@@ -100,6 +100,9 @@
 (defn- glob-pattern? [value]
   (boolean (re-find #"[\*\?\[\]\{\}]" value)))
 
+(defn- windows-drive-prefixed-path? [value]
+  (boolean (re-find #"^[A-Za-z]:" value)))
+
 (defn- plugin-path-structure [config-path index value]
   (let [field-name (str "plugins[" index "]")]
     (cond
@@ -131,6 +134,11 @@
       :else
       (let [normalized (.normalize (.-posix path) value)]
         (cond
+          (windows-drive-prefixed-path? normalized)
+          {:diagnostics
+           [(diagnostic config-path
+                        (str "`" field-name "`にはWindowsドライブ接頭辞を含むパスを指定できません。"))]}
+
           (or (= normalized "..") (.startsWith normalized "../"))
           {:diagnostics
            [(diagnostic config-path
@@ -460,36 +468,50 @@
     (if-let [plugin (first remaining)]
       (let [plugin-path (:path plugin)
             file-path (resolve-portable-path project-root plugin-path)
+            inside-project? (path-descendant? project-root file-path)
             comparison-key (if (= "win32" (.-platform js/process))
                              (.toLowerCase plugin-path)
                              plugin-path)
             duplicate? (contains? seen comparison-key)
             path-diagnostics
             (try
-              (let [symlink (existing-symlink project-root plugin-path)
-                    file-stat (lstat-if-present file-path)]
+              (let [symlink (when inside-project?
+                              (existing-symlink project-root plugin-path))
+                    file-stat (when inside-project?
+                                (lstat-if-present file-path))]
                 (cond-> []
                   duplicate?
                   (conj (diagnostic config-path
                                     (str "`plugins`に同じプラグインパスが重複しています: "
                                          (:specifier plugin))))
 
-                  symlink
+                  (not inside-project?)
+                  (conj (diagnostic config-path
+                                    (str "`plugins[" index "]`にプロジェクトルートの外側へ出るパスは指定できません: "
+                                         (:specifier plugin))))
+
+                  (and inside-project? symlink)
                   (conj (diagnostic config-path
                                     (str "`plugins[" index "]`はシンボリックリンクを経由できません: "
                                          (:specifier plugin))))
 
-                  (and (nil? symlink) (nil? file-stat))
+                  (and inside-project? (nil? symlink) (nil? file-stat))
                   (conj (diagnostic config-path
                                     (str "`plugins[" index "]`のプラグインが存在しません: "
                                          (:specifier plugin))))
 
-                  (and (nil? symlink) file-stat (not (.isFile file-stat)))
+                  (and inside-project?
+                       (nil? symlink)
+                       file-stat
+                       (not (.isFile file-stat)))
                   (conj (diagnostic config-path
                                     (str "`plugins[" index "]`には通常ファイルを指定してください: "
                                          (:specifier plugin))))
 
-                  (and (nil? symlink) file-stat (.isFile file-stat))
+                  (and inside-project?
+                       (nil? symlink)
+                       file-stat
+                       (.isFile file-stat))
                   (into
                    (try
                      (.accessSync fs file-path (.-R_OK (.-constants fs)))

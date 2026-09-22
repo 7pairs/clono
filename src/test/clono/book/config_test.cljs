@@ -155,7 +155,8 @@
                 "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
                 "  ],\n"
                 "  plugins: [42, '', 'plugin.mjs', './plugins\\\\bad.mjs',\n"
-                "            './../outside.mjs', './plugins/*.mjs', './plugins/plugin.js'],\n"
+                "            './../outside.mjs', './plugins/*.mjs', './plugins/plugin.js',\n"
+                "            './C:/outside.mjs', './C:outside.mjs'],\n"
                 "};\n")))
         (fn [result]
           (is (false? (:ok? result)))
@@ -166,7 +167,9 @@
                    "`plugins[3]`の区切り文字には`/`を使用してください。"
                    "`plugins[4]`にプロジェクトルートの外側へ出るパスは指定できません。"
                    "`plugins[5]`にglobパターンは指定できません。"
-                   "`plugins[6]`には`.mjs`ファイルを指定してください。"}
+                   "`plugins[6]`には`.mjs`ファイルを指定してください。"
+                   "`plugins[7]`にはWindowsドライブ接頭辞を含むパスを指定できません。"
+                   "`plugins[8]`にはWindowsドライブ接頭辞を含むパスを指定できません。"}
                  (set (messages result)))))
         done))))
 
