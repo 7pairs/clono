@@ -1,7 +1,8 @@
 (ns clono.plugin.loader
   (:require
    ["node:url" :refer [pathToFileURL]]
-   [clojure.string :as string]))
+   [clojure.string :as string]
+   [clono.plugin.validator :as validator]))
 
 ;; Closure cannot transpile a dynamic import expression in a node-script release.
 (def ^:private dynamic-import
@@ -30,11 +31,18 @@
                 (try
                   (.then
                    (importer
-                    (.-href (pathToFileURL (:file-path plugin))))
+                   (.-href (pathToFileURL (:file-path plugin))))
                    (fn [module]
-                     (load-next (inc index)
-                                (conj loaded (assoc plugin :module module))
-                                (next remaining)))
+                     (let [validation-result
+                           (validator/validate index plugin module)]
+                       (if (:ok? validation-result)
+                         (load-next (inc index)
+                                    (conj loaded (:plugin validation-result))
+                                    (next remaining))
+                         (js/Promise.resolve
+                          {:ok? false
+                           :plugins []
+                           :diagnostics (:diagnostics validation-result)}))))
                    (fn [error]
                      (load-error-result index plugin error)))
                   (catch :default error
