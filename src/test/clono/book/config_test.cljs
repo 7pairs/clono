@@ -73,17 +73,19 @@
                 "    { type: 'index', path: './generated/index.MD', title: '索引', includeInToc: true },\n"
                 "    { type: 'document', path: 'colophon.html', kind: 'backmatter', includeInToc: false },\n"
                 "  ],\n"
+                "  plugins: [],\n"
                 "};\n")))
         (fn [result]
           (is (:ok? result))
           (is (empty? (:diagnostics result)))
-          (let [{:keys [project-root source-root source-path output-root output-path publication]}
+          (let [{:keys [project-root source-root source-path output-root output-path plugins publication]}
                 (:config result)]
             (is (.isAbsolute path project-root))
             (is (= "manuscripts" source-root))
             (is (= (.join path project-root "manuscripts") source-path))
             (is (= "build/manuscripts" output-root))
             (is (= (.join path project-root "build" "manuscripts") output-path))
+            (is (empty? plugins))
             (is (= [{:type :document
                      :path "chapter.md"
                      :kind "chapter"
@@ -100,6 +102,137 @@
                    (mapv #(dissoc % :file-path) publication)))
             (is (every? #(.isAbsolute path (:file-path %))
                         (filter #(= :document (:type %)) publication)))))
+        done))))
+
+(deftest valid-plugin-configuration-test
+  (async done
+    (testing "When local plugin paths are valid, then normalized plugin entries are loaded in configuration order"
+      (with-project
+        (fn [project]
+          (write-file! (.join path project "manuscripts" "chapter.md") "# 本文\n")
+          (write-file! (.join path project "plugins" "first plugin.mjs")
+                       "export default {};\n")
+          (write-file! (.join path project "plugins" "second#plugin.mjs")
+                       "export default {};\n")
+          (write-file!
+           (.join path project "clono.config.mjs")
+           (str "export default {\n"
+                "  sourceRoot: 'manuscripts',\n"
+                "  outputRoot: 'build/manuscripts',\n"
+                "  publication: [\n"
+                "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+                "  ],\n"
+                "  plugins: [\n"
+                "    './plugins/first plugin.mjs',\n"
+                "    './plugins/nested/../second#plugin.mjs',\n"
+                "  ],\n"
+                "};\n")))
+        (fn [result]
+          (is (:ok? result))
+          (is (empty? (:diagnostics result)))
+          (let [project-root (get-in result [:config :project-root])]
+            (is (= [{:specifier "./plugins/first plugin.mjs"
+                     :path "plugins/first plugin.mjs"
+                     :file-path (.join path project-root "plugins" "first plugin.mjs")}
+                    {:specifier "./plugins/nested/../second#plugin.mjs"
+                     :path "plugins/second#plugin.mjs"
+                     :file-path (.join path project-root "plugins" "second#plugin.mjs")}]
+                   (get-in result [:config :plugins])))))
+        done))))
+
+(deftest plugin-structure-validation-test
+  (async done
+    (testing "When plugin settings violate the schema, then every independent path diagnostic is returned"
+      (with-project
+        (fn [project]
+          (write-file! (.join path project "manuscripts" "chapter.md") "# 本文\n")
+          (write-file!
+           (.join path project "clono.config.mjs")
+           (str "export default {\n"
+                "  sourceRoot: 'manuscripts',\n"
+                "  outputRoot: 'build/manuscripts',\n"
+                "  publication: [\n"
+                "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+                "  ],\n"
+                "  plugins: [42, '', 'plugin.mjs', './plugins\\\\bad.mjs',\n"
+                "            './../outside.mjs', './plugins/*.mjs', './plugins/plugin.js'],\n"
+                "};\n")))
+        (fn [result]
+          (is (false? (:ok? result)))
+          (is (nil? (:config result)))
+          (is (= #{"`plugins[0]`には文字列を指定してください。"
+                   "`plugins[1]`に空文字列は指定できません。"
+                   "`plugins[2]`には`./`で始まるローカルパスを指定してください。"
+                   "`plugins[3]`の区切り文字には`/`を使用してください。"
+                   "`plugins[4]`にプロジェクトルートの外側へ出るパスは指定できません。"
+                   "`plugins[5]`にglobパターンは指定できません。"
+                   "`plugins[6]`には`.mjs`ファイルを指定してください。"}
+                 (set (messages result)))))
+        done))))
+
+(deftest plugin-array-validation-test
+  (async done
+    (testing "When plugins is not an array, then the configuration is rejected"
+      (with-project
+        (fn [project]
+          (write-file! (.join path project "manuscripts" "chapter.md") "# 本文\n")
+          (write-file!
+           (.join path project "clono.config.mjs")
+           (str "export default {\n"
+                "  sourceRoot: 'manuscripts',\n"
+                "  outputRoot: 'build/manuscripts',\n"
+                "  publication: [\n"
+                "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+                "  ],\n"
+                "  plugins: './plugins/plugin.mjs',\n"
+                "};\n")))
+        (fn [result]
+          (is (false? (:ok? result)))
+          (is (= ["`plugins`には配列を指定してください。"]
+                 (messages result))))
+        done))))
+
+(deftest plugin-file-validation-test
+  (async done
+    (testing "When plugin paths are duplicated, missing, non-files, or symbolic links, then each problem is diagnosed"
+      (with-project
+        (fn [project]
+          (write-file! (.join path project "manuscripts" "chapter.md") "# 本文\n")
+          (write-file! (.join path project "plugins" "valid.mjs")
+                       "export default {};\n")
+          (.mkdirSync fs (.join path project "plugins" "directory.mjs"))
+          (let [link-target (.join path project "plugin-link-target")
+                link-path (.join path project "plugin-link")]
+            (.mkdirSync fs link-target)
+            (write-file! (.join path link-target "linked.mjs") "export default {};\n")
+            (.symlinkSync fs
+                          link-target
+                          link-path
+                          (if (= "win32" (.-platform js/process)) "junction" "dir")))
+          (write-file!
+           (.join path project "clono.config.mjs")
+           (str "export default {\n"
+                "  sourceRoot: 'manuscripts',\n"
+                "  outputRoot: 'build/manuscripts',\n"
+                "  publication: [\n"
+                "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+                "  ],\n"
+                "  plugins: [\n"
+                "    './plugins/valid.mjs',\n"
+                "    './plugins/./valid.mjs',\n"
+                "    './plugins/missing.mjs',\n"
+                "    './plugins/directory.mjs',\n"
+                "    './plugin-link/linked.mjs',\n"
+                "  ],\n"
+                "};\n")))
+        (fn [result]
+          (is (false? (:ok? result)))
+          (is (nil? (:config result)))
+          (is (= #{"`plugins`に同じプラグインパスが重複しています: ./plugins/./valid.mjs"
+                   "`plugins[2]`のプラグインが存在しません: ./plugins/missing.mjs"
+                   "`plugins[3]`には通常ファイルを指定してください: ./plugins/directory.mjs"
+                   "`plugins[4]`はシンボリックリンクを経由できません: ./plugin-link/linked.mjs"}
+                 (set (messages result)))))
         done))))
 
 (deftest configuration-location-test

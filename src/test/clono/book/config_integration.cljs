@@ -23,6 +23,10 @@
          (= "manuscripts" (:source-root loaded-config))
          (= "build/manuscripts" (:output-root loaded-config))
          (= (.join path project "manuscripts") (:source-path loaded-config))
+         (= [{:specifier "./plugins/column-theme.mjs"
+              :path "plugins/column-theme.mjs"
+              :file-path (.join path project "plugins" "column-theme.mjs")}]
+            (:plugins loaded-config))
          (= [{:type :document
               :path "chapter.md"
               :kind "chapter"
@@ -35,6 +39,8 @@
     (try
       (write-file! (.join path project "manuscripts" "chapter.md")
                    "# Release integration\n")
+      (write-file! (.join path project "plugins" "column-theme.mjs")
+                   "export default {};\n")
       (write-file!
        (.join path project "clono.config.mjs")
        (str "const sourceRoot = await Promise.resolve('manuscripts');\n"
@@ -44,6 +50,7 @@
             "  publication: [\n"
             "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
             "  ],\n"
+            "  plugins: ['./plugins/column-theme.mjs'],\n"
             "};\n"))
       (-> (config/load-project-config project)
           (.then (fn [result]
