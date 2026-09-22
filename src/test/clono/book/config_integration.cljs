@@ -3,7 +3,8 @@
    ["node:fs" :as fs]
    ["node:os" :as os]
    ["node:path" :as path]
-   [clono.book.config :as config]))
+   [clono.book.config :as config]
+   [clono.plugin.loader :as plugin-loader]))
 
 (defn- write-file! [file-path content]
   (.mkdirSync fs (.dirname path file-path) #js {:recursive true})
@@ -23,9 +24,12 @@
          (= "manuscripts" (:source-root loaded-config))
          (= "build/manuscripts" (:output-root loaded-config))
          (= (.join path project "manuscripts") (:source-path loaded-config))
-         (= [{:specifier "./plugins/column-theme.mjs"
-              :path "plugins/column-theme.mjs"
-              :file-path (.join path project "plugins" "column-theme.mjs")}]
+         (= [{:specifier "./plugins/first plugin#renderer.mjs"
+              :path "plugins/first plugin#renderer.mjs"
+              :file-path (.join path project "plugins" "first plugin#renderer.mjs")}
+             {:specifier "./plugins/second.mjs"
+              :path "plugins/second.mjs"
+              :file-path (.join path project "plugins" "second.mjs")}]
             (:plugins loaded-config))
          (= [{:type :document
               :path "chapter.md"
@@ -33,14 +37,29 @@
               :include-in-toc true}]
             (mapv #(dissoc % :file-path) (:publication loaded-config))))))
 
+(defn- expected-plugins? [result]
+  (and (:ok? result)
+       (empty? (:diagnostics result))
+       (= 2 (count (:plugins result)))
+       (= ["first" "second"]
+          (vec (array-seq (aget js/globalThis "__clonoPluginLoadTrace"))))))
+
 (defn main []
   (let [project (.mkdtempSync fs (.join path (.tmpdir os)
                                         "clono-config-integration-"))]
     (try
       (write-file! (.join path project "manuscripts" "chapter.md")
                    "# Release integration\n")
-      (write-file! (.join path project "plugins" "column-theme.mjs")
-                   "export default {};\n")
+      (aset js/globalThis "__clonoPluginLoadTrace" #js [])
+      (write-file!
+       (.join path project "plugins" "first plugin#renderer.mjs")
+       (str "await new Promise((resolve) => setTimeout(resolve, 20));\n"
+            "globalThis.__clonoPluginLoadTrace.push('first');\n"
+            "export default {};\n"))
+      (write-file!
+       (.join path project "plugins" "second.mjs")
+       (str "globalThis.__clonoPluginLoadTrace.push('second');\n"
+            "export default {};\n"))
       (write-file!
        (.join path project "clono.config.mjs")
        (str "const sourceRoot = await Promise.resolve('manuscripts');\n"
@@ -50,17 +69,27 @@
             "  publication: [\n"
             "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
             "  ],\n"
-            "  plugins: ['./plugins/column-theme.mjs'],\n"
+            "  plugins: [\n"
+            "    './plugins/first plugin#renderer.mjs',\n"
+            "    './plugins/second.mjs',\n"
+            "  ],\n"
             "};\n"))
       (-> (config/load-project-config project)
           (.then (fn [result]
                    (when-not (expected-config? result project)
                      (throw (js/Error.
-                             (str "Unexpected load result: " (pr-str result)))))))
+                             (str "Unexpected config result: " (pr-str result)))))
+                   (plugin-loader/load (:config result))))
+          (.then (fn [result]
+                   (when-not (expected-plugins? result)
+                     (throw (js/Error.
+                             (str "Unexpected plugin result: " (pr-str result)))))))
           (.catch fail!)
           (.finally (fn []
+                      (js-delete js/globalThis "__clonoPluginLoadTrace")
                       (.rmSync fs project #js {:recursive true
                                                :force true}))))
       (catch :default error
+        (js-delete js/globalThis "__clonoPluginLoadTrace")
         (.rmSync fs project #js {:recursive true :force true})
         (fail! error)))))
