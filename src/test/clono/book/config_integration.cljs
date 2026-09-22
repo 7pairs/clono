@@ -4,8 +4,7 @@
    ["node:os" :as os]
    ["node:path" :as path]
    [clono.book.config :as config]
-   [clono.plugin.loader :as plugin-loader]
-   [clono.plugin.registry :as plugin-registry]))
+   [clono.plugin :as plugin]))
 
 (defn- write-file! [file-path content]
   (.mkdirSync fs (.dirname path file-path) #js {:recursive true})
@@ -38,19 +37,14 @@
               :include-in-toc true}]
             (mapv #(dissoc % :file-path) (:publication loaded-config))))))
 
-(defn- expected-plugins? [result]
-  (and (:ok? result)
-       (empty? (:diagnostics result))
-       (= 2 (count (:plugins result)))
-       (= ["first" "second"]
-          (vec (array-seq (aget js/globalThis "__clonoPluginLoadTrace"))))))
-
 (defn- expected-registry? [result]
   (and (false? (:ok? result))
        (nil? (:registry result))
        (= 1 (count (:diagnostics result)))
        (.includes (:message (first (:diagnostics result)))
-                  "renderer名`column`が競合しています")))
+                  "renderer名`column`が競合しています")
+       (= ["first" "second"]
+          (vec (array-seq (aget js/globalThis "__clonoPluginLoadTrace"))))))
 
 (defn main []
   (let [project (.mkdtempSync fs (.join path (.tmpdir os)
@@ -93,14 +87,9 @@
                    (when-not (expected-config? result project)
                      (throw (js/Error.
                              (str "Unexpected config result: " (pr-str result)))))
-                   (plugin-loader/load (:config result))))
-          (.then (fn [result]
-                   (when-not (expected-plugins? result)
-                     (throw (js/Error.
-                             (str "Unexpected plugin result: " (pr-str result)))))
-                   (plugin-registry/build
+                   (plugin/load-registry
                     (.join path project "clono.config.mjs")
-                    (:plugins result))))
+                    (:config result))))
           (.then (fn [result]
                    (when-not (expected-registry? result)
                      (throw (js/Error.
