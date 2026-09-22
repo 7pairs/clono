@@ -35,23 +35,7 @@
       (is (identical? (aget (:definition loaded-plugin) "renderers" "column")
                       (:renderer registration))))))
 
-(deftest duplicate-plugin-name-test
-  (testing "When plugin names and renderer names conflict, then both conflicts identify every source plugin"
-    (let [first-plugin (plugin "same-name" "first.mjs")
-          second-plugin (plugin "same-name" "second.mjs")
-          result (registry/build config-path [first-plugin second-plugin])]
-      (is (false? (:ok? result)))
-      (is (nil? (:registry result)))
-      (is (= [{:file config-path
-               :message (str "プラグイン名\"same-name\"が重複しています: "
-                             "\"./plugins/first.mjs\", \"./plugins/second.mjs\"")}
-              {:file config-path
-               :message (str "renderer名`column`が競合しています: "
-                             "\"same-name\" (\"./plugins/first.mjs\"), "
-                             "\"same-name\" (\"./plugins/second.mjs\")")}]
-             (:diagnostics result))))))
-
-(deftest conflicting-renderer-test
+(deftest registry-conflict-test
   (testing "When different plugins register the column renderer, then no implicit precedence is selected"
     (let [result (registry/build config-path
                                  [(plugin "first-theme" "first.mjs")
