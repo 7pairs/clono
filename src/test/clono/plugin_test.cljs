@@ -7,29 +7,36 @@
 
 (def config-path "/project/clono.config.mjs")
 
+(defn- loaded-plugin [name file-name]
+  (let [renderer (fn [_] (str "rendered by " name))]
+    {:specifier (str "./plugins/" file-name)
+     :path (str "plugins/" file-name)
+     :file-path (str "/project/plugins/" file-name)
+     :module #js {}
+     :definition
+     #js {:name name
+          :version "1.0.0"
+          :apiVersion 1
+          :renderers #js {:column renderer}}}))
+
 (deftest successful-plugin-registration-test
   (async done
     (testing "When plugin loading and registration succeed, then the renderer registry is returned"
-      (let [loaded-plugins [{:specifier "./plugins/column-theme.mjs"}]
-            expected-registry {"column" {:renderer identity}}]
+      (let [loaded-plugin (loaded-plugin "column-theme" "column-theme.mjs")]
         (with-redefs [loader/load
                       (fn [_]
                         (js/Promise.resolve
                          {:ok? true
-                          :plugins loaded-plugins
-                          :diagnostics []}))
-                      registry/build
-                      (fn [actual-config-path actual-plugins]
-                        (is (= config-path actual-config-path))
-                        (is (= loaded-plugins actual-plugins))
-                        {:ok? true
-                         :registry expected-registry
-                         :diagnostics []})]
+                          :plugins [loaded-plugin]
+                          :diagnostics []}))]
           (-> (plugin/load-registry config-path {:plugins []})
               (.then (fn [result]
-                       (is (:ok? result))
-                       (is (= expected-registry (:registry result)))
-                       (is (empty? (:diagnostics result)))))
+                       (let [registration (get (:registry result) "column")]
+                         (is (:ok? result))
+                         (is (empty? (:diagnostics result)))
+                         (is (= loaded-plugin (:plugin registration)))
+                         (is (= "rendered by column-theme"
+                                ((:renderer registration) #js {}))))))
               (.catch (fn [error]
                         (is false
                             (str "Unexpected rejected promise: "
@@ -64,26 +71,24 @@
 (deftest plugin-registration-diagnostic-test
   (async done
     (testing "When renderer registration conflicts, then its configuration diagnostic is returned without a registry"
-      (let [loaded-plugins [{:specifier "./plugins/first.mjs"}
-                            {:specifier "./plugins/second.mjs"}]
-            diagnostic {:file config-path
-                        :message "renderer名`column`が競合しています。"}]
+      (let [loaded-plugins [(loaded-plugin "first" "first.mjs")
+                            (loaded-plugin "second" "second.mjs")]]
         (with-redefs [loader/load
                       (fn [_]
                         (js/Promise.resolve
                          {:ok? true
                           :plugins loaded-plugins
-                          :diagnostics []}))
-                      registry/build
-                      (fn [_ _]
-                        {:ok? false
-                         :registry nil
-                         :diagnostics [diagnostic]})]
+                          :diagnostics []}))]
           (-> (plugin/load-registry config-path {:plugins []})
               (.then (fn [result]
                        (is (false? (:ok? result)))
                        (is (nil? (:registry result)))
-                       (is (= [diagnostic] (:diagnostics result)))))
+                       (is (= [{:file config-path
+                                :message
+                                (str "renderer名`column`が競合しています: "
+                                     "\"first\" (\"./plugins/first.mjs\"), "
+                                     "\"second\" (\"./plugins/second.mjs\")")}]
+                              (:diagnostics result)))))
               (.catch (fn [error]
                         (is false
                             (str "Unexpected rejected promise: "
