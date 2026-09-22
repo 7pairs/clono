@@ -9,6 +9,13 @@
    :path (str "plugins/" name ".mjs")
    :file-path (str "/project/plugins/" name ".mjs")})
 
+(defn- valid-module [name]
+  #js {:default
+       #js {:name name
+            :version "1.0.0"
+            :apiVersion 1
+            :renderers #js {:column (fn [_] "column")}}})
+
 (deftest empty-plugin-loading-test
   (async done
     (testing "When no plugins are configured, then loading succeeds without importing a module"
@@ -29,7 +36,7 @@
     (testing "When plugin modules are valid, then they are returned in configuration order"
       (let [plugins [(plugin "first") (plugin "second")]
             imported-specifiers (atom [])
-            modules [(js-obj "value" "first") (js-obj "value" "second")]]
+            modules [(valid-module "first") (valid-module "second")]]
         (with-redefs [loader/import-plugin-module
                       (fn [specifier]
                         (let [index (count @imported-specifiers)]
@@ -43,7 +50,8 @@
                                (.-href (pathToFileURL "/project/plugins/second.mjs"))]
                               @imported-specifiers))
                        (is (= plugins
-                              (mapv #(dissoc % :module) (:plugins result))))
+                              (mapv #(dissoc % :module :definition)
+                                    (:plugins result))))
                        (is (= modules (mapv :module (:plugins result))))))
               (.catch (fn [error]
                         (is false (str "Unexpected rejected promise: " (.-message error)))))
@@ -62,7 +70,7 @@
                             (set! (.-stack error)
                                   "Error: evaluation exploded\n    at private stack")
                             (js/Promise.reject error))
-                          (js/Promise.resolve (js-obj))))]
+                          (js/Promise.resolve (valid-module "first"))))]
           (-> (loader/load {:plugins plugins})
               (.then (fn [result]
                        (is (false? (:ok? result)))
@@ -77,6 +85,27 @@
                               (:diagnostics result)))
                        (is (not (.includes (:message (first (:diagnostics result)))
                                            "private stack")))))
+              (.catch (fn [error]
+                        (is false (str "Unexpected rejected promise: " (.-message error)))))
+              (.finally done)))))))
+
+(deftest invalid-plugin-information-loading-test
+  (async done
+    (testing "When plugin information is invalid, then later plugin modules are not evaluated"
+      (let [plugins [(plugin "invalid") (plugin "later")]
+            imported-specifiers (atom [])]
+        (with-redefs [loader/import-plugin-module
+                      (fn [specifier]
+                        (swap! imported-specifiers conj specifier)
+                        (js/Promise.resolve #js {:default #js {}}))]
+          (-> (loader/load {:plugins plugins})
+              (.then (fn [result]
+                       (is (false? (:ok? result)))
+                       (is (empty? (:plugins result)))
+                       (is (= [(.-href (pathToFileURL
+                                       "/project/plugins/invalid.mjs"))]
+                              @imported-specifiers))
+                       (is (= 4 (count (:diagnostics result))))))
               (.catch (fn [error]
                         (is false (str "Unexpected rejected promise: " (.-message error)))))
               (.finally done)))))))

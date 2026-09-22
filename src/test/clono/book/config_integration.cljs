@@ -55,11 +55,17 @@
        (.join path project "plugins" "first plugin#renderer.mjs")
        (str "await new Promise((resolve) => setTimeout(resolve, 20));\n"
             "globalThis.__clonoPluginLoadTrace.push('first');\n"
-            "export default {};\n"))
+            "export default {\n"
+            "  name: 'first', version: '1.0.0', apiVersion: 1,\n"
+            "  renderers: { column() { return 'first'; } },\n"
+            "};\n"))
       (write-file!
        (.join path project "plugins" "second.mjs")
        (str "globalThis.__clonoPluginLoadTrace.push('second');\n"
-            "export default {};\n"))
+            "export default {\n"
+            "  name: 'second', version: '1.0.0', apiVersion: 1,\n"
+            "  renderers: { column() { return 'second'; } },\n"
+            "};\n"))
       (write-file!
        (.join path project "clono.config.mjs")
        (str "const sourceRoot = await Promise.resolve('manuscripts');\n"
