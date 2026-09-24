@@ -3,6 +3,7 @@
    [clojure.string :as str]
    [clono.ast :as ast]
    [clono.diagnostic :as diagnostic]
+   [clono.markdown :as markdown]
    [goog.string :as gstring]))
 
 (def allowed-content-node-types
@@ -64,6 +65,13 @@
 (defn- semantic-content [node]
   {:title (some-> node label-node title-value)
    :body-nodes (vec (body-children node))})
+
+(defn normalized-data [node]
+  (let [{:keys [title body-nodes]} (semantic-content node)
+        body (markdown/serialize
+              #js {:type "root"
+                   :children (into-array body-nodes)})]
+    (js/Object.freeze #js {:title title :body body})))
 
 (defn title-diagnostic [node source-name title]
   (if-let [label (label-node node)]
