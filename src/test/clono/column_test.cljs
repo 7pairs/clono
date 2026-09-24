@@ -125,6 +125,27 @@
         (is (.includes body "麻雀</span>"))
         (is (not (.includes body ":index[")))))))
 
+(deftest column-default-renderer-test
+  (testing "When the default renderer receives a column, then it returns the existing wrapper and preserves body Markdown"
+    (let [body "本文には**強調**がある。\n\n- 箇条書き"
+          output (column/default-renderer
+                  #js {:title "ちょっと休憩" :body body})
+          tree (markdown/parse output)]
+      (is (= (str "<aside class=\"clono-column\">\n\n"
+                  "<p class=\"clono-column-title\">ちょっと休憩</p>\n\n"
+                  body
+                  "\n\n</aside>")
+             output))
+      (is (= 1 (count (test-support/nodes-by-type tree "strong"))))
+      (is (= 1 (count (test-support/nodes-by-type tree "list"))))))
+
+  (testing "When the column title contains HTML syntax, then the default renderer escapes it as text"
+    (let [output (column/default-renderer
+                  #js {:title "A & B <unsafe>" :body "本文。"})]
+      (is (.includes output
+                     "<p class=\"clono-column-title\">A &amp; B &lt;unsafe&gt;</p>"))
+      (is (not (.includes output "<unsafe>"))))))
+
 (deftest column-transformation-test
   (let [result (pipeline/run {:mode :transform :source-name "column.md"}
                              valid-column-source)
