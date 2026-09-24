@@ -887,6 +887,33 @@
                (str "Unpositioned diagnostic was incorrectly formatted: "
                     (.-stderr result))))))
 
+(defn- verify-plugin-loading-build! [root]
+  (let [project (.join path root "plugin-loading")
+        output (.join path project "build" "manuscripts")]
+    (write-file! (.join path project "clono.config.mjs")
+                 (str "export default {\n"
+                      "  sourceRoot: 'manuscripts',\n"
+                      "  outputRoot: 'build/manuscripts',\n"
+                      "  publication: [\n"
+                      "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+                      "  ],\n"
+                      "  plugins: ['./plugins/failing.mjs'],\n"
+                      "};\n"))
+    (write-file! (.join path project "manuscripts" "chapter.md")
+                 ":::column[雑談]\n本文。\n:::\n")
+    (write-file! (.join path project "plugins" "failing.mjs")
+                 "throw new Error('plugin exploded');\n")
+    (let [result (run-cli ["build" project] root)]
+      (ensure! (= 1 (.-status result))
+               "Release build command accepted a plugin that failed to load")
+      (ensure! (= "" (.-stdout result))
+               "Plugin loading failure wrote to stdout")
+      (ensure! (.includes (.-stderr result) "plugin exploded")
+               (str "Plugin loading failure was not diagnosed: "
+                    (.-stderr result)))
+      (ensure! (not (.existsSync fs output))
+               "Plugin loading failure published output"))))
+
 (defn main []
   (let [root (.mkdtempSync fs (.join path (.tmpdir os)
                                       "clono-cli-integration-"))]
@@ -903,5 +930,6 @@
       (verify-listing-reference-build! root)
       (verify-heading-reference-build! root)
       (verify-unpositioned-diagnostic! root)
+      (verify-plugin-loading-build! root)
       (finally
         (.rmSync fs root #js {:recursive true :force true})))))
