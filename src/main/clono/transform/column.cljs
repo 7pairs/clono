@@ -3,6 +3,7 @@
    [clojure.string :as str]
    [clono.ast :as ast]
    [clono.diagnostic :as diagnostic]
+   [clono.markdown :as markdown]
    [goog.string :as gstring]))
 
 (def allowed-content-node-types
@@ -61,11 +62,30 @@
 (defn title-value [label]
   (apply str (map #(.-value %) (ast/children label))))
 
-(defn title-diagnostic [node source-name]
+(defn- semantic-content [node]
+  {:title (some-> node label-node title-value)
+   :body-nodes (vec (body-children node))})
+
+(defn normalized-data [node]
+  (let [{:keys [title body-nodes]} (semantic-content node)
+        body (markdown/serialize
+              #js {:type "root"
+                   :children (into-array body-nodes)})]
+    (js/Object.freeze #js {:title title :body body})))
+
+(defn default-renderer [input]
+  (str "<aside class=\"clono-column\">\n\n"
+       "<p class=\"clono-column-title\">"
+       (gstring/htmlEscape (.-title input))
+       "</p>\n\n"
+       (.-body input)
+       "\n\n</aside>"))
+
+(defn title-diagnostic [node source-name title]
   (if-let [label (label-node node)]
     (let [label-children (vec (ast/children label))]
       (when (or (not-every? #(= "text" (.-type %)) label-children)
-                (str/blank? (title-value label)))
+                (str/blank? title))
         (node-diagnostic
          source-name
          label
@@ -105,21 +125,20 @@
           (recur (next remaining) (conj invalid node))))
       invalid)))
 
-(defn content-diagnostics [node source-name known-directive-names]
-  (let [body (vec (body-children node))]
-    (if (empty? body)
-      [(diagnostic/for-node
+(defn content-diagnostics [node source-name body-nodes known-directive-names]
+  (if (empty? body-nodes)
+    [(diagnostic/for-node
+      source-name
+      node
+      "`column`には1個以上の本文ブロックが必要です。")]
+    (mapv
+     (fn [invalid-node]
+       (node-diagnostic
         source-name
-        node
-        "`column`には1個以上の本文ブロックが必要です。")]
-      (mapv
-       (fn [invalid-node]
-         (node-diagnostic
-          source-name
-          invalid-node
-          (str "`column`内では"
-               (node-description invalid-node) "を使用できません。")))
-       (invalid-content-nodes body known-directive-names)))))
+        invalid-node
+        (str "`column`内では"
+             (node-description invalid-node) "を使用できません。")))
+     (invalid-content-nodes body-nodes known-directive-names))))
 
 (defn diagnostics [node context known-directive-names]
   (let [source-name (:source-name context)]
@@ -128,24 +147,28 @@
         source-name
         node
         "`column`はContainer directiveとして記述する必要があります。")]
-      (let [title-problem (title-diagnostic node source-name)
+      (let [{:keys [title body-nodes]} (semantic-content node)
+            title-problem (title-diagnostic node source-name title)
             attribute-problem (attribute-diagnostic node source-name)]
-        (cond-> (content-diagnostics node source-name known-directive-names)
+        (cond-> (content-diagnostics node source-name body-nodes
+                                     known-directive-names)
           (some? title-problem) (conj title-problem)
           (some? attribute-problem) (conj attribute-problem))))))
 
 (defn html-node [value]
   #js {:type "html" :value value})
 
+(defn- generate-default-output [{:keys [title body-nodes]}]
+  (concat [(html-node "<aside class=\"clono-column\">")
+           (html-node
+            (str "<p class=\"clono-column-title\">"
+                 (gstring/htmlEscape title)
+                 "</p>"))]
+          body-nodes
+          [(html-node "</aside>")]))
+
 (defn transform [node _context]
-  (let [title (title-value (label-node node))]
-    (concat [(html-node "<aside class=\"clono-column\">")
-             (html-node
-              (str "<p class=\"clono-column-title\">"
-                   (gstring/htmlEscape title)
-                   "</p>"))]
-            (body-children node)
-            [(html-node "</aside>")])))
+  (generate-default-output (semantic-content node)))
 
 (def rule
   {:node-type "containerDirective"

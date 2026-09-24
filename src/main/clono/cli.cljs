@@ -9,6 +9,7 @@
    [clono.book.publish :as book-publish]
    [clono.book.transform :as book-transform]
    [clono.pipeline :as pipeline]
+   [clono.plugin :as plugin]
    [goog.object :as gobj]))
 
 (def usage
@@ -282,13 +283,21 @@
   (let [plan-result (book-plan/create config)]
     (if-not (:ok? plan-result)
       (diagnostics-result (:diagnostics plan-result))
-      (let [transformation (book-transform/run (:plan plan-result))]
-        (if-not (:ok? transformation)
-          (diagnostics-result (:diagnostics transformation))
-          (let [publication (book-publish/run (:plan transformation))]
-            (if (:ok? publication)
-              (result 0 nil nil)
-              (diagnostics-result (:diagnostics publication)))))))))
+      (-> (plugin/load-registry (:config-path config) config)
+          (.then (fn [registry-result]
+                   (if-not (:ok? registry-result)
+                     (diagnostics-result (:diagnostics registry-result))
+                     (let [transformation
+                           (book-transform/run (:plan plan-result)
+                                               (:registry registry-result))]
+                       (if-not (:ok? transformation)
+                         (diagnostics-result (:diagnostics transformation))
+                         (let [publication (book-publish/run
+                                            (:plan transformation))]
+                           (if (:ok? publication)
+                             (result 0 nil nil)
+                             (diagnostics-result
+                              (:diagnostics publication)))))))))))))
 
 (defn- build-result [project]
   (-> (book-config/load-project-config project)

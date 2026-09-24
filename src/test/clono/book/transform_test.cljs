@@ -34,6 +34,35 @@
 (defn- operation-by-path [operations operation-path]
   (first (filter #(= operation-path (:path %)) operations)))
 
+(deftest renderer-registry-context-test
+  (testing "When a book has a renderer registry, then listed and unlisted Markdown receive the same registry"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              publication [{:type :document
+                            :path "chapter.md"
+                            :kind "chapter"
+                            :include-in-toc true}]
+              registry {"column" {:renderer identity}}
+              contexts (atom {})]
+          (write-file! (.join path source "chapter.md") "# 本文\n")
+          (write-file! (.join path source "notes.md") "掲載外の原稿。\n")
+          (with-redefs [pipeline/run-analyzed
+                        (fn [context _tree]
+                          (swap! contexts assoc (:source-name context) context)
+                          {:ok? true :output "掲載原稿。\n" :diagnostics []})
+                        pipeline/run
+                        (fn [context _source]
+                          (swap! contexts assoc (:source-name context) context)
+                          {:ok? true :output "掲載外原稿。\n" :diagnostics []})]
+            (let [result (book-transform/run
+                          (create-plan project publication)
+                          registry)]
+              (is (:ok? result))
+              (is (= #{"chapter.md" "notes.md"} (set (keys @contexts))))
+              (is (every? #(identical? registry (:registry %))
+                          (vals @contexts))))))))))
+
 (deftest multiple-manuscript-transformation-test
   (testing "When a transformation plan contains multiple Markdown manuscripts, then every manuscript is transformed in deterministic plan order without writing output"
     (with-temporary-project

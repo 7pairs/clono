@@ -4,7 +4,9 @@
    [cljs.test :refer [deftest is testing]]
    [clono.markdown :as markdown]
    [clono.pipeline :as pipeline]
-   [clono.test-support :as test-support]))
+   [clono.test-support :as test-support]
+   [clono.transform :as transform]
+   [clono.transform.column :as column]))
 
 (def valid-column-source
   (str ":::column[A &amp; B &lt;unsafe&gt;]\n"
@@ -86,6 +88,99 @@
 
 (defn- normalize-line-endings [value]
   (.replace value (js/RegExp. "\\r\\n?" "g") "\n"))
+
+(deftest column-normalized-data-test
+  (testing "When a validated column is normalized, then its renderer receives only the unescaped title and Markdown body"
+    (let [tree (markdown/parse valid-column-source)
+          input (column/normalized-data
+                 (test-support/directive tree "column"))
+          body (.-body input)]
+      (is (= ["body" "title"]
+             (sort (array-seq (js/Object.keys input)))))
+      (is (true? (js/Object.isFrozen input)))
+      (is (= "A & B <unsafe>" (.-title input)))
+      (is (.includes body "**太字**"))
+      (is (.includes body "[リンク][site]"))
+      (is (.includes body "[^note]"))
+      (is (not (.includes body ":::column")))
+      (is (not (.includes body "[site]:")))
+      (is (not (.includes body "[^note]:")))))
+
+  (testing "When a column contains an index term, then its renderer receives the transformed marker in the body"
+    (let [source (str ":::column[雑談]\n"
+                      "これは:index[麻雀]{reading=\"まーじゃん\"}の話です。\n"
+                      ":::\n")
+          source-name "column-index.md"
+          tree (markdown/parse source)
+          context {:mode :transform :source-name source-name}
+          entries (transform/collect-index-entries tree context)
+          prepared (transform/prepare-index-entries entries [])
+          column-node (test-support/directive tree "column")]
+      (is (true? (:ok? prepared)))
+      (transform/transform-children!
+       column-node
+       (transform/add-index-entries context (:entries prepared)))
+      (let [body (.-body (column/normalized-data column-node))]
+        (is (.includes body "<span class=\"clono-index-marker\""))
+        (is (.includes body "麻雀</span>"))
+        (is (not (.includes body ":index[")))))))
+
+(deftest column-default-renderer-test
+  (testing "When the default renderer receives a column, then it returns the existing wrapper and preserves body Markdown"
+    (let [body "本文には**強調**がある。\n\n- 箇条書き"
+          output (column/default-renderer
+                  #js {:title "ちょっと休憩" :body body})
+          tree (markdown/parse output)]
+      (is (= (str "<aside class=\"clono-column\">\n\n"
+                  "<p class=\"clono-column-title\">ちょっと休憩</p>\n\n"
+                  body
+                  "\n\n</aside>")
+             output))
+      (is (= 1 (count (test-support/nodes-by-type tree "strong"))))
+      (is (= 1 (count (test-support/nodes-by-type tree "list"))))))
+
+  (testing "When the column title contains HTML syntax, then the default renderer escapes it as text"
+    (let [output (column/default-renderer
+                  #js {:title "A & B <unsafe>" :body "本文。"})]
+      (is (.includes output
+                     "<p class=\"clono-column-title\">A &amp; B &lt;unsafe&gt;</p>"))
+      (is (not (.includes output "<unsafe>"))))))
+
+(deftest column-existing-behavior-regression-test
+  (testing "When a column is transformed without an external renderer, then its Markdown output remains unchanged"
+    (let [source (str "前の段落。\n\n"
+                      ":::column[A &amp; B]\n"
+                      "**重要**な本文。\n"
+                      ":::\n\n"
+                      "後の段落。\n")
+          expected (str "前の段落。\n\n"
+                        "<aside class=\"clono-column\">\n\n"
+                        "<p class=\"clono-column-title\">A &amp; B</p>\n\n"
+                        "**重要**な本文。\n\n"
+                        "</aside>\n\n"
+                        "後の段落。\n")]
+      (doseq [context [{:mode :transform :source-name "column.md"}
+                       {:mode :build :source-name "column.md"
+                        :registry {}}]]
+        (let [result (pipeline/run context source)]
+          (is (true? (:ok? result)))
+          (is (= [] (:diagnostics result)))
+          (is (= expected (:output result)))))))
+
+  (testing "When a column is invalid, then its positioned diagnostic and absent output remain unchanged"
+    (let [source ":::column\n本文。\n:::\n"
+          expected [{:file "invalid-column.md"
+                     :line 1
+                     :column 1
+                     :directive "column"
+                     :message "`column`にはプレーンテキストのタイトルが必要です。"}]]
+      (doseq [context [{:mode :transform :source-name "invalid-column.md"}
+                       {:mode :build :source-name "invalid-column.md"
+                        :registry {}}]]
+        (let [result (pipeline/run context source)]
+          (is (false? (:ok? result)))
+          (is (nil? (:output result)))
+          (is (= expected (:diagnostics result))))))))
 
 (deftest column-transformation-test
   (let [result (pipeline/run {:mode :transform :source-name "column.md"}
