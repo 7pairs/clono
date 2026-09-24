@@ -96,15 +96,16 @@
        (map (juxt :path identity))
        (into {})))
 
-(defn- execution-context [plan publication-documents operation]
+(defn- execution-context [plan registry publication-documents operation]
   {:mode :build
    :source-name (:path operation)
    :input-path (:source-path operation)
    :source-root-path (:source-path plan)
+   :registry registry
    :publication-entry (get publication-documents (:path operation))})
 
-(defn- prepare-operation [plan publication-documents operation]
-  (let [context (execution-context plan publication-documents operation)]
+(defn- prepare-operation [plan registry publication-documents operation]
+  (let [context (execution-context plan registry publication-documents operation)]
     (if (and (= :transform-markdown (:action operation))
              (some? (:publication-entry context)))
       (let [read-result (read-markdown operation)]
@@ -214,28 +215,30 @@
     :diagnostics []}
    prepared-operations))
 
-(defn run [plan]
-  (let [publication-documents (publication-by-path (:publication plan))
-        prepared-operations
-        (mapv #(prepare-operation plan publication-documents %)
-              (:operations plan))
-        preflight-result (preflight plan prepared-operations)]
-    (if-not (:ok? preflight-result)
-      {:ok? false
-       :plan nil
-       :diagnostics (:diagnostics preflight-result)}
-      (let [result
-            (transform-prepared-operations
-             (:prepared-operations preflight-result))]
-        (if (seq (:diagnostics result))
-          {:ok? false
-           :plan nil
-           :diagnostics (:diagnostics result)}
-          (let [generated-index
-                (book-index/generate (:publication plan)
-                                     (:index-entries preflight-result))]
-            {:ok? true
-             :plan (cond-> (assoc plan :operations (:operations result))
-                     generated-index
-                     (assoc :generated-index generated-index))
-             :diagnostics []}))))))
+(defn run
+  ([plan] (run plan {}))
+  ([plan registry]
+   (let [publication-documents (publication-by-path (:publication plan))
+         prepared-operations
+         (mapv #(prepare-operation plan registry publication-documents %)
+               (:operations plan))
+         preflight-result (preflight plan prepared-operations)]
+     (if-not (:ok? preflight-result)
+       {:ok? false
+        :plan nil
+        :diagnostics (:diagnostics preflight-result)}
+       (let [result
+             (transform-prepared-operations
+              (:prepared-operations preflight-result))]
+         (if (seq (:diagnostics result))
+           {:ok? false
+            :plan nil
+            :diagnostics (:diagnostics result)}
+           (let [generated-index
+                 (book-index/generate (:publication plan)
+                                      (:index-entries preflight-result))]
+             {:ok? true
+              :plan (cond-> (assoc plan :operations (:operations result))
+                      generated-index
+                      (assoc :generated-index generated-index))
+              :diagnostics []})))))))
