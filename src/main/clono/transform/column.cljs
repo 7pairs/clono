@@ -73,6 +73,14 @@
                    :children (into-array body-nodes)})]
     (js/Object.freeze #js {:title title :body body})))
 
+(defn default-renderer [input]
+  (str "<aside class=\"clono-column\">\n\n"
+       "<p class=\"clono-column-title\">"
+       (gstring/htmlEscape (.-title input))
+       "</p>\n\n"
+       (.-body input)
+       "\n\n</aside>"))
+
 (defn title-diagnostic [node source-name title]
   (if-let [label (label-node node)]
     (let [label-children (vec (ast/children label))]
