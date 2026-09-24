@@ -914,6 +914,44 @@
       (ensure! (not (.existsSync fs output))
                "Plugin loading failure published output"))))
 
+(defn- verify-column-regression-build! [root]
+  (let [project (.join path root "column-regression")
+        config-path (.join path project "clono.config.mjs")
+        input (.join path project "manuscripts" "chapter.md")
+        output (.join path project "build" "manuscripts" "chapter.md")
+        config-prefix (str "export default {\n"
+                           "  sourceRoot: 'manuscripts',\n"
+                           "  outputRoot: 'build/manuscripts',\n"
+                           "  publication: [\n"
+                           "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+                           "  ],\n")
+        expected-output (str "<aside class=\"clono-column\">\n\n"
+                             "<p class=\"clono-column-title\">雑談</p>\n\n"
+                             "本文には**強調**がある。\n\n"
+                             "</aside>\n")
+        invalid-diagnostic (str "chapter.md:1:1: "
+                                "`column`にはプレーンテキストのタイトルが必要です。\n")]
+    (write-file! input ":::column[雑談]\n本文には**強調**がある。\n:::\n")
+    (doseq [plugins-line ["" "  plugins: [],\n"]]
+      (write-file! config-path (str config-prefix plugins-line "};\n"))
+      (verify-success! (run-cli ["build" project] root)
+                       "Release build command without a custom column renderer")
+      (ensure! (= expected-output (.readFileSync fs output "utf8"))
+               "Release build command changed the default column output"))
+    (write-file! input ":::column\n本文。\n:::\n")
+    (doseq [plugins-line ["" "  plugins: [],\n"]]
+      (write-file! config-path (str config-prefix plugins-line "};\n"))
+      (let [result (run-cli ["build" project] root)]
+        (ensure! (= 1 (.-status result))
+                 "Release build command accepted an invalid column")
+        (ensure! (= "" (.-stdout result))
+                 "Invalid column build wrote to stdout")
+        (ensure! (= invalid-diagnostic (.-stderr result))
+                 (str "Release build command changed the column diagnostic: "
+                      (.-stderr result)))
+        (ensure! (= expected-output (.readFileSync fs output "utf8"))
+                 "Invalid column build changed existing output")))))
+
 (defn main []
   (let [root (.mkdtempSync fs (.join path (.tmpdir os)
                                       "clono-cli-integration-"))]
@@ -931,5 +969,6 @@
       (verify-heading-reference-build! root)
       (verify-unpositioned-diagnostic! root)
       (verify-plugin-loading-build! root)
+      (verify-column-regression-build! root)
       (finally
         (.rmSync fs root #js {:recursive true :force true})))))

@@ -146,6 +146,42 @@
                      "<p class=\"clono-column-title\">A &amp; B &lt;unsafe&gt;</p>"))
       (is (not (.includes output "<unsafe>"))))))
 
+(deftest column-existing-behavior-regression-test
+  (testing "When a column is transformed without an external renderer, then its Markdown output remains unchanged"
+    (let [source (str "前の段落。\n\n"
+                      ":::column[A &amp; B]\n"
+                      "**重要**な本文。\n"
+                      ":::\n\n"
+                      "後の段落。\n")
+          expected (str "前の段落。\n\n"
+                        "<aside class=\"clono-column\">\n\n"
+                        "<p class=\"clono-column-title\">A &amp; B</p>\n\n"
+                        "**重要**な本文。\n\n"
+                        "</aside>\n\n"
+                        "後の段落。\n")]
+      (doseq [context [{:mode :transform :source-name "column.md"}
+                       {:mode :build :source-name "column.md"
+                        :registry {}}]]
+        (let [result (pipeline/run context source)]
+          (is (true? (:ok? result)))
+          (is (= [] (:diagnostics result)))
+          (is (= expected (:output result)))))))
+
+  (testing "When a column is invalid, then its positioned diagnostic and absent output remain unchanged"
+    (let [source ":::column\n本文。\n:::\n"
+          expected [{:file "invalid-column.md"
+                     :line 1
+                     :column 1
+                     :directive "column"
+                     :message "`column`にはプレーンテキストのタイトルが必要です。"}]]
+      (doseq [context [{:mode :transform :source-name "invalid-column.md"}
+                       {:mode :build :source-name "invalid-column.md"
+                        :registry {}}]]
+        (let [result (pipeline/run context source)]
+          (is (false? (:ok? result)))
+          (is (nil? (:output result)))
+          (is (= expected (:diagnostics result))))))))
+
 (deftest column-transformation-test
   (let [result (pipeline/run {:mode :transform :source-name "column.md"}
                              valid-column-source)
