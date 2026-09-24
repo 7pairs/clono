@@ -4,7 +4,9 @@
    [cljs.test :refer [deftest is testing]]
    [clono.markdown :as markdown]
    [clono.pipeline :as pipeline]
-   [clono.test-support :as test-support]))
+   [clono.test-support :as test-support]
+   [clono.transform :as transform]
+   [clono.transform.column :as column]))
 
 (def valid-column-source
   (str ":::column[A &amp; B &lt;unsafe&gt;]\n"
@@ -86,6 +88,42 @@
 
 (defn- normalize-line-endings [value]
   (.replace value (js/RegExp. "\\r\\n?" "g") "\n"))
+
+(deftest column-normalized-data-test
+  (testing "When a validated column is normalized, then its renderer receives only the unescaped title and Markdown body"
+    (let [tree (markdown/parse valid-column-source)
+          input (column/normalized-data
+                 (test-support/directive tree "column"))
+          body (.-body input)]
+      (is (= ["body" "title"]
+             (sort (array-seq (js/Object.keys input)))))
+      (is (true? (js/Object.isFrozen input)))
+      (is (= "A & B <unsafe>" (.-title input)))
+      (is (.includes body "**太字**"))
+      (is (.includes body "[リンク][site]"))
+      (is (.includes body "[^note]"))
+      (is (not (.includes body ":::column")))
+      (is (not (.includes body "[site]:")))
+      (is (not (.includes body "[^note]:")))))
+
+  (testing "When a column contains an index term, then its renderer receives the transformed marker in the body"
+    (let [source (str ":::column[雑談]\n"
+                      "これは:index[麻雀]{reading=\"まーじゃん\"}の話です。\n"
+                      ":::\n")
+          source-name "column-index.md"
+          tree (markdown/parse source)
+          context {:mode :transform :source-name source-name}
+          entries (transform/collect-index-entries tree context)
+          prepared (transform/prepare-index-entries entries [])
+          column-node (test-support/directive tree "column")]
+      (is (true? (:ok? prepared)))
+      (transform/transform-children!
+       column-node
+       (transform/add-index-entries context (:entries prepared)))
+      (let [body (.-body (column/normalized-data column-node))]
+        (is (.includes body "<span class=\"clono-index-marker\""))
+        (is (.includes body "麻雀</span>"))
+        (is (not (.includes body ":index[")))))))
 
 (deftest column-transformation-test
   (let [result (pipeline/run {:mode :transform :source-name "column.md"}
