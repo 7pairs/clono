@@ -916,6 +916,7 @@
 
 (defn- verify-custom-column-build! [root]
   (let [project (.join path root "custom-column")
+        plugin-path (.join path project "plugins" "custom.mjs")
         output (.join path project "build" "manuscripts" "chapter.md")]
     (write-file! (.join path project "clono.config.mjs")
                  (str "export default {\n"
@@ -928,7 +929,7 @@
                       "};\n"))
     (write-file! (.join path project "manuscripts" "chapter.md")
                  ":::column[雑談]\n**本文**です。\n:::\n")
-    (write-file! (.join path project "plugins" "custom.mjs")
+    (write-file! plugin-path
                  (str "export default {\n"
                       "  name: 'custom-column',\n"
                       "  version: '1.0.0',\n"
@@ -947,7 +948,23 @@
       (ensure! (.includes content "**本文**です。")
                "Custom column renderer lost the Markdown body")
       (ensure! (not (.includes content "clono-column"))
-               "Default column renderer was used despite plugin registration"))))
+               "Default column renderer was used despite plugin registration")
+      (write-file! plugin-path
+                   (str "export default {\n"
+                        "  name: 'custom-column',\n"
+                        "  version: '1.0.0',\n"
+                        "  apiVersion: 1,\n"
+                        "  renderers: { column() { return '   '; } },\n"
+                        "};\n"))
+      (let [result (run-cli ["build" project] root)]
+        (ensure! (= 1 (.-status result))
+                 "Release build command accepted a blank renderer output")
+        (ensure! (.includes (.-stderr result)
+                            "chapter.md:1:1: コラムrenderer（custom-column）")
+                 (str "Invalid renderer output lacked a positioned diagnostic: "
+                      (.-stderr result)))
+        (ensure! (= content (.readFileSync fs output "utf8"))
+                 "Invalid renderer output changed the existing book")))))
 
 (defn- verify-column-regression-build! [root]
   (let [project (.join path root "column-regression")
