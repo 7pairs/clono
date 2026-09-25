@@ -63,6 +63,53 @@
               (is (every? #(identical? registry (:registry %))
                           (vals @contexts))))))))))
 
+(deftest renderer-failure-publication-test
+  (testing "When column renderers fail after earlier successes, then later manuscripts are checked without exposing a partial book"
+    (with-temporary-project
+      (fn [project]
+        (let [source (.join path project "manuscripts")
+              output (.join path project "build" "manuscripts")
+              publication (mapv (fn [file-path]
+                                  {:type :document
+                                   :path file-path
+                                   :kind "chapter"
+                                   :include-in-toc true})
+                                ["a.md" "b.md" "c.md"])
+              rendered-titles (atom [])
+              registry {"column"
+                        {:plugin {:name "custom-column"}
+                         :renderer (fn [input]
+                                     (let [title (.-title input)]
+                                       (swap! rendered-titles conj title)
+                                       (when (.startsWith title "失敗")
+                                         (throw (js/Error. "render failed")))
+                                       (str "<aside>" title "</aside>")))}}]
+          (write-file! (.join path source "a.md")
+                       ":::column[成功A]\n本文。\n:::\n")
+          (write-file! (.join path source "b.md")
+                       (str ":::column[前半]\n本文。\n:::\n\n"
+                            ":::column[失敗B]\n本文。\n:::\n"))
+          (write-file! (.join path source "c.md")
+                       ":::column[失敗C]\n本文。\n:::\n")
+          (let [result (book-transform/run
+                        (create-plan project publication) registry)]
+            (is (false? (:ok? result)))
+            (is (nil? (:plan result)))
+            (is (= ["成功A" "前半" "失敗B" "失敗C"]
+                   @rendered-titles))
+            (is (= [{:file "b.md"
+                     :line 5
+                     :column 1
+                     :directive "column"
+                     :message "コラムrenderer（custom-column）の実行に失敗しました: render failed"}
+                    {:file "c.md"
+                     :line 1
+                     :column 1
+                     :directive "column"
+                     :message "コラムrenderer（custom-column）の実行に失敗しました: render failed"}]
+                   (:diagnostics result)))
+            (is (false? (.existsSync fs output)))))))))
+
 (deftest multiple-manuscript-transformation-test
   (testing "When a transformation plan contains multiple Markdown manuscripts, then every manuscript is transformed in deterministic plan order without writing output"
     (with-temporary-project

@@ -985,6 +985,85 @@
         (ensure! (= content (.readFileSync fs output "utf8"))
                  "Renderer exception changed the existing book")))))
 
+(defn- verify-column-failure-does-not-publish! [root]
+  (let [project (.join path root "column-atomicity")
+        config-path (.join path project "clono.config.mjs")
+        plugin-path (.join path project "plugins" "custom.mjs")
+        source (.join path project "manuscripts")
+        output (.join path project "build" "manuscripts")
+        config (str "export default {\n"
+                    "  sourceRoot: 'manuscripts',\n"
+                    "  outputRoot: 'build/manuscripts',\n"
+                    "  publication: [\n"
+                    "    { type: 'document', path: 'a.md', kind: 'chapter', includeInToc: true },\n"
+                    "    { type: 'document', path: 'b.md', kind: 'chapter', includeInToc: true },\n"
+                    "    { type: 'document', path: 'c.md', kind: 'chapter', includeInToc: true },\n"
+                    "  ],\n"
+                    "  plugins: ['./plugins/custom.mjs'],\n"
+                    "};\n")
+        plugin-prefix (str "export default {\n"
+                           "  name: 'custom-column',\n"
+                           "  version: '1.0.0',\n"
+                           "  apiVersion: 1,\n")]
+    (write-file! config-path config)
+    (write-file! plugin-path
+                 (str plugin-prefix
+                      "  renderers: { column(input) { return `<aside>${input.title}</aside>`; } },\n"
+                      "};\n"))
+    (doseq [name ["a" "b" "c"]]
+      (write-file! (.join path source (str name ".md"))
+                   (str ":::column[" name "]\n本文。\n:::\n")))
+    (verify-success! (run-cli ["build" project] root)
+                     "Release build command before renderer failures")
+    (let [expected-files (into {}
+                               (map (fn [relative-path]
+                                      [relative-path
+                                       (.readFileSync fs
+                                                      (.join path output relative-path)
+                                                      "utf8")]))
+                               ["a.md" "b.md" "c.md"
+                                "_clono/styles/clono.css" ".clono-output.json"])
+          expected-stderr
+          (str "b.md:5:1: コラムrenderer（custom-column）の実行に失敗しました: render failed\n"
+               "c.md:1:1: コラムrenderer（custom-column）の実行に失敗しました: render failed\n")]
+      (write-file! (.join path output "keep.txt") "keep\n")
+      (write-file! (.join path source "a.md")
+                   ":::column[変更A]\n新しい本文。\n:::\n")
+      (write-file! (.join path source "b.md")
+                   (str ":::column[前半]\n本文。\n:::\n\n"
+                        ":::column[失敗B]\n本文。\n:::\n"))
+      (write-file! (.join path source "c.md")
+                   ":::column[失敗C]\n本文。\n:::\n")
+      (write-file! plugin-path
+                   (str plugin-prefix
+                        "  renderers: {\n"
+                        "    column(input) {\n"
+                        "      if (input.title.startsWith('失敗')) throw new Error('render failed');\n"
+                        "      return `<aside>${input.title}</aside>`;\n"
+                        "    },\n"
+                        "  },\n"
+                        "};\n"))
+      (let [result (run-cli ["build" project] root)]
+        (ensure! (= 1 (.-status result))
+                 "Release build command accepted failed column renderers")
+        (ensure! (= "" (.-stdout result))
+                 "Failed column build wrote to stdout")
+        (ensure! (= expected-stderr (.-stderr result))
+                 (str "Renderer failures were not collected in manuscript order: "
+                      (.-stderr result)))
+        (verify-unchanged-output! output expected-files
+                                  "Failed column rebuild"))
+      (write-file! config-path
+                   (.replace config "build/manuscripts" "build/fresh"))
+      (let [fresh-output (.join path project "build" "fresh")
+            result (run-cli ["build" project] root)]
+        (ensure! (= 1 (.-status result))
+                 "Release build command accepted failed renderers for fresh output")
+        (ensure! (= expected-stderr (.-stderr result))
+                 "Fresh build did not report both renderer failures")
+        (ensure! (not (.existsSync fs fresh-output))
+                 "Failed fresh build published partial output")))))
+
 (defn- verify-column-regression-build! [root]
   (let [project (.join path root "column-regression")
         config-path (.join path project "clono.config.mjs")
@@ -1041,6 +1120,7 @@
       (verify-unpositioned-diagnostic! root)
       (verify-plugin-loading-build! root)
       (verify-custom-column-build! root)
+      (verify-column-failure-does-not-publish! root)
       (verify-column-regression-build! root)
       (finally
         (.rmSync fs root #js {:recursive true :force true})))))
