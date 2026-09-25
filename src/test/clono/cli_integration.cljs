@@ -914,6 +914,41 @@
       (ensure! (not (.existsSync fs output))
                "Plugin loading failure published output"))))
 
+(defn- verify-custom-column-build! [root]
+  (let [project (.join path root "custom-column")
+        output (.join path project "build" "manuscripts" "chapter.md")]
+    (write-file! (.join path project "clono.config.mjs")
+                 (str "export default {\n"
+                      "  sourceRoot: 'manuscripts',\n"
+                      "  outputRoot: 'build/manuscripts',\n"
+                      "  publication: [\n"
+                      "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+                      "  ],\n"
+                      "  plugins: ['./plugins/custom.mjs'],\n"
+                      "};\n"))
+    (write-file! (.join path project "manuscripts" "chapter.md")
+                 ":::column[雑談]\n**本文**です。\n:::\n")
+    (write-file! (.join path project "plugins" "custom.mjs")
+                 (str "export default {\n"
+                      "  name: 'custom-column',\n"
+                      "  version: '1.0.0',\n"
+                      "  apiVersion: 1,\n"
+                      "  renderers: {\n"
+                      "    column(input) {\n"
+                      "      return `<div class=\"custom-column\">\\n\\n${input.body}\\n\\n</div>`;\n"
+                      "    },\n"
+                      "  },\n"
+                      "};\n"))
+    (verify-success! (run-cli ["build" project] root)
+                     "Release build command with a custom column renderer")
+    (let [content (.readFileSync fs output "utf8")]
+      (ensure! (.includes content "<div class=\"custom-column\">")
+               "Custom column renderer did not replace the wrapper")
+      (ensure! (.includes content "**本文**です。")
+               "Custom column renderer lost the Markdown body")
+      (ensure! (not (.includes content "clono-column"))
+               "Default column renderer was used despite plugin registration"))))
+
 (defn- verify-column-regression-build! [root]
   (let [project (.join path root "column-regression")
         config-path (.join path project "clono.config.mjs")
@@ -969,6 +1004,7 @@
       (verify-heading-reference-build! root)
       (verify-unpositioned-diagnostic! root)
       (verify-plugin-loading-build! root)
+      (verify-custom-column-build! root)
       (verify-column-regression-build! root)
       (finally
         (.rmSync fs root #js {:recursive true :force true})))))

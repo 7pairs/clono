@@ -146,6 +146,32 @@
                      "<p class=\"clono-column-title\">A &amp; B &lt;unsafe&gt;</p>"))
       (is (not (.includes output "<unsafe>"))))))
 
+(deftest registered-column-renderer-test
+  (testing "When a column renderer is registered, then its Markdown replaces the default column output"
+    (let [inputs (atom [])
+          renderer (fn [input]
+                     (swap! inputs conj input)
+                     (str "<div class=\"custom-column\">\n\n"
+                          (.-body input)
+                          "\n\n</div>"))
+          source ":::column[雑談]\n**本文**です。\n:::\n"
+          result (pipeline/run
+                  {:mode :transform
+                   :source-name "custom-column.md"
+                   :registry {"column" {:plugin {:name "custom-column"}
+                                         :renderer renderer}}}
+                  source)
+          output (:output result)
+          tree (markdown/parse output)]
+      (is (true? (:ok? result)))
+      (is (= [] (:diagnostics result)))
+      (is (= 1 (count @inputs)))
+      (is (= "雑談" (.-title (first @inputs))))
+      (is (true? (js/Object.isFrozen (first @inputs))))
+      (is (.includes output "<div class=\"custom-column\">"))
+      (is (not (.includes output "clono-column")))
+      (is (= 1 (count (test-support/nodes-by-type tree "strong")))))))
+
 (deftest column-existing-behavior-regression-test
   (testing "When a column is transformed without an external renderer, then its Markdown output remains unchanged"
     (let [source (str "前の段落。\n\n"
