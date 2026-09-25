@@ -1148,6 +1148,43 @@
       (ensure! (.existsSync fs (.join path output ".clono-output.json"))
                "Custom column build did not publish an owned output tree"))))
 
+(defn- verify-example-column-plugin! [root]
+  (let [project (.join path root "example-column-plugin")
+        example-path (.resolve path js/__dirname ".." "examples"
+                               "column-renderer" "column.mjs")
+        plugin-path (.join path project "plugins" "column.mjs")
+        output (.join path project "build" "manuscripts" "chapter.md")]
+    (write-file! plugin-path (.readFileSync fs example-path "utf8"))
+    (write-file! (.join path project "clono.config.mjs")
+                 (str "export default {\n"
+                      "  sourceRoot: 'manuscripts',\n"
+                      "  outputRoot: 'build/manuscripts',\n"
+                      "  publication: [\n"
+                      "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+                      "  ],\n"
+                      "  plugins: ['./plugins/column.mjs'],\n"
+                      "};\n"))
+    (write-file! (.join path project "manuscripts" "chapter.md")
+                 ":::column[A & B]\n本文には**強調**がある。\n:::\n")
+    (verify-success! (run-cli ["build" project] root)
+                     "Release build command with the example column plugin")
+    (let [content (.readFileSync fs output "utf8")]
+      (ensure! (= 3 (count (re-seq #"<div " content)))
+               "Example column plugin did not emit three nested div elements")
+      (ensure! (.includes content
+                          "<div class=\"clono-column column\">\n<div class=\"column-frame\">\n<div class=\"column-content\">")
+               "Example column plugin did not retain the legacy column wrapper")
+      (ensure! (.includes content
+                          "<h4 class=\"clono-column-title column-title\">")
+               "Example column plugin did not emit the column heading")
+      (ensure! (.includes content
+                          "<span class=\"column-title-text\">A &amp; B</span>")
+               "Example column plugin did not escape the title")
+      (ensure! (.includes content "本文には**強調**がある。")
+               "Example column plugin did not preserve the Markdown body")
+      (ensure! (not (.includes content " id=\""))
+               "Example column plugin generated an ID from the title"))))
+
 (defn- verify-column-regression-build! [root]
   (let [project (.join path root "column-regression")
         config-path (.join path project "clono.config.mjs")
@@ -1206,6 +1243,7 @@
       (verify-custom-column-build! root)
       (verify-column-failure-does-not-publish! root)
       (verify-custom-column-book-build! root)
+      (verify-example-column-plugin! root)
       (verify-column-regression-build! root)
       (finally
         (.rmSync fs root #js {:recursive true :force true})))))
