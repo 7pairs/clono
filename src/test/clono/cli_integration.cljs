@@ -1064,6 +1064,90 @@
         (ensure! (not (.existsSync fs fresh-output))
                  "Failed fresh build published partial output")))))
 
+(defn- verify-custom-column-book-build! [root]
+  (let [project (.join path root "custom-column-book")
+        source (.join path project "manuscripts")
+        output (.join path project "build" "manuscripts")
+        chapter-one (.join path output "chapters" "one.md")
+        chapter-two (.join path output "chapters" "two.md")
+        notes (.join path output "notes.md")
+        index (.join path output "generated" "index.md")
+        asset (.join path output "images" "diagram.svg")]
+    (write-file!
+     (.join path project "clono.config.mjs")
+     (str "export default {\n"
+          "  sourceRoot: 'manuscripts',\n"
+          "  outputRoot: 'build/manuscripts',\n"
+          "  publication: [\n"
+          "    { type: 'document', path: 'chapters/one.md', kind: 'chapter', includeInToc: true },\n"
+          "    { type: 'document', path: 'chapters/two.md', kind: 'chapter', includeInToc: true },\n"
+          "    { type: 'index', path: 'generated/index.md', title: '索引', includeInToc: true },\n"
+          "  ],\n"
+          "  plugins: ['./plugins/column.mjs'],\n"
+          "};\n"))
+    (write-file!
+     (.join path project "plugins" "column.mjs")
+     (str "export default {\n"
+          "  name: 'book-column',\n"
+          "  version: '1.0.0',\n"
+          "  apiVersion: 1,\n"
+          "  renderers: {\n"
+          "    column(input) {\n"
+          "      const title = input.title.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');\n"
+          "      return `<div class=\"custom-column\"><span class=\"label\">${title}</span>\\n\\n${input.body}\\n\\n</div>`;\n"
+          "    },\n"
+          "  },\n"
+          "};\n"))
+    (write-file!
+     (.join path source "chapters" "one.md")
+     (str "# 第一章 {#chapter-one}\n\n"
+          ":::column[準備 & 確認]\n本文に**強調**。\n:::\n\n"
+          ":xref[chapter-two]{type=\"heading\" format=\"number-title\"}\n\n"
+          ":index[索引語]{reading=\"さくいんご\"}\n"))
+    (write-file!
+     (.join path source "chapters" "two.md")
+     (str "# 第二章 {#chapter-two}\n\n"
+          ":::column[実行]\n- 手順\n:::\n"))
+    (write-file!
+     (.join path source "notes.md")
+     ":::column[メモ]\n[リンク](https://example.com)。\n:::\n")
+    (write-file! (.join path source "images" "diagram.svg")
+                 "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>\n")
+
+    (verify-success! (run-cli ["build" project] root)
+                     "Release build command for a book with custom columns")
+    (let [first-content (.readFileSync fs chapter-one "utf8")
+          second-content (.readFileSync fs chapter-two "utf8")
+          notes-content (.readFileSync fs notes "utf8")
+          index-content (.readFileSync fs index "utf8")]
+      (doseq [[content title body] [[first-content "準備 &amp; 確認" "本文に**強調**。"]
+                                    [second-content "実行" "* 手順"]
+                                    [notes-content "メモ" "[リンク](https://example.com)。"]]]
+        (ensure! (.includes content (str "<span class=\"label\">" title "</span>"))
+                 "Custom column renderer did not run for every Markdown manuscript")
+        (ensure! (.includes content body)
+                 (str "Custom column renderer lost the manuscript body: "
+                      title))
+        (ensure! (not (.includes content "clono-column"))
+                 "Default column renderer appeared in the custom book"))
+      (ensure! (.includes first-content "href=\"two.html#chapter-two\"")
+               "Custom column build did not resolve a cross-document reference")
+      (ensure! (.includes first-content
+                          "id=\"clono-index-marker-1\">索引語</span>")
+               "Custom column build did not preserve an index marker")
+      (ensure! (.includes index-content
+                          "href=\"../chapters/one.html#clono-index-marker-1\"")
+               "Custom column build did not generate the book index")
+      (ensure! (not (.includes index-content "custom-column"))
+               "Custom column renderer changed the generated index")
+      (ensure! (= "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>\n"
+                  (.readFileSync fs asset "utf8"))
+               "Custom column build did not copy a normal asset")
+      (ensure! (.existsSync fs (.join path output "_clono" "styles" "clono.css"))
+               "Custom column build did not include the base stylesheet")
+      (ensure! (.existsSync fs (.join path output ".clono-output.json"))
+               "Custom column build did not publish an owned output tree"))))
+
 (defn- verify-column-regression-build! [root]
   (let [project (.join path root "column-regression")
         config-path (.join path project "clono.config.mjs")
@@ -1121,6 +1205,7 @@
       (verify-plugin-loading-build! root)
       (verify-custom-column-build! root)
       (verify-column-failure-does-not-publish! root)
+      (verify-custom-column-book-build! root)
       (verify-column-regression-build! root)
       (finally
         (.rmSync fs root #js {:recursive true :force true})))))
