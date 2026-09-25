@@ -964,7 +964,26 @@
                  (str "Invalid renderer output lacked a positioned diagnostic: "
                       (.-stderr result)))
         (ensure! (= content (.readFileSync fs output "utf8"))
-                 "Invalid renderer output changed the existing book")))))
+                 "Invalid renderer output changed the existing book"))
+      (write-file! plugin-path
+                   (str "export default {\n"
+                        "  name: 'custom-column',\n"
+                        "  version: '1.0.0',\n"
+                        "  apiVersion: 1,\n"
+                        "  renderers: {\n"
+                        "    column() { throw new Error('decor failed\\nstack marker'); },\n"
+                        "  },\n"
+                        "};\n"))
+      (let [result (run-cli ["build" project] root)]
+        (ensure! (= 1 (.-status result))
+                 "Release build command accepted a throwing renderer")
+        (ensure! (= (str "chapter.md:1:1: コラムrenderer（custom-column）"
+                         "の実行に失敗しました: decor failed\n")
+                    (.-stderr result))
+                 (str "Renderer exception was not diagnosed on one line: "
+                      (.-stderr result)))
+        (ensure! (= content (.readFileSync fs output "utf8"))
+                 "Renderer exception changed the existing book")))))
 
 (defn- verify-column-regression-build! [root]
   (let [project (.join path root "column-regression")
