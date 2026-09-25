@@ -4,6 +4,7 @@
    [clono.ast :as ast]
    [clono.diagnostic :as diagnostic]
    [clono.markdown :as markdown]
+   [goog.object :as gobj]
    [goog.string :as gstring]))
 
 (def allowed-content-node-types
@@ -68,9 +69,11 @@
 
 (defn normalized-data [node]
   (let [{:keys [title body-nodes]} (semantic-content node)
-        body (markdown/serialize
-              #js {:type "root"
-                   :children (into-array body-nodes)})]
+        body (str/replace
+              (markdown/serialize
+               #js {:type "root"
+                    :children (into-array body-nodes)})
+              #"\n$" "")]
     (js/Object.freeze #js {:title title :body body})))
 
 (defn default-renderer [input]
@@ -158,17 +161,76 @@
 (defn html-node [value]
   #js {:type "html" :value value})
 
-(defn- generate-default-output [{:keys [title body-nodes]}]
-  (concat [(html-node "<aside class=\"clono-column\">")
-           (html-node
-            (str "<p class=\"clono-column-title\">"
-                 (gstring/htmlEscape title)
-                 "</p>"))]
-          body-nodes
-          [(html-node "</aside>")]))
+(defn- thenable? [value]
+  (and (some? value)
+       (contains? #{"object" "function"} (goog/typeOf value))
+       (fn? (gobj/get value "then"))))
 
-(defn transform [node _context]
-  (generate-default-output (semantic-content node)))
+(defn- renderer-name [registration]
+  (if-let [plugin (:plugin registration)]
+    (or (some-> (:definition plugin) (gobj/get "name"))
+        (:name plugin)
+        "外部プラグイン")
+    "組み込みの既定renderer"))
+
+(defn- renderer-failure! [node context registration reason]
+  (throw
+   (ex-info
+    "Column renderer failed"
+    {:clono/renderer-diagnostic
+     (node-diagnostic
+      (:source-name context)
+      node
+      (str "コラムrenderer（" (renderer-name registration) "）" reason))})))
+
+(defn- error-summary [error]
+  (let [message (try
+                  (gobj/get error "message")
+                  (catch :default _ nil))
+        raw (if (and (string? message) (not (str/blank? message)))
+              message
+              (try
+                (str error)
+                (catch :default _ "")))
+        first-line (first (str/split raw #"\r\n|[\r\n\u2028\u2029]" 2))
+        summary (str/trim (str/replace first-line #"\t+" " "))]
+    (if (str/blank? summary) "詳細不明の例外" summary)))
+
+(defn- invoke-renderer [node context registration renderer input]
+  (try
+    (renderer input)
+    (catch :default error
+      (renderer-failure!
+       node context registration
+       (str "の実行に失敗しました: " (error-summary error))))))
+
+(defn- validated-output [node context registration output]
+  (cond
+    (try
+      (thenable? output)
+      (catch :default error
+        (renderer-failure!
+         node context registration
+         (str "の戻り値を確認できません: " (error-summary error)))))
+    (renderer-failure! node context registration
+                       "はPromiseなどの非同期結果を返せません。")
+
+    (not (string? output))
+    (renderer-failure! node context registration
+                       "は空白ではない文字列を返してください。")
+
+    (str/blank? output)
+    (renderer-failure! node context registration
+                       "は空白ではない文字列を返してください。")
+
+    :else output))
+
+(defn transform [node context]
+  (let [registration (get-in context [:registry "column"])
+        renderer (or (:renderer registration) default-renderer)
+        output (invoke-renderer node context registration renderer
+                                (normalized-data node))]
+    [(html-node (validated-output node context registration output))]))
 
 (def rule
   {:node-type "containerDirective"

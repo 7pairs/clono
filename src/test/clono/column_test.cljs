@@ -146,6 +146,161 @@
                      "<p class=\"clono-column-title\">A &amp; B &lt;unsafe&gt;</p>"))
       (is (not (.includes output "<unsafe>"))))))
 
+(deftest registered-column-renderer-test
+  (testing "When a column renderer is registered, then its Markdown replaces the default column output"
+    (let [inputs (atom [])
+          renderer (fn [input]
+                     (swap! inputs conj input)
+                     (str "<div class=\"custom-column\">\n\n"
+                          (.-body input)
+                          "\n\n</div>"))
+          source ":::column[雑談]\n**本文**です。\n:::\n"
+          result (pipeline/run
+                  {:mode :transform
+                   :source-name "custom-column.md"
+                   :registry {"column" {:plugin {:name "custom-column"}
+                                         :renderer renderer}}}
+                  source)
+          output (:output result)
+          tree (markdown/parse output)]
+      (is (true? (:ok? result)))
+      (is (= [] (:diagnostics result)))
+      (is (= 1 (count @inputs)))
+      (is (= "雑談" (.-title (first @inputs))))
+      (is (true? (js/Object.isFrozen (first @inputs))))
+      (is (.includes output "<div class=\"custom-column\">"))
+      (is (not (.includes output "clono-column")))
+      (is (= 1 (count (test-support/nodes-by-type tree "strong")))))))
+
+(deftest invalid-column-renderer-output-test
+  (testing "When a column renderer returns a non-string, blank string, or thenable, then a positioned diagnostic replaces all output"
+    (let [source (str "先の段落。\n\n"
+                      ":::column[最初]\n本文。\n:::\n\n"
+                      ":::column[次]\n本文。\n:::\n")
+          thenable-calls (atom 0)
+          cases [{:case "number" :value 42 :reason "空白ではない文字列"}
+                 {:case "nil" :value nil :reason "空白ではない文字列"}
+                 {:case "empty" :value "" :reason "空白ではない文字列"}
+                 {:case "whitespace" :value " \n\t" :reason "空白ではない文字列"}
+                 {:case "promise" :value (js/Promise.resolve "本文。")
+                  :reason "非同期結果"}
+                 {:case "thenable"
+                  :value #js {:then (fn [_resolve]
+                                      (swap! thenable-calls inc))}
+                  :reason "非同期結果"}]]
+      (doseq [{:keys [case value reason]} cases]
+        (let [invocations (atom 0)
+              renderer (fn [_input]
+                         (swap! invocations inc)
+                         value)
+              result (pipeline/run
+                      {:mode :transform
+                       :source-name "invalid-renderer.md"
+                       :registry {"column" {:plugin {:name "custom-column"}
+                                             :renderer renderer}}}
+                      source)
+              problem (first (:diagnostics result))]
+          (is (false? (:ok? result)) case)
+          (is (nil? (:output result)) case)
+          (is (= 1 (count (:diagnostics result))) case)
+          (is (= {:file "invalid-renderer.md"
+                  :line 3
+                  :column 1
+                  :directive "column"}
+                 (select-keys problem [:file :line :column :directive]))
+              case)
+          (is (.includes (:message problem) "custom-column") case)
+          (is (.includes (:message problem) reason) case)
+          (is (= 1 @invocations) case)))
+      (is (zero? @thenable-calls)))))
+
+(deftest later-column-renderer-failure-test
+  (testing "When a later column renderer returns a blank value, then earlier rendered columns are not returned as partial output"
+    (let [calls (atom 0)
+          renderer (fn [_input]
+                     (if (= 1 (swap! calls inc))
+                       "<aside>最初のコラム</aside>"
+                       ""))
+          source (str ":::column[最初]\n本文。\n:::\n\n"
+                      ":::column[次]\n本文。\n:::\n")
+          result (pipeline/run
+                  {:mode :transform
+                   :source-name "later-column.md"
+                   :registry {"column" {:plugin {:name "custom-column"}
+                                         :renderer renderer}}}
+                  source)]
+      (is (false? (:ok? result)))
+      (is (nil? (:output result)))
+      (is (= 2 @calls))
+      (is (= {:file "later-column.md"
+              :line 5
+              :column 1
+              :directive "column"}
+             (select-keys (first (:diagnostics result))
+                          [:file :line :column :directive]))))))
+
+(deftest column-renderer-exception-diagnostic-test
+  (testing "When a custom renderer throws, then its first failure is reported at the column without exposing a stack trace or partial output"
+    (let [calls (atom 0)
+          renderer (fn [_input]
+                     (swap! calls inc)
+                     (throw (js/Error. "装飾に失敗\nat internal stack")))
+          source (str "前の段落。\n\n"
+                      ":::column[最初]\n本文。\n:::\n\n"
+                      ":::column[次]\n本文。\n:::\n")
+          result (pipeline/run
+                  {:mode :transform
+                   :source-name "renderer-error.md"
+                   :registry {"column" {:plugin {:name "custom-column"}
+                                         :renderer renderer}}}
+                  source)]
+      (is (false? (:ok? result)))
+      (is (nil? (:output result)))
+      (is (= 1 @calls))
+      (is (= [{:file "renderer-error.md"
+               :line 3
+               :column 1
+               :directive "column"
+               :message (str "コラムrenderer（custom-column）の実行に失敗しました: "
+                             "装飾に失敗")}]
+             (:diagnostics result)))))
+
+  (testing "When the built-in renderer throws, then the diagnostic identifies it as built-in"
+    (with-redefs [column/default-renderer
+                  (fn [_input] (throw (js/Error. "既定出力に失敗")))]
+      (let [result (pipeline/run
+                    {:mode :transform :source-name "default-error.md"}
+                    ":::column[雑談]\n本文。\n:::\n")]
+        (is (false? (:ok? result)))
+        (is (nil? (:output result)))
+        (is (= [{:file "default-error.md"
+                 :line 1
+                 :column 1
+                 :directive "column"
+                 :message (str "コラムrenderer（組み込みの既定renderer）"
+                               "の実行に失敗しました: 既定出力に失敗")}]
+               (:diagnostics result))))))
+
+  (testing "When a returned then property throws, then its error is diagnosed without awaiting the value"
+    (let [value (js/Object.defineProperty
+                 #js {} "then"
+                 #js {:get (fn [] (throw (js/Error. "thenを読めません")))})
+          result (pipeline/run
+                  {:mode :transform
+                   :source-name "then-error.md"
+                   :registry {"column" {:plugin {:name "custom-column"}
+                                         :renderer (fn [_input] value)}}}
+                  ":::column[雑談]\n本文。\n:::\n")]
+      (is (false? (:ok? result)))
+      (is (nil? (:output result)))
+      (is (= [{:file "then-error.md"
+               :line 1
+               :column 1
+               :directive "column"
+               :message (str "コラムrenderer（custom-column）の戻り値を確認できません: "
+                             "thenを読めません")}]
+             (:diagnostics result))))))
+
 (deftest column-existing-behavior-regression-test
   (testing "When a column is transformed without an external renderer, then its Markdown output remains unchanged"
     (let [source (str "前の段落。\n\n"

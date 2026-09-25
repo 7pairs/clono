@@ -914,6 +914,277 @@
       (ensure! (not (.existsSync fs output))
                "Plugin loading failure published output"))))
 
+(defn- verify-custom-column-build! [root]
+  (let [project (.join path root "custom-column")
+        plugin-path (.join path project "plugins" "custom.mjs")
+        output (.join path project "build" "manuscripts" "chapter.md")]
+    (write-file! (.join path project "clono.config.mjs")
+                 (str "export default {\n"
+                      "  sourceRoot: 'manuscripts',\n"
+                      "  outputRoot: 'build/manuscripts',\n"
+                      "  publication: [\n"
+                      "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+                      "  ],\n"
+                      "  plugins: ['./plugins/custom.mjs'],\n"
+                      "};\n"))
+    (write-file! (.join path project "manuscripts" "chapter.md")
+                 ":::column[雑談]\n**本文**です。\n:::\n")
+    (write-file! plugin-path
+                 (str "export default {\n"
+                      "  name: 'custom-column',\n"
+                      "  version: '1.0.0',\n"
+                      "  apiVersion: 1,\n"
+                      "  renderers: {\n"
+                      "    column(input) {\n"
+                      "      return `<div class=\"custom-column\">\\n\\n${input.body}\\n\\n</div>`;\n"
+                      "    },\n"
+                      "  },\n"
+                      "};\n"))
+    (verify-success! (run-cli ["build" project] root)
+                     "Release build command with a custom column renderer")
+    (let [content (.readFileSync fs output "utf8")]
+      (ensure! (.includes content "<div class=\"custom-column\">")
+               "Custom column renderer did not replace the wrapper")
+      (ensure! (.includes content "**本文**です。")
+               "Custom column renderer lost the Markdown body")
+      (ensure! (not (.includes content "clono-column"))
+               "Default column renderer was used despite plugin registration")
+      (write-file! plugin-path
+                   (str "export default {\n"
+                        "  name: 'custom-column',\n"
+                        "  version: '1.0.0',\n"
+                        "  apiVersion: 1,\n"
+                        "  renderers: { column() { return '   '; } },\n"
+                        "};\n"))
+      (let [result (run-cli ["build" project] root)]
+        (ensure! (= 1 (.-status result))
+                 "Release build command accepted a blank renderer output")
+        (ensure! (.includes (.-stderr result)
+                            "chapter.md:1:1: コラムrenderer（custom-column）")
+                 (str "Invalid renderer output lacked a positioned diagnostic: "
+                      (.-stderr result)))
+        (ensure! (= content (.readFileSync fs output "utf8"))
+                 "Invalid renderer output changed the existing book"))
+      (write-file! plugin-path
+                   (str "export default {\n"
+                        "  name: 'custom-column',\n"
+                        "  version: '1.0.0',\n"
+                        "  apiVersion: 1,\n"
+                        "  renderers: {\n"
+                        "    column() { throw new Error('decor failed\\nstack marker'); },\n"
+                        "  },\n"
+                        "};\n"))
+      (let [result (run-cli ["build" project] root)]
+        (ensure! (= 1 (.-status result))
+                 "Release build command accepted a throwing renderer")
+        (ensure! (= (str "chapter.md:1:1: コラムrenderer（custom-column）"
+                         "の実行に失敗しました: decor failed\n")
+                    (.-stderr result))
+                 (str "Renderer exception was not diagnosed on one line: "
+                      (.-stderr result)))
+        (ensure! (= content (.readFileSync fs output "utf8"))
+                 "Renderer exception changed the existing book")))))
+
+(defn- verify-column-failure-does-not-publish! [root]
+  (let [project (.join path root "column-atomicity")
+        config-path (.join path project "clono.config.mjs")
+        plugin-path (.join path project "plugins" "custom.mjs")
+        source (.join path project "manuscripts")
+        output (.join path project "build" "manuscripts")
+        config (str "export default {\n"
+                    "  sourceRoot: 'manuscripts',\n"
+                    "  outputRoot: 'build/manuscripts',\n"
+                    "  publication: [\n"
+                    "    { type: 'document', path: 'a.md', kind: 'chapter', includeInToc: true },\n"
+                    "    { type: 'document', path: 'b.md', kind: 'chapter', includeInToc: true },\n"
+                    "    { type: 'document', path: 'c.md', kind: 'chapter', includeInToc: true },\n"
+                    "  ],\n"
+                    "  plugins: ['./plugins/custom.mjs'],\n"
+                    "};\n")
+        plugin-prefix (str "export default {\n"
+                           "  name: 'custom-column',\n"
+                           "  version: '1.0.0',\n"
+                           "  apiVersion: 1,\n")]
+    (write-file! config-path config)
+    (write-file! plugin-path
+                 (str plugin-prefix
+                      "  renderers: { column(input) { return `<aside>${input.title}</aside>`; } },\n"
+                      "};\n"))
+    (doseq [name ["a" "b" "c"]]
+      (write-file! (.join path source (str name ".md"))
+                   (str ":::column[" name "]\n本文。\n:::\n")))
+    (verify-success! (run-cli ["build" project] root)
+                     "Release build command before renderer failures")
+    (let [expected-files (into {}
+                               (map (fn [relative-path]
+                                      [relative-path
+                                       (.readFileSync fs
+                                                      (.join path output relative-path)
+                                                      "utf8")]))
+                               ["a.md" "b.md" "c.md"
+                                "_clono/styles/clono.css" ".clono-output.json"])
+          expected-stderr
+          (str "b.md:5:1: コラムrenderer（custom-column）の実行に失敗しました: render failed\n"
+               "c.md:1:1: コラムrenderer（custom-column）の実行に失敗しました: render failed\n")]
+      (write-file! (.join path output "keep.txt") "keep\n")
+      (write-file! (.join path source "a.md")
+                   ":::column[変更A]\n新しい本文。\n:::\n")
+      (write-file! (.join path source "b.md")
+                   (str ":::column[前半]\n本文。\n:::\n\n"
+                        ":::column[失敗B]\n本文。\n:::\n"))
+      (write-file! (.join path source "c.md")
+                   ":::column[失敗C]\n本文。\n:::\n")
+      (write-file! plugin-path
+                   (str plugin-prefix
+                        "  renderers: {\n"
+                        "    column(input) {\n"
+                        "      if (input.title.startsWith('失敗')) throw new Error('render failed');\n"
+                        "      return `<aside>${input.title}</aside>`;\n"
+                        "    },\n"
+                        "  },\n"
+                        "};\n"))
+      (let [result (run-cli ["build" project] root)]
+        (ensure! (= 1 (.-status result))
+                 "Release build command accepted failed column renderers")
+        (ensure! (= "" (.-stdout result))
+                 "Failed column build wrote to stdout")
+        (ensure! (= expected-stderr (.-stderr result))
+                 (str "Renderer failures were not collected in manuscript order: "
+                      (.-stderr result)))
+        (verify-unchanged-output! output expected-files
+                                  "Failed column rebuild"))
+      (write-file! config-path
+                   (.replace config "build/manuscripts" "build/fresh"))
+      (let [fresh-output (.join path project "build" "fresh")
+            result (run-cli ["build" project] root)]
+        (ensure! (= 1 (.-status result))
+                 "Release build command accepted failed renderers for fresh output")
+        (ensure! (= expected-stderr (.-stderr result))
+                 "Fresh build did not report both renderer failures")
+        (ensure! (not (.existsSync fs fresh-output))
+                 "Failed fresh build published partial output")))))
+
+(defn- verify-custom-column-book-build! [root]
+  (let [project (.join path root "custom-column-book")
+        source (.join path project "manuscripts")
+        output (.join path project "build" "manuscripts")
+        chapter-one (.join path output "chapters" "one.md")
+        chapter-two (.join path output "chapters" "two.md")
+        notes (.join path output "notes.md")
+        index (.join path output "generated" "index.md")
+        asset (.join path output "images" "diagram.svg")]
+    (write-file!
+     (.join path project "clono.config.mjs")
+     (str "export default {\n"
+          "  sourceRoot: 'manuscripts',\n"
+          "  outputRoot: 'build/manuscripts',\n"
+          "  publication: [\n"
+          "    { type: 'document', path: 'chapters/one.md', kind: 'chapter', includeInToc: true },\n"
+          "    { type: 'document', path: 'chapters/two.md', kind: 'chapter', includeInToc: true },\n"
+          "    { type: 'index', path: 'generated/index.md', title: '索引', includeInToc: true },\n"
+          "  ],\n"
+          "  plugins: ['./plugins/column.mjs'],\n"
+          "};\n"))
+    (write-file!
+     (.join path project "plugins" "column.mjs")
+     (str "export default {\n"
+          "  name: 'book-column',\n"
+          "  version: '1.0.0',\n"
+          "  apiVersion: 1,\n"
+          "  renderers: {\n"
+          "    column(input) {\n"
+          "      const title = input.title.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');\n"
+          "      return `<div class=\"custom-column\"><span class=\"label\">${title}</span>\\n\\n${input.body}\\n\\n</div>`;\n"
+          "    },\n"
+          "  },\n"
+          "};\n"))
+    (write-file!
+     (.join path source "chapters" "one.md")
+     (str "# 第一章 {#chapter-one}\n\n"
+          ":::column[準備 & 確認]\n本文に**強調**。\n:::\n\n"
+          ":xref[chapter-two]{type=\"heading\" format=\"number-title\"}\n\n"
+          ":index[索引語]{reading=\"さくいんご\"}\n"))
+    (write-file!
+     (.join path source "chapters" "two.md")
+     (str "# 第二章 {#chapter-two}\n\n"
+          ":::column[実行]\n- 手順\n:::\n"))
+    (write-file!
+     (.join path source "notes.md")
+     ":::column[メモ]\n[リンク](https://example.com)。\n:::\n")
+    (write-file! (.join path source "images" "diagram.svg")
+                 "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>\n")
+
+    (verify-success! (run-cli ["build" project] root)
+                     "Release build command for a book with custom columns")
+    (let [first-content (.readFileSync fs chapter-one "utf8")
+          second-content (.readFileSync fs chapter-two "utf8")
+          notes-content (.readFileSync fs notes "utf8")
+          index-content (.readFileSync fs index "utf8")]
+      (doseq [[content title body] [[first-content "準備 &amp; 確認" "本文に**強調**。"]
+                                    [second-content "実行" "* 手順"]
+                                    [notes-content "メモ" "[リンク](https://example.com)。"]]]
+        (ensure! (.includes content (str "<span class=\"label\">" title "</span>"))
+                 "Custom column renderer did not run for every Markdown manuscript")
+        (ensure! (.includes content body)
+                 (str "Custom column renderer lost the manuscript body: "
+                      title))
+        (ensure! (not (.includes content "clono-column"))
+                 "Default column renderer appeared in the custom book"))
+      (ensure! (.includes first-content "href=\"two.html#chapter-two\"")
+               "Custom column build did not resolve a cross-document reference")
+      (ensure! (.includes first-content
+                          "id=\"clono-index-marker-1\">索引語</span>")
+               "Custom column build did not preserve an index marker")
+      (ensure! (.includes index-content
+                          "href=\"../chapters/one.html#clono-index-marker-1\"")
+               "Custom column build did not generate the book index")
+      (ensure! (not (.includes index-content "custom-column"))
+               "Custom column renderer changed the generated index")
+      (ensure! (= "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>\n"
+                  (.readFileSync fs asset "utf8"))
+               "Custom column build did not copy a normal asset")
+      (ensure! (.existsSync fs (.join path output "_clono" "styles" "clono.css"))
+               "Custom column build did not include the base stylesheet")
+      (ensure! (.existsSync fs (.join path output ".clono-output.json"))
+               "Custom column build did not publish an owned output tree"))))
+
+(defn- verify-example-column-plugin! [root]
+  (let [project (.join path root "example-column-plugin")
+        example-path (.resolve path js/__dirname ".." "examples"
+                               "column-renderer" "column.mjs")
+        plugin-path (.join path project "plugins" "column.mjs")
+        output (.join path project "build" "manuscripts" "chapter.md")]
+    (write-file! plugin-path (.readFileSync fs example-path "utf8"))
+    (write-file! (.join path project "clono.config.mjs")
+                 (str "export default {\n"
+                      "  sourceRoot: 'manuscripts',\n"
+                      "  outputRoot: 'build/manuscripts',\n"
+                      "  publication: [\n"
+                      "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+                      "  ],\n"
+                      "  plugins: ['./plugins/column.mjs'],\n"
+                      "};\n"))
+    (write-file! (.join path project "manuscripts" "chapter.md")
+                 ":::column[A & B]\n本文には**強調**がある。\n:::\n")
+    (verify-success! (run-cli ["build" project] root)
+                     "Release build command with the example column plugin")
+    (let [content (.readFileSync fs output "utf8")]
+      (ensure! (= 3 (count (re-seq #"<div " content)))
+               "Example column plugin did not emit three nested div elements")
+      (ensure! (.includes content
+                          "<div class=\"clono-column column\">\n<div class=\"column-frame\">\n<div class=\"column-content\">")
+               "Example column plugin did not retain the legacy column wrapper")
+      (ensure! (.includes content
+                          "<h4 class=\"clono-column-title column-title\">")
+               "Example column plugin did not emit the column heading")
+      (ensure! (.includes content
+                          "<span class=\"column-title-text\">A &amp; B</span>")
+               "Example column plugin did not escape the title")
+      (ensure! (.includes content "本文には**強調**がある。")
+               "Example column plugin did not preserve the Markdown body")
+      (ensure! (not (.includes content " id=\""))
+               "Example column plugin generated an ID from the title"))))
+
 (defn- verify-column-regression-build! [root]
   (let [project (.join path root "column-regression")
         config-path (.join path project "clono.config.mjs")
@@ -969,6 +1240,10 @@
       (verify-heading-reference-build! root)
       (verify-unpositioned-diagnostic! root)
       (verify-plugin-loading-build! root)
+      (verify-custom-column-build! root)
+      (verify-column-failure-does-not-publish! root)
+      (verify-custom-column-book-build! root)
+      (verify-example-column-plugin! root)
       (verify-column-regression-build! root)
       (finally
         (.rmSync fs root #js {:recursive true :force true})))))
