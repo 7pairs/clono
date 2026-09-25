@@ -68,9 +68,11 @@
 
 (defn normalized-data [node]
   (let [{:keys [title body-nodes]} (semantic-content node)
-        body (markdown/serialize
-              #js {:type "root"
-                   :children (into-array body-nodes)})]
+        body (str/replace
+              (markdown/serialize
+               #js {:type "root"
+                    :children (into-array body-nodes)})
+              #"\n$" "")]
     (js/Object.freeze #js {:title title :body body})))
 
 (defn default-renderer [input]
@@ -158,17 +160,10 @@
 (defn html-node [value]
   #js {:type "html" :value value})
 
-(defn- generate-default-output [{:keys [title body-nodes]}]
-  (concat [(html-node "<aside class=\"clono-column\">")
-           (html-node
-            (str "<p class=\"clono-column-title\">"
-                 (gstring/htmlEscape title)
-                 "</p>"))]
-          body-nodes
-          [(html-node "</aside>")]))
-
-(defn transform [node _context]
-  (generate-default-output (semantic-content node)))
+(defn transform [node context]
+  (let [renderer (or (get-in context [:registry "column" :renderer])
+                     default-renderer)]
+    [(html-node (renderer (normalized-data node)))]))
 
 (def rule
   {:node-type "containerDirective"
