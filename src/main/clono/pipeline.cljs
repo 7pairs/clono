@@ -83,11 +83,19 @@
               {:ok? false
                :output nil
                :diagnostics reference-diagnostics}
-              {:ok? true
-               :output (-> tree
-                           (transform/transform transformation-context)
-                           markdown/serialize)
-               :diagnostics []})))))))
+              (try
+                {:ok? true
+                 :output (-> tree
+                             (transform/transform transformation-context)
+                             markdown/serialize)
+                 :diagnostics []}
+                (catch :default error
+                  (if-let [problem (:clono/renderer-output-diagnostic
+                                    (ex-data error))]
+                    {:ok? false
+                     :output nil
+                     :diagnostics [problem]}
+                    (throw error)))))))))))
 
 (defn run [context source]
   (let [analysis (analyze context source)]

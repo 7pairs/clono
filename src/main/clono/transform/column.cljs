@@ -4,6 +4,7 @@
    [clono.ast :as ast]
    [clono.diagnostic :as diagnostic]
    [clono.markdown :as markdown]
+   [goog.object :as gobj]
    [goog.string :as gstring]))
 
 (def allowed-content-node-types
@@ -160,10 +161,49 @@
 (defn html-node [value]
   #js {:type "html" :value value})
 
+(defn- thenable? [value]
+  (and (some? value)
+       (contains? #{"object" "function"} (goog/typeOf value))
+       (fn? (gobj/get value "then"))))
+
+(defn- renderer-name [registration]
+  (if-let [plugin (:plugin registration)]
+    (or (some-> (:definition plugin) (gobj/get "name"))
+        (:name plugin)
+        "外部プラグイン")
+    "組み込みの既定renderer"))
+
+(defn- invalid-output! [node context registration reason]
+  (throw
+   (ex-info
+    "Column renderer returned an invalid value"
+    {:clono/renderer-output-diagnostic
+     (node-diagnostic
+      (:source-name context)
+      node
+      (str "コラムrenderer（" (renderer-name registration) "）" reason))})))
+
+(defn- validated-output [node context registration output]
+  (cond
+    (thenable? output)
+    (invalid-output! node context registration
+                     "はPromiseなどの非同期結果を返せません。")
+
+    (not (string? output))
+    (invalid-output! node context registration
+                     "は空白ではない文字列を返してください。")
+
+    (str/blank? output)
+    (invalid-output! node context registration
+                     "は空白ではない文字列を返してください。")
+
+    :else output))
+
 (defn transform [node context]
-  (let [renderer (or (get-in context [:registry "column" :renderer])
-                     default-renderer)]
-    [(html-node (renderer (normalized-data node)))]))
+  (let [registration (get-in context [:registry "column"])
+        renderer (or (:renderer registration) default-renderer)
+        output (renderer (normalized-data node))]
+    [(html-node (validated-output node context registration output))]))
 
 (def rule
   {:node-type "containerDirective"
