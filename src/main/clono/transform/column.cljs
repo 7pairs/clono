@@ -173,36 +173,63 @@
         "外部プラグイン")
     "組み込みの既定renderer"))
 
-(defn- invalid-output! [node context registration reason]
+(defn- renderer-failure! [node context registration reason]
   (throw
    (ex-info
-    "Column renderer returned an invalid value"
-    {:clono/renderer-output-diagnostic
+    "Column renderer failed"
+    {:clono/renderer-diagnostic
      (node-diagnostic
       (:source-name context)
       node
       (str "コラムrenderer（" (renderer-name registration) "）" reason))})))
 
+(defn- error-summary [error]
+  (let [message (try
+                  (gobj/get error "message")
+                  (catch :default _ nil))
+        raw (if (and (string? message) (not (str/blank? message)))
+              message
+              (try
+                (str error)
+                (catch :default _ "")))
+        first-line (first (str/split raw #"\r\n|[\r\n\u2028\u2029]" 2))
+        summary (str/trim (str/replace first-line #"\t+" " "))]
+    (if (str/blank? summary) "詳細不明の例外" summary)))
+
+(defn- invoke-renderer [node context registration renderer input]
+  (try
+    (renderer input)
+    (catch :default error
+      (renderer-failure!
+       node context registration
+       (str "の実行に失敗しました: " (error-summary error))))))
+
 (defn- validated-output [node context registration output]
   (cond
-    (thenable? output)
-    (invalid-output! node context registration
-                     "はPromiseなどの非同期結果を返せません。")
+    (try
+      (thenable? output)
+      (catch :default error
+        (renderer-failure!
+         node context registration
+         (str "の戻り値を確認できません: " (error-summary error)))))
+    (renderer-failure! node context registration
+                       "はPromiseなどの非同期結果を返せません。")
 
     (not (string? output))
-    (invalid-output! node context registration
-                     "は空白ではない文字列を返してください。")
+    (renderer-failure! node context registration
+                       "は空白ではない文字列を返してください。")
 
     (str/blank? output)
-    (invalid-output! node context registration
-                     "は空白ではない文字列を返してください。")
+    (renderer-failure! node context registration
+                       "は空白ではない文字列を返してください。")
 
     :else output))
 
 (defn transform [node context]
   (let [registration (get-in context [:registry "column"])
         renderer (or (:renderer registration) default-renderer)
-        output (renderer (normalized-data node))]
+        output (invoke-renderer node context registration renderer
+                                (normalized-data node))]
     [(html-node (validated-output node context registration output))]))
 
 (def rule

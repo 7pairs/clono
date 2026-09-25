@@ -90,11 +90,11 @@
                              markdown/serialize)
                  :diagnostics []}
                 (catch :default error
-                  (if-let [problem (:clono/renderer-output-diagnostic
+                  (if-let [problem (:clono/renderer-diagnostic
                                     (ex-data error))]
                     {:ok? false
                      :output nil
-                     :diagnostics [problem]}
+                     :diagnostics (diagnostic/finalize [problem])}
                     (throw error)))))))))))
 
 (defn run [context source]
