@@ -272,7 +272,7 @@
       (finally
         (remove-temporary-file! temporary-path)))))
 
-(defn- transform-result [input output]
+(defn- transform-result [input output registry]
   (let [paths (validate-paths input output)]
     (if-not (:ok? paths)
       (if (= :argument (:kind paths))
@@ -282,9 +282,11 @@
         (if-not (:ok? input-result)
           (error-result (:message input-result))
           (try
-            (let [transformation (pipeline/run {:mode :transform
-                                                :source-name input
-                                                :input-path (:input-path paths)}
+            (let [context (cond-> {:mode :transform
+                                   :source-name input
+                                   :input-path (:input-path paths)}
+                            registry (assoc :registry registry))
+                  transformation (pipeline/run context
                                                (:source input-result))]
               (if-not (:ok? transformation)
                 (diagnostics-result (:diagnostics transformation))
@@ -300,6 +302,24 @@
               (error-result
                (str input ": 変換を実行できません: "
                     (error-message error))))))))))
+
+(defn- transform-with-project [input output project]
+  (-> (book-config/load-project-config project)
+      (.then (fn [config-result]
+               (if-not (:ok? config-result)
+                 (diagnostics-result (:diagnostics config-result))
+                 (let [config (:config config-result)]
+                   (-> (plugin/load-registry (:config-path config) config)
+                       (.then (fn [registry-result]
+                                (if (:ok? registry-result)
+                                  (transform-result input output
+                                                    (:registry registry-result))
+                                  (diagnostics-result
+                                   (:diagnostics registry-result))))))))))
+      (.catch (fn [error]
+                (error-result
+                 (str project ": 単一ファイル変換の設定を読み込めません: "
+                      (error-message error)))))))
 
 (defn- build-with-config [config]
   (let [plan-result (book-plan/create config)]
@@ -338,8 +358,8 @@
       :help (help-result)
       :error (argument-error-result message)
       :transform (if project
-                   (error-result "`--project`による単一ファイル変換はまだ利用できません。")
-                   (transform-result input output))
+                   (transform-with-project input output project)
+                   (transform-result input output nil))
       :build (build-result project))))
 
 (defn- write-result! [{:keys [exit-code stdout stderr]}]
