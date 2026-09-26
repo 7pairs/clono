@@ -14,11 +14,12 @@
 
 (def usage
   (str "Usage:\n"
-       "  clono transform <input> --output <output>\n"
+       "  clono transform <input> --output <output> [--project <project>]\n"
        "  clono build [project]\n"
        "\n"
        "Options:\n"
        "  -o, --output <output>  変換後のMarkdownを書き込むファイル\n"
+       "  --project <project>   プラグイン設定を読む書籍プロジェクト\n"
        "  -h, --help             使用方法を表示\n"))
 
 (def ^:private private-file-mode 8r600)
@@ -27,7 +28,8 @@
 (defn- parse-transform-arguments [arguments]
   (loop [remaining (seq arguments)
          input nil
-         output nil]
+         output nil
+         project nil]
     (if-let [argument (first remaining)]
       (cond
         (#{"-o" "--output"} argument)
@@ -38,9 +40,28 @@
             (if (.startsWith value "-")
               {:action :error
                :message (str "未知のオプションです: " value)}
-              (recur (nnext remaining) input value))
+              (recur (nnext remaining) input value project))
             {:action :error
              :message (str "`" argument "`には出力ファイルの指定が必要です。")}))
+
+        (= "--project" argument)
+        (if project
+          {:action :error
+           :message "書籍プロジェクトを複数指定できません。"}
+          (if-let [value (second remaining)]
+            (cond
+              (empty? value)
+              {:action :error
+               :message "`--project`には書籍プロジェクトの指定が必要です。"}
+
+              (.startsWith value "-")
+              {:action :error
+               :message (str "未知のオプションです: " value)}
+
+              :else
+              (recur (nnext remaining) input output value))
+            {:action :error
+             :message "`--project`には書籍プロジェクトの指定が必要です。"}))
 
         (.startsWith argument "-")
         {:action :error
@@ -51,7 +72,7 @@
          :message "入力ファイルを複数指定できません。"}
 
         :else
-        (recur (next remaining) argument output))
+        (recur (next remaining) argument output project))
       (cond
         (nil? input)
         {:action :error
@@ -62,9 +83,10 @@
          :message "出力ファイルを指定してください。"}
 
         :else
-        {:action :transform
-         :input input
-         :output output}))))
+        (cond-> {:action :transform
+                 :input input
+                 :output output}
+          project (assoc :project project))))))
 
 (defn- parse-build-arguments [arguments]
   (cond
@@ -315,7 +337,9 @@
     (case action
       :help (help-result)
       :error (argument-error-result message)
-      :transform (transform-result input output)
+      :transform (if project
+                   (error-result "`--project`による単一ファイル変換はまだ利用できません。")
+                   (transform-result input output))
       :build (build-result project))))
 
 (defn- write-result! [{:keys [exit-code stdout stderr]}]
