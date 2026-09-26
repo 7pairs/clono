@@ -1247,6 +1247,84 @@
         (ensure! (= content (.readFileSync fs output "utf8"))
                  "Invalid project plugin changed the existing output")))))
 
+(defn- verify-transform-renderer-contract! [root]
+  (let [project-name "transform-renderer-contract"
+        project (.join path root project-name)
+        input-name (str project-name "/manuscripts/chapter.md")
+        output-name (str project-name "/preview.md")
+        output (.join path project "preview.md")
+        plugin-path (.join path project "plugins" "column.mjs")
+        book-output (.join path project "build" "manuscripts")
+        cases [{:name "blank"
+                :failure "return '   ';"
+                :reason "は空白ではない文字列を返してください。"}
+               {:name "non-string"
+                :failure "return 42;"
+                :reason "は空白ではない文字列を返してください。"}
+               {:name "promise"
+                :failure "return Promise.resolve('<aside>次</aside>');"
+                :reason "はPromiseなどの非同期結果を返せません。"}
+               {:name "exception"
+                :failure "throw new Error('render failed\\nstack marker');"
+                :reason "の実行に失敗しました: render failed"}]]
+    (write-file! (.join path project "clono.config.mjs")
+                 (str "export default {\n"
+                      "  sourceRoot: 'manuscripts',\n"
+                      "  outputRoot: 'build/manuscripts',\n"
+                      "  publication: [\n"
+                      "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+                      "  ],\n"
+                      "  plugins: ['./plugins/column.mjs'],\n"
+                      "};\n"))
+    (write-file! (.join path project "manuscripts" "chapter.md")
+                 (str ":::column[前]\n本文。\n:::\n\n"
+                      ":::column[次]\n本文。\n:::\n"))
+    (write-file! output "previous output\n")
+    (doseq [{:keys [name failure reason]} cases]
+      (write-file! plugin-path
+                   (str "export default {\n"
+                        "  name: 'contract-column',\n"
+                        "  version: '1.0.0',\n"
+                        "  apiVersion: 1,\n"
+                        "  renderers: {\n"
+                        "    column(input) {\n"
+                        "      if (input.title === '次') { " failure " }\n"
+                        "      return '<aside>前</aside>';\n"
+                        "    },\n"
+                        "  },\n"
+                        "};\n"))
+      (let [book-result (run-cli ["build" project-name] root)
+            transform-result
+            (run-cli ["transform" input-name "-o" output-name
+                      "--project" project-name] root)
+            diagnostic (str ":5:1: コラムrenderer（contract-column）"
+                            reason "\n")]
+        (ensure! (= 1 (.-status book-result))
+                 (str "Book build accepted the " name " renderer failure"))
+        (ensure! (= 1 (.-status transform-result))
+                 (str "Single-file transform accepted the " name
+                      " renderer failure"))
+        (ensure! (= (str "chapter.md" diagnostic) (.-stderr book-result))
+                 (str "Book build changed the " name " renderer diagnostic: "
+                      (.-stderr book-result)))
+        (ensure! (= (str input-name diagnostic) (.-stderr transform-result))
+                 (str "Single-file transform did not match the book's " name
+                      " renderer diagnostic: " (.-stderr transform-result)))
+        (ensure! (= "" (.-stdout transform-result))
+                 (str "Single-file transform wrote output for " name))
+        (ensure! (= "previous output\n" (.readFileSync fs output "utf8"))
+                 (str "Single-file transform changed output after " name))
+        (ensure! (not (.existsSync fs book-output))
+                 (str "Book build published output after " name))))
+    (let [new-output (.join path project "new-preview.md")
+          result (run-cli ["transform" input-name "-o"
+                           (str project-name "/new-preview.md")
+                           "--project" project-name] root)]
+      (ensure! (= 1 (.-status result))
+               "Single-file transform accepted the renderer failure for new output")
+      (ensure! (not (.existsSync fs new-output))
+               "Single-file transform created partial output after a renderer failure"))))
+
 (defn- verify-column-regression-build! [root]
   (let [project (.join path root "column-regression")
         config-path (.join path project "clono.config.mjs")
@@ -1307,6 +1385,7 @@
       (verify-custom-column-book-build! root)
       (verify-example-column-plugin! root)
       (verify-transform-with-project! root)
+      (verify-transform-renderer-contract! root)
       (verify-column-regression-build! root)
       (finally
         (.rmSync fs root #js {:recursive true :force true})))))
