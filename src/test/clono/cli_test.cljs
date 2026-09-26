@@ -83,6 +83,21 @@
             :output "./-output.md"}
            (cli/parse-arguments ["transform" "input.md" "-o" "./-output.md"]))))
 
+  (testing "When --project is given with a transform command, then its value is selected regardless of argument order"
+    (doseq [[arguments expected-project]
+            [[["transform" "input.md" "--output" "output.md"
+               "--project" "books/next"] "books/next"]
+             [["transform" "--project" "books/next" "-o"
+               "output.md" "input.md"] "books/next"]
+             [["transform" "input.md" "--project" "./-book"
+               "-o" "output.md"] "./-book"]]]
+      (is (= {:action :transform
+              :input "input.md"
+              :output "output.md"
+              :project expected-project}
+             (cli/parse-arguments arguments))
+          (str "Unexpected result for " arguments))))
+
   (testing "When build has zero or one project argument, then a book command is parsed"
     (is (= {:action :build
             :project "."}
@@ -111,8 +126,22 @@
               "未知のオプションです: --unknown"]
              [["transform" "input.md" "--output" "--unknown"]
               "未知のオプションです: --unknown"]
+             [["transform" "input.md" "-o" "output.md" "--project"]
+              "`--project`には書籍プロジェクトの指定が必要です。"]
+             [["transform" "input.md" "-o" "output.md" "--project" ""]
+              "`--project`には書籍プロジェクトの指定が必要です。"]
+             [["transform" "input.md" "-o" "output.md" "--project" "--unknown"]
+              "未知のオプションです: --unknown"]
+             [["transform" "input.md" "-o" "output.md" "--project" "one" "--project" "two"]
+              "書籍プロジェクトを複数指定できません。"]
+             [["transform" "input.md" "-o" "output.md" "--project=books/next"]
+              "未知のオプションです: --project=books/next"]
+             [["transform" "input.md" "-o" "output.md" "-p" "books/next"]
+              "未知のオプションです: -p"]
              [["build" "one" "two"]
               "書籍プロジェクトを複数指定できません。"]
+             [["build" "--project" "books/next"]
+              "未知のオプションです: --project"]
              [["unknown"]
               "未知のサブコマンドです: unknown"]]]
       (is (= {:action :error

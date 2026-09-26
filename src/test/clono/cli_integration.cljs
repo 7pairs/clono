@@ -1185,6 +1185,197 @@
       (ensure! (not (.includes content " id=\""))
                "Example column plugin generated an ID from the title"))))
 
+(defn- verify-transform-with-project! [root]
+  (let [project (.join path root "transform-plugin-project")
+        config-path (.join path project "clono.config.mjs")
+        input (.join path root "standalone-column.md")
+        output (.join path root "standalone-column-output.md")
+        reordered-output (.join path root "standalone-reordered-output.md")
+        default-output (.join path root "standalone-default-output.md")
+        empty-plugin-output (.join path root "standalone-empty-plugin-output.md")
+        example-path (.resolve path js/__dirname ".." "examples"
+                               "column-renderer" "column.mjs")
+        project-config (str "export default {\n"
+                            "  sourceRoot: 'manuscripts',\n"
+                            "  outputRoot: 'build/manuscripts',\n"
+                            "  publication: [\n"
+                            "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+                            "  ],\n"
+                            "  plugins: ['./plugins/column.mjs'],\n"
+                            "};\n")]
+    (write-file! config-path project-config)
+    (write-file! (.join path project "manuscripts" "chapter.md")
+                 "# 掲載原稿\n")
+    (write-file! (.join path project "plugins" "column.mjs")
+                 (.readFileSync fs example-path "utf8"))
+    (write-file! input ":::column[A & B]\n本文には**強調**がある。\n:::\n")
+
+    (verify-success!
+     (run-cli ["transform" input "-o" output
+               "--project" "transform-plugin-project"] root)
+     "Release transform command with an explicit project")
+    (let [content (.readFileSync fs output "utf8")]
+      (ensure! (.includes content "<div class=\"clono-column column\">")
+               "Explicit project did not select the custom column renderer")
+      (ensure! (.includes content
+                          "<span class=\"column-title-text\">A &amp; B</span>")
+               "Explicit project lost the escaped column title")
+      (ensure! (.includes content "本文には**強調**がある。")
+               "Explicit project lost the Markdown body")
+      (ensure! (not (.existsSync fs (.join path project "build" "manuscripts")))
+               "Single-file transform created the book output tree")
+
+      (verify-success!
+       (run-cli ["transform" "--project" "transform-plugin-project"
+                 "--output" reordered-output input] root)
+       "Release transform command with reordered project and output options")
+      (ensure! (= content (.readFileSync fs reordered-output "utf8"))
+               "Reordered options changed the custom column output")
+
+      (verify-success! (run-cli ["transform" input "-o" default-output] root)
+                       "Release transform command without a project")
+      (ensure! (.includes (.readFileSync fs default-output "utf8")
+                         "<aside class=\"clono-column\">")
+               "Transform without --project discovered a plugin unexpectedly")
+
+      (write-file! config-path
+                   (.replace project-config
+                             "['./plugins/column.mjs']" "[]"))
+      (verify-success!
+       (run-cli ["transform" input "-o" empty-plugin-output
+                 "--project" "transform-plugin-project"] root)
+       "Release transform command with an empty plugin list")
+      (ensure! (= (.readFileSync fs default-output "utf8")
+                  (.readFileSync fs empty-plugin-output "utf8"))
+               "An empty plugin list changed the default column output")
+
+      (write-file! config-path
+                   (.replace project-config "./plugins/column.mjs"
+                             "./plugins/missing.mjs"))
+      (let [result (run-cli ["transform" input "-o" output
+                             "--project" "transform-plugin-project"] root)]
+        (ensure! (= 1 (.-status result))
+                 "Transform accepted an invalid project plugin")
+        (ensure! (.includes (.-stderr result) "missing.mjs")
+                 "Transform did not diagnose the invalid project plugin")
+        (ensure! (= content (.readFileSync fs output "utf8"))
+                 "Invalid project plugin changed the existing output"))
+      (let [missing-config-output (.join path root "standalone-missing-config.md")
+            result (run-cli ["transform" input "-o" missing-config-output
+                             "--project" "missing-transform-project"] root)]
+        (ensure! (= 1 (.-status result))
+                 "Transform accepted a project without a config file")
+        (ensure! (= "" (.-stdout result))
+                 "Missing project config wrote to stdout")
+        (ensure! (.includes (.-stderr result) "clono.config.mjs")
+                 "Missing project config was not diagnosed")
+        (ensure! (not (.existsSync fs missing-config-output))
+                 "Missing project config created an output file")))))
+
+(defn- verify-projectless-column-transform! [root]
+  (let [standalone (.join path root "standalone-column")
+        input (.join path standalone "chapter.md")
+        config (.join path standalone "clono.config.mjs")
+        expected-output (str "<aside class=\"clono-column\">\n\n"
+                             "<p class=\"clono-column-title\">雑談</p>\n\n"
+                             "本文には**強調**がある。\n\n"
+                             "</aside>\n")]
+    (write-file! input ":::column[雑談]\n本文には**強調**がある。\n:::\n")
+    (verify-success!
+     (run-cli ["transform" "chapter.md" "-o" "preview.md"] standalone)
+     "Release transform command outside a book project")
+    (ensure! (= expected-output
+                (.readFileSync fs (.join path standalone "preview.md") "utf8"))
+             "Projectless transform changed the default column output")
+
+    (write-file! config "throw new Error('unexpected config evaluation');\n")
+    (verify-success!
+     (run-cli ["transform" "chapter.md" "-o" "preview-with-config.md"]
+              standalone)
+     "Release transform command without an explicit project")
+    (ensure! (= expected-output
+                (.readFileSync fs (.join path standalone "preview-with-config.md")
+                               "utf8"))
+             "Transform without --project loaded a nearby config")))
+
+(defn- verify-transform-renderer-contract! [root]
+  (let [project-name "transform-renderer-contract"
+        project (.join path root project-name)
+        input-name (str project-name "/manuscripts/chapter.md")
+        output-name (str project-name "/preview.md")
+        output (.join path project "preview.md")
+        plugin-path (.join path project "plugins" "column.mjs")
+        book-output (.join path project "build" "manuscripts")
+        cases [{:name "blank"
+                :failure "return '   ';"
+                :reason "は空白ではない文字列を返してください。"}
+               {:name "non-string"
+                :failure "return 42;"
+                :reason "は空白ではない文字列を返してください。"}
+               {:name "promise"
+                :failure "return Promise.resolve('<aside>次</aside>');"
+                :reason "はPromiseなどの非同期結果を返せません。"}
+               {:name "exception"
+                :failure "throw new Error('render failed\\nstack marker');"
+                :reason "の実行に失敗しました: render failed"}]]
+    (write-file! (.join path project "clono.config.mjs")
+                 (str "export default {\n"
+                      "  sourceRoot: 'manuscripts',\n"
+                      "  outputRoot: 'build/manuscripts',\n"
+                      "  publication: [\n"
+                      "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+                      "  ],\n"
+                      "  plugins: ['./plugins/column.mjs'],\n"
+                      "};\n"))
+    (write-file! (.join path project "manuscripts" "chapter.md")
+                 (str ":::column[前]\n本文。\n:::\n\n"
+                      ":::column[次]\n本文。\n:::\n"))
+    (write-file! output "previous output\n")
+    (doseq [{:keys [name failure reason]} cases]
+      (write-file! plugin-path
+                   (str "export default {\n"
+                        "  name: 'contract-column',\n"
+                        "  version: '1.0.0',\n"
+                        "  apiVersion: 1,\n"
+                        "  renderers: {\n"
+                        "    column(input) {\n"
+                        "      if (input.title === '次') { " failure " }\n"
+                        "      return '<aside>前</aside>';\n"
+                        "    },\n"
+                        "  },\n"
+                        "};\n"))
+      (let [book-result (run-cli ["build" project-name] root)
+            transform-result
+            (run-cli ["transform" input-name "-o" output-name
+                      "--project" project-name] root)
+            diagnostic (str ":5:1: コラムrenderer（contract-column）"
+                            reason "\n")]
+        (ensure! (= 1 (.-status book-result))
+                 (str "Book build accepted the " name " renderer failure"))
+        (ensure! (= 1 (.-status transform-result))
+                 (str "Single-file transform accepted the " name
+                      " renderer failure"))
+        (ensure! (= (str "chapter.md" diagnostic) (.-stderr book-result))
+                 (str "Book build changed the " name " renderer diagnostic: "
+                      (.-stderr book-result)))
+        (ensure! (= (str input-name diagnostic) (.-stderr transform-result))
+                 (str "Single-file transform did not match the book's " name
+                      " renderer diagnostic: " (.-stderr transform-result)))
+        (ensure! (= "" (.-stdout transform-result))
+                 (str "Single-file transform wrote output for " name))
+        (ensure! (= "previous output\n" (.readFileSync fs output "utf8"))
+                 (str "Single-file transform changed output after " name))
+        (ensure! (not (.existsSync fs book-output))
+                 (str "Book build published output after " name))))
+    (let [new-output (.join path project "new-preview.md")
+          result (run-cli ["transform" input-name "-o"
+                           (str project-name "/new-preview.md")
+                           "--project" project-name] root)]
+      (ensure! (= 1 (.-status result))
+               "Single-file transform accepted the renderer failure for new output")
+      (ensure! (not (.existsSync fs new-output))
+               "Single-file transform created partial output after a renderer failure"))))
+
 (defn- verify-column-regression-build! [root]
   (let [project (.join path root "column-regression")
         config-path (.join path project "clono.config.mjs")
@@ -1244,6 +1435,9 @@
       (verify-column-failure-does-not-publish! root)
       (verify-custom-column-book-build! root)
       (verify-example-column-plugin! root)
+      (verify-transform-with-project! root)
+      (verify-projectless-column-transform! root)
+      (verify-transform-renderer-contract! root)
       (verify-column-regression-build! root)
       (finally
         (.rmSync fs root #js {:recursive true :force true})))))

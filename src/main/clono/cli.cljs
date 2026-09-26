@@ -14,11 +14,12 @@
 
 (def usage
   (str "Usage:\n"
-       "  clono transform <input> --output <output>\n"
+       "  clono transform <input> --output <output> [--project <project>]\n"
        "  clono build [project]\n"
        "\n"
        "Options:\n"
        "  -o, --output <output>  変換後のMarkdownを書き込むファイル\n"
+       "  --project <project>   プラグイン設定を読む書籍プロジェクト\n"
        "  -h, --help             使用方法を表示\n"))
 
 (def ^:private private-file-mode 8r600)
@@ -27,7 +28,8 @@
 (defn- parse-transform-arguments [arguments]
   (loop [remaining (seq arguments)
          input nil
-         output nil]
+         output nil
+         project nil]
     (if-let [argument (first remaining)]
       (cond
         (#{"-o" "--output"} argument)
@@ -38,9 +40,28 @@
             (if (.startsWith value "-")
               {:action :error
                :message (str "未知のオプションです: " value)}
-              (recur (nnext remaining) input value))
+              (recur (nnext remaining) input value project))
             {:action :error
              :message (str "`" argument "`には出力ファイルの指定が必要です。")}))
+
+        (= "--project" argument)
+        (if project
+          {:action :error
+           :message "書籍プロジェクトを複数指定できません。"}
+          (if-let [value (second remaining)]
+            (cond
+              (empty? value)
+              {:action :error
+               :message "`--project`には書籍プロジェクトの指定が必要です。"}
+
+              (.startsWith value "-")
+              {:action :error
+               :message (str "未知のオプションです: " value)}
+
+              :else
+              (recur (nnext remaining) input output value))
+            {:action :error
+             :message "`--project`には書籍プロジェクトの指定が必要です。"}))
 
         (.startsWith argument "-")
         {:action :error
@@ -51,7 +72,7 @@
          :message "入力ファイルを複数指定できません。"}
 
         :else
-        (recur (next remaining) argument output))
+        (recur (next remaining) argument output project))
       (cond
         (nil? input)
         {:action :error
@@ -62,9 +83,10 @@
          :message "出力ファイルを指定してください。"}
 
         :else
-        {:action :transform
-         :input input
-         :output output}))))
+        (cond-> {:action :transform
+                 :input input
+                 :output output}
+          project (assoc :project project))))))
 
 (defn- parse-build-arguments [arguments]
   (cond
@@ -250,7 +272,7 @@
       (finally
         (remove-temporary-file! temporary-path)))))
 
-(defn- transform-result [input output]
+(defn- transform-result [input output registry]
   (let [paths (validate-paths input output)]
     (if-not (:ok? paths)
       (if (= :argument (:kind paths))
@@ -260,9 +282,11 @@
         (if-not (:ok? input-result)
           (error-result (:message input-result))
           (try
-            (let [transformation (pipeline/run {:mode :transform
-                                                :source-name input
-                                                :input-path (:input-path paths)}
+            (let [context (cond-> {:mode :transform
+                                   :source-name input
+                                   :input-path (:input-path paths)}
+                            registry (assoc :registry registry))
+                  transformation (pipeline/run context
                                                (:source input-result))]
               (if-not (:ok? transformation)
                 (diagnostics-result (:diagnostics transformation))
@@ -278,6 +302,24 @@
               (error-result
                (str input ": 変換を実行できません: "
                     (error-message error))))))))))
+
+(defn- transform-with-project [input output project]
+  (-> (book-config/load-project-config project)
+      (.then (fn [config-result]
+               (if-not (:ok? config-result)
+                 (diagnostics-result (:diagnostics config-result))
+                 (let [config (:config config-result)]
+                   (-> (plugin/load-registry (:config-path config) config)
+                       (.then (fn [registry-result]
+                                (if (:ok? registry-result)
+                                  (transform-result input output
+                                                    (:registry registry-result))
+                                  (diagnostics-result
+                                   (:diagnostics registry-result))))))))))
+      (.catch (fn [error]
+                (error-result
+                 (str project ": 単一ファイル変換の設定を読み込めません: "
+                      (error-message error)))))))
 
 (defn- build-with-config [config]
   (let [plan-result (book-plan/create config)]
@@ -315,7 +357,9 @@
     (case action
       :help (help-result)
       :error (argument-error-result message)
-      :transform (transform-result input output)
+      :transform (if project
+                   (transform-with-project input output project)
+                   (transform-result input output nil))
       :build (build-result project))))
 
 (defn- write-result! [{:keys [exit-code stdout stderr]}]
