@@ -1185,6 +1185,68 @@
       (ensure! (not (.includes content " id=\""))
                "Example column plugin generated an ID from the title"))))
 
+(defn- verify-transform-with-project! [root]
+  (let [project (.join path root "transform-plugin-project")
+        config-path (.join path project "clono.config.mjs")
+        input (.join path root "standalone-column.md")
+        output (.join path root "standalone-column-output.md")
+        default-output (.join path root "standalone-default-output.md")
+        example-path (.resolve path js/__dirname ".." "examples"
+                               "column-renderer" "column.mjs")]
+    (write-file! config-path
+                 (str "export default {\n"
+                      "  sourceRoot: 'manuscripts',\n"
+                      "  outputRoot: 'build/manuscripts',\n"
+                      "  publication: [\n"
+                      "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+                      "  ],\n"
+                      "  plugins: ['./plugins/column.mjs'],\n"
+                      "};\n"))
+    (write-file! (.join path project "manuscripts" "chapter.md")
+                 "# 掲載原稿\n")
+    (write-file! (.join path project "plugins" "column.mjs")
+                 (.readFileSync fs example-path "utf8"))
+    (write-file! input ":::column[A & B]\n本文には**強調**がある。\n:::\n")
+
+    (verify-success!
+     (run-cli ["transform" input "-o" output
+               "--project" "transform-plugin-project"] root)
+     "Release transform command with an explicit project")
+    (let [content (.readFileSync fs output "utf8")]
+      (ensure! (.includes content "<div class=\"clono-column column\">")
+               "Explicit project did not select the custom column renderer")
+      (ensure! (.includes content
+                          "<span class=\"column-title-text\">A &amp; B</span>")
+               "Explicit project lost the escaped column title")
+      (ensure! (.includes content "本文には**強調**がある。")
+               "Explicit project lost the Markdown body")
+      (ensure! (not (.existsSync fs (.join path project "build" "manuscripts")))
+               "Single-file transform created the book output tree")
+
+      (verify-success! (run-cli ["transform" input "-o" default-output] root)
+                       "Release transform command without a project")
+      (ensure! (.includes (.readFileSync fs default-output "utf8")
+                         "<aside class=\"clono-column\">")
+               "Transform without --project discovered a plugin unexpectedly")
+
+      (write-file! config-path
+                   (str "export default {\n"
+                        "  sourceRoot: 'manuscripts',\n"
+                        "  outputRoot: 'build/manuscripts',\n"
+                        "  publication: [\n"
+                        "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+                        "  ],\n"
+                        "  plugins: ['./plugins/missing.mjs'],\n"
+                        "};\n"))
+      (let [result (run-cli ["transform" input "-o" output
+                             "--project" "transform-plugin-project"] root)]
+        (ensure! (= 1 (.-status result))
+                 "Transform accepted an invalid project plugin")
+        (ensure! (.includes (.-stderr result) "missing.mjs")
+                 "Transform did not diagnose the invalid project plugin")
+        (ensure! (= content (.readFileSync fs output "utf8"))
+                 "Invalid project plugin changed the existing output")))))
+
 (defn- verify-column-regression-build! [root]
   (let [project (.join path root "column-regression")
         config-path (.join path project "clono.config.mjs")
@@ -1244,6 +1306,7 @@
       (verify-column-failure-does-not-publish! root)
       (verify-custom-column-book-build! root)
       (verify-example-column-plugin! root)
+      (verify-transform-with-project! root)
       (verify-column-regression-build! root)
       (finally
         (.rmSync fs root #js {:recursive true :force true})))))

@@ -149,23 +149,6 @@
              (cli/parse-arguments arguments))
           (str "Unexpected result for " arguments)))))
 
-(deftest project-option-before-loading-test
-  (testing "When --project is used before configuration loading is available, then the existing output is preserved"
-    (with-temporary-directory
-      (fn [directory]
-        (let [input (.join path directory "input.md")
-              output (.join path directory "output.md")]
-          (write-file! input valid-source)
-          (write-file! output "previous output\n")
-          (let [command-result
-                (cli/command-result ["transform" input "-o" output
-                                     "--project" directory])]
-            (is (= 1 (:exit-code command-result)))
-            (is (.includes (:stderr command-result)
-                           "`--project`による単一ファイル変換はまだ利用できません。"))
-            (is (= "previous output\n"
-                   (.readFileSync fs output "utf8")))))))))
-
 (deftest file-transformation-test
   (testing "When a single file is transformed, then the pipeline receives transform mode and the resolved input path"
     (with-temporary-directory
