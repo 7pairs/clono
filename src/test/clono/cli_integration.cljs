@@ -1190,18 +1190,20 @@
         config-path (.join path project "clono.config.mjs")
         input (.join path root "standalone-column.md")
         output (.join path root "standalone-column-output.md")
+        reordered-output (.join path root "standalone-reordered-output.md")
         default-output (.join path root "standalone-default-output.md")
+        empty-plugin-output (.join path root "standalone-empty-plugin-output.md")
         example-path (.resolve path js/__dirname ".." "examples"
-                               "column-renderer" "column.mjs")]
-    (write-file! config-path
-                 (str "export default {\n"
-                      "  sourceRoot: 'manuscripts',\n"
-                      "  outputRoot: 'build/manuscripts',\n"
-                      "  publication: [\n"
-                      "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
-                      "  ],\n"
-                      "  plugins: ['./plugins/column.mjs'],\n"
-                      "};\n"))
+                               "column-renderer" "column.mjs")
+        project-config (str "export default {\n"
+                            "  sourceRoot: 'manuscripts',\n"
+                            "  outputRoot: 'build/manuscripts',\n"
+                            "  publication: [\n"
+                            "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
+                            "  ],\n"
+                            "  plugins: ['./plugins/column.mjs'],\n"
+                            "};\n")]
+    (write-file! config-path project-config)
     (write-file! (.join path project "manuscripts" "chapter.md")
                  "# 掲載原稿\n")
     (write-file! (.join path project "plugins" "column.mjs")
@@ -1223,6 +1225,13 @@
       (ensure! (not (.existsSync fs (.join path project "build" "manuscripts")))
                "Single-file transform created the book output tree")
 
+      (verify-success!
+       (run-cli ["transform" "--project" "transform-plugin-project"
+                 "--output" reordered-output input] root)
+       "Release transform command with reordered project and output options")
+      (ensure! (= content (.readFileSync fs reordered-output "utf8"))
+               "Reordered options changed the custom column output")
+
       (verify-success! (run-cli ["transform" input "-o" default-output] root)
                        "Release transform command without a project")
       (ensure! (.includes (.readFileSync fs default-output "utf8")
@@ -1230,14 +1239,19 @@
                "Transform without --project discovered a plugin unexpectedly")
 
       (write-file! config-path
-                   (str "export default {\n"
-                        "  sourceRoot: 'manuscripts',\n"
-                        "  outputRoot: 'build/manuscripts',\n"
-                        "  publication: [\n"
-                        "    { type: 'document', path: 'chapter.md', kind: 'chapter', includeInToc: true },\n"
-                        "  ],\n"
-                        "  plugins: ['./plugins/missing.mjs'],\n"
-                        "};\n"))
+                   (.replace project-config
+                             "['./plugins/column.mjs']" "[]"))
+      (verify-success!
+       (run-cli ["transform" input "-o" empty-plugin-output
+                 "--project" "transform-plugin-project"] root)
+       "Release transform command with an empty plugin list")
+      (ensure! (= (.readFileSync fs default-output "utf8")
+                  (.readFileSync fs empty-plugin-output "utf8"))
+               "An empty plugin list changed the default column output")
+
+      (write-file! config-path
+                   (.replace project-config "./plugins/column.mjs"
+                             "./plugins/missing.mjs"))
       (let [result (run-cli ["transform" input "-o" output
                              "--project" "transform-plugin-project"] root)]
         (ensure! (= 1 (.-status result))
@@ -1245,7 +1259,18 @@
         (ensure! (.includes (.-stderr result) "missing.mjs")
                  "Transform did not diagnose the invalid project plugin")
         (ensure! (= content (.readFileSync fs output "utf8"))
-                 "Invalid project plugin changed the existing output")))))
+                 "Invalid project plugin changed the existing output"))
+      (let [missing-config-output (.join path root "standalone-missing-config.md")
+            result (run-cli ["transform" input "-o" missing-config-output
+                             "--project" "missing-transform-project"] root)]
+        (ensure! (= 1 (.-status result))
+                 "Transform accepted a project without a config file")
+        (ensure! (= "" (.-stdout result))
+                 "Missing project config wrote to stdout")
+        (ensure! (.includes (.-stderr result) "clono.config.mjs")
+                 "Missing project config was not diagnosed")
+        (ensure! (not (.existsSync fs missing-config-output))
+                 "Missing project config created an output file")))))
 
 (defn- verify-transform-renderer-contract! [root]
   (let [project-name "transform-renderer-contract"
