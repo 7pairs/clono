@@ -1272,6 +1272,32 @@
         (ensure! (not (.existsSync fs missing-config-output))
                  "Missing project config created an output file")))))
 
+(defn- verify-projectless-column-transform! [root]
+  (let [standalone (.join path root "standalone-column")
+        input (.join path standalone "chapter.md")
+        config (.join path standalone "clono.config.mjs")
+        expected-output (str "<aside class=\"clono-column\">\n\n"
+                             "<p class=\"clono-column-title\">雑談</p>\n\n"
+                             "本文には**強調**がある。\n\n"
+                             "</aside>\n")]
+    (write-file! input ":::column[雑談]\n本文には**強調**がある。\n:::\n")
+    (verify-success!
+     (run-cli ["transform" "chapter.md" "-o" "preview.md"] standalone)
+     "Release transform command outside a book project")
+    (ensure! (= expected-output
+                (.readFileSync fs (.join path standalone "preview.md") "utf8"))
+             "Projectless transform changed the default column output")
+
+    (write-file! config "throw new Error('unexpected config evaluation');\n")
+    (verify-success!
+     (run-cli ["transform" "chapter.md" "-o" "preview-with-config.md"]
+              standalone)
+     "Release transform command without an explicit project")
+    (ensure! (= expected-output
+                (.readFileSync fs (.join path standalone "preview-with-config.md")
+                               "utf8"))
+             "Transform without --project loaded a nearby config")))
+
 (defn- verify-transform-renderer-contract! [root]
   (let [project-name "transform-renderer-contract"
         project (.join path root project-name)
@@ -1410,6 +1436,7 @@
       (verify-custom-column-book-build! root)
       (verify-example-column-plugin! root)
       (verify-transform-with-project! root)
+      (verify-projectless-column-transform! root)
       (verify-transform-renderer-contract! root)
       (verify-column-regression-build! root)
       (finally
