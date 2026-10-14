@@ -1,5 +1,9 @@
 # Instructions for AI Contributors
 
+## Development Workflow
+
+- Before discussing or performing development work, read the [development workflow](docs/development-workflow.md) and the project charter, Sora Driven Development, and Sora Flow documents referenced in its first section. Follow their guidance.
+
 ## Japanese Documentation
 
 - When creating or updating Japanese documentation, use the `yomiyasu` skill to revise the text for readability and natural Japanese.
