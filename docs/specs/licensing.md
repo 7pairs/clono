@@ -1,3 +1,8 @@
+<!--
+Copyright 2026 HASEBA Junya (7pairs)
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # clonoのライセンス方針
 
 ## 1. 目的と参照先
@@ -8,7 +13,7 @@
 
 採用理由は、[配布ライセンスを採用したADR](../decisions/0001-adopt-project-license.md)に記録する。比較の根拠は[配布ライセンスの比較調査](../../research/project-license/README.md)を参照する。
 
-本文書に記載する管理ルールは、ライセンス本文の条件と区別する。利用・再配布の正式な条件は、[Apache License 2.0公式本文](https://www.apache.org/licenses/LICENSE-2.0)に従う。リポジトリへの反映時には、ルートの`LICENSE`に同じ本文を配置する。
+本文書に記載する管理ルールは、ライセンス本文の条件と区別する。利用・再配布の正式な条件は、[Apache License 2.0公式本文](https://www.apache.org/licenses/LICENSE-2.0)に従う。ルートの[LICENSE](../../LICENSE)に同じ本文を配置している。
 
 ## 2. 採用ライセンスと適用範囲
 
