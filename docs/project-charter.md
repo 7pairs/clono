@@ -1,3 +1,8 @@
+<!--
+Copyright 2026 HASEBA Junya (7pairs)
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # clono プロジェクト憲章
 
 ## 1. 目的
