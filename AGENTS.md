@@ -1,3 +1,8 @@
+<!--
+Copyright 2026 HASEBA Junya (7pairs)
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # Instructions for AI Contributors
 
 ## Development Workflow

@@ -1,3 +1,8 @@
+<!--
+Copyright 2026 HASEBA Junya (7pairs)
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # 配布ライセンスの比較調査
 
 - 確認日：2026-10-15（日本時間）

@@ -1,3 +1,8 @@
+<!--
+Copyright 2026 HASEBA Junya (7pairs)
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # ADR 0001：配布ライセンスにApache-2.0を採用する
 
 - 状態：合意済み
