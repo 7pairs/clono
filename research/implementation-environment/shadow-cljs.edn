@@ -12,6 +12,7 @@
                                          parse probe.core/parse
                                          collect probe.core/collect
                                          transform probe.core/transform
+                                         prepareColumns probe.core/prepare-columns
                                          fail probe.core/fail}
                                :init-fn probe.core/main}}}
   :probe-cjs {:target :node-script

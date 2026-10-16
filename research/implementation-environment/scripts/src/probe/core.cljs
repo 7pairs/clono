@@ -69,6 +69,19 @@
                 node)
               node))]
     (visit tree)))
+(defn prepare-columns [tree]
+  ;; Keep Markdown children and footnote definitions for the downstream parser.
+  (letfn [(expand [node]
+            (when-let [children (.-children ^js node)]
+              (set! (.-children ^js node)
+                    (into-array (mapcat expand (array-seq children)))))
+            (if (and (= "containerDirective" (.-type ^js node))
+                     (= "column" (.-name ^js node)))
+              (concat [#js {:type "html" :value "<div class=\"column\">"}]
+                      (array-seq (.-children ^js node))
+                      [#js {:type "html" :value "</div>"}])
+              [node]))]
+    (first (expand tree))))
 (defn fail [] (throw (js/Error. "CLJS_PROBE_FAILURE")))
 
 (defn main [& args]
