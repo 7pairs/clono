@@ -1,0 +1,9 @@
+/* Copyright 2026 HASEBA Junya (7pairs)
+ * SPDX-License-Identifier: Apache-2.0 */
+@page { size: A5; margin: 18mm; }
+body { font: 10pt "Hiragino Mincho ProN", serif; line-height: 1.6; }
+.column { border: 1px solid #555; padding: 8pt; }
+.probe-page-break { break-after: page; }
+.probe-next-page { break-before: page; }
+img { max-width: 160px; }
+.chapter-title { background-image: url("images/title.svg"); background-repeat: no-repeat; }

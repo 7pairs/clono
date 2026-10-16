@@ -5,8 +5,9 @@ SPDX-License-Identifier: Apache-2.0
 
 # 実装言語・実行環境の検証計画とテスト項目
 
-- 状態：独立レビュー・二人の確認完了。検証は未実施。
+- 状態：計画と検証成果物の独立レビュー・二人の確認完了。
 - 対応する作業：[選定の手順書](../plans/0002-choose-implementation-environment.md)の手順2〜3。
+- 実施結果：[検証結果](../../research/implementation-environment/results/verification.md)を参照する。手順3の指摘対応と再レビューも完了した。正式な採用方針は手順4で判断する。
 
 ## 1. 目的と検証の範囲
 
@@ -47,7 +48,7 @@ SPDX-License-Identifier: Apache-2.0
 
 ASTの操作はJavaScriptオブジェクト・配列と既存のAPIを基本とし、この検証のためにAST操作用ライブラリを増やさない。テストにはNode.js組み込みのnode:testとnode:assert/strictを使う。これは調査用の選択であり、製品の正式なテスト環境の選定ではない。
 
-VFM内部のunified 9・remark-parse 8などはVFM自身の依存として扱い、現行remark系へ強制統一しない。間接依存はlockfileで固定する。取得に必要なネットワークや書き込みの許可は実行時の環境に従い、今回はインストールしない。
+VFM内部のunified 9・remark-parse 8などはVFM自身の依存として扱い、現行remark系へ強制統一しない。間接依存はlockfileで固定する。取得に必要なネットワークや書き込みの許可は実行時の環境に従い、手順2の計画作成中にはインストールしない。
 
 ## 3. 比較する構成と順序
 
@@ -237,7 +238,7 @@ T09では、コピー先にビルドツールとCLJSソースを含めず、PATH
 
 入力画像は検証専用の簡単なものを作り、第三者素材や外部ネットワークへ依存させない。生成物やビルドキャッシュの除外設定は調査ディレクトリ内で行う。必要なファイルのライセンス表示は[ライセンス方針](licensing.md)に従う。
 
-以下は手順3で用意する予定のコマンドであり、手順2時点では設定・コードが存在せず実行できない。作業ディレクトリは`research/implementation-environment/`とする。
+以下は手順2で合意した予定のコマンドである。手順3の実際の実行方法と、分離先の準備などの前提は[検証結果](../../research/implementation-environment/results/verification.md)を参照する。作業ディレクトリは`research/implementation-environment/`とする。
 
 ```sh
 npm ci
