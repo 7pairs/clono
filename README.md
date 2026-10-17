@@ -11,6 +11,10 @@ clonoは、Vivliostyleで技術同人誌を制作するために、不足する�
 
 開発の進め方と関連文書は、[開発フロー](docs/development-workflow.md)を参照する。
 
+本体は可能な限りClojureScriptで実装し、Node.js上で実行する。shadow-cljsでESMを生成し、本ごとのJavaScript拡張は.mjsファイルで扱う方針である。環境要件と制約は[実装環境の仕様](docs/specs/implementation-environment.md)、採用理由は[ADR 0002](docs/decisions/0002-choose-implementation-environment.md)にまとめている。
+
+製品の利用手順と正式な開発・検証コマンドは未整備である。実装環境の調査・検証を再現する場合は、[検証資料](research/implementation-environment/README.md)と、そこから参照する検証結果を確認する。
+
 ## ライセンス
 
 Copyright 2026 HASEBA Junya (7pairs)
