@@ -1,0 +1,6 @@
+{
+  "chapters": ["chapters/z-first.md", "chapters/a-second.md"],
+  "extension": "title-image.mjs",
+  "images": {"chapters/z-first.md": "images/title.svg", "chapters/a-second.md": "images/title.svg"},
+  "output": "results/generated/book"
+}

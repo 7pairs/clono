@@ -1,0 +1,21 @@
+;; Copyright 2026 HASEBA Junya (7pairs)
+;; SPDX-License-Identifier: Apache-2.0
+{:source-paths ["scripts/src"]
+ :builds
+ {:probe-esm {:target :esm
+              :runtime :node
+              :output-dir "results/build/esm"
+              :js-options {:js-provider :import}
+              :release {:compiler-options {:source-map true}}
+              :modules {:core {:exports {echo probe.core/echo
+                                         runExtension probe.core/run-extension
+                                         parse probe.core/parse
+                                         collect probe.core/collect
+                                         transform probe.core/transform
+                                         prepareColumns probe.core/prepare-columns
+                                         fail probe.core/fail}
+                               :init-fn probe.core/main}}}
+  :probe-cjs {:target :node-script
+              :main probe.core/main
+              :output-to "results/build/probe.cjs"
+              :release {:compiler-options {:source-map true}}}}}
