@@ -105,4 +105,4 @@ VFM配下のtrimは当面0.0.1を使う。開発時だけ0.0.3へ差し替える
 
 正式なテスト環境・CI・PRレビューツール、製品の設定と拡張API、ソース・mapを含む配布構成、公開・リリース手順は後続で決める。今回の調査で使用したNode.js組み込みテストや組版スクリプトを、正式環境の選定済みとして扱わない。
 
-開発フローとREADMEへの決定事項の反映は、[選定の手順書](../plans/0002-choose-implementation-environment.md)の手順5で行う。
+決定事項は[開発フロー](../development-workflow.md#111-採用した実装環境)と[README](../../README.md#開発について)へ反映済みである。実施内容と確認結果は、[選定の手順書](../plans/0002-choose-implementation-environment.md)の手順5に記録している。
