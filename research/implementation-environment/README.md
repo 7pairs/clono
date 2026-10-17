@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 
 確認日：2026-10-16（日本時間）。
 
-[選定の手順書](../../docs/plans/0002-choose-implementation-environment.md)の手順1として、公式資料、公開パッケージのメタデータと実装を調査した。本資料は手順1時点の資料調査を示す。調査成果物の独立レビューと二人の確認は完了した。結果は手順書第8節に記録している。手順3で行った動作確認は[検証結果](results/verification.md)を参照する。正式な採用は未決定である。
+[選定の手順書](../../docs/plans/0002-choose-implementation-environment.md)の手順1として、公式資料、公開パッケージのメタデータと実装を調査した。本資料は手順1時点の資料調査を示す。調査成果物の独立レビューと二人の確認は完了した。結果は手順書第8節に記録している。手順3〜4で行った動作確認と採用判断は[検証結果](results/verification.md)を参照する。現在の方針は[ADR 0002](../../docs/decisions/0002-choose-implementation-environment.md)と[実装環境の仕様](../../docs/specs/implementation-environment.md)に記録し、独立レビュー・二人の確認を完了した。以下は資料調査時点の記録として残す。
 
 ## 1. 調査の目的と方法
 
