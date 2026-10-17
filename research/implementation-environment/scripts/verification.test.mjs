@@ -180,3 +180,37 @@ test('T09: release output runs without compiler or source in the isolated direct
   assert.doesNotMatch(result.stderr,/JAVA_MUST_NOT_RUN/);
   assert.equal(JSON.parse(result.stdout).files.length,2);
 });
+
+test('T06: chapter outputs stay inside the output directory', async () => {
+  const {outputPath} = await import('./book-config.mjs');
+  const out = resolve('results/generated/path-boundary');
+  assert.equal(outputPath(out, 'chapters/one.md'), join(out, 'chapters/one.md'));
+  assert.equal(outputPath(out, 'chapters/../one.md'), join(out, 'one.md'));
+  for (const file of ['.', '..', '../outside.md', '../path-boundary-other/one.md', resolve(out, '../absolute.md')]) {
+    assert.throws(() => outputPath(out, file), /outside output/i, file);
+  }
+  assert.throws(() => generatedEntries({chapters: ['chapters/one.md', '../outside.md']}, out), /outside output/i);
+});
+
+test('T06: invalid chapter paths are rejected before any output writes', async () => {
+  for (const pipeline of ['remark-html', 'remark-md-vfm', 'vfm-baseline']) {
+    for (const absolute of [false, true]) {
+      const work = await mkdtemp(join(tmpdir(), 'clono-output-boundary-'));
+      const root = join(work, 'book'), out = join(work, 'output');
+      await cp('fixtures/book', root, {recursive: true});
+      await writeFile(join(root, 'chapters/z-first.md'), '# Valid chapter\n');
+      const sourceFile = join(root, 'chapters/a-second.md');
+      const htmlFile = join(root, 'chapters/a-second.html');
+      const source = '# Original title\n\nOriginal source.\n';
+      await writeFile(sourceFile, source);
+      await writeFile(htmlFile, 'ORIGINAL_HTML');
+      const chapter = absolute ? sourceFile : '../book/chapters/a-second.md';
+      const configPath = join(root, 'book.json');
+      await writeFile(configPath, JSON.stringify({chapters: ['chapters/z-first.md', chapter], images: {}}));
+      await assert.rejects(() => runBook({pipeline, configPath, out}), /outside output/i);
+      assert.equal(await readFile(sourceFile, 'utf8'), source);
+      assert.equal(await readFile(htmlFile, 'utf8'), 'ORIGINAL_HTML');
+      assert.ok(!existsSync(out), 'validation must precede directory creation and asset copies');
+    }
+  }
+});

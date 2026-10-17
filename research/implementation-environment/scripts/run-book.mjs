@@ -9,7 +9,7 @@ import rehypeStringify from 'rehype-stringify';
 import remarkStringify from 'remark-stringify';
 import remarkGfm from 'remark-gfm';
 import {stringify as vfmStringify} from '@vivliostyle/vfm';
-import {generatedEntries} from './book-config.mjs';
+import {generatedEntries, outputPath} from './book-config.mjs';
 export {generatedEntries} from './book-config.mjs';
 
 const base = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -30,6 +30,9 @@ export async function runBook({pipeline, configPath = resolve(base, 'fixtures/bo
   out = resolve(out ?? resolve(base, config.output, pipeline));
   const rel = relative(root, out);
   if (!rel || (!rel.startsWith('..' + sep) && !isAbsolute(rel))) throw new Error('output must be outside source');
+  const files = generatedEntries(config, out);
+  const markdownFiles = pipeline === 'remark-md-vfm'
+    ? config.chapters.map(file => outputPath(out, file)) : [];
   const docs = await Promise.all(config.chapters.map(async file => {
     const source = await readFile(resolve(root, file), 'utf8');
     return {file, source, tree: core.parse(source)};
@@ -42,7 +45,6 @@ export async function runBook({pipeline, configPath = resolve(base, 'fixtures/bo
   await mkdir(out, {recursive: true});
   await cp(resolve(root, 'images'), resolve(out, 'images'), {recursive: true});
   await cp(resolve(root, 'style.css'), resolve(out, 'style.css'));
-  const files = generatedEntries(config, out);
   for (const [i, doc] of docs.entries()) {
     let body;
     if (pipeline === 'vfm-baseline') body = vfmStringify(doc.source, {partial: true, footnote});
@@ -60,7 +62,7 @@ export async function runBook({pipeline, configPath = resolve(base, 'fixtures/bo
         body = html(tree);
       } else {
         const md = unified().use(remarkGfm).use(remarkStringify).stringify(tree);
-        const mdPath = resolve(out, doc.file);
+        const mdPath = markdownFiles[i];
         await mkdir(dirname(mdPath), {recursive: true});
         await writeFile(mdPath, md);
         body = vfmStringify(md, {partial:true, footnote, rewriteRelativeHrefExtensions: true});
