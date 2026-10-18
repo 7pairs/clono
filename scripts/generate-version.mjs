@@ -3,7 +3,7 @@
 
 import { mkdir, readFile, realpath, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 
 export async function generateVersion(root) {
   const metadata = JSON.parse(await readFile(resolve(root, 'package.json'), 'utf8'));
@@ -32,17 +32,18 @@ export async function generateVersion(root) {
   await writeFile(output, source);
 }
 
-let entryUrl;
+let entryPath;
 if (process.argv[1]) {
   try {
-    entryUrl = pathToFileURL(await realpath(resolve(process.argv[1]))).href;
+    entryPath = await realpath(resolve(process.argv[1]));
   } catch (error) {
     // Standard-input entry points such as "-" do not refer to a file.
     if (error.code !== 'ENOENT') throw error;
   }
 }
 
-if (entryUrl === import.meta.url) {
+// Resolve both paths identically before deciding whether this is the entry point.
+if (entryPath && entryPath === await realpath(fileURLToPath(import.meta.url))) {
   try {
     await generateVersion(fileURLToPath(new URL('../', import.meta.url)));
   } catch (error) {

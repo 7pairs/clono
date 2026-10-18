@@ -31,20 +31,25 @@ test('When the package version changes, then the generated source reflects the n
   assert.doesNotMatch(updated, /"0\.0\.0"/);
 });
 
-test('When version generation is invoked through a directory alias, then the generated file contains the package version', async t => {
-  const { root, output } = await fixture(t, '{"version":"0.0.0"}');
-  await cp(fileURLToPath(new URL('../../scripts', import.meta.url)), join(root, 'scripts'), { recursive: true });
-  const alias = join(root, 'alias');
-  await symlink(root, alias, process.platform === 'win32' ? 'junction' : 'dir');
-  const result = spawnSync(process.execPath, [join(alias, 'scripts/generate-version.mjs')], {
-    encoding: 'utf8', timeout: 10000, shell: false,
+for (const [condition, flags] of [
+  ['version generation is invoked through a directory alias', []],
+  ['the generator entry point retains a directory alias', ['--preserve-symlinks-main']],
+]) {
+  test(`When ${condition}, then the generated file contains the package version`, async t => {
+    const { root, output } = await fixture(t, '{"version":"0.0.0"}');
+    await cp(fileURLToPath(new URL('../../scripts', import.meta.url)), join(root, 'scripts'), { recursive: true });
+    const alias = join(root, 'alias');
+    await symlink(root, alias, process.platform === 'win32' ? 'junction' : 'dir');
+    const result = spawnSync(process.execPath, [...flags, join(alias, 'scripts/generate-version.mjs')], {
+      encoding: 'utf8', timeout: 10000, shell: false,
+    });
+    assert.ifError(result.error);
+    assert.equal(result.signal, null);
+    assert.equal(result.status, 0, result.stderr);
+    await assert.doesNotReject(access(output), 'must generate the CLJS source');
+    assert.match(await readFile(output, 'utf8'), /"0\.0\.0"/);
   });
-  assert.ifError(result.error);
-  assert.equal(result.signal, null);
-  assert.equal(result.status, 0, result.stderr);
-  await assert.doesNotReject(access(output), 'must generate the CLJS source');
-  assert.match(await readFile(output, 'utf8'), /"0\.0\.0"/);
-});
+}
 
 test('When the generator is imported from standard input, then its function is available without generating a file', async t => {
   const { root, output } = await fixture(t, '{"version":"0.0.0"}');
