@@ -244,11 +244,51 @@ scopeは原則として付けず、付けることで対象が明確になる場
 | 仕様・設計・テスト項目・手順書・ADR | 日本語 |
 | Issue・PRのタイトルと説明・レビュー | 日本語 |
 | ファイル名・プログラムの識別子・コードコメント | 英語 |
+| テストコードの説明文 | 英語 |
 | AI向けの`AGENTS.md` | 英語 |
 
 READMEは当面日本語を基本とし、英語版は必要になった場合に検討する。
 
 日本語ドキュメントの作成・更新では、`AGENTS.md`に従って`yomiyasu`を使用する。チャットの会話と、`session-handoff`で作成・更新する引き継ぎ文書は対象外とする。
+
+### 8.1 テストコードの命名と説明
+
+ClojureScriptのテスト名前空間は、末尾を`-test`にする。テスト環境と実行方法は、[開発環境の仕様](specs/development-environment.md)を参照する。
+
+`cljs.test`の`testing`の説明文と、`node:test`の`test`・`it`・`describe`の説明文には、次の共通方針を適用する。
+
+- 英語で記述し、`When <condition or action>, then <observable result>`を基本形とする。
+- 実装手順やテスト側の検査操作ではなく、対象の外から確認できる振る舞いを記述する。単体テストでは、関数に渡す入力や返り値も対象の外から確認できる振る舞いとして扱う。
+- `When`と`Given`は大文字で始め、カンマの後の`then`は小文字にする。説明文の末尾にピリオドを付けない。
+- 前提ごとにまとめると意図が伝わりやすい場合は、外側を`Given <context>`、内側を`When ..., then ...`とする。`Given`には状態や入力を記述し、セットアップの手順は書かない。
+- `Given`によるグループ化は任意とする。意図を明確にできる場合は、内側の説明文が一つだけでも使用できる。
+- 説明文を持つブロックの入れ子は、原則として`Given`と`When`の2段までとする。テストが大きくなった場合は、深い入れ子を追加せず、複数の`deftest`や`test`などへ分割する。
+
+`cljs.test`では、必要に応じて外側と内側の`testing`を使う。`node:test`では、単独の`test`や`it`を基本形で記述し、グループ化する場合は外側の`describe`を`Given`、内側の`test`や`it`を`When ..., then ...`にする。
+
+```clojure
+(deftest command-result-test
+  (testing "Given no arguments"
+    (testing "When the command is evaluated, then usage is returned successfully"
+      ...))
+  (testing "Given an unknown argument"
+    (testing "When the command is evaluated, then usage is returned as an error"
+      ...)))
+```
+
+CLIの結合テストでは、実際のコマンド実行と出力を説明する。
+
+```javascript
+test('When the command receives no arguments, then usage is written to standard output', () => {
+  // ...
+});
+
+describe('Given an existing generated file', () => {
+  test('When the version is unchanged, then the generated file remains unchanged', async () => {
+    // ...
+  });
+});
+```
 
 ## 9. 後続課題の管理
 
