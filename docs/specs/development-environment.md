@@ -69,7 +69,13 @@ node dist/cli.js --version
 
 開発用CLIにはREPL接続用クライアントを含めず、一度実行して終了できる構成にする。配布用ビルドには、開発用の接続処理を含めない。
 
-配布用ビルドではsource mapを生成する。ただし、Node.js標準機能だけで元のCLJS位置を表示できるとは保証しない。既存の[検証結果](../../research/implementation-environment/results/verification.md)にある補助方法を開発時の案内へ引き継ぐ。
+配布用ビルドではsource mapを生成する。ただし、Node.js標準機能だけで元のCLJS位置を表示できるとは保証しない。デバッグ時は、リポジトリルートから補助を事前に読み込んで実行できる。
+
+```sh
+node -r source-map-support/register dist/cli.js --version
+```
+
+`source-map-support`は現在のshadow-cljsの開発依存に含まれる0.5.21を利用するため、先に`npm ci`を行う。この起動方法は開発時の補助であり、通常のCLI実行や配布用出力だけの実行には不要である。CLJS位置へ対応することを確認した根拠は既存の[調査結果](../../research/implementation-environment/results/verification.md#4-ビルド方式とデバッグ)を参照する。現在のCLIでは補助付きで正常起動することを確認し、例外時の位置表示は今回再検証していない。
 
 ### バージョン番号の生成
 
