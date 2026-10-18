@@ -1,0 +1,32 @@
+{
+  "name": "clono",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=24.22.0 <25"
+  },
+  "scripts": {
+    "generate:version": "node scripts/generate-version.mjs",
+    "prebuild:dev": "npm run generate:version",
+    "build:dev": "shadow-cljs compile cli",
+    "prebuild": "npm run generate:version",
+    "build": "shadow-cljs release cli",
+    "predev": "npm run generate:version",
+    "dev": "shadow-cljs watch repl",
+    "repl:runtime": "node target/repl/repl.js",
+    "repl": "shadow-cljs cljs-repl repl",
+    "pretest:unit": "npm run generate:version",
+    "test:unit": "shadow-cljs compile test && node target/test/tests.cjs",
+    "pretest:watch": "npm run generate:version",
+    "test:watch": "shadow-cljs watch test --config-merge \"{:autorun true}\"",
+    "test:tools": "node --test test/tools/generate-version.test.mjs",
+    "test:cli": "npm run build:dev && npm run build && node --test test/cli/cli.test.mjs",
+    "test": "npm run test:tools && npm run test:unit && npm run test:cli",
+    "verify": "npm test"
+  },
+  "devDependencies": {
+    "shadow-cljs": "3.5.7"
+  }
+}
