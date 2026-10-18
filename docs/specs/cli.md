@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # CLIの仕様
 
-- 状態：合意済み（独立レビュー・再レビュー・二人の確認完了、未実装）
+- 状態：合意済み。実装・ローカル検証・独立レビュー・二人の確認完了。3OSでの実行確認は後続のCIで行う。
 - 関連する手順書：[0003 最小限の開発基盤とバージョン表示を実装する](../plans/0003-set-up-development-foundation.md)
 - 関連する仕様：[開発環境](development-environment.md)
 

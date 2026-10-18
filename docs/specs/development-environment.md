@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # 開発環境の仕様
 
-- 状態：合意済み。手順2の開発基盤は実装・ローカル検証・独立レビュー・二人の確認完了。製品CLIとCIは未実装。
+- 状態：合意済み。開発基盤と製品CLIは実装・ローカル検証・独立レビュー・二人の確認完了。CIは未実装。
 - 関連する手順書：[0003 最小限の開発基盤とバージョン表示を実装する](../plans/0003-set-up-development-foundation.md)
 - 関連する仕様：[実装環境](implementation-environment.md)、[CLI](cli.md)
 
@@ -117,9 +117,9 @@ REPL用ビルドを読み込んでも、CLIの引数処理や出力を自動実�
 
 shadow-cljsのビルド固有REPLは、監視プロセスとJavaScriptの実行環境の両方を必要とする。この手順は、その二つを明示している。[shadow-cljsのREPL接続](https://shadow-cljs.github.io/docs/UsersGuide.html#_build_specific_repl)
 
-### 手順2時点の実装状況
+### 実装状況
 
-現在の`clono.cli/probe`、`clono.main/main`とCLJSのテストは、ビルド・REPL・テスト実行を確認するための仮コードである。CLIの結合テストも、開発用・配布用の入口が出力なしで起動・終了することだけを確認する。`npm run verify`の成功を、製品CLIの仕様を満たしたこととは扱わない。手順3で仮コードと接続確認用テストを製品の実装・テストへ置き換える。
+手順3で仮コードと接続確認用テストを製品の実装・テストへ置き換えた。`clono.cli/evaluate`が引数とバージョン番号から結果を返し、`clono.main/main`が引数の取得、出力、終了コードの設定を行う。単体テストと両ビルドの結合テストに加え、別の作業ディレクトリ、配布用出力だけの分離実行、番号変更前後の再ビルドをローカルで確認した。実装に対する独立レビューと二人の確認も完了した。3OSのCIは手順4で追加する。
 
 バージョン情報の生成処理と、そのテストは後続でも使用する。`.node-version`でNode.jsの版、`.sdkmanrc`でSDKMANのJDKを指定する。SDKMANでの切り替えには、リポジトリルートで`sdk env`を実行する。既定のJDKは変更しない。
 
