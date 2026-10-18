@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # 0003 最小限の開発基盤とバージョン表示を実装する
 
-- 状態：手順書の独立レビュー・二人の確認完了（本作業は未着手）
+- 状態：手順1の実施・内部確認完了（手順2以降は未着手）
 
 ## 1. 目的
 
@@ -59,8 +59,8 @@ ClojureScriptのソース変更から、ビルド、テスト、CLIの実行、C
 | 配置 | 内容 |
 |---|---|
 | `docs/plans/0003-set-up-development-foundation.md` | 本手順書と実施記録 |
-| `docs/specs/development-environment.md` | 開発・テスト・CIの構成と検証項目 |
-| `docs/specs/cli.md` | 今回のCLI仕様とテスト項目 |
+| [開発環境の仕様](../specs/development-environment.md) | 開発・テスト・CIの構成と検証項目 |
+| [CLIの仕様](../specs/cli.md) | 今回のCLI仕様とテスト項目 |
 | 製品コード・テスト・設定 | CLI、ビルド、開発コマンド、CI |
 | `README.md`など | 開発とCLI実行の入口 |
 
@@ -236,3 +236,30 @@ CIや外部レビューで修正が必要になった場合は、開発フロー
 - 開発者が構成と実行方法を理解し、次の機能開発に利用できる。
 
 手順書には「全手順の実施・内部確認完了」までを記録し、CIの実行結果、外部レビュー、作業全体の完了状況はPRから追えるようにする。
+
+## 7. 実施記録
+
+### 手順1：開発基盤とCLIの仕様・設計・検証項目を決める
+
+実施日：2026-10-18（日本時間）。仕様・設計・検証項目の作成、独立レビュー、修正・再レビュー、開発者の理解確認を完了した。
+
+- 成果物：[開発環境の仕様](../specs/development-environment.md)と[CLIの仕様](../specs/cli.md)。前者にD01〜D09、後者にC01〜C12の検証項目を記載した。
+- 既存資料と公式資料を確認し、テストの分担、ソースと生成物の配置、開発コマンド、REPL、バージョン情報の生成方法、CLIの入出力、3OSのCI条件を具体化した。判断の根拠は以下の「選定理由と参照資料」を参照する。
+- ローカルのJDKはSDKMANで管理するTemurin 21.0.12を使用し、CIではTemurin 21の更新版を取得して実際の版を記録する方針に合意した。ローカルに別経路のJDKを手動導入することは要求しない。
+- 不正な引数のエラーには、受け取った引数全体を順序保持のコンパクトなJSON配列で表示する。空文字列、引用符、改行の表現も検証項目に含めた。
+- 文書の検証として、手順書・既存仕様との整合性、ローカルリンク、検証項目の連番、空白・末尾改行を確認した。日本語には`yomiyasu`を使用した。静的検査の箇条書き比率の候補は、並列した条件・操作を示すために必要と判断し、そのまま残した。
+- 会話履歴を引き継がないサブエージェントによる初回の独立レビューでは、修正必須の指摘はなかった。任意の提案として、同じ内容なら生成ファイルを書き換えないことを検証項目にも明記する指摘があった。
+- 提案を二人で検討して採用し、生成ファイルの内容と最終更新時刻が変わらないことをD09に追加した。同じレビュアーによる再レビューで、提案への対応と既存項目との整合性を確認し、追加指摘はなかった。
+- 開発者は仕様2文書と生成ファイル方式を理解し、内容に合意した。D09の追加にも合意し、再レビュー後に手順1の完了確認と記録更新を依頼した。
+- 仕様選定のための追加実験は実施していない。製品コード・設定の実装、依存導入、ビルド、実REPL、3OSのCIの実行は未実施であり、後続の手順で確認する。
+
+**選定理由と参照資料**
+
+- [実装環境仕様](../specs/implementation-environment.md)と[既存の検証結果](../../research/implementation-environment/results/verification.md)を出発点とし、採用済みのCLJS・Node.js・ESM・shadow-cljsを維持した。調査用構成の製品への丸ごとの移植は行わない。
+- 単体テストにはCLJSの関数を扱いやすい`cljs.test`、CLIの結合テストにはプロセスの入出力を外から確認できる`node:test`を選んだ。両方とも採用済み環境に含まれ、新しい外部テストライブラリを要求しない。[ClojureScriptのテスト資料](https://clojurescript.org/tools/testing)、[Node.jsのテスト資料](https://nodejs.org/docs/latest-v24.x/api/test.html)
+- shadow-cljsの公式資料で、テストの`:autorun`では終了コードが呼び出し元へ返らないことを確認した。一回実行とCIでは、生成したテストをNode.jsで明示的に実行する。ESMのCLI、REPL用ビルド、テスト用の`.cjs`を分ける設計は、独立レビューでローカルのshadow-cljs 3.5.7のjar内ソースとも照合した。[shadow-cljsのテスト資料](https://shadow-cljs.github.io/docs/UsersGuide.html#target-node-test)、[REPLの資料](https://shadow-cljs.github.io/docs/UsersGuide.html#_build_specific_repl)
+- バージョン情報には、`package.json`からCLJS定数ファイルを生成する方式を選んだ。実行時に管理元を読む必要がなく、JSONの読み取りとファイル生成として処理を追えることを優先した。番号変更後は監視プロセスの再起動を必要とする制約を許容した。
+- CIにはGitHub Actionsの標準ランナーを選んだ。公開リポジトリの標準ランナーは無料で利用でき、3OSで共通の検証を実行できる。OSとアーキテクチャは仕様に明記した。[マトリクスの資料](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/run-job-variations)、[ランナー一覧](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)、[料金の説明](https://docs.github.com/en/billing/concepts/product-billing/github-actions)
+- 既存の言語・実行環境・ビルドツールのライセンス確認は、[前回の調査資料](../../research/implementation-environment/sources.md)を参照した。新しい外部テストライブラリは追加しない。具体的に導入する依存やActionsの版・SHA、必要な表示は、後続の実装時にも[ライセンス方針](../specs/licensing.md)に従って確認する。
+
+予定していた対象範囲と工程の変更はない。実行時の制約や未検証事項は仕様に明記し、現時点でbacklogへ追加する独立した後続課題はない。手順2以降への着手は、開発者のコミットと着手依頼を受けてから行う。
