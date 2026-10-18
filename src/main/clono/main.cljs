@@ -5,6 +5,9 @@
   (:require [clono.cli :as cli]
             [clono.version :as version]))
 
-;; Temporary entry point for build/startup checks, not the product CLI.
 (defn main []
-  (cli/probe version/value))
+  (let [args (vec (array-seq (.slice (.-argv js/process) 2)))
+        {:keys [stdout stderr exit-code]} (cli/evaluate args version/value)]
+    (.write (.-stdout js/process) stdout)
+    (.write (.-stderr js/process) stderr)
+    (set! (.-exitCode js/process) exit-code)))
