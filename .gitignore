@@ -1,0 +1,10 @@
+# Copyright 2026 HASEBA Junya (7pairs)
+# SPDX-License-Identifier: Apache-2.0
+
+node_modules/
+.shadow-cljs/
+target/
+dist/
+.clj-kondo/.cache/
+.lsp/.cache/
+.nrepl-port

@@ -1,0 +1,22 @@
+;; Copyright 2026 HASEBA Junya (7pairs)
+;; SPDX-License-Identifier: Apache-2.0
+
+{:source-paths ["src/main" "src/test" "target/generated"]
+ :builds
+ {:cli {:target :esm
+        :runtime :node
+        :output-dir "target/dev"
+        :js-options {:js-provider :import}
+        :devtools {:enabled false}
+        :modules {:cli {:init-fn clono.main/main}}
+        :release {:output-dir "dist"
+                  :compiler-options {:source-map true}}}
+  :repl {:target :esm
+         :runtime :node
+         :output-dir "target/repl"
+         :js-options {:js-provider :import}
+         :modules {:repl {:entries [clono.cli clono.version]}}}
+  :test {:target :node-test
+         :output-to "target/test/tests.cjs"
+         :ns-regexp "-test$"
+         :autorun false}}}

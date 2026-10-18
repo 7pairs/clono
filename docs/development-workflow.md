@@ -244,11 +244,51 @@ scopeは原則として付けず、付けることで対象が明確になる場
 | 仕様・設計・テスト項目・手順書・ADR | 日本語 |
 | Issue・PRのタイトルと説明・レビュー | 日本語 |
 | ファイル名・プログラムの識別子・コードコメント | 英語 |
+| テストコードの説明文 | 英語 |
 | AI向けの`AGENTS.md` | 英語 |
 
 READMEは当面日本語を基本とし、英語版は必要になった場合に検討する。
 
 日本語ドキュメントの作成・更新では、`AGENTS.md`に従って`yomiyasu`を使用する。チャットの会話と、`session-handoff`で作成・更新する引き継ぎ文書は対象外とする。
+
+### 8.1 テストコードの命名と説明
+
+ClojureScriptのテスト名前空間は、末尾を`-test`にする。テスト環境と実行方法は、[開発環境の仕様](specs/development-environment.md)を参照する。
+
+`cljs.test`の`testing`の説明文と、`node:test`の`test`・`it`・`describe`の説明文には、次の共通方針を適用する。
+
+- 英語で記述し、`When <condition or action>, then <observable result>`を基本形とする。
+- 実装手順やテスト側の検査操作ではなく、対象の外から確認できる振る舞いを記述する。単体テストでは、関数に渡す入力や返り値も対象の外から確認できる振る舞いとして扱う。
+- `When`と`Given`は大文字で始め、カンマの後の`then`は小文字にする。説明文の末尾にピリオドを付けない。
+- 前提ごとにまとめると意図が伝わりやすい場合は、外側を`Given <context>`、内側を`When ..., then ...`とする。`Given`には状態や入力を記述し、セットアップの手順は書かない。
+- `Given`によるグループ化は任意とする。意図を明確にできる場合は、内側の説明文が一つだけでも使用できる。
+- 説明文を持つブロックの入れ子は、原則として`Given`と`When`の2段までとする。テストが大きくなった場合は、深い入れ子を追加せず、複数の`deftest`や`test`などへ分割する。
+
+`cljs.test`では、必要に応じて外側と内側の`testing`を使う。`node:test`では、単独の`test`や`it`を基本形で記述し、グループ化する場合は外側の`describe`を`Given`、内側の`test`や`it`を`When ..., then ...`にする。
+
+```clojure
+(deftest command-result-test
+  (testing "Given no arguments"
+    (testing "When the command is evaluated, then usage is returned successfully"
+      ...))
+  (testing "Given an unknown argument"
+    (testing "When the command is evaluated, then usage is returned as an error"
+      ...)))
+```
+
+CLIの結合テストでは、実際のコマンド実行と出力を説明する。
+
+```javascript
+test('When the command receives no arguments, then usage is written to standard output', () => {
+  // ...
+});
+
+describe('Given an existing generated file', () => {
+  test('When the version is unchanged, then the generated file remains unchanged', async () => {
+    // ...
+  });
+});
+```
 
 ## 9. 後続課題の管理
 
@@ -301,14 +341,17 @@ Markdownは現行remark系でASTとして加工し、Markdownへ再出力してV
 
 採用理由と代替案は[ADR 0002](decisions/0002-choose-implementation-environment.md)、調査と検証の根拠は[検証資料](../research/implementation-environment/README.md)と、そこから参照する検証結果に記録している。調査用コマンドはその環境を再現するためのものであり、正式な製品の開発・検証コマンドとして扱わない。
 
-### 11.2 未決定の事項
+### 11.2 開発・検証の基盤
+
+正式な開発・検証コマンド、テスト、REPL、CIは[開発環境の仕様](specs/development-environment.md)に従う。セットアップとCLIの実行例は[README](../README.md#セットアップと検証)、引数・出力・終了コードは[CLIの仕様](specs/cli.md)を参照する。
+
+ローカルとCIの共通検証は`npm run verify`とする。CIは`develop`・`main`向けのPRと両ブランチへのpushで実行し、Draft PRも対象とする。3OSの設定は実装済みで、GitHub Actions上での実行結果は[手順書0003](plans/0003-set-up-development-foundation.md)に対応する通常のPRで確認する。
+
+### 11.3 未決定の事項
 
 現時点では、次の内容は未決定とする。
 
-- テスト環境。
-- CIの内容と、PR・mainなどでの実行条件。
 - 正式なPRレビューツールと起動条件。
-- 開発・検証に必要なコマンド。
 - リリース準備で更新するファイル。
 - バージョン番号の更新規則と、後方互換性を保証する対象。
 - タグの共有先、リリースの公開先と具体的な操作。
@@ -321,7 +364,7 @@ Markdownは現行remark系でASTとして加工し、Markdownへ再出力してV
 
 Draft中の自動レビュー抑止、レビュー可能な状態へ切り替えた後のレビュー開始、昇格PRの重複レビュー抑止については、正式な選定時に設定方法と挙動を確認する。
 
-未決定のコマンドやCI、公開手順が利用できることを前提にしない。文書作成など現在実施できる作業では、手順書で合意した検証を行う。
+未決定の公開・リリース手順や正式なPRレビューツールの設定が利用できることを前提にしない。各作業では、手順書で合意した検証を行う。
 
 技術選定の手順書と関連文書は第12節から参照する。決定した内容は、開発フローの該当箇所へ反映する。
 
@@ -333,9 +376,9 @@ Draft中の自動レビュー抑止、レビュー可能な状態へ切り替え
 
 実装言語・実行環境の採用判断は[選定の手順書](plans/0002-choose-implementation-environment.md)の手順4までに完了した。決定した内容は[実装環境の仕様](specs/implementation-environment.md)、判断理由は[ADR 0002](decisions/0002-choose-implementation-environment.md)を参照する。
 
-今後、正式なテスト環境、CI、PRレビューツール、必要な開発・検証コマンドを検討する。実装環境の調査で使ったテストや組版スクリプトを、そのまま正式環境として採用したものとは扱わない。
+正式な開発・テスト基盤、CI設定、最初の製品機能であるバージョン表示は[手順書0003](plans/0003-set-up-development-foundation.md)で扱う。現在の構成は第11.2節の仕様を参照する。正式なPRレビューツールは引き続き未決定である。実装環境の調査で使った組版スクリプトを、そのまま製品の機能として採用したものとは扱わない。
 
-最初の機能を、合意したフローで実装・検証できる環境まで整えることを目標とする。
+最初の機能と開発基盤のローカル検証は済んでいる。PRでは3OSのCIと外部レビューを確認する。
 
 すべてを一度に決める必要はない。調査結果に応じて作業を分け、後続の手順を具体化する場合はSDDの条件に従う。
 
