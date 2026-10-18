@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # 開発環境の仕様
 
-- 状態：合意済み（独立レビュー・再レビュー・二人の確認完了、未実装）
+- 状態：合意済み。手順2の開発基盤は実装・ローカル検証・独立レビュー・二人の確認完了。製品CLIとCIは未実装。
 - 関連する手順書：[0003 最小限の開発基盤とバージョン表示を実装する](../plans/0003-set-up-development-foundation.md)
 - 関連する仕様：[実装環境](implementation-environment.md)、[CLI](cli.md)
 
@@ -100,8 +100,9 @@ node dist/cli.js --version
 | `npm run repl` | 起動済みのREPL用ビルドへ端末から接続する |
 | `npm run test:unit` | 単体テストをビルドし、Node.jsで一回実行する |
 | `npm run test:watch` | CLJSの単体テストを監視・自動実行する |
+| `npm run test:tools` | バージョン情報の生成処理をテストする |
 | `npm run test:cli` | 開発用・配布用CLIをビルドし、結合テストを実行する |
-| `npm test` | 単体テストとCLIの結合テストを順に実行する |
+| `npm test` | 生成処理のテスト、単体テスト、CLIの結合テストを順に実行する |
 | `npm run verify` | ローカルとCIで共通の検証として`npm test`を実行する |
 
 一回実行するコマンドは、途中の処理が失敗したら非0で終了する。監視コマンドは、修正を続けられるよう、テスト失敗を表示して監視を継続する。
@@ -115,6 +116,12 @@ REPLの利用手順は次とする。
 REPL用ビルドを読み込んでも、CLIの引数処理や出力を自動実行しない。関数を読み込み、必要な引数を与えて評価する。
 
 shadow-cljsのビルド固有REPLは、監視プロセスとJavaScriptの実行環境の両方を必要とする。この手順は、その二つを明示している。[shadow-cljsのREPL接続](https://shadow-cljs.github.io/docs/UsersGuide.html#_build_specific_repl)
+
+### 手順2時点の実装状況
+
+現在の`clono.cli/probe`、`clono.main/main`とCLJSのテストは、ビルド・REPL・テスト実行を確認するための仮コードである。CLIの結合テストも、開発用・配布用の入口が出力なしで起動・終了することだけを確認する。`npm run verify`の成功を、製品CLIの仕様を満たしたこととは扱わない。手順3で仮コードと接続確認用テストを製品の実装・テストへ置き換える。
+
+バージョン情報の生成処理と、そのテストは後続でも使用する。`.node-version`でNode.jsの版、`.sdkmanrc`でSDKMANのJDKを指定する。SDKMANでの切り替えには、リポジトリルートで`sdk env`を実行する。既定のJDKは変更しない。
 
 ## 6. テストの分担
 
