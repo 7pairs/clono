@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 
 [手順書0005](../../docs/plans/0005-investigate-numbering-and-references.md)に基づき、旧要件のT03～T05について、既存機能で満たせる範囲とclonoで補う処理を調べる。
 
-- 現在地：手順2の実施・検証・独立レビュー・再レビュー・二人の確認は完了。手順3・4は未着手。
+- 現在地：手順2まで完了。章開始値の補助を省けるか調べる手順2Aを手順書に追加した。手順2A・3・4は未着手。
 - [参照資料と公開パッケージの識別情報](sources.md)
 - [候補・検証項目・期待値・環境とリスクの確認](results/verification.md)
 - [要件の出発点](../legacy-preprocessor/results/requirements.md#12-要件に結び付けた後続の確認事項)
