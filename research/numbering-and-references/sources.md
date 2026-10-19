@@ -88,3 +88,9 @@ CLIの目次は組版前のHTMLを読み、Coreの`target-text()`は組版した
 | Core `lib/vivliostyle.js.map` | `379cfb9421cd246e88148d63548fe8337e4ed544f6dccb0bc8153c02adfe4938` |
 
 この照合は参照したコードの識別のためであり、ローカル依存全体の監査や、挙動の実証ではない。アーカイブの一時保存先には依存せず、再確認時は上記URLとintegrityを使用する。
+
+## 4. 手順2で確認した実行版との違い
+
+CLI 11.3.3がPDFを生成するときは、Viewer 2.45.1に内蔵されたコードを使った。生成PDFのCreatorはVivliostyle.js 2.45.1を示し、Viewerの`lib/index.html`にもcore+viewer 2.45.1の表示があった。独立したCoreパッケージ2.45.2がlockfileに存在することだけでは、実行版が2.45.2とは判断できない。
+
+`node_modules/@vivliostyle/viewer/lib/js/vivliostyle-viewer.js.map`の`../../../core/src/vivliostyle/counters.ts`と`css-cascade.ts`を確認し、参照値とtarget-textの処理を読み直した。S08はCore 2.45.2の静的読解結果として維持し、今回の実測はViewer内蔵版の結果として[第9節](results/verification.md#9-手順2通常出力での検証結果)に記録した。bundleと参照処理のハッシュは[環境記録](results/environment.json)を参照する。
