@@ -64,6 +64,8 @@ python3 scripts/render-pdfs.py
 
 `prepare.mjs`は固定した検証原稿と参照一覧を再作成する。`build.mjs b-base`のように構成名を指定すれば、その構成だけを再生成できる。PDFは`results/pdf/`、中間Markdown・HTML・CLI設定・目次・個別の照合結果・ページ画像は`results/generated/`へ保存し、Git管理から除外する。
 
+`render-pdfs.py`は各構成の画像化の直前に、その構成の`images/page-*.png`だけを削除する。ページ数が減る再実行でも、一覧画像に以前の末尾ページや桁数の異なる画像を混ぜないための処理である。
+
 集計結果は[step2-observations.json](results/step2-observations.json)、環境と依存定義のハッシュは[environment.json](results/environment.json)、PDF閲覧時の確認は[viewing-observations.json](results/viewing-observations.json)に残す。検査用PythonはPDFから文字列とリンク注釈を調べる。閲覧操作と画像の目視確認は、その実行だけで自動的に再現したことにはならない。
 
 環境JSONは調査時点の記録として保持する。外部レビュー対応後の`check-environment.mjs`は、既存依存の定義・解決内容とJSDOMの直接宣言を照合し、通常・`--page-counters`・`--headings`それぞれの結果を`environment-current.json`・`step2a-environment-current.json`・`step3-environment-current.json`へ保存する。

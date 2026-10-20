@@ -17,6 +17,8 @@ names = [p['name'] for p in json.loads((root/'fixtures'/fixture).read_text())['p
 for name in names:
     out = root/'results/generated'/name/'images'
     out.mkdir(exist_ok=True)
+    for previous_page in out.glob('page-*.png'):
+        previous_page.unlink()
     subprocess.run(['pdftoppm','-png','-r','65',str(root/f'results/pdf/{name}.pdf'),str(out/'page')],check=True)
     paths = sorted(out.glob('page-*.png'))
     sheet = Image.new('RGB',(1020,480*((len(paths)+2)//3)),'#dddddd')
