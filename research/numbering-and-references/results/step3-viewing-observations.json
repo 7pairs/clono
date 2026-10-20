@@ -1,0 +1,161 @@
+{
+  "copyright": "Copyright 2026 HASEBA Junya (7pairs)",
+  "license": "Apache-2.0",
+  "date": "2026-10-20",
+  "viewer": "macOS Preview 11.0",
+  "method": "Native Preview actual clicks for 14 ToC links and 12 body links per baseline; source shown before clicking and window page status checked after arrival",
+  "profiles": [
+    {
+      "name": "h-span-base",
+      "pdfSha256": "b404c03372bb7d1ef853d8ee4c2a13b0077b2f8df47c9acc43070fe5f4d32a13",
+      "toc": {
+        "count": 14,
+        "observedPages": [
+          1,
+          3,
+          3,
+          3,
+          5,
+          5,
+          5,
+          7,
+          7,
+          7,
+          9,
+          9,
+          9,
+          11
+        ]
+      },
+      "body": [
+        {
+          "token": "R0005",
+          "observedPage": 3
+        },
+        {
+          "token": "R0006",
+          "observedPage": 3
+        },
+        {
+          "token": "R0007",
+          "observedPage": 3
+        },
+        {
+          "token": "R0014",
+          "observedPage": 3
+        },
+        {
+          "token": "R0015",
+          "observedPage": 3
+        },
+        {
+          "token": "R0016",
+          "observedPage": 3
+        },
+        {
+          "token": "R0017",
+          "observedPage": 5
+        },
+        {
+          "token": "R0051",
+          "observedPage": 5
+        },
+        {
+          "token": "R0065",
+          "observedPage": 3
+        },
+        {
+          "token": "R0101",
+          "observedPage": 7
+        },
+        {
+          "token": "R0149",
+          "observedPage": 9
+        },
+        {
+          "token": "R0198",
+          "observedPage": 1
+        }
+      ]
+    },
+    {
+      "name": "h-image-base",
+      "pdfSha256": "48583f6eb834af5316e25e5bb0f9452f6c68331e3a607fd3993e8a5502797469",
+      "toc": {
+        "count": 14,
+        "observedPages": [
+          1,
+          3,
+          3,
+          3,
+          5,
+          5,
+          5,
+          7,
+          7,
+          7,
+          9,
+          9,
+          9,
+          11
+        ]
+      },
+      "body": [
+        {
+          "token": "R0005",
+          "observedPage": 3
+        },
+        {
+          "token": "R0006",
+          "observedPage": 3
+        },
+        {
+          "token": "R0007",
+          "observedPage": 3
+        },
+        {
+          "token": "R0014",
+          "observedPage": 3
+        },
+        {
+          "token": "R0015",
+          "observedPage": 3
+        },
+        {
+          "token": "R0016",
+          "observedPage": 3
+        },
+        {
+          "token": "R0017",
+          "observedPage": 5
+        },
+        {
+          "token": "R0051",
+          "observedPage": 5
+        },
+        {
+          "token": "R0065",
+          "observedPage": 3
+        },
+        {
+          "token": "R0101",
+          "observedPage": 7
+        },
+        {
+          "token": "R0149",
+          "observedPage": 9
+        },
+        {
+          "token": "R0198",
+          "observedPage": 1
+        }
+      ]
+    }
+  ],
+  "visualInspection": {
+    "profiles": 16,
+    "renderedPages": 176,
+    "method": "All-page labeled contact sheets; image and span baseline headings additionally inspected enlarged in Preview",
+    "controls": "Six counterexamples preserve intentional missing text, image ToC or div-heading failures"
+  }
+}

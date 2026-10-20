@@ -33,8 +33,19 @@ norm = lambda s: re.sub(r'\s+', '', unicodedata.normalize('NFKC', s or ''))
 args = argparse.ArgumentParser(description=__doc__)
 args.add_argument('--check-regressions', action='store_true', help='Reject deliberately corrupted copies of the baseline TOC observations')
 args.add_argument('--page-counters', action='store_true', help='Check the separate page-counter profiles and preserve step 2 results')
+args.add_argument('--headings', action='store_true', help='Check heading replacement profiles separately')
+args.add_argument('profiles', nargs='*', help='Optional profile names; save per-profile observations without replacing the full summary')
 options = args.parse_args()
-profiles = json.loads((root / ('fixtures/page-counter-profiles.json' if options.page_counters else 'fixtures/profiles.json')).read_text())['profiles']
+fixture = 'fixtures/heading-profiles.json' if options.headings else 'fixtures/page-counter-profiles.json' if options.page_counters else 'fixtures/profiles.json'
+profiles = json.loads((root / fixture).read_text())['profiles']
+if options.profiles:
+    unknown = set(options.profiles) - {p['name'] for p in profiles}
+    if unknown:
+        args.error('Unknown profiles: ' + ', '.join(sorted(unknown)))
+    profiles = [p for p in profiles if p['name'] in options.profiles]
+
+def profile_oracle(profile):
+    return profile.get('oracle', oracle_name(profile['name']))
 
 def oracle_name(name):
     return 'b-' + name[2:] if name.startswith('p-') else name
@@ -51,7 +62,7 @@ def expected_toc(profile, numbers, sep):
     order = {
         'b-body-swapped': ['preface', 'beta', 'alpha', 'appendix-a', 'appendix-b', 'afterword'],
         'b-appendix-swapped': ['preface', 'alpha', 'beta', 'appendix-b', 'appendix-a', 'afterword'],
-    }.get(oracle_name(profile['name']), ['preface', 'alpha', 'beta', 'appendix-a', 'appendix-b', 'afterword'])
+    }.get(profile_oracle(profile), ['preface', 'alpha', 'beta', 'appendix-a', 'appendix-b', 'afterword'])
     if profile.get('single'):
         order = ['alpha']
     items = []
@@ -123,9 +134,12 @@ def expected(ref, numbers, sep):
 class TocParser(HTMLParser):
     def __init__(self):
         super().__init__(); self.links = []; self.current = None; self.in_nav = False
+        self.images = 0; self.hidden_titles = 0
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
         if tag == 'nav': self.in_nav = True
+        if self.in_nav and tag == 'img': self.images += 1
+        if self.in_nav and 'reference-title' in a.get('class', '').split(): self.hidden_titles += 1
         if self.in_nav and tag == 'a': self.current = {'href': a.get('href', ''), 'text': ''}
     def handle_data(self, text):
         if self.current is not None: self.current['text'] += text
@@ -151,7 +165,7 @@ for profile in profiles:
     subprocess.run(['pdftotext', '-layout', str(pdf), str(root / f'results/generated/{name}/extracted.txt')], check=True)
     raw = (root / f'results/generated/{name}/extracted.txt').read_text()
     flattened = norm(raw)
-    numbers = ordinals.get(oracle_name(name), base_order)
+    numbers = ordinals.get(profile_oracle(profile), base_order)
     sep = profile.get('separator', '.')
     values = dict(re.findall(r'(R\d{4})=([^;]*);', flattened))
     detail = []
@@ -178,7 +192,7 @@ for profile in profiles:
     wanted_toc = expected_toc(profile, numbers, sep)
     toc_check = check_toc(wanted_toc, toc.links, toc_lines, annotations, destinations, toc_page_number, toc_height)
     toc_checks = toc_check['items']
-    if options.check_regressions and name in ['b-base', 'p-base']:
+    if options.check_regressions and name in ['b-base', 'p-base', 'h-span-base', 'h-image-base']:
         assert toc_passes(toc_check), 'Baseline must pass before checking corruptions'
         cases = []
         for label, changed_links in [('missing entry', toc.links[:2] + toc.links[3:]),
@@ -228,6 +242,8 @@ for profile in profiles:
         generated = root / 'results/generated' / name
         metadata = json.loads((generated / 'metadata.json').read_text())
         css = (root / 'fixtures/page-counters.css').read_text()
+        if profile.get('headingMode'):
+            css += '\n' + (root / 'fixtures/heading-overrides.css').read_text()
         if profile.get('separator'):
             css = css.replace('"."', '"' + sep + '"')
         page_counter_input_checks = (
@@ -259,6 +275,8 @@ for profile in profiles:
         'tocExpectedItems': len(wanted_toc), 'tocStructureMatches': toc_check['structureMatches'],
         'tocRowCountMatches': toc_check['rowCountMatches'], 'tocChecksPassed': toc_passes(toc_check),
         'tocPdfLinks': sum(t['hasPdfLink'] for t in toc_checks),
+        **({'tocImageCount': toc.images, 'tocHiddenTitleCount': toc.hidden_titles,
+            'tocTextWithoutReplacementMarkup': toc.images == 0 and toc.hidden_titles == 0} if options.headings else {}),
         'referenceDestinations': sum(t['hasDestination'] for t in ref_dest_checks),
         'referencePdfLinks': sum(t['hasPdfLink'] for t in ref_dest_checks),
         'annotationCount': len(annotations), 'unresolvedAnnotations': sum(not a['resolved'] for a in annotations),
@@ -277,9 +295,11 @@ for profile in profiles:
     print(name, f"refs {summary['matchedReferences']}/{len(detail)}, captions {summary['matchedCaptions']}/{len(captions)}, toc {summary['tocPageMatches']}/{len(toc.links)}")
 
 out = {'copyright': 'Copyright 2026 HASEBA Junya (7pairs)', 'license': 'Apache-2.0', 'profiles': results}
-(root / ('results/step2a-observations.json' if options.page_counters else 'results/step2-observations.json')).write_text(json.dumps(out, ensure_ascii=False, indent=2) + '\n')
+if not options.profiles:
+    (root / ('results/step3-observations.json' if options.headings else 'results/step2a-observations.json' if options.page_counters else 'results/step2-observations.json')).write_text(json.dumps(out, ensure_ascii=False, indent=2) + '\n')
 for r in results:
-    if oracle_name(r['name']) in ['b-base', 'b-body-swapped', 'b-appendix-swapped', 'b-depth3', 'b-hyphen']:
+    profile = next(p for p in profiles if p['name'] == r['name'])
+    if (options.headings and profile.get('expectSuccess')) or (not options.headings and oracle_name(r['name']) in ['b-base', 'b-body-swapped', 'b-appendix-swapped', 'b-depth3', 'b-hyphen']):
         assert r['matchedReferences'] == r['references'], (r['name'], r['mismatches'])
         assert r['matchedCaptions'] == r['captionChecks'], r['name']
         assert r['tocPageMatches'] == r['tocItems'], r['name']
@@ -289,11 +309,27 @@ for r in results:
         assert r['referencePdfLinks'] == r['references'], r['name']
         assert r['preservedContentMarkers'] == r['contentMarkers'] == 16, r['name']
         assert r['literalCodeReferenceCount'] == 8, r['name']
-        if options.page_counters:
+        if options.headings:
+            assert r['tocTextWithoutReplacementMarkup'], r['name']
+        if options.page_counters or options.headings:
             assert r['noPerDocumentChapterSeeds'], r['name']
             assert len(r['referencePagesByDocument']) == 4 and all(len(pages) >= 2 for pages in r['referencePagesByDocument'].values()), r['name']
             assert len(r['laterPageCounterChecks']) == 4 and all(c['matches'] for c in r['laterPageCounterChecks']), r['name']
     if r['name'] == 'a-single':
         assert r['singleHeadingChecks'] and r['singleReferencePdfLinks'] == 2, r['name']
         assert r['tocChecksPassed'] and r['tocPdfLinks'] == r['tocExpectedItems'] == 3, r['name']
-print('Independent text and destination checks passed for five supplemented profiles')
+    if options.headings and not profile.get('expectSuccess'):
+        if profile['headingMode'] in ['image-none', 'image-only']:
+            assert r['matchedReferences'] == 160 and r['matchedCaptions'] == 24, r['name']
+        if profile['headingMode'] == 'div':
+            assert r['matchedReferences'] == 184 and not r['tocStructureMatches'], r['name']
+        if profile['headingMode'].startswith('image') and not profile.get('tocText'):
+            assert r['tocImageCount'] == 6, r['name']
+        if profile['headingMode'] == 'image-only':
+            assert not r['tocStructureMatches'], r['name']
+if options.headings:
+    successful_profiles = sum(bool(p.get('expectSuccess')) for p in profiles)
+    controls = len(profiles) - successful_profiles
+    print(f'Independent checks passed for {successful_profiles} heading configurations and {controls} controls')
+else:
+    print(f'Independent text and destination checks passed for {len(results)} profiles')

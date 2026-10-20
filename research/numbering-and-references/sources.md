@@ -114,3 +114,15 @@ CLI 11.3.3がPDFを生成するときは、Viewer 2.45.1に内蔵されたコー
 | `counters.ts`の`getTargetCounterVal`・`getTargetPageCounters`・`adjustCountersForCrossScope` | 参照先要素のページ側の値を取得し、文書側のカウンターとの関係を扱う |
 
 Viewer bundleは手順2と同一である。参照したソースのハッシュと確認項目は[手順2Aの環境記録](results/step2a-environment.json)、実測と限界は[検証結果の第10節](results/verification.md#10-手順2aページ側のカウンター方式の追加検証)へ記録した。第三者コードは転載していない。
+
+## 6. 手順3で確認した目次フックと文字の取得経路
+
+確認日：2026-10-20（日本時間）。S04・S07～S09と、実際に使うViewer内蔵版の処理を読み直した。
+
+CLI 11.3.3の`getStructuredSectionFromHtml`は、CSSの表示状態にかかわらず元HTMLの見出しから`headingText`を取得する。一方、既定の`transformSectionList`はsanitize済みの`headingHtml`を目次へ入れる。このため、画像と参照用文字を持つ見出しを既定出力で複製すると、その構造も目次に残る。
+
+採用版の`generateTocListElement`は、Node.jsで`transformSectionList(nodeList)(propsList)`を呼ぶ。調査用フックは既存の情報からHASTのtextノードを作り、リンク・階層・子項目を維持する。`headingText`をRaw HTMLとして出力せず、DOMPurifyの設定やフックも変更しない。この呼び出し方を、手順1で合意した依存リスクの確認範囲と照合した。
+
+[タグ付きの目次作成資料](https://raw.githubusercontent.com/vivliostyle/vivliostyle-cli/v11.3.3/docs/toc-page.md)も参照した。GitHubの表示ページは取得できなかったが、同じタグのraw資料は取得できた。フックの引数と返す構造の根拠にはS07の配布コードを使った。
+
+Viewer内蔵版の`getTargetTextVal`・`getTargetPageText`は組版時の対象要素から文字を取り出す。`display: none`で文字を消す場合と、ボックスを残してクリップする場合の差は、静的な読解だけで決めず、[第11節](results/verification.md#11-手順3見出しの差し替えとの組み合わせ)に実測した結果を記録した。画像のaltやSVGの表示文字が、見出し本文の保持を代替するとは判断しない。

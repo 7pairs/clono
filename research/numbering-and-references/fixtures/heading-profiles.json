@@ -1,0 +1,188 @@
+{
+  "copyright": "Copyright 2026 HASEBA Junya (7pairs)",
+  "license": "Apache-2.0",
+  "profiles": [
+    {
+      "name": "h-span-base",
+      "supplement": true,
+      "assignId": true,
+      "depth": 2,
+      "pageCounters": true,
+      "headingMode": "span",
+      "tocText": false,
+      "oracle": "b-base",
+      "expectSuccess": true
+    },
+    {
+      "name": "h-span-body-swapped",
+      "supplement": true,
+      "assignId": true,
+      "depth": 2,
+      "pageCounters": true,
+      "headingMode": "span",
+      "tocText": false,
+      "oracle": "b-body-swapped",
+      "expectSuccess": true,
+      "swap": "main"
+    },
+    {
+      "name": "h-span-appendix-swapped",
+      "supplement": true,
+      "assignId": true,
+      "depth": 2,
+      "pageCounters": true,
+      "headingMode": "span",
+      "tocText": false,
+      "oracle": "b-appendix-swapped",
+      "expectSuccess": true,
+      "swap": "appendix"
+    },
+    {
+      "name": "h-span-depth3",
+      "supplement": true,
+      "assignId": true,
+      "depth": 3,
+      "pageCounters": true,
+      "headingMode": "span",
+      "tocText": false,
+      "oracle": "b-depth3",
+      "expectSuccess": true
+    },
+    {
+      "name": "h-span-hyphen",
+      "supplement": true,
+      "assignId": true,
+      "depth": 2,
+      "pageCounters": true,
+      "headingMode": "span",
+      "tocText": false,
+      "oracle": "b-hyphen",
+      "expectSuccess": true,
+      "separator": "-"
+    },
+    {
+      "name": "h-image-base",
+      "supplement": true,
+      "assignId": true,
+      "depth": 2,
+      "pageCounters": true,
+      "headingMode": "image",
+      "tocText": true,
+      "oracle": "b-base",
+      "expectSuccess": true
+    },
+    {
+      "name": "h-image-body-swapped",
+      "supplement": true,
+      "assignId": true,
+      "depth": 2,
+      "pageCounters": true,
+      "headingMode": "image",
+      "tocText": true,
+      "oracle": "b-body-swapped",
+      "expectSuccess": true,
+      "swap": "main"
+    },
+    {
+      "name": "h-image-appendix-swapped",
+      "supplement": true,
+      "assignId": true,
+      "depth": 2,
+      "pageCounters": true,
+      "headingMode": "image",
+      "tocText": true,
+      "oracle": "b-appendix-swapped",
+      "expectSuccess": true,
+      "swap": "appendix"
+    },
+    {
+      "name": "h-image-depth3",
+      "supplement": true,
+      "assignId": true,
+      "depth": 3,
+      "pageCounters": true,
+      "headingMode": "image",
+      "tocText": true,
+      "oracle": "b-depth3",
+      "expectSuccess": true
+    },
+    {
+      "name": "h-image-hyphen",
+      "supplement": true,
+      "assignId": true,
+      "depth": 2,
+      "pageCounters": true,
+      "headingMode": "image",
+      "tocText": true,
+      "oracle": "b-hyphen",
+      "expectSuccess": true,
+      "separator": "-"
+    },
+    {
+      "name": "h-image-default",
+      "supplement": true,
+      "assignId": true,
+      "depth": 2,
+      "pageCounters": true,
+      "headingMode": "image",
+      "tocText": false,
+      "oracle": "b-base",
+      "expectSuccess": false
+    },
+    {
+      "name": "h-image-none",
+      "supplement": true,
+      "assignId": true,
+      "depth": 2,
+      "pageCounters": true,
+      "headingMode": "image-none",
+      "tocText": true,
+      "oracle": "b-base",
+      "expectSuccess": false
+    },
+    {
+      "name": "h-image-none-default",
+      "supplement": true,
+      "assignId": true,
+      "depth": 2,
+      "pageCounters": true,
+      "headingMode": "image-none",
+      "tocText": false,
+      "oracle": "b-base",
+      "expectSuccess": false
+    },
+    {
+      "name": "h-div",
+      "supplement": true,
+      "assignId": true,
+      "depth": 2,
+      "pageCounters": true,
+      "headingMode": "div",
+      "tocText": false,
+      "oracle": "b-base",
+      "expectSuccess": false
+    },
+    {
+      "name": "h-image-only",
+      "supplement": true,
+      "assignId": true,
+      "depth": 2,
+      "pageCounters": true,
+      "headingMode": "image-only",
+      "tocText": true,
+      "oracle": "b-base",
+      "expectSuccess": false
+    },
+    {
+      "name": "h-image-only-default",
+      "supplement": true,
+      "assignId": true,
+      "depth": 2,
+      "pageCounters": true,
+      "headingMode": "image-only",
+      "tocText": false,
+      "oracle": "b-base",
+      "expectSuccess": false
+    }
+  ]
+}

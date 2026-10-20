@@ -1,0 +1,7 @@
+/* Copyright 2026 HASEBA Junya (7pairs) */
+/* SPDX-License-Identifier: Apache-2.0 */
+.heading-body {border-bottom:0.3mm solid #357e9c;}
+.heading-accent {display:inline-block;width:1mm;height:1mm;background:#357e9c;margin-left:1mm;}
+.heading-image {width:44mm;height:8mm;vertical-align:middle;}
+.reference-title {position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
+.reference-title.hidden-none {display:none;}

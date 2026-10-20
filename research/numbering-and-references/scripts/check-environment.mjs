@@ -6,7 +6,8 @@ import {spawnSync} from 'node:child_process';
 import assert from 'node:assert/strict';
 
 const hash=x=>createHash('sha256').update(x).digest('hex');
-const pageCounters=process.argv.includes('--page-counters');
+const headings=process.argv.includes('--headings');
+const pageCounters=headings||process.argv.includes('--page-counters');
 const definitions={};
 for(const file of ['package.json','package-lock.json']) {
  const here=await readFile(file);const previous=await readFile(`../implementation-environment/${file}`);
@@ -45,4 +46,19 @@ if(pageCounters) {
  result.pageCounterChecks={sameViewerBundle:true,documentRelativeNthSelector:true,pageCounterReferencePath:true,
   changes:'CSS page rules and named pages only; no dependency, API option, execution location or sanitization hook changes',previousPdfSha256};
 }
-await writeFile(pageCounters?'results/step2a-environment.json':'results/environment.json',JSON.stringify(result,null,2)+'\n');console.log(result);
+if(headings) {
+ result.pageCounterChecks.changes='Page-counter rules unchanged from step 2A; heading and ToC changes are assessed in headingChecks';
+ assert.ok(cli.includes('headingText: head.textContent')&&cli.includes('return transformSectionList(nodeList)'));
+ const hook=await readFile('scripts/toc-text.mjs','utf8');
+ assert.ok(hook.includes("type:'text',value:node.headingText")&&!hook.includes("type:'raw'"));
+ const previous=JSON.parse(await readFile('results/step2a-observations.json','utf8'));
+ const previousPdfSha256={};
+ for(const p of previous.profiles) {
+  const actual=hash(await readFile(`results/pdf/${p.name}.pdf`));assert.equal(actual,p.pdfSha256);previousPdfSha256[p.name]=actual;
+ }
+ result.headingChecks={sameDependencyAndViewer:true,dompurifyStillReceivesString:true,
+  tocTransformRunsInNode:true,hookEmitsEscapedTextNodes:true,noJsdomRunScriptsOption:true,
+  hookSha256:hash(hook),previousPdfSha256,
+  scope:'Existing CLI transformSectionList receives headingText; text HAST nodes are serialized without raw HTML; no new sanitizer configuration or browser-side VFM'};
+}
+await writeFile(headings?'results/step3-environment.json':pageCounters?'results/step2a-environment.json':'results/environment.json',JSON.stringify(result,null,2)+'\n');console.log(result);

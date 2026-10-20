@@ -13,9 +13,10 @@ import {stringify as vfm} from '@vivliostyle/vfm';
 import {JSDOM} from '@vivliostyle/jsdom';
 
 const pageCounters=process.argv.includes('--page-counters');
-const profiles=JSON.parse(await readFile(pageCounters?'fixtures/page-counter-profiles.json':'fixtures/profiles.json','utf8')).profiles;
+const headings=process.argv.includes('--headings');
+const profiles=JSON.parse(await readFile(headings?'fixtures/heading-profiles.json':pageCounters?'fixtures/page-counter-profiles.json':'fixtures/profiles.json','utf8')).profiles;
 const allDocs=JSON.parse(await readFile('fixtures/documents.json','utf8')).documents;
-const requested=new Set(process.argv.slice(2).filter(arg=>arg!=='--page-counters'));
+const requested=new Set(process.argv.slice(2).filter(arg=>!['--page-counters','--headings'].includes(arg)));
 const parser=unified().use(remarkParse).use(remarkGfm).use(remarkDirective).use(remarkStringify);
 const escape=s=>s.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
 for(const profile of profiles.filter(p=>!requested.size||requested.has(p.name))) {
@@ -27,6 +28,7 @@ for(const profile of profiles.filter(p=>!requested.size||requested.has(p.name)))
  }
  const counts={main:0,appendix:0};const metadata=[];
  let css=await readFile(profile.pageCounters?'fixtures/page-counters.css':'fixtures/book.css','utf8');
+ if(profile.headingMode)css+='\n'+await readFile('fixtures/heading-overrides.css','utf8');
  if(profile.separator) css=css.replaceAll('"."',`"${profile.separator}"`);
  await writeFile(`${out}/book.css`,css);await copyFile('fixtures/sample.svg',`${out}/sample.svg`);
  for(const doc of docs) {
@@ -56,6 +58,23 @@ for(const profile of profiles.filter(p=>!requested.size||requested.has(p.name)))
   if(profile.pageCounters&&doc.kind!=='front') {
    html+=`<p class="page-state">PAGE_STATE_${doc.file}=</p>`;
   }
+  if(profile.headingMode) {
+   const dom=new JSDOM(html);const document=dom.window.document;
+   for(const heading of document.querySelectorAll(profile.headingMode==='span'?'h1,h2,h3':'h1')) {
+    const original=heading.innerHTML;const text=heading.textContent;
+    if(profile.headingMode==='span') {
+     heading.innerHTML=`<span class="heading-body">${original}</span><span class="heading-accent" aria-hidden="true"></span>`;
+    } else if(profile.headingMode==='div') {
+     const replacement=document.createElement('div');replacement.className='heading-div';replacement.id=heading.id;
+     replacement.innerHTML=original;heading.replaceWith(replacement);
+    } else {
+     const title=profile.headingMode==='image-only'?'':`<span class="reference-title${profile.headingMode==='image-none'?' hidden-none':''}">${original}</span>`;
+     heading.innerHTML=`${title}<img class="heading-image" src="heading-${doc.file}.svg" alt="${escape(text)}">`;
+    }
+   }
+   html=document.body.innerHTML;
+   if(profile.headingMode.startsWith('image'))await copyFile(`fixtures/heading-images/${doc.file}.svg`,`${out}/heading-${doc.file}.svg`);
+  }
   const ordinal=profile.pageCounters?undefined:(doc.kind==='front'?0:++counts[doc.kind]);
   const seed=profile.supplement&&ordinal?` style="counter-reset:chapter ${ordinal-1} section 0 subsection 0 fig 0 tbl 0 listing 0"`:'';
   await writeFile(`${out}/${doc.file}.html`,`<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>${escape(doc.title)}</title><link rel="stylesheet" href="book.css"></head><body class="${doc.kind}"${seed}>${html}</body></html>`);
@@ -63,13 +82,18 @@ for(const profile of profiles.filter(p=>!requested.size||requested.has(p.name)))
  }
  const entry=docs.map(d=>`${d.file}.html`);entry.splice(profile.single?0:1,0,{rel:'contents'});
  const config={title:'採番・参照の検証',language:'ja',entryContext:out,entry,theme:`${out}/book.css`,toc:{title:'目次',sectionDepth:profile.depth},workspaceDir:`${out}/workspace`,output:resolve('results/pdf',`${profile.name}.pdf`),timeout:60000};
- await writeFile(`${out}/config.json`,JSON.stringify(config,null,2)+'\n');
+ let configPath=`${out}/config.json`;
+ await writeFile(configPath,JSON.stringify(config,null,2)+'\n');
+ if(profile.tocText) {
+  configPath=`${out}/config.mjs`;
+  await writeFile(configPath,`import {transformSectionList} from ${JSON.stringify(resolve('scripts/toc-text.mjs'))};\nconst config=${JSON.stringify(config)};\nconfig.toc.transformSectionList=transformSectionList;\nexport default config;\n`);
+ }
  await writeFile(`${out}/metadata.json`,JSON.stringify({profile,documents:metadata},null,2)+'\n');
  const start=Date.now();
- const result=spawnSync('./node_modules/.bin/vivliostyle',['build','-c',`${out}/config.json`],{encoding:'utf8',timeout:90000,maxBuffer:8*1024*1024});
+ const result=spawnSync('./node_modules/.bin/vivliostyle',['build','-c',configPath],{encoding:'utf8',timeout:90000,maxBuffer:8*1024*1024});
  await writeFile(`results/logs/${profile.name}.stdout.log`,result.stdout??'');
  await writeFile(`results/logs/${profile.name}.stderr.log`,result.stderr??'');
- await writeFile(`results/logs/${profile.name}.run.json`,JSON.stringify({command:['vivliostyle','build','-c',`${out}/config.json`],status:result.status,signal:result.signal,error:result.error?.message,elapsedMs:Date.now()-start},null,2)+'\n');
+ await writeFile(`results/logs/${profile.name}.run.json`,JSON.stringify({command:['vivliostyle','build','-c',configPath],status:result.status,signal:result.signal,error:result.error?.message,elapsedMs:Date.now()-start},null,2)+'\n');
  console.log(`${profile.name}: status=${result.status}, ${Date.now()-start} ms`);
  if(result.status!==0){console.error(result.stderr||result.error);process.exitCode=1;break;}
 }

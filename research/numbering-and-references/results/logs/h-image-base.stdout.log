@@ -1,0 +1,13 @@
+INFO Start building
+INFO Launching PDF build environment
+INFO Building pages
+INFO 採番・参照の検証
+INFO alpha.html 導入
+INFO beta.html 応用
+INFO appendix-a.html 補足
+INFO appendix-b.html 資料
+INFO afterword.html おわりに
+INFO Building PDF
+INFO Processing PDF
+SUCCESS Finished building results/pdf/h-image-base.pdf
+📘 Built successfully!

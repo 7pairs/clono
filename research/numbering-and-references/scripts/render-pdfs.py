@@ -10,8 +10,9 @@ from PIL import Image, ImageDraw
 root = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--page-counters', action='store_true')
+parser.add_argument('--headings', action='store_true')
 options = parser.parse_args()
-fixture = 'page-counter-profiles.json' if options.page_counters else 'profiles.json'
+fixture = 'heading-profiles.json' if options.headings else 'page-counter-profiles.json' if options.page_counters else 'profiles.json'
 names = [p['name'] for p in json.loads((root/'fixtures'/fixture).read_text())['profiles']]
 for name in names:
     out = root/'results/generated'/name/'images'

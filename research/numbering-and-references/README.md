@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 
 [手順書0005](../../docs/plans/0005-investigate-numbering-and-references.md)に基づき、旧要件のT03～T05について、既存機能で満たせる範囲とclonoで補う処理を調べる。
 
-- 現在地：手順2Aの実施・検証・独立レビュー・二人の確認は完了。手順3ではページ側の採番方式を使う。手順3・4は未着手。
+- 現在地：手順3までの実施・検証・独立レビュー・再レビュー・二人の確認は完了。手順4は未着手。
 - [参照資料と公開パッケージの識別情報](sources.md)
 - [候補・検証項目・期待値・環境とリスクの確認](results/verification.md)
 - [要件の出発点](../legacy-preprocessor/results/requirements.md#12-要件に結び付けた後続の確認事項)
@@ -43,7 +43,7 @@ Python側には`pypdf`・`pdfplumber`・Pillow、外部コマンドにはPoppler
 
 目次は、生成物から独立した期待項目と順序を使い、番号・本文・ページ番号を行単位で照合する。各行のPDF注釈はファイル名と見出しIDまで確認する。同名IDへの参照と単一原稿の参照も自動判定する。`--check-regressions`を付けると、基準構成から読み取った検査データのコピーに欠落・重複・順序変更・章番号の誤り・同ページ内の誤リンクを与え、5種類とも検出できることを確認する。保存済みのHTML・PDFは変更しない。
 
-手順3の見出し差し替え例はまだ作成・検証していない。
+手順3の見出し差し替えは、下記の専用構成で検証した。
 
 ## 手順2A：ページ側カウンターの検証と再現方法
 
@@ -61,6 +61,24 @@ python3 scripts/render-pdfs.py --page-counters
 入力は`fixtures/page-counter-profiles.json`と`fixtures/page-counters.css`で、原稿は手順2と共通である。`build.mjs --page-counters p-base`のように構成を絞ることもできる。原稿末尾には、そのページ自身の章カウンターを確認する検査表示を追加する。目次・リンクの検査に加え、生成HTML・CSSに原稿ごとの章開始値がないこと、章先頭より後のページでも章の値を維持することを自動判定する。
 
 集計は[step2a-observations.json](results/step2a-observations.json)、環境と既存PDFのハッシュ確認は[step2a-environment.json](results/step2a-environment.json)、最終版の実クリック確認は[step2a-viewing-observations.json](results/step2a-viewing-observations.json)に保存した。PDF・中間生成物は従来と同じ保存先のGit管理外に置く。結果の内容確認と独立レビューを終え、手順3ではページ側の採番方式を使うことに合意した。
+
+## 手順3：見出し差し替えの検証と再現方法
+
+[検証結果の第11節](results/verification.md#11-手順3見出しの差し替えとの組み合わせ)に成立条件と不足を記載した。文字を残すH1～H3の装飾、本文文字を保持してH1を画像で見せる構成、文字を消す方法・目次・div置換の対照を含む16構成を検証した。標準出力の対照は手順2Aの5構成を使用する。
+
+手順2・2Aの生成物を用意した後、このディレクトリで次を実行する。
+
+```sh
+node scripts/check-environment.mjs --headings
+node scripts/build.mjs --headings
+node scripts/inspect-headings.mjs
+python3 scripts/verify-pdfs.py --headings --check-regressions
+python3 scripts/render-pdfs.py --headings
+```
+
+`fixtures/heading-profiles.json`が構成一覧、`heading-overrides.css`が差し替え用CSS、`heading-images/`が自作SVGである。元原稿は共通で、VFM出力後のHTMLを調査用に加工する。画像構成の文字目次には、`scripts/toc-text.mjs`のCLIフックを使う。フック付きの構成だけは、関数を渡すために生成した`config.mjs`をCLIへ指定する。関数を使わない構成は従来のJSON設定を維持する。
+
+集計・HTML構造・環境・閲覧結果をそれぞれ`results/step3-observations.json`・`step3-structure.json`・`step3-environment.json`・`step3-viewing-observations.json`に保存した。成立する10構成と不足を調べる6構成を区別し、対照で参照が欠けることも検査する。文字列が一致しても目次に画像が残る場合があるため、HTML内の画像・隠し文字用spanも確認する。画像や実クリックの目視確認は、コマンドを実行するだけで再現したことにはならない。
 
 ## 資料の追跡と表示
 
