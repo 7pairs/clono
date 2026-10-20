@@ -1,0 +1,19 @@
+Rejected five deliberately corrupted TOC observations
+h-span-base refs 200/200, captions 24/24, toc 14/14
+h-span-body-swapped refs 200/200, captions 24/24, toc 14/14
+h-span-appendix-swapped refs 200/200, captions 24/24, toc 14/14
+h-span-depth3 refs 200/200, captions 24/24, toc 26/26
+h-span-hyphen refs 200/200, captions 24/24, toc 14/14
+Rejected five deliberately corrupted TOC observations
+h-image-base refs 200/200, captions 24/24, toc 14/14
+h-image-body-swapped refs 200/200, captions 24/24, toc 14/14
+h-image-appendix-swapped refs 200/200, captions 24/24, toc 14/14
+h-image-depth3 refs 200/200, captions 24/24, toc 26/26
+h-image-hyphen refs 200/200, captions 24/24, toc 14/14
+h-image-default refs 200/200, captions 24/24, toc 14/14
+h-image-none refs 160/200, captions 24/24, toc 14/14
+h-image-none-default refs 160/200, captions 24/24, toc 14/14
+h-div refs 184/200, captions 24/24, toc 8/14
+h-image-only refs 160/200, captions 24/24, toc 14/14
+h-image-only-default refs 160/200, captions 24/24, toc 14/14
+Independent checks passed for 10 heading configurations and 6 controls

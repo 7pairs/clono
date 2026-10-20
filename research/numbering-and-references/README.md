@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 [手順書0005](../../docs/plans/0005-investigate-numbering-and-references.md)に基づき、旧要件のT03～T05について、既存機能で満たせる範囲とclonoで補う処理を調べる。
 
 - 現在地：全手順の実施・内部確認完了。外部レビューと作業全体の完了状況は、対応するPRで確認する。
-- 外部レビューの3指摘への修正・検証・独立レビュー・二人の確認は完了。外部レビューによる修正確認は未実施。[対応記録](results/verification.md#13-外部レビューへの対応)を参照する。
+- 外部レビューの初回3指摘は修正確認済み。追加のPython依存更新と基準lockfileの診断改善も、修正・検証・独立レビュー・二人の確認は完了した。追加2点の外部レビューによる修正確認は未実施。[初回の対応記録](results/verification.md#13-外部レビューへの対応)と[追加対応](results/verification.md#14-python検査依存の更新と基準lockfileの診断改善)を参照する。
 - [責務分担・成立条件・未確認事項・全体の見直し](results/verification.md#12-手順4責務分担と全体の見直し)
 - [参照資料と公開パッケージの識別情報](sources.md)
 - [候補・検証項目・期待値・環境とリスクの確認](results/verification.md)
@@ -30,7 +30,7 @@ Markdown変換、CSSの実行、組版、PDF確認、依存の導入・更新は
 
 ### PythonとPopplerの準備
 
-実測に使った版はPython 3.12.14、pypdf 6.10.0、pdfplumber 0.11.9、Pillow 12.3.0、Poppler 25.09.1である。Pythonの直接依存は[requirements.txt](requirements.txt)へ固定した。Python 3.12を用意した環境で、このディレクトリから次を実行する。
+初回の実測版はPython 3.12.14、pypdf 6.10.0、pdfplumber 0.11.9、Pillow 12.3.0、Poppler 25.09.1であり、当時の記録は保持している。脆弱性の追加指摘を受け、現在の[requirements.txt](requirements.txt)はpypdf 6.21.1・pdfplumber 0.11.9・Pillow 13.0.0を指定する。同じPython・Popplerを使った再検証では、全29構成の集計・詳細結果と、310ページの画像・29枚の一覧画像が更新前と一致した。[更新後の記録](results/python-security-update.json)を参照する。Python 3.12を用意した環境で、このディレクトリから次を実行する。
 
 ```sh
 python3.12 -m venv .venv
@@ -48,7 +48,7 @@ pdftotext -v
 pdftoppm -v
 ```
 
-[Homebrewの導入案内](https://formulae.brew.sh/formula/poppler)は現行版を導入するため、実測版25.09.1の再導入を保証する手順ではない。別の版や環境では、版を記録して検査と表示確認をやり直す。Python・Popplerとも、別環境での導入と同一結果は未検証である。
+[Homebrewの導入案内](https://formulae.brew.sh/formula/poppler)は現行版を導入するため、実測版25.09.1の再導入を保証する手順ではない。別の版や環境では、版を記録して検査と表示確認をやり直す。更新後のPython依存は、同じmacOS・Pythonの新しい仮想環境へ導入して検証した。他OS・別のPythonやPopplerでの同一結果は未検証である。
 
 ### 生成と検査
 
@@ -61,7 +61,7 @@ python3 scripts/verify-pdfs.py --check-regressions
 python3 scripts/render-pdfs.py
 ```
 
-今回の調査は上記の版が導入済みのCodex同梱Pythonで実行し、`python3`をその実行ファイルへ読み替えた。仮想環境の導入例とは区別する。Node.js側の依存へPythonのライブラリは追加していない。
+初回の調査は旧版が導入済みのCodex同梱Pythonで実行した。更新後は同じPythonから作った仮想環境へrequirements.txtを導入し、検査・画像化を再実行した。共通の同梱Python環境やNode.js側の依存は変更していない。
 
 `prepare.mjs`は固定した検証原稿と参照一覧を再作成する。`build.mjs b-base`のように構成名を指定すれば、その構成だけを再生成できる。PDFは`results/pdf/`、中間Markdown・HTML・CLI設定・目次・個別の照合結果・ページ画像は`results/generated/`へ保存し、Git管理から除外する。
 

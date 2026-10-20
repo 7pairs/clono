@@ -126,3 +126,17 @@ CLI 11.3.3の`getStructuredSectionFromHtml`は、CSSの表示状態にかかわ�
 [タグ付きの目次作成資料](https://raw.githubusercontent.com/vivliostyle/vivliostyle-cli/v11.3.3/docs/toc-page.md)も参照した。GitHubの表示ページは取得できなかったが、同じタグのraw資料は取得できた。フックの引数と返す構造の根拠にはS07の配布コードを使った。
 
 Viewer内蔵版の`getTargetTextVal`・`getTargetPageText`は組版時の対象要素から文字を取り出す。`display: none`で文字を消す場合と、ボックスを残してクリップする場合の差は、静的な読解だけで決めず、[第11節](results/verification.md#11-手順3見出しの差し替えとの組み合わせ)に実測した結果を記録した。画像のaltやSVGの表示文字が、見出し本文の保持を代替するとは判断しない。
+
+## 7. Python検査依存の更新で確認した資料
+
+確認日：2026-10-21（日本時間）。PR #10の追加指摘を受け、直接依存の更新先を確認した。
+
+| 資料 | 確認内容 |
+|---|---|
+| [pypdfの公式アドバイザリ](https://github.com/py-pdf/pypdf/security/advisories/GHSA-5jq2-8x83-x246) | 長い間接オブジェクトヘッダーを持つ不正なPDFで処理が長時間化する問題。6.18.0未満が影響範囲で、6.18.0で修正された |
+| [pypdfの変更履歴](https://pypdf.readthedocs.io/en/stable/meta/CHANGELOG.html) | 6.18.0以降にもストリーム解析や循環構造などのセキュリティ修正があるため、更新先を6.21.1とした |
+| [Pillowの公式13.0.0リリースノート](https://pillow.readthedocs.io/en/stable/releasenotes/13.0.0.html) | 指摘されたGHSA-8g5g-8vmr-9782を含む修正を確認し、13.0.0へ更新した |
+| [Pillowのアドバイザリ](https://github.com/advisories/GHSA-8g5g-8vmr-9782) | 12.3.0以下が影響範囲、13.0.0が修正版。対象はJPEGデコードであり、今回のPoppler生成PNGの処理と区別する |
+| [pypdfのPyPIメタデータ](https://pypi.org/pypi/pypdf/6.21.1/json)・[PillowのPyPIメタデータ](https://pypi.org/pypi/Pillow/13.0.0/json) | 配布版の存在とPython 3.12への対応を確認した。取得時点で両版の`vulnerabilities`配列は空だったが、全依存の安全性を保証する結果とは扱わない |
+
+旧版と更新版のメタデータのURL・取得内容のハッシュ、実際の導入版、再検証結果は[更新後の記録](results/python-security-update.json)へ保存した。旧版のPyPI登録情報は、別IDや別名を含むため件数を固有の脆弱性数と解釈せず、公式の修正情報と併せて確認した。
