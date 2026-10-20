@@ -12,7 +12,9 @@ const definitions={};
 const baselineDefinitions={};
 const jsdomName='@vivliostyle/jsdom';
 const baselineLock=JSON.parse(await readFile('../implementation-environment/package-lock.json','utf8'));
-const jsdomVersion=baselineLock.packages[`node_modules/${jsdomName}`].version;
+const baselineJsdom=baselineLock.packages?.[`node_modules/${jsdomName}`];
+assert.ok(baselineJsdom?.version,'Baseline package-lock.json must resolve @vivliostyle/jsdom with a version');
+const jsdomVersion=baselineJsdom.version;
 for(const file of ['package.json','package-lock.json']) {
  const here=await readFile(file);const previous=await readFile(`../implementation-environment/${file}`);
  const current=JSON.parse(here);const baseline=JSON.parse(previous);
