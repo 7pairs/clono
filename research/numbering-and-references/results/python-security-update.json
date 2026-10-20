@@ -1,0 +1,809 @@
+{
+  "copyright": "Copyright 2026 HASEBA Junya (7pairs)",
+  "license": "Apache-2.0",
+  "date": "2026-10-21",
+  "python": "3.12.14",
+  "pythonPackages": {
+    "pypdfium2": "5.14.0",
+    "pypdf": "6.21.1",
+    "cryptography": "50.0.2",
+    "pillow": "13.0.0",
+    "cffi": "2.1.1",
+    "pycparser": "3.11",
+    "pdfminer.six": "20251230",
+    "pdfplumber": "0.11.9",
+    "charset-normalizer": "3.5.2"
+  },
+  "directPythonPackages": {
+    "pypdf": "6.21.1",
+    "pdfplumber": "0.11.9",
+    "Pillow": "13.0.0"
+  },
+  "requirementsSha256": "f6b92502bf3ef8764fff84b34ec3dcbc84a810057df30994f120575a1caf6513",
+  "poppler": "25.09.1",
+  "pipCheckPassed": true,
+  "metadataSnapshots": [
+    {
+      "package": "pypdf",
+      "version": "6.10.0",
+      "url": "https://pypi.org/pypi/pypdf/6.10.0/json",
+      "sha256": "5bf49ed833967a2c3e2eb85c04c2fe97c1690f0815c7623da9b0a6d9060769ec",
+      "requiresPython": ">=3.9",
+      "reportedAdvisories": [
+        {
+          "id": "GHSA-jj6c-8h6c-hppx",
+          "fixedIn": [
+            "6.10.1"
+          ]
+        },
+        {
+          "id": "GHSA-4pxv-j86v-mhcw",
+          "fixedIn": [
+            "6.10.2"
+          ]
+        },
+        {
+          "id": "GHSA-7gw9-cf7v-778f",
+          "fixedIn": [
+            "6.10.2"
+          ]
+        },
+        {
+          "id": "GHSA-x284-j5p8-9c5p",
+          "fixedIn": [
+            "6.10.2"
+          ]
+        },
+        {
+          "id": "GHSA-248m-82v9-q6g6",
+          "fixedIn": [
+            "6.12.0"
+          ]
+        },
+        {
+          "id": "GHSA-cj93-chg6-vgv8",
+          "fixedIn": [
+            "6.12.0"
+          ]
+        },
+        {
+          "id": "GHSA-wjqc-6w8f-h24c",
+          "fixedIn": [
+            "6.12.1"
+          ]
+        },
+        {
+          "id": "GHSA-j543-4vmf-qm7v",
+          "fixedIn": [
+            "6.12.2"
+          ]
+        },
+        {
+          "id": "GHSA-5hgr-hg42-57jg",
+          "fixedIn": [
+            "6.12.2"
+          ]
+        },
+        {
+          "id": "GHSA-m2v9-299j-rv96",
+          "fixedIn": [
+            "6.13.0"
+          ]
+        },
+        {
+          "id": "GHSA-52x6-gq3r-vpf4",
+          "fixedIn": [
+            "6.13.0"
+          ]
+        },
+        {
+          "id": "GHSA-jm82-fx9c-mx94",
+          "fixedIn": [
+            "6.13.3"
+          ]
+        },
+        {
+          "id": "GHSA-g9xf-7f8q-9mcj",
+          "fixedIn": [
+            "6.13.1"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-3022",
+          "fixedIn": [
+            "6.13.0"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-3020",
+          "fixedIn": [
+            "6.12.2"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-3018",
+          "fixedIn": [
+            "6.13.1"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-3021",
+          "fixedIn": [
+            "6.10.1"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-3011",
+          "fixedIn": [
+            "6.10.2"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-3007",
+          "fixedIn": [
+            "6.10.2"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-3004",
+          "fixedIn": [
+            "6.12.0"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-3026",
+          "fixedIn": [
+            "6.10.2"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-3016",
+          "fixedIn": [
+            "6.12.0"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-3010",
+          "fixedIn": [
+            "6.12.2"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-3025",
+          "fixedIn": [
+            "6.12.1"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-3009",
+          "fixedIn": [
+            "6.13.0"
+          ]
+        },
+        {
+          "id": "GHSA-5qjq-93h5-hrgp",
+          "fixedIn": [
+            "6.14.0"
+          ]
+        },
+        {
+          "id": "GHSA-55h5-xmcq-c37v",
+          "fixedIn": [
+            "6.14.0"
+          ]
+        },
+        {
+          "id": "GHSA-g867-7843-wf8q",
+          "fixedIn": [
+            "6.14.2"
+          ]
+        },
+        {
+          "id": "GHSA-5xf7-4p34-54qr",
+          "fixedIn": [
+            "6.14.1"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-3613",
+          "fixedIn": [
+            "6.14.2"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-3610",
+          "fixedIn": [
+            "6.14.0"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-3612",
+          "fixedIn": [
+            "6.14.1"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-3611",
+          "fixedIn": [
+            "6.14.0"
+          ]
+        },
+        {
+          "id": "GHSA-fwg2-594c-jp42",
+          "fixedIn": [
+            "6.15.0"
+          ]
+        },
+        {
+          "id": "GHSA-fp3f-mc75-235c",
+          "fixedIn": [
+            "6.15.0"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-3655",
+          "fixedIn": [
+            "6.15.0"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-3656",
+          "fixedIn": [
+            "6.15.0"
+          ]
+        },
+        {
+          "id": "GHSA-qv6h-rv94-w285",
+          "fixedIn": [
+            "6.17.0"
+          ]
+        },
+        {
+          "id": "GHSA-w23x-9jrw-r45c",
+          "fixedIn": [
+            "6.19.0"
+          ]
+        },
+        {
+          "id": "GHSA-fp3h-c4fm-7vvf",
+          "fixedIn": [
+            "6.18.1"
+          ]
+        },
+        {
+          "id": "GHSA-5jq2-8x83-x246",
+          "fixedIn": [
+            "6.18.0"
+          ]
+        },
+        {
+          "id": "GHSA-jp53-mhqp-8xcg",
+          "fixedIn": [
+            "6.16.0"
+          ]
+        },
+        {
+          "id": "GHSA-23w6-3w8w-8484",
+          "fixedIn": [
+            "6.16.1"
+          ]
+        },
+        {
+          "id": "GHSA-763m-79hh-57f2",
+          "fixedIn": [
+            "6.16.1"
+          ]
+        },
+        {
+          "id": "GHSA-php9-fj8v-98fj",
+          "fixedIn": [
+            "6.19.0"
+          ]
+        },
+        {
+          "id": "GHSA-g9cg-prrw-2r8q",
+          "fixedIn": [
+            "6.18.1"
+          ]
+        },
+        {
+          "id": "GHSA-fc8x-2rww-xw9m",
+          "fixedIn": [
+            "6.15.0"
+          ]
+        },
+        {
+          "id": "GHSA-jw7q-gvrg-4vj3",
+          "fixedIn": [
+            "6.18.1"
+          ]
+        },
+        {
+          "id": "GHSA-v247-6f48-mgcj",
+          "fixedIn": [
+            "6.19.0"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-3910",
+          "fixedIn": [
+            "6.16.1"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-3912",
+          "fixedIn": [
+            "6.15.0"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-3911",
+          "fixedIn": [
+            "6.16.1"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-3913",
+          "fixedIn": [
+            "6.16.0"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-4160",
+          "fixedIn": [
+            "6.19.0"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-4153",
+          "fixedIn": [
+            "6.18.0"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-4154",
+          "fixedIn": [
+            "6.18.1"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-4159",
+          "fixedIn": [
+            "6.19.0"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-4156",
+          "fixedIn": [
+            "6.18.1"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-4155",
+          "fixedIn": [
+            "6.18.1"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-4158",
+          "fixedIn": [
+            "6.17.0"
+          ]
+        },
+        {
+          "id": "PYSEC-2026-4157",
+          "fixedIn": [
+            "6.19.0"
+          ]
+        }
+      ]
+    },
+    {
+      "package": "pypdf",
+      "version": "6.21.1",
+      "url": "https://pypi.org/pypi/pypdf/6.21.1/json",
+      "sha256": "681f1f79c29a12f41944563a482a25ed28cf44a89f607125c87551022babe5bb",
+      "requiresPython": ">=3.9",
+      "reportedAdvisories": []
+    },
+    {
+      "package": "Pillow",
+      "version": "12.3.0",
+      "url": "https://pypi.org/pypi/Pillow/12.3.0/json",
+      "sha256": "02756d039a1ac4f3400f457f72d711f27b0c3dc739d04cc3a5a5f2dcf85df5e2",
+      "requiresPython": ">=3.10",
+      "reportedAdvisories": [
+        {
+          "id": "GHSA-p4wg-p73j-c528",
+          "fixedIn": [
+            "13.0.0"
+          ]
+        },
+        {
+          "id": "GHSA-65qm-jvmh-6pqg",
+          "fixedIn": [
+            "13.0.0"
+          ]
+        },
+        {
+          "id": "GHSA-58r4-6rv3-gfh8",
+          "fixedIn": [
+            "13.0.0"
+          ]
+        },
+        {
+          "id": "GHSA-pchr-8j38-3x4p",
+          "fixedIn": [
+            "13.0.0"
+          ]
+        },
+        {
+          "id": "GHSA-q45j-58j2-45rg",
+          "fixedIn": [
+            "13.0.0"
+          ]
+        },
+        {
+          "id": "GHSA-462x-pgg6-55fp",
+          "fixedIn": [
+            "13.0.0"
+          ]
+        },
+        {
+          "id": "GHSA-c6hw-5grf-ff96",
+          "fixedIn": [
+            "13.0.0"
+          ]
+        },
+        {
+          "id": "GHSA-vx6w-vv9f-6gvg",
+          "fixedIn": [
+            "13.0.0"
+          ]
+        }
+      ]
+    },
+    {
+      "package": "Pillow",
+      "version": "13.0.0",
+      "url": "https://pypi.org/pypi/Pillow/13.0.0/json",
+      "sha256": "183d4151cbc909acf39d4d5d48469d6bc66d5516e7f506854241839d0611b69e",
+      "requiresPython": ">=3.11",
+      "reportedAdvisories": []
+    }
+  ],
+  "securityScope": "Targeted checks of pypdf and Pillow advisories; not a full dependency security audit",
+  "profiles": [
+    {
+      "name": "a-default",
+      "pages": 11,
+      "pdfSha256": "a8cce7dc572fc3eb496255340951ae069bbda970e12fd3dc6a7be64cf31f00c0",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "b-base",
+      "pages": 11,
+      "pdfSha256": "6cb3215d1fd44494cd2fd1f05be1a68cb397e93720b438c6ad895ffc447df1d4",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "b-body-swapped",
+      "pages": 11,
+      "pdfSha256": "db956b133ee295f7d1910967c0817fcdf3f28bc5394ace7a597c7cbe882f8400",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "b-appendix-swapped",
+      "pages": 11,
+      "pdfSha256": "25425bb4a20ada10338927203e04dfd1463f5d1d6c189df6f9860c152fa76ff7",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "b-depth3",
+      "pages": 11,
+      "pdfSha256": "9eb0459c89cc0fdd78e20b28ae419a27d1c1829b9b090f37449520ed15ad2e6b",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "b-hyphen",
+      "pages": 11,
+      "pdfSha256": "7a6ed8c3003004505a7c608d0b501daa10acb12fc591e6fdc446c9a348b35e66",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "b-original-id",
+      "pages": 11,
+      "pdfSha256": "12a610d353cf05686e302e3e3fe8549edcfe147b9ee0e1abde5320ae87df9ea6",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "a-single",
+      "pages": 2,
+      "pdfSha256": "cd6c212c67475675f3bcd30245473a8a07291a7b76e2fd5eb467a585171962e3",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "p-base",
+      "pages": 11,
+      "pdfSha256": "cd76bc98aae28d3d3627176cd8cf34fa8bcb47cf83dd75ff8dcc2091c97f931a",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "p-body-swapped",
+      "pages": 11,
+      "pdfSha256": "0bfadadda84640103a4eb371c63f29b530cebbca1f2c1ad4b1b9cda750944b66",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "p-appendix-swapped",
+      "pages": 11,
+      "pdfSha256": "10cb807a09ed5355e408fefdc37a891b22c0cf15f0cc3087bd75796438bda18d",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "p-depth3",
+      "pages": 11,
+      "pdfSha256": "f655702f4b6e5096b4709f62706fd7f0ae720ded58cda6236e5a62d926962e94",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "p-hyphen",
+      "pages": 11,
+      "pdfSha256": "a40943052ab0de5d2c2bd0839df0d7828fb5e9cca9b793543fa757bca712512e",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "h-span-base",
+      "pages": 11,
+      "pdfSha256": "b404c03372bb7d1ef853d8ee4c2a13b0077b2f8df47c9acc43070fe5f4d32a13",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "h-span-body-swapped",
+      "pages": 11,
+      "pdfSha256": "f4fc2b4a658111dca7016e3e4666d7438cc8531f97cc8dc4d0c5dca9863e2c44",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "h-span-appendix-swapped",
+      "pages": 11,
+      "pdfSha256": "6b8f023d7d226470e6a8128e3fab6d860a7e485e7c2594d5dc9a4a86b05d632a",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "h-span-depth3",
+      "pages": 11,
+      "pdfSha256": "898f724a569b374eb2d5facab50183a4bedda6d5ad51cc92a59d932ec886412b",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "h-span-hyphen",
+      "pages": 11,
+      "pdfSha256": "d0e26c5dcbfc3075ba08cd1daa60246c6919fc17ce363a1ff448a50ac290a6f4",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "h-image-base",
+      "pages": 11,
+      "pdfSha256": "48583f6eb834af5316e25e5bb0f9452f6c68331e3a607fd3993e8a5502797469",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "h-image-body-swapped",
+      "pages": 11,
+      "pdfSha256": "a2487b5017c3c26e0cf7d15792114339724809d2d6a306074318b31fcc6e666f",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "h-image-appendix-swapped",
+      "pages": 11,
+      "pdfSha256": "b82228c111a022d2bb9e8a0f03afb800039b2610c7f5e6e1d26323362a1a7a0e",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "h-image-depth3",
+      "pages": 11,
+      "pdfSha256": "670afd5ba41b0a202242b55ababfaa9d21989aac86cee0c915a708c90a153b2c",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "h-image-hyphen",
+      "pages": 11,
+      "pdfSha256": "2909624b51c1a43c72d8cf29fe53237e01e470deba5f40b9307bb79a282d7805",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "h-image-default",
+      "pages": 11,
+      "pdfSha256": "23af1077e38dde62da2f53470df78a65eeea968035a947bb783f4f76b91762d5",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "h-image-none",
+      "pages": 11,
+      "pdfSha256": "0b90be1dfd42a82252c0fea7ee3ebe89ea4cfea5322d85abc55c339a9e9d522c",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "h-image-none-default",
+      "pages": 11,
+      "pdfSha256": "f662526bdfe6fbac91ea3d13c13a92822daa5d6c5537abbd0ac46ccb2c98b8d0",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "h-div",
+      "pages": 11,
+      "pdfSha256": "718b8cc05c2d7a0a545706019d9ac069c113daf44a7fba4aaa54aa57dc4ee427",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "h-image-only",
+      "pages": 11,
+      "pdfSha256": "50441d355e7b41224369c41ad4fadc2d776ca32ead49026e468536f184a5c322",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    },
+    {
+      "name": "h-image-only-default",
+      "pages": 11,
+      "pdfSha256": "a1a278b0175a266391914d949b7ab2f35f8b6da1f750a14c07a728d0987a9709",
+      "summaryAndDetailByteIdentical": true,
+      "pageImagesPixelIdentical": true,
+      "contactSheetPixelIdentical": true
+    }
+  ],
+  "verifiedProfiles": 29,
+  "renderedPages": 310,
+  "contactSheets": 29,
+  "pixelDifferences": [],
+  "visualSpotChecks": [
+    "h-span-base",
+    "h-image-base"
+  ],
+  "tocCorruptionsPerBaseline": 5,
+  "tocCorruptionBaselines": 4,
+  "historicalRecordsSha256": {
+    "step3-viewing-observations.json": "3b8cc1a83d7df501da05949d746d9b0db0ea89b9b0b7ce21a4b48d4372063713",
+    "step2a-environment.json": "f6d0c4b55c96fe85e1222d726e6f2b1dd97b85ea483c62ed9fbd49d6accb230e",
+    "step3-environment.json": "b6d769e64677b31150bed00437b77be865af6dfec0c49c96af74ecb9bf30da6e",
+    "environment-current.json": "4eb22dd5b3aa1616c51c7120c55b8d1c7a32dd88bae6ae2e934ba42795d2f24e",
+    "step2a-observations.json": "e8dd56ae0a9f05b72f689c78b4e000b38b6569d15e0fba9a51cafc9ce4dafbe2",
+    "step2a-environment-current.json": "81d46c676fe93e0fcfbefb5bfe2a71177d55056177b3a0d7ad3711352951916a",
+    "review-corrections.json": "e7c65c7ae08c5076010f7d5754c5d3b2139ecd3a42b871130fc2f51c85719dc3",
+    "step2-observations.json": "a727e48cc7a43c0052aca30ccc77b017f60d65befd9276c5d792d4961c22331b",
+    "step2a-viewing-observations.json": "66a8144174b3d13f7a0b690dcd5b5d62a9f48dabd5ec85c98b68f5fa8f8ab493",
+    "step3-structure.json": "d41455bb6a515581e98f375c9ad21d73159942e4e6a1417cdbcb4317ad6aac0e",
+    "step3-observations.json": "f4772659a7ed1156bc18ad58e43f3b43e971fd965d46f8ab2a13263136508cf7",
+    "environment.json": "2a681dcc872e8a046686ec0b890220ed31707b486ff301b3366f315162ed6056",
+    "step3-environment-current.json": "86ced910041c99af21afede68fcee51d1d00d010ca89d634cadddd7586279f9c",
+    "viewing-observations.json": "05d872db4a9ded14cc117e6c61d463ec9ed6159d175ac18588dc343305a3f266"
+  },
+  "diagnosticChecks": {
+    "scriptSha256": "ed1b7c7c019cfe5ec832ef6b0e1b73da99a8ba02b9eb7eb4c61f1bfb0dc03d7e",
+    "missingBaselineCases": [
+      "missing JSDOM",
+      "missing packages",
+      "missing version"
+    ],
+    "expectedMessage": "Baseline package-lock.json must resolve @vivliostyle/jsdom with a version",
+    "failureBeforeOutputWrite": true,
+    "normalOutputByteIdenticalModes": [
+      "default",
+      "page-counters",
+      "headings"
+    ]
+  },
+  "logs": [
+    {
+      "path": "logs/python-security-default-render.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/python-security-default-render.stdout.log",
+      "sha256": "8f2eefbea1ccbcecb51d6ed38840fbb759ece5e32f49a53fb27c320ae5f2b13a"
+    },
+    {
+      "path": "logs/python-security-default-verify.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/python-security-default-verify.stdout.log",
+      "sha256": "f266c3af514f605f1f93837d854014f165a1e41ae6195e6df10d52bcc4f4b1ee"
+    },
+    {
+      "path": "logs/python-security-headings-render.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/python-security-headings-render.stdout.log",
+      "sha256": "7059c7fe38f996b1b34bb098336aee44e433188f2831aecf087e0cd520422e6f"
+    },
+    {
+      "path": "logs/python-security-headings-verify.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/python-security-headings-verify.stdout.log",
+      "sha256": "21135a42245a19e4662507f719feddb4fc06d4c64529939a5ddcb9682815aadf"
+    },
+    {
+      "path": "logs/python-security-page-counters-render.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/python-security-page-counters-render.stdout.log",
+      "sha256": "a242a4ef2bfa614ffa76b53fc7c3da22dd1b908274b0c82c93311dbf3996f6ce"
+    },
+    {
+      "path": "logs/python-security-page-counters-verify.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/python-security-page-counters-verify.stdout.log",
+      "sha256": "33bd027fdf38de091f1a9a14815baaa7498bc333e91db56bb5402bb48d020c13"
+    }
+  ],
+  "independentReview": "passed",
+  "reviewRecordUpdated": "2026-10-21",
+  "independentReviewFindings": {
+    "required": 0,
+    "optional": 0
+  },
+  "userConfirmation": "complete",
+  "externalReviewConfirmation": "pending"
+}

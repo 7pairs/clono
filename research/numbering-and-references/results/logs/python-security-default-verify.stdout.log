@@ -1,0 +1,10 @@
+a-default refs 100/200, captions 8/24, toc 14/14
+Rejected five deliberately corrupted TOC observations
+b-base refs 200/200, captions 24/24, toc 14/14
+b-body-swapped refs 200/200, captions 24/24, toc 14/14
+b-appendix-swapped refs 200/200, captions 24/24, toc 14/14
+b-depth3 refs 200/200, captions 24/24, toc 26/26
+b-hyphen refs 200/200, captions 24/24, toc 14/14
+b-original-id refs 184/200, captions 24/24, toc 14/14
+a-single refs 0/0, captions 0/0, toc 3/3
+Independent text and destination checks passed for 8 profiles

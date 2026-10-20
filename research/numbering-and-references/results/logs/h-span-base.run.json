@@ -1,0 +1,11 @@
+{
+  "command": [
+    "vivliostyle",
+    "build",
+    "-c",
+    "/Users/jun-haseba/GitHub/clono/research/numbering-and-references/results/generated/h-span-base/config.json"
+  ],
+  "status": 0,
+  "signal": null,
+  "elapsedMs": 7327
+}

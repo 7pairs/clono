@@ -1,0 +1,37 @@
+{
+  "copyright": "Copyright 2026 HASEBA Junya (7pairs)",
+  "license": "Apache-2.0",
+  "documents": [
+    {
+      "file": "preface",
+      "kind": "front",
+      "title": "はじめに"
+    },
+    {
+      "file": "alpha",
+      "kind": "main",
+      "title": "導入",
+      "decorated": "**導入** `API`"
+    },
+    {
+      "file": "beta",
+      "kind": "main",
+      "title": "応用"
+    },
+    {
+      "file": "appendix-a",
+      "kind": "appendix",
+      "title": "補足"
+    },
+    {
+      "file": "appendix-b",
+      "kind": "appendix",
+      "title": "資料"
+    },
+    {
+      "file": "afterword",
+      "kind": "front",
+      "title": "おわりに"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "command": [
+    "vivliostyle",
+    "build",
+    "-c",
+    "/Users/jun-haseba/GitHub/clono/research/numbering-and-references/results/generated/b-original-id/config.json"
+  ],
+  "status": 0,
+  "signal": null,
+  "elapsedMs": 2388
+}

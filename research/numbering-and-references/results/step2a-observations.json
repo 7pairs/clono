@@ -1,0 +1,461 @@
+{
+  "copyright": "Copyright 2026 HASEBA Junya (7pairs)",
+  "license": "Apache-2.0",
+  "profiles": [
+    {
+      "name": "p-base",
+      "pages": 11,
+      "creator": "Vivliostyle (Vivliostyle.js 2.45.1; Chrome/153.0.8010.36)",
+      "pdfSha256": "cd76bc98aae28d3d3627176cd8cf34fa8bcb47cf83dd75ff8dcc2091c97f931a",
+      "references": 200,
+      "matchedReferences": 200,
+      "mismatches": [],
+      "captionChecks": 24,
+      "matchedCaptions": 24,
+      "tocItems": 14,
+      "tocPageMatches": 14,
+      "tocDisplayMatches": 14,
+      "tocExpectedItems": 14,
+      "tocStructureMatches": true,
+      "tocRowCountMatches": true,
+      "tocChecksPassed": true,
+      "tocPdfLinks": 14,
+      "referenceDestinations": 200,
+      "referencePdfLinks": 200,
+      "annotationCount": 927,
+      "unresolvedAnnotations": 0,
+      "sharedIdReferences": {
+        "alpha": "2.2.2共通",
+        "beta": "1.2.2共通",
+        "appendix-a": "B.2.2共通",
+        "appendix-b": "A.2.2共通"
+      },
+      "missingTargetObserved": "??.??",
+      "sharedIdChecks": 4,
+      "matchedSharedIdReferences": 4,
+      "sharedIdPdfLinks": 4,
+      "singleReferencePdfLinks": 0,
+      "noPerDocumentChapterSeeds": true,
+      "referencePagesByDocument": {
+        "alpha": [
+          3,
+          4
+        ],
+        "beta": [
+          5,
+          6
+        ],
+        "appendix-a": [
+          7,
+          8
+        ],
+        "appendix-b": [
+          9,
+          10
+        ]
+      },
+      "laterPageCounterChecks": [
+        {
+          "file": "alpha",
+          "expected": "1",
+          "observed": "1",
+          "page": 4,
+          "firstPage": 3,
+          "matches": true
+        },
+        {
+          "file": "beta",
+          "expected": "2",
+          "observed": "2",
+          "page": 6,
+          "firstPage": 5,
+          "matches": true
+        },
+        {
+          "file": "appendix-a",
+          "expected": "A",
+          "observed": "A",
+          "page": 8,
+          "firstPage": 7,
+          "matches": true
+        },
+        {
+          "file": "appendix-b",
+          "expected": "B",
+          "observed": "B",
+          "page": 10,
+          "firstPage": 9,
+          "matches": true
+        }
+      ],
+      "singleHeadingChecks": null,
+      "contentMarkers": 16,
+      "preservedContentMarkers": 16,
+      "literalCodeReferenceCount": 8
+    },
+    {
+      "name": "p-body-swapped",
+      "pages": 11,
+      "creator": "Vivliostyle (Vivliostyle.js 2.45.1; Chrome/153.0.8010.36)",
+      "pdfSha256": "0bfadadda84640103a4eb371c63f29b530cebbca1f2c1ad4b1b9cda750944b66",
+      "references": 200,
+      "matchedReferences": 200,
+      "mismatches": [],
+      "captionChecks": 24,
+      "matchedCaptions": 24,
+      "tocItems": 14,
+      "tocPageMatches": 14,
+      "tocDisplayMatches": 14,
+      "tocExpectedItems": 14,
+      "tocStructureMatches": true,
+      "tocRowCountMatches": true,
+      "tocChecksPassed": true,
+      "tocPdfLinks": 14,
+      "referenceDestinations": 200,
+      "referencePdfLinks": 200,
+      "annotationCount": 927,
+      "unresolvedAnnotations": 0,
+      "sharedIdReferences": {
+        "alpha": "1.2.2共通",
+        "beta": "2.2.2共通",
+        "appendix-a": "B.2.2共通",
+        "appendix-b": "A.2.2共通"
+      },
+      "missingTargetObserved": "??.??",
+      "sharedIdChecks": 4,
+      "matchedSharedIdReferences": 4,
+      "sharedIdPdfLinks": 4,
+      "singleReferencePdfLinks": 0,
+      "noPerDocumentChapterSeeds": true,
+      "referencePagesByDocument": {
+        "alpha": [
+          5,
+          6
+        ],
+        "beta": [
+          3,
+          4
+        ],
+        "appendix-a": [
+          7,
+          8
+        ],
+        "appendix-b": [
+          9,
+          10
+        ]
+      },
+      "laterPageCounterChecks": [
+        {
+          "file": "alpha",
+          "expected": "2",
+          "observed": "2",
+          "page": 6,
+          "firstPage": 5,
+          "matches": true
+        },
+        {
+          "file": "beta",
+          "expected": "1",
+          "observed": "1",
+          "page": 4,
+          "firstPage": 3,
+          "matches": true
+        },
+        {
+          "file": "appendix-a",
+          "expected": "A",
+          "observed": "A",
+          "page": 8,
+          "firstPage": 7,
+          "matches": true
+        },
+        {
+          "file": "appendix-b",
+          "expected": "B",
+          "observed": "B",
+          "page": 10,
+          "firstPage": 9,
+          "matches": true
+        }
+      ],
+      "singleHeadingChecks": null,
+      "contentMarkers": 16,
+      "preservedContentMarkers": 16,
+      "literalCodeReferenceCount": 8
+    },
+    {
+      "name": "p-appendix-swapped",
+      "pages": 11,
+      "creator": "Vivliostyle (Vivliostyle.js 2.45.1; Chrome/153.0.8010.36)",
+      "pdfSha256": "10cb807a09ed5355e408fefdc37a891b22c0cf15f0cc3087bd75796438bda18d",
+      "references": 200,
+      "matchedReferences": 200,
+      "mismatches": [],
+      "captionChecks": 24,
+      "matchedCaptions": 24,
+      "tocItems": 14,
+      "tocPageMatches": 14,
+      "tocDisplayMatches": 14,
+      "tocExpectedItems": 14,
+      "tocStructureMatches": true,
+      "tocRowCountMatches": true,
+      "tocChecksPassed": true,
+      "tocPdfLinks": 14,
+      "referenceDestinations": 200,
+      "referencePdfLinks": 200,
+      "annotationCount": 927,
+      "unresolvedAnnotations": 0,
+      "sharedIdReferences": {
+        "alpha": "2.2.2共通",
+        "beta": "1.2.2共通",
+        "appendix-a": "A.2.2共通",
+        "appendix-b": "B.2.2共通"
+      },
+      "missingTargetObserved": "??.??",
+      "sharedIdChecks": 4,
+      "matchedSharedIdReferences": 4,
+      "sharedIdPdfLinks": 4,
+      "singleReferencePdfLinks": 0,
+      "noPerDocumentChapterSeeds": true,
+      "referencePagesByDocument": {
+        "alpha": [
+          3,
+          4
+        ],
+        "beta": [
+          5,
+          6
+        ],
+        "appendix-a": [
+          9,
+          10
+        ],
+        "appendix-b": [
+          7,
+          8
+        ]
+      },
+      "laterPageCounterChecks": [
+        {
+          "file": "alpha",
+          "expected": "1",
+          "observed": "1",
+          "page": 4,
+          "firstPage": 3,
+          "matches": true
+        },
+        {
+          "file": "beta",
+          "expected": "2",
+          "observed": "2",
+          "page": 6,
+          "firstPage": 5,
+          "matches": true
+        },
+        {
+          "file": "appendix-a",
+          "expected": "B",
+          "observed": "B",
+          "page": 10,
+          "firstPage": 9,
+          "matches": true
+        },
+        {
+          "file": "appendix-b",
+          "expected": "A",
+          "observed": "A",
+          "page": 8,
+          "firstPage": 7,
+          "matches": true
+        }
+      ],
+      "singleHeadingChecks": null,
+      "contentMarkers": 16,
+      "preservedContentMarkers": 16,
+      "literalCodeReferenceCount": 8
+    },
+    {
+      "name": "p-depth3",
+      "pages": 11,
+      "creator": "Vivliostyle (Vivliostyle.js 2.45.1; Chrome/153.0.8010.36)",
+      "pdfSha256": "f655702f4b6e5096b4709f62706fd7f0ae720ded58cda6236e5a62d926962e94",
+      "references": 200,
+      "matchedReferences": 200,
+      "mismatches": [],
+      "captionChecks": 24,
+      "matchedCaptions": 24,
+      "tocItems": 26,
+      "tocPageMatches": 26,
+      "tocDisplayMatches": 26,
+      "tocExpectedItems": 26,
+      "tocStructureMatches": true,
+      "tocRowCountMatches": true,
+      "tocChecksPassed": true,
+      "tocPdfLinks": 26,
+      "referenceDestinations": 200,
+      "referencePdfLinks": 200,
+      "annotationCount": 975,
+      "unresolvedAnnotations": 0,
+      "sharedIdReferences": {
+        "alpha": "2.2.2共通",
+        "beta": "1.2.2共通",
+        "appendix-a": "B.2.2共通",
+        "appendix-b": "A.2.2共通"
+      },
+      "missingTargetObserved": "??.??",
+      "sharedIdChecks": 4,
+      "matchedSharedIdReferences": 4,
+      "sharedIdPdfLinks": 4,
+      "singleReferencePdfLinks": 0,
+      "noPerDocumentChapterSeeds": true,
+      "referencePagesByDocument": {
+        "alpha": [
+          3,
+          4
+        ],
+        "beta": [
+          5,
+          6
+        ],
+        "appendix-a": [
+          7,
+          8
+        ],
+        "appendix-b": [
+          9,
+          10
+        ]
+      },
+      "laterPageCounterChecks": [
+        {
+          "file": "alpha",
+          "expected": "1",
+          "observed": "1",
+          "page": 4,
+          "firstPage": 3,
+          "matches": true
+        },
+        {
+          "file": "beta",
+          "expected": "2",
+          "observed": "2",
+          "page": 6,
+          "firstPage": 5,
+          "matches": true
+        },
+        {
+          "file": "appendix-a",
+          "expected": "A",
+          "observed": "A",
+          "page": 8,
+          "firstPage": 7,
+          "matches": true
+        },
+        {
+          "file": "appendix-b",
+          "expected": "B",
+          "observed": "B",
+          "page": 10,
+          "firstPage": 9,
+          "matches": true
+        }
+      ],
+      "singleHeadingChecks": null,
+      "contentMarkers": 16,
+      "preservedContentMarkers": 16,
+      "literalCodeReferenceCount": 8
+    },
+    {
+      "name": "p-hyphen",
+      "pages": 11,
+      "creator": "Vivliostyle (Vivliostyle.js 2.45.1; Chrome/153.0.8010.36)",
+      "pdfSha256": "a40943052ab0de5d2c2bd0839df0d7828fb5e9cca9b793543fa757bca712512e",
+      "references": 200,
+      "matchedReferences": 200,
+      "mismatches": [],
+      "captionChecks": 24,
+      "matchedCaptions": 24,
+      "tocItems": 14,
+      "tocPageMatches": 14,
+      "tocDisplayMatches": 14,
+      "tocExpectedItems": 14,
+      "tocStructureMatches": true,
+      "tocRowCountMatches": true,
+      "tocChecksPassed": true,
+      "tocPdfLinks": 14,
+      "referenceDestinations": 200,
+      "referencePdfLinks": 200,
+      "annotationCount": 927,
+      "unresolvedAnnotations": 0,
+      "sharedIdReferences": {
+        "alpha": "2-2-2共通",
+        "beta": "1-2-2共通",
+        "appendix-a": "B-2-2共通",
+        "appendix-b": "A-2-2共通"
+      },
+      "missingTargetObserved": "??-??",
+      "sharedIdChecks": 4,
+      "matchedSharedIdReferences": 4,
+      "sharedIdPdfLinks": 4,
+      "singleReferencePdfLinks": 0,
+      "noPerDocumentChapterSeeds": true,
+      "referencePagesByDocument": {
+        "alpha": [
+          3,
+          4
+        ],
+        "beta": [
+          5,
+          6
+        ],
+        "appendix-a": [
+          7,
+          8
+        ],
+        "appendix-b": [
+          9,
+          10
+        ]
+      },
+      "laterPageCounterChecks": [
+        {
+          "file": "alpha",
+          "expected": "1",
+          "observed": "1",
+          "page": 4,
+          "firstPage": 3,
+          "matches": true
+        },
+        {
+          "file": "beta",
+          "expected": "2",
+          "observed": "2",
+          "page": 6,
+          "firstPage": 5,
+          "matches": true
+        },
+        {
+          "file": "appendix-a",
+          "expected": "A",
+          "observed": "A",
+          "page": 8,
+          "firstPage": 7,
+          "matches": true
+        },
+        {
+          "file": "appendix-b",
+          "expected": "B",
+          "observed": "B",
+          "page": 10,
+          "firstPage": 9,
+          "matches": true
+        }
+      ],
+      "singleHeadingChecks": null,
+      "contentMarkers": 16,
+      "preservedContentMarkers": 16,
+      "literalCodeReferenceCount": 8
+    }
+  ]
+}

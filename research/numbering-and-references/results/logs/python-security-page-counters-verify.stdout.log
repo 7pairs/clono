@@ -1,0 +1,7 @@
+Rejected five deliberately corrupted TOC observations
+p-base refs 200/200, captions 24/24, toc 14/14
+p-body-swapped refs 200/200, captions 24/24, toc 14/14
+p-appendix-swapped refs 200/200, captions 24/24, toc 14/14
+p-depth3 refs 200/200, captions 24/24, toc 26/26
+p-hyphen refs 200/200, captions 24/24, toc 14/14
+Independent text and destination checks passed for 5 profiles

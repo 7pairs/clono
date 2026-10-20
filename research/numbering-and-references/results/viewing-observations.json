@@ -1,0 +1,83 @@
+{
+  "copyright": "Copyright 2026 HASEBA Junya (7pairs)",
+  "license": "Apache-2.0",
+  "date": "2026-10-20",
+  "viewer": "macOS Preview 11.0",
+  "profile": "b-base",
+  "toc": {
+    "count": 14,
+    "observedPages": [
+      1,
+      3,
+      3,
+      3,
+      5,
+      5,
+      5,
+      7,
+      7,
+      7,
+      9,
+      9,
+      9,
+      11
+    ]
+  },
+  "body": [
+    {
+      "token": "R0005",
+      "observedPage": 3
+    },
+    {
+      "token": "R0006",
+      "observedPage": 3
+    },
+    {
+      "token": "R0007",
+      "observedPage": 3
+    },
+    {
+      "token": "R0014",
+      "observedPage": 3
+    },
+    {
+      "token": "R0015",
+      "observedPage": 3
+    },
+    {
+      "token": "R0016",
+      "observedPage": 3
+    },
+    {
+      "token": "R0017",
+      "observedPage": 5
+    },
+    {
+      "token": "R0041",
+      "observedPage": 5
+    },
+    {
+      "token": "R0065",
+      "observedPage": 3
+    },
+    {
+      "token": "R0101",
+      "observedPage": 7
+    },
+    {
+      "token": "R0149",
+      "observedPage": 9
+    },
+    {
+      "token": "R0198",
+      "observedPage": 1
+    }
+  ],
+  "method": "Native Preview accessibility link navigation and actual clicks; window page status checked after each action",
+  "visualInspection": {
+    "profiles": 8,
+    "renderedPages": 79,
+    "method": "All-page labeled contact sheets; baseline body and ToC additionally inspected in Preview",
+    "knownCounterexamples": "a-default and b-original-id preserve expected failures; missing-ID control renders question marks"
+  }
+}

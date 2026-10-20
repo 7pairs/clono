@@ -1,0 +1,35 @@
+{
+  "copyright": "Copyright 2026 HASEBA Junya (7pairs)",
+  "license": "Apache-2.0",
+  "node": "v24.22.0",
+  "npm": "11.19.1",
+  "macOS": "27.0.1",
+  "versions": {
+    "cli": "11.3.3",
+    "vfm": "2.7.2",
+    "viewer": "2.45.1",
+    "core": "2.45.2"
+  },
+  "definitionSha256": {
+    "package.json": "e2b6b2e30ab05748434cb22a80d37a9d8e8509db266ae7baf2aaa9614ade3ec0",
+    "package-lock.json": "862ec9fdb05234813a7681eca0d7467183b75091e5da964918c7e04ffa9b00ba"
+  },
+  "baselineDefinitionSha256": {
+    "package.json": "509c9b32d35c776f63983bd5725f89281ad8558831505a69bbb7c78564cd06e3",
+    "package-lock.json": "744362986e821e4539b5ab5c4c71150c603145365d8aa91bcede99d939677c4c"
+  },
+  "explicitJsdomVersion": "25.0.1-vivliostyle-cli.2",
+  "cliSourceSha256": "28ae0bae2e39d632f8ed2fc7c3a9dfbe82f02ea084c2f74820f12d20331c21d3",
+  "viewerBundleSha256": "fcc36dd47511a72b8bde992d39bafd8685138da408e1426d26567d5623ae55c8",
+  "viewerEmbeddedCoreSourceSha256": {
+    "counters.ts": "1067970a19876c928886014c637b1902e60b247dad82851220ab556a0e7f7237",
+    "css-cascade.ts": "8a766180f11bd60fc230c2dd9299ac414d990689e6348b8fa4e1530893e11270"
+  },
+  "checks": {
+    "sameExistingDependencyDefinitions": true,
+    "explicitJsdomMatchesBaselineResolution": true,
+    "dompurifyStringInput": true,
+    "noInPlaceOrCustomHook": true
+  },
+  "scope": "Static comparison of the agreed options and call paths; not a full dependency audit"
+}

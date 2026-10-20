@@ -1,0 +1,1482 @@
+{
+  "copyright": "Copyright 2026 HASEBA Junya (7pairs)",
+  "license": "Apache-2.0",
+  "oldResultSha256": {
+    "step2-observations.json": "a727e48cc7a43c0052aca30ccc77b017f60d65befd9276c5d792d4961c22331b",
+    "step2a-observations.json": "e8dd56ae0a9f05b72f689c78b4e000b38b6569d15e0fba9a51cafc9ce4dafbe2"
+  },
+  "profiles": [
+    {
+      "name": "h-span-base",
+      "baseline": "p-base",
+      "documents": [
+        {
+          "file": "preface",
+          "headingIds": [
+            "preface-title"
+          ],
+          "tag": "H1",
+          "retainedText": "はじめに",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "alpha",
+          "headingIds": [
+            "alpha-title",
+            "alpha-preparation",
+            "alpha-detail",
+            "alpha-execution",
+            "alpha-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "導入 API",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "beta",
+          "headingIds": [
+            "beta-title",
+            "beta-preparation",
+            "beta-detail",
+            "beta-execution",
+            "beta-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "応用",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-a",
+          "headingIds": [
+            "appendix-a-title",
+            "appendix-a-preparation",
+            "appendix-a-detail",
+            "appendix-a-execution",
+            "appendix-a-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "補足",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-b",
+          "headingIds": [
+            "appendix-b-title",
+            "appendix-b-preparation",
+            "appendix-b-detail",
+            "appendix-b-execution",
+            "appendix-b-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "資料",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "afterword",
+          "headingIds": [
+            "afterword-title"
+          ],
+          "tag": "H1",
+          "retainedText": "おわりに",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        }
+      ]
+    },
+    {
+      "name": "h-span-body-swapped",
+      "baseline": "p-body-swapped",
+      "documents": [
+        {
+          "file": "preface",
+          "headingIds": [
+            "preface-title"
+          ],
+          "tag": "H1",
+          "retainedText": "はじめに",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "alpha",
+          "headingIds": [
+            "alpha-title",
+            "alpha-preparation",
+            "alpha-detail",
+            "alpha-execution",
+            "alpha-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "導入 API",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "beta",
+          "headingIds": [
+            "beta-title",
+            "beta-preparation",
+            "beta-detail",
+            "beta-execution",
+            "beta-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "応用",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-a",
+          "headingIds": [
+            "appendix-a-title",
+            "appendix-a-preparation",
+            "appendix-a-detail",
+            "appendix-a-execution",
+            "appendix-a-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "補足",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-b",
+          "headingIds": [
+            "appendix-b-title",
+            "appendix-b-preparation",
+            "appendix-b-detail",
+            "appendix-b-execution",
+            "appendix-b-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "資料",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "afterword",
+          "headingIds": [
+            "afterword-title"
+          ],
+          "tag": "H1",
+          "retainedText": "おわりに",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        }
+      ]
+    },
+    {
+      "name": "h-span-appendix-swapped",
+      "baseline": "p-appendix-swapped",
+      "documents": [
+        {
+          "file": "preface",
+          "headingIds": [
+            "preface-title"
+          ],
+          "tag": "H1",
+          "retainedText": "はじめに",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "alpha",
+          "headingIds": [
+            "alpha-title",
+            "alpha-preparation",
+            "alpha-detail",
+            "alpha-execution",
+            "alpha-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "導入 API",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "beta",
+          "headingIds": [
+            "beta-title",
+            "beta-preparation",
+            "beta-detail",
+            "beta-execution",
+            "beta-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "応用",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-a",
+          "headingIds": [
+            "appendix-a-title",
+            "appendix-a-preparation",
+            "appendix-a-detail",
+            "appendix-a-execution",
+            "appendix-a-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "補足",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-b",
+          "headingIds": [
+            "appendix-b-title",
+            "appendix-b-preparation",
+            "appendix-b-detail",
+            "appendix-b-execution",
+            "appendix-b-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "資料",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "afterword",
+          "headingIds": [
+            "afterword-title"
+          ],
+          "tag": "H1",
+          "retainedText": "おわりに",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        }
+      ]
+    },
+    {
+      "name": "h-span-depth3",
+      "baseline": "p-depth3",
+      "documents": [
+        {
+          "file": "preface",
+          "headingIds": [
+            "preface-title"
+          ],
+          "tag": "H1",
+          "retainedText": "はじめに",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "alpha",
+          "headingIds": [
+            "alpha-title",
+            "alpha-preparation",
+            "alpha-detail",
+            "alpha-execution",
+            "alpha-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "導入 API",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "beta",
+          "headingIds": [
+            "beta-title",
+            "beta-preparation",
+            "beta-detail",
+            "beta-execution",
+            "beta-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "応用",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-a",
+          "headingIds": [
+            "appendix-a-title",
+            "appendix-a-preparation",
+            "appendix-a-detail",
+            "appendix-a-execution",
+            "appendix-a-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "補足",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-b",
+          "headingIds": [
+            "appendix-b-title",
+            "appendix-b-preparation",
+            "appendix-b-detail",
+            "appendix-b-execution",
+            "appendix-b-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "資料",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "afterword",
+          "headingIds": [
+            "afterword-title"
+          ],
+          "tag": "H1",
+          "retainedText": "おわりに",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        }
+      ]
+    },
+    {
+      "name": "h-span-hyphen",
+      "baseline": "p-hyphen",
+      "documents": [
+        {
+          "file": "preface",
+          "headingIds": [
+            "preface-title"
+          ],
+          "tag": "H1",
+          "retainedText": "はじめに",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "alpha",
+          "headingIds": [
+            "alpha-title",
+            "alpha-preparation",
+            "alpha-detail",
+            "alpha-execution",
+            "alpha-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "導入 API",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "beta",
+          "headingIds": [
+            "beta-title",
+            "beta-preparation",
+            "beta-detail",
+            "beta-execution",
+            "beta-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "応用",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-a",
+          "headingIds": [
+            "appendix-a-title",
+            "appendix-a-preparation",
+            "appendix-a-detail",
+            "appendix-a-execution",
+            "appendix-a-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "補足",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-b",
+          "headingIds": [
+            "appendix-b-title",
+            "appendix-b-preparation",
+            "appendix-b-detail",
+            "appendix-b-execution",
+            "appendix-b-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "資料",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "afterword",
+          "headingIds": [
+            "afterword-title"
+          ],
+          "tag": "H1",
+          "retainedText": "おわりに",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        }
+      ]
+    },
+    {
+      "name": "h-image-base",
+      "baseline": "p-base",
+      "documents": [
+        {
+          "file": "preface",
+          "headingIds": [
+            "preface-title"
+          ],
+          "tag": "H1",
+          "retainedText": "はじめに",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "alpha",
+          "headingIds": [
+            "alpha-title",
+            "alpha-preparation",
+            "alpha-detail",
+            "alpha-execution",
+            "alpha-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "導入 API",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "beta",
+          "headingIds": [
+            "beta-title",
+            "beta-preparation",
+            "beta-detail",
+            "beta-execution",
+            "beta-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "応用",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-a",
+          "headingIds": [
+            "appendix-a-title",
+            "appendix-a-preparation",
+            "appendix-a-detail",
+            "appendix-a-execution",
+            "appendix-a-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "補足",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-b",
+          "headingIds": [
+            "appendix-b-title",
+            "appendix-b-preparation",
+            "appendix-b-detail",
+            "appendix-b-execution",
+            "appendix-b-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "資料",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "afterword",
+          "headingIds": [
+            "afterword-title"
+          ],
+          "tag": "H1",
+          "retainedText": "おわりに",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        }
+      ]
+    },
+    {
+      "name": "h-image-body-swapped",
+      "baseline": "p-body-swapped",
+      "documents": [
+        {
+          "file": "preface",
+          "headingIds": [
+            "preface-title"
+          ],
+          "tag": "H1",
+          "retainedText": "はじめに",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "alpha",
+          "headingIds": [
+            "alpha-title",
+            "alpha-preparation",
+            "alpha-detail",
+            "alpha-execution",
+            "alpha-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "導入 API",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "beta",
+          "headingIds": [
+            "beta-title",
+            "beta-preparation",
+            "beta-detail",
+            "beta-execution",
+            "beta-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "応用",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-a",
+          "headingIds": [
+            "appendix-a-title",
+            "appendix-a-preparation",
+            "appendix-a-detail",
+            "appendix-a-execution",
+            "appendix-a-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "補足",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-b",
+          "headingIds": [
+            "appendix-b-title",
+            "appendix-b-preparation",
+            "appendix-b-detail",
+            "appendix-b-execution",
+            "appendix-b-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "資料",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "afterword",
+          "headingIds": [
+            "afterword-title"
+          ],
+          "tag": "H1",
+          "retainedText": "おわりに",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        }
+      ]
+    },
+    {
+      "name": "h-image-appendix-swapped",
+      "baseline": "p-appendix-swapped",
+      "documents": [
+        {
+          "file": "preface",
+          "headingIds": [
+            "preface-title"
+          ],
+          "tag": "H1",
+          "retainedText": "はじめに",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "alpha",
+          "headingIds": [
+            "alpha-title",
+            "alpha-preparation",
+            "alpha-detail",
+            "alpha-execution",
+            "alpha-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "導入 API",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "beta",
+          "headingIds": [
+            "beta-title",
+            "beta-preparation",
+            "beta-detail",
+            "beta-execution",
+            "beta-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "応用",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-a",
+          "headingIds": [
+            "appendix-a-title",
+            "appendix-a-preparation",
+            "appendix-a-detail",
+            "appendix-a-execution",
+            "appendix-a-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "補足",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-b",
+          "headingIds": [
+            "appendix-b-title",
+            "appendix-b-preparation",
+            "appendix-b-detail",
+            "appendix-b-execution",
+            "appendix-b-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "資料",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "afterword",
+          "headingIds": [
+            "afterword-title"
+          ],
+          "tag": "H1",
+          "retainedText": "おわりに",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        }
+      ]
+    },
+    {
+      "name": "h-image-depth3",
+      "baseline": "p-depth3",
+      "documents": [
+        {
+          "file": "preface",
+          "headingIds": [
+            "preface-title"
+          ],
+          "tag": "H1",
+          "retainedText": "はじめに",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "alpha",
+          "headingIds": [
+            "alpha-title",
+            "alpha-preparation",
+            "alpha-detail",
+            "alpha-execution",
+            "alpha-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "導入 API",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "beta",
+          "headingIds": [
+            "beta-title",
+            "beta-preparation",
+            "beta-detail",
+            "beta-execution",
+            "beta-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "応用",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-a",
+          "headingIds": [
+            "appendix-a-title",
+            "appendix-a-preparation",
+            "appendix-a-detail",
+            "appendix-a-execution",
+            "appendix-a-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "補足",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-b",
+          "headingIds": [
+            "appendix-b-title",
+            "appendix-b-preparation",
+            "appendix-b-detail",
+            "appendix-b-execution",
+            "appendix-b-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "資料",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "afterword",
+          "headingIds": [
+            "afterword-title"
+          ],
+          "tag": "H1",
+          "retainedText": "おわりに",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        }
+      ]
+    },
+    {
+      "name": "h-image-hyphen",
+      "baseline": "p-hyphen",
+      "documents": [
+        {
+          "file": "preface",
+          "headingIds": [
+            "preface-title"
+          ],
+          "tag": "H1",
+          "retainedText": "はじめに",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "alpha",
+          "headingIds": [
+            "alpha-title",
+            "alpha-preparation",
+            "alpha-detail",
+            "alpha-execution",
+            "alpha-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "導入 API",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "beta",
+          "headingIds": [
+            "beta-title",
+            "beta-preparation",
+            "beta-detail",
+            "beta-execution",
+            "beta-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "応用",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-a",
+          "headingIds": [
+            "appendix-a-title",
+            "appendix-a-preparation",
+            "appendix-a-detail",
+            "appendix-a-execution",
+            "appendix-a-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "補足",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-b",
+          "headingIds": [
+            "appendix-b-title",
+            "appendix-b-preparation",
+            "appendix-b-detail",
+            "appendix-b-execution",
+            "appendix-b-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "資料",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "afterword",
+          "headingIds": [
+            "afterword-title"
+          ],
+          "tag": "H1",
+          "retainedText": "おわりに",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        }
+      ]
+    },
+    {
+      "name": "h-image-default",
+      "baseline": "p-base",
+      "documents": [
+        {
+          "file": "preface",
+          "headingIds": [
+            "preface-title"
+          ],
+          "tag": "H1",
+          "retainedText": "はじめに",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "alpha",
+          "headingIds": [
+            "alpha-title",
+            "alpha-preparation",
+            "alpha-detail",
+            "alpha-execution",
+            "alpha-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "導入 API",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "beta",
+          "headingIds": [
+            "beta-title",
+            "beta-preparation",
+            "beta-detail",
+            "beta-execution",
+            "beta-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "応用",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-a",
+          "headingIds": [
+            "appendix-a-title",
+            "appendix-a-preparation",
+            "appendix-a-detail",
+            "appendix-a-execution",
+            "appendix-a-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "補足",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-b",
+          "headingIds": [
+            "appendix-b-title",
+            "appendix-b-preparation",
+            "appendix-b-detail",
+            "appendix-b-execution",
+            "appendix-b-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "資料",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "afterword",
+          "headingIds": [
+            "afterword-title"
+          ],
+          "tag": "H1",
+          "retainedText": "おわりに",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        }
+      ]
+    },
+    {
+      "name": "h-image-none",
+      "baseline": "p-base",
+      "documents": [
+        {
+          "file": "preface",
+          "headingIds": [
+            "preface-title"
+          ],
+          "tag": "H1",
+          "retainedText": "はじめに",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "alpha",
+          "headingIds": [
+            "alpha-title",
+            "alpha-preparation",
+            "alpha-detail",
+            "alpha-execution",
+            "alpha-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "導入 API",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "beta",
+          "headingIds": [
+            "beta-title",
+            "beta-preparation",
+            "beta-detail",
+            "beta-execution",
+            "beta-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "応用",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-a",
+          "headingIds": [
+            "appendix-a-title",
+            "appendix-a-preparation",
+            "appendix-a-detail",
+            "appendix-a-execution",
+            "appendix-a-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "補足",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-b",
+          "headingIds": [
+            "appendix-b-title",
+            "appendix-b-preparation",
+            "appendix-b-detail",
+            "appendix-b-execution",
+            "appendix-b-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "資料",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "afterword",
+          "headingIds": [
+            "afterword-title"
+          ],
+          "tag": "H1",
+          "retainedText": "おわりに",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        }
+      ]
+    },
+    {
+      "name": "h-image-none-default",
+      "baseline": "p-base",
+      "documents": [
+        {
+          "file": "preface",
+          "headingIds": [
+            "preface-title"
+          ],
+          "tag": "H1",
+          "retainedText": "はじめに",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "alpha",
+          "headingIds": [
+            "alpha-title",
+            "alpha-preparation",
+            "alpha-detail",
+            "alpha-execution",
+            "alpha-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "導入 API",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "beta",
+          "headingIds": [
+            "beta-title",
+            "beta-preparation",
+            "beta-detail",
+            "beta-execution",
+            "beta-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "応用",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-a",
+          "headingIds": [
+            "appendix-a-title",
+            "appendix-a-preparation",
+            "appendix-a-detail",
+            "appendix-a-execution",
+            "appendix-a-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "補足",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-b",
+          "headingIds": [
+            "appendix-b-title",
+            "appendix-b-preparation",
+            "appendix-b-detail",
+            "appendix-b-execution",
+            "appendix-b-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "資料",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "afterword",
+          "headingIds": [
+            "afterword-title"
+          ],
+          "tag": "H1",
+          "retainedText": "おわりに",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        }
+      ]
+    },
+    {
+      "name": "h-div",
+      "baseline": "p-base",
+      "documents": [
+        {
+          "file": "preface",
+          "headingIds": [
+            "preface-title"
+          ],
+          "tag": "DIV",
+          "retainedText": "はじめに",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "alpha",
+          "headingIds": [
+            "alpha-title",
+            "alpha-preparation",
+            "alpha-detail",
+            "alpha-execution",
+            "alpha-check",
+            "shared"
+          ],
+          "tag": "DIV",
+          "retainedText": "導入 API",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "beta",
+          "headingIds": [
+            "beta-title",
+            "beta-preparation",
+            "beta-detail",
+            "beta-execution",
+            "beta-check",
+            "shared"
+          ],
+          "tag": "DIV",
+          "retainedText": "応用",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-a",
+          "headingIds": [
+            "appendix-a-title",
+            "appendix-a-preparation",
+            "appendix-a-detail",
+            "appendix-a-execution",
+            "appendix-a-check",
+            "shared"
+          ],
+          "tag": "DIV",
+          "retainedText": "補足",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-b",
+          "headingIds": [
+            "appendix-b-title",
+            "appendix-b-preparation",
+            "appendix-b-detail",
+            "appendix-b-execution",
+            "appendix-b-check",
+            "shared"
+          ],
+          "tag": "DIV",
+          "retainedText": "資料",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "afterword",
+          "headingIds": [
+            "afterword-title"
+          ],
+          "tag": "DIV",
+          "retainedText": "おわりに",
+          "images": 0,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        }
+      ]
+    },
+    {
+      "name": "h-image-only",
+      "baseline": "p-base",
+      "documents": [
+        {
+          "file": "preface",
+          "headingIds": [
+            "preface-title"
+          ],
+          "tag": "H1",
+          "retainedText": "",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "alpha",
+          "headingIds": [
+            "alpha-title",
+            "alpha-preparation",
+            "alpha-detail",
+            "alpha-execution",
+            "alpha-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "beta",
+          "headingIds": [
+            "beta-title",
+            "beta-preparation",
+            "beta-detail",
+            "beta-execution",
+            "beta-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-a",
+          "headingIds": [
+            "appendix-a-title",
+            "appendix-a-preparation",
+            "appendix-a-detail",
+            "appendix-a-execution",
+            "appendix-a-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-b",
+          "headingIds": [
+            "appendix-b-title",
+            "appendix-b-preparation",
+            "appendix-b-detail",
+            "appendix-b-execution",
+            "appendix-b-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "afterword",
+          "headingIds": [
+            "afterword-title"
+          ],
+          "tag": "H1",
+          "retainedText": "",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        }
+      ]
+    },
+    {
+      "name": "h-image-only-default",
+      "baseline": "p-base",
+      "documents": [
+        {
+          "file": "preface",
+          "headingIds": [
+            "preface-title"
+          ],
+          "tag": "H1",
+          "retainedText": "",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "alpha",
+          "headingIds": [
+            "alpha-title",
+            "alpha-preparation",
+            "alpha-detail",
+            "alpha-execution",
+            "alpha-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "beta",
+          "headingIds": [
+            "beta-title",
+            "beta-preparation",
+            "beta-detail",
+            "beta-execution",
+            "beta-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-a",
+          "headingIds": [
+            "appendix-a-title",
+            "appendix-a-preparation",
+            "appendix-a-detail",
+            "appendix-a-execution",
+            "appendix-a-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "appendix-b",
+          "headingIds": [
+            "appendix-b-title",
+            "appendix-b-preparation",
+            "appendix-b-detail",
+            "appendix-b-execution",
+            "appendix-b-check",
+            "shared"
+          ],
+          "tag": "H1",
+          "retainedText": "",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        },
+        {
+          "file": "afterword",
+          "headingIds": [
+            "afterword-title"
+          ],
+          "tag": "H1",
+          "retainedText": "",
+          "images": 1,
+          "sameIntermediateMarkdown": true,
+          "noInlineCounterSeed": true
+        }
+      ]
+    }
+  ]
+}
