@@ -9,10 +9,20 @@ const hash=x=>createHash('sha256').update(x).digest('hex');
 const headings=process.argv.includes('--headings');
 const pageCounters=headings||process.argv.includes('--page-counters');
 const definitions={};
+const baselineDefinitions={};
+const jsdomName='@vivliostyle/jsdom';
+const baselineLock=JSON.parse(await readFile('../implementation-environment/package-lock.json','utf8'));
+const jsdomVersion=baselineLock.packages[`node_modules/${jsdomName}`].version;
 for(const file of ['package.json','package-lock.json']) {
  const here=await readFile(file);const previous=await readFile(`../implementation-environment/${file}`);
- assert.ok(here.equals(previous),file);definitions[file]=hash(here);
+ const current=JSON.parse(here);const baseline=JSON.parse(previous);
+ const declaration=file==='package.json'?current:current.packages[''];
+ assert.equal(declaration.devDependencies[jsdomName],jsdomVersion,`${file}: explicit JSDOM version`);
+ delete declaration.devDependencies[jsdomName];
+ assert.deepEqual(current,baseline,`${file}: only the root JSDOM declaration may differ`);
+ definitions[file]=hash(here);baselineDefinitions[file]=hash(previous);
 }
+assert.equal(JSON.parse(await readFile(`node_modules/${jsdomName}/package.json`,'utf8')).version,jsdomVersion);
 const versions={};
 for(const name of ['cli','vfm','viewer','core']) {
  const p=JSON.parse(await readFile(`node_modules/@vivliostyle/${name}/package.json`,'utf8'));versions[name]=p.version;
@@ -29,7 +39,7 @@ for(const file of (pageCounters?['counters.ts','css-cascade.ts','css-page.ts','o
  if(file==='counters.ts')assert.ok(code.includes('getTargetTextVal')&&code.includes('getTargetCounterVal'));
  if(file==='css-cascade.ts')assert.ok(code.includes('visitFuncTargetText'));
 }
-const result={copyright:'Copyright 2026 HASEBA Junya (7pairs)',license:'Apache-2.0',node:process.version,npm:spawnSync('npm',['--version'],{encoding:'utf8'}).stdout.trim(),macOS:spawnSync('sw_vers',['-productVersion'],{encoding:'utf8'}).stdout.trim(),versions,definitionSha256:definitions,cliSourceSha256:hash(cli),viewerBundleSha256:hash(await readFile('node_modules/@vivliostyle/viewer/lib/js/vivliostyle-viewer.js')),viewerEmbeddedCoreSourceSha256:coreSources,checks:{sameDependencyDefinitions:true,dompurifyStringInput:true,noInPlaceOrCustomHook:true},scope:'Static comparison of the agreed options and call paths; not a full dependency audit'};
+const result={copyright:'Copyright 2026 HASEBA Junya (7pairs)',license:'Apache-2.0',node:process.version,npm:spawnSync('npm',['--version'],{encoding:'utf8'}).stdout.trim(),macOS:spawnSync('sw_vers',['-productVersion'],{encoding:'utf8'}).stdout.trim(),versions,definitionSha256:definitions,baselineDefinitionSha256:baselineDefinitions,explicitJsdomVersion:jsdomVersion,cliSourceSha256:hash(cli),viewerBundleSha256:hash(await readFile('node_modules/@vivliostyle/viewer/lib/js/vivliostyle-viewer.js')),viewerEmbeddedCoreSourceSha256:coreSources,checks:{sameExistingDependencyDefinitions:true,explicitJsdomMatchesBaselineResolution:true,dompurifyStringInput:true,noInPlaceOrCustomHook:true},scope:'Static comparison of the agreed options and call paths; not a full dependency audit'};
 if(pageCounters) {
  const previous=JSON.parse(await readFile('results/environment.json','utf8'));
  assert.equal(result.viewerBundleSha256,previous.viewerBundleSha256);
@@ -44,7 +54,7 @@ if(pageCounters) {
  assert.ok(sourceText['counters.ts'].includes('getTargetPageCounters')&&sourceText['counters.ts'].includes('adjustCountersForCrossScope'));
  assert.ok(sourceText['css-cascade.ts'].includes('isPageControlledCounter'));
  result.pageCounterChecks={sameViewerBundle:true,documentRelativeNthSelector:true,pageCounterReferencePath:true,
-  changes:'CSS page rules and named pages only; no dependency, API option, execution location or sanitization hook changes',previousPdfSha256};
+  changes:'CSS page rules and named pages only; no dependency resolution, API option, execution location or sanitization hook changes',previousPdfSha256};
 }
 if(headings) {
  result.pageCounterChecks.changes='Page-counter rules unchanged from step 2A; heading and ToC changes are assessed in headingChecks';
@@ -61,4 +71,5 @@ if(headings) {
   hookSha256:hash(hook),previousPdfSha256,
   scope:'Existing CLI transformSectionList receives headingText; text HAST nodes are serialized without raw HTML; no new sanitizer configuration or browser-side VFM'};
 }
-await writeFile(headings?'results/step3-environment.json':pageCounters?'results/step2a-environment.json':'results/environment.json',JSON.stringify(result,null,2)+'\n');console.log(result);
+// Preserve the environment records captured before the review correction.
+await writeFile(headings?'results/step3-environment-current.json':pageCounters?'results/step2a-environment-current.json':'results/environment-current.json',JSON.stringify(result,null,2)+'\n');console.log(result);

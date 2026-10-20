@@ -25,7 +25,7 @@ Markdown変換、CSSの実行、組版、PDF確認、依存の導入・更新は
 
 手順2の結果は[検証結果の第9節](results/verification.md#9-手順2通常出力での検証結果)に記載した。補助なしの構成、開始値・ID・表キャプションを補う構成、章順・目次階層・区切り文字・ID配置を変える構成、単一原稿の対照を含む8構成を組版した。
 
-このディレクトリで次を実行する。`package.json`とlockfileは既存調査環境から同じ組を引き継ぎ、製品の依存とは分離している。`npm ci`は依存の導入、`build.mjs`はローカル配信とブラウザー起動を行う。
+このディレクトリで次を実行する。`package.json`とlockfileは既存調査環境を基準とし、外部レビュー対応で直接使用する`@vivliostyle/jsdom`の宣言だけを追加した。既存パッケージの解決内容は維持し、製品の依存とは分離している。`npm ci`は依存の導入、`build.mjs`はローカル配信とブラウザー起動を行う。
 
 ### PythonとPopplerの準備
 
@@ -65,6 +65,8 @@ python3 scripts/render-pdfs.py
 `prepare.mjs`は固定した検証原稿と参照一覧を再作成する。`build.mjs b-base`のように構成名を指定すれば、その構成だけを再生成できる。PDFは`results/pdf/`、中間Markdown・HTML・CLI設定・目次・個別の照合結果・ページ画像は`results/generated/`へ保存し、Git管理から除外する。
 
 集計結果は[step2-observations.json](results/step2-observations.json)、環境と依存定義のハッシュは[environment.json](results/environment.json)、PDF閲覧時の確認は[viewing-observations.json](results/viewing-observations.json)に残す。検査用PythonはPDFから文字列とリンク注釈を調べる。閲覧操作と画像の目視確認は、その実行だけで自動的に再現したことにはならない。
+
+環境JSONは調査時点の記録として保持する。外部レビュー対応後の`check-environment.mjs`は、既存依存の定義・解決内容とJSDOMの直接宣言を照合し、通常・`--page-counters`・`--headings`それぞれの結果を`environment-current.json`・`step2a-environment-current.json`・`step3-environment-current.json`へ保存する。
 
 目次は、生成物から独立した期待項目と順序を使い、番号・本文・ページ番号を行単位で照合する。各行のPDF注釈はファイル名と見出しIDまで確認する。同名IDへの参照と単一原稿の参照も自動判定する。`--check-regressions`を付けると、基準構成から読み取った検査データのコピーに欠落・重複・順序変更・章番号の誤り・同ページ内の誤リンクを与え、5種類とも検出できることを確認する。保存済みのHTML・PDFは変更しない。
 
