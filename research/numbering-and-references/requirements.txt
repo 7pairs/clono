@@ -1,0 +1,6 @@
+# Copyright 2026 HASEBA Junya (7pairs)
+# SPDX-License-Identifier: Apache-2.0
+# Direct Python dependencies used for the recorded PDF checks.
+pypdf==6.10.0
+pdfplumber==0.11.9
+Pillow==12.3.0

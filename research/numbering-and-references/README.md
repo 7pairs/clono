@@ -27,6 +27,30 @@ Markdown変換、CSSの実行、組版、PDF確認、依存の導入・更新は
 
 このディレクトリで次を実行する。`package.json`とlockfileは既存調査環境から同じ組を引き継ぎ、製品の依存とは分離している。`npm ci`は依存の導入、`build.mjs`はローカル配信とブラウザー起動を行う。
 
+### PythonとPopplerの準備
+
+実測に使った版はPython 3.12.14、pypdf 6.10.0、pdfplumber 0.11.9、Pillow 12.3.0、Poppler 25.09.1である。Pythonの直接依存は[requirements.txt](requirements.txt)へ固定した。Python 3.12を用意した環境で、このディレクトリから次を実行する。
+
+```sh
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+source .venv/bin/activate
+```
+
+有効化後は、以下の`python3`が仮想環境の実行ファイルを指す。[venvの公式説明](https://docs.python.org/3.12/library/venv.html)も参照する。requirements.txtは直接依存の版を固定するもので、推移的依存やOS全体を固定するlockfileではない。
+
+Popplerの`pdftotext`と`pdftoppm`は別途必要になる。Homebrewを利用できるmacOSでの導入例は次のとおりである。
+
+```sh
+brew install poppler
+pdftotext -v
+pdftoppm -v
+```
+
+[Homebrewの導入案内](https://formulae.brew.sh/formula/poppler)は現行版を導入するため、実測版25.09.1の再導入を保証する手順ではない。別の版や環境では、版を記録して検査と表示確認をやり直す。Python・Popplerとも、別環境での導入と同一結果は未検証である。
+
+### 生成と検査
+
 ```sh
 npm ci --ignore-scripts --no-audit --no-fund
 node scripts/check-environment.mjs
@@ -36,7 +60,7 @@ python3 scripts/verify-pdfs.py --check-regressions
 python3 scripts/render-pdfs.py
 ```
 
-Python側には`pypdf`・`pdfplumber`・Pillow、外部コマンドにはPopplerの`pdftotext`・`pdftoppm`を使う。今回のPython実行環境はCodexの同梱ランタイムであり、`python3`をその実行ファイルへ読み替えて実行した。Node.js側の依存へPythonのライブラリは追加していない。
+今回の調査は上記の版が導入済みのCodex同梱Pythonで実行し、`python3`をその実行ファイルへ読み替えた。仮想環境の導入例とは区別する。Node.js側の依存へPythonのライブラリは追加していない。
 
 `prepare.mjs`は固定した検証原稿と参照一覧を再作成する。`build.mjs b-base`のように構成名を指定すれば、その構成だけを再生成できる。PDFは`results/pdf/`、中間Markdown・HTML・CLI設定・目次・個別の照合結果・ページ画像は`results/generated/`へ保存し、Git管理から除外する。
 
