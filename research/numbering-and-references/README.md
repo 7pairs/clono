@@ -7,7 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 
 [手順書0005](../../docs/plans/0005-investigate-numbering-and-references.md)に基づき、旧要件のT03～T05について、既存機能で満たせる範囲とclonoで補う処理を調べる。
 
-- 現在地：手順3までの実施・検証・独立レビュー・再レビュー・二人の確認は完了。手順4は未着手。
+- 現在地：全手順の実施・内部確認完了。外部レビューと作業全体の完了状況は、対応するPRで確認する。
+- [責務分担・成立条件・未確認事項・全体の見直し](results/verification.md#12-手順4責務分担と全体の見直し)
 - [参照資料と公開パッケージの識別情報](sources.md)
 - [候補・検証項目・期待値・環境とリスクの確認](results/verification.md)
 - [要件の出発点](../legacy-preprocessor/results/requirements.md#12-要件に結び付けた後続の確認事項)
@@ -79,6 +80,10 @@ python3 scripts/render-pdfs.py --headings
 `fixtures/heading-profiles.json`が構成一覧、`heading-overrides.css`が差し替え用CSS、`heading-images/`が自作SVGである。元原稿は共通で、VFM出力後のHTMLを調査用に加工する。画像構成の文字目次には、`scripts/toc-text.mjs`のCLIフックを使う。フック付きの構成だけは、関数を渡すために生成した`config.mjs`をCLIへ指定する。関数を使わない構成は従来のJSON設定を維持する。
 
 集計・HTML構造・環境・閲覧結果をそれぞれ`results/step3-observations.json`・`step3-structure.json`・`step3-environment.json`・`step3-viewing-observations.json`に保存した。成立する10構成と不足を調べる6構成を区別し、対照で参照が欠けることも検査する。文字列が一致しても目次に画像が残る場合があるため、HTML内の画像・隠し文字用spanも確認する。画像や実クリックの目視確認は、コマンドを実行するだけで再現したことにはならない。
+
+## 手順4：全体の整理
+
+[検証結果の第12節](results/verification.md#12-手順4責務分担と全体の見直し)に、T03～T05と全検証項目の対応、既存機能に任せる処理と補助、条件付きの希望、残る確認とその時点をまとめた。第1～8節は調査前の候補、第9～11節は各手順の実測として保持している。構成を見直し、現時点ではリファクタリングを見送ると判断した。新しい実験やコード変更は行っていない。
 
 ## 資料の追跡と表示
 
