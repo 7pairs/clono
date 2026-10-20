@@ -1,0 +1,44 @@
+{
+  "copyright": "Copyright 2026 HASEBA Junya (7pairs)",
+  "license": "Apache-2.0",
+  "profiles": [
+    {
+      "name": "p-base",
+      "supplement": true,
+      "assignId": true,
+      "depth": 2,
+      "pageCounters": true
+    },
+    {
+      "name": "p-body-swapped",
+      "supplement": true,
+      "assignId": true,
+      "depth": 2,
+      "pageCounters": true,
+      "swap": "main"
+    },
+    {
+      "name": "p-appendix-swapped",
+      "supplement": true,
+      "assignId": true,
+      "depth": 2,
+      "pageCounters": true,
+      "swap": "appendix"
+    },
+    {
+      "name": "p-depth3",
+      "supplement": true,
+      "assignId": true,
+      "depth": 3,
+      "pageCounters": true
+    },
+    {
+      "name": "p-hyphen",
+      "supplement": true,
+      "assignId": true,
+      "depth": 2,
+      "pageCounters": true,
+      "separator": "-"
+    }
+  ]
+}

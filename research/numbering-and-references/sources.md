@@ -94,3 +94,23 @@ CLIの目次は組版前のHTMLを読み、Coreの`target-text()`は組版した
 CLI 11.3.3がPDFを生成するときは、Viewer 2.45.1に内蔵されたコードを使った。生成PDFのCreatorはVivliostyle.js 2.45.1を示し、Viewerの`lib/index.html`にもcore+viewer 2.45.1の表示があった。独立したCoreパッケージ2.45.2がlockfileに存在することだけでは、実行版が2.45.2とは判断できない。
 
 `node_modules/@vivliostyle/viewer/lib/js/vivliostyle-viewer.js.map`の`../../../core/src/vivliostyle/counters.ts`と`css-cascade.ts`を確認し、参照値とtarget-textの処理を読み直した。S08はCore 2.45.2の静的読解結果として維持し、今回の実測はViewer内蔵版の結果として[第9節](results/verification.md#9-手順2通常出力での検証結果)に記録した。bundleと参照処理のハッシュは[環境記録](results/environment.json)を参照する。
+
+## 5. 手順2Aで確認したページ側カウンターの資料と実装
+
+### S10 公式チュートリアル：カウンタと柱のスタイル
+
+- [公式チュートリアル](https://vivliostyle.org/ja/tutorials/configure-counters-running-heads/)
+- 確認日：2026-10-20（日本時間）。
+
+同資料は、`@page :first`で本全体の先頭に章カウンターを初期化し、`@page :nth(1)`で各原稿の最初のページに対して加算する方法を紹介している。手順1・2ではこの候補を検証していなかった。手順2Aでは本文・付録それぞれに名前付きページと別のカウンターを使い、前後付け・目次を加算から除外する調査用CSSへ具体化した。チュートリアルの例だけで今回の全要件が成立すると判断したものではない。
+
+実行版のViewer 2.45.1のsource mapから、次の処理を確認した。
+
+| ソースと処理 | 確認内容 |
+|---|---|
+| `css-page.ts`の`IsNthPageAction`・ページセレクター解析 | `:nth(An+B)`は`layoutPositionAtPageStart.page`を使う。名前付きページの条件と併用でき、`:nth(An+B of <page-type>)`とは分岐を分けている |
+| `css-page.ts`の`IsFirstPageAction`、`ops.ts`の`page-number` | `:first`は本全体のページ位置を評価する。原稿ごとの`:nth(1)`と区別する |
+| `css-cascade.ts`の`buildCounterText` | ページ側で管理するカウンターを、生成内容の値へ反映する |
+| `counters.ts`の`getTargetCounterVal`・`getTargetPageCounters`・`adjustCountersForCrossScope` | 参照先要素のページ側の値を取得し、文書側のカウンターとの関係を扱う |
+
+Viewer bundleは手順2と同一である。参照したソースのハッシュと確認項目は[手順2Aの環境記録](results/step2a-environment.json)、実測と限界は[検証結果の第10節](results/verification.md#10-手順2aページ側のカウンター方式の追加検証)へ記録した。第三者コードは転載していない。

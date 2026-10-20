@@ -17,7 +17,6 @@ from pypdf import PdfReader
 
 root = Path(__file__).resolve().parents[1]
 logging.getLogger('pdfminer').setLevel(logging.ERROR)
-profiles = json.loads((root / 'fixtures/profiles.json').read_text())['profiles']
 refs = json.loads((root / 'fixtures/references.json').read_text())['references']
 # These literal expectations do not read the builder's calculated ordinals.
 ordinals = {
@@ -33,7 +32,12 @@ titles = {'alpha': '導入API', 'beta': '応用', 'appendix-a': '補足', 'appen
 norm = lambda s: re.sub(r'\s+', '', unicodedata.normalize('NFKC', s or ''))
 args = argparse.ArgumentParser(description=__doc__)
 args.add_argument('--check-regressions', action='store_true', help='Reject deliberately corrupted copies of the baseline TOC observations')
+args.add_argument('--page-counters', action='store_true', help='Check the separate page-counter profiles and preserve step 2 results')
 options = args.parse_args()
+profiles = json.loads((root / ('fixtures/page-counter-profiles.json' if options.page_counters else 'fixtures/profiles.json')).read_text())['profiles']
+
+def oracle_name(name):
+    return 'b-' + name[2:] if name.startswith('p-') else name
 
 def destination_key(value):
     decoded = re.sub(r':([0-9a-f]{4})', lambda m: chr(int(m[1], 16)), value)
@@ -47,7 +51,7 @@ def expected_toc(profile, numbers, sep):
     order = {
         'b-body-swapped': ['preface', 'beta', 'alpha', 'appendix-a', 'appendix-b', 'afterword'],
         'b-appendix-swapped': ['preface', 'alpha', 'beta', 'appendix-b', 'appendix-a', 'afterword'],
-    }.get(profile['name'], ['preface', 'alpha', 'beta', 'appendix-a', 'appendix-b', 'afterword'])
+    }.get(oracle_name(profile['name']), ['preface', 'alpha', 'beta', 'appendix-a', 'appendix-b', 'afterword'])
     if profile.get('single'):
         order = ['alpha']
     items = []
@@ -142,12 +146,12 @@ for profile in profiles:
         toc_lines = [{k: line[k] for k in ['text', 'x0', 'x1', 'top', 'bottom']} for line in toc_page.extract_text_lines()]
         toc_height = toc_page.height
         for i, page in enumerate(pl.pages, 1):
-            for hit in page.search(r'(?:R\d{4}|S_[a-z-]+|SINGLE_H[23])=', regex=True):
+            for hit in page.search(r'(?:R\d{4}|S_[a-z-]+|SINGLE_H[23]|PAGE_STATE_[a-z-]+)=', regex=True):
                 token_positions[hit['text'].rstrip('=')] = {'page': i, 'x1': hit['x1'], 'top': hit['top'], 'bottom': hit['bottom'], 'height': page.height}
     subprocess.run(['pdftotext', '-layout', str(pdf), str(root / f'results/generated/{name}/extracted.txt')], check=True)
     raw = (root / f'results/generated/{name}/extracted.txt').read_text()
     flattened = norm(raw)
-    numbers = ordinals.get(name, base_order)
+    numbers = ordinals.get(oracle_name(name), base_order)
     sep = profile.get('separator', '.')
     values = dict(re.findall(r'(R\d{4})=([^;]*);', flattened))
     detail = []
@@ -174,7 +178,7 @@ for profile in profiles:
     wanted_toc = expected_toc(profile, numbers, sep)
     toc_check = check_toc(wanted_toc, toc.links, toc_lines, annotations, destinations, toc_page_number, toc_height)
     toc_checks = toc_check['items']
-    if options.check_regressions and name == 'b-base':
+    if options.check_regressions and name in ['b-base', 'p-base']:
         assert toc_passes(toc_check), 'Baseline must pass before checking corruptions'
         cases = []
         for label, changed_links in [('missing entry', toc.links[:2] + toc.links[3:]),
@@ -217,6 +221,32 @@ for profile in profiles:
                                   'expected': want, 'observed': shared[source], 'matches': shared[source] == want})
     single_links = [token_link(token, 'alpha.html#' + id, token_positions, annotations, destinations)
                     for token, id in [('SINGLE_H2', 'alpha-preparation'), ('SINGLE_H3', 'alpha-detail')]] if profile.get('single') else []
+    page_counter_input_checks = None
+    multi_page_documents = {}
+    page_state_checks = []
+    if profile.get('pageCounters'):
+        generated = root / 'results/generated' / name
+        metadata = json.loads((generated / 'metadata.json').read_text())
+        css = (root / 'fixtures/page-counters.css').read_text()
+        if profile.get('separator'):
+            css = css.replace('"."', '"' + sep + '"')
+        page_counter_input_checks = (
+            (generated / 'book.css').read_text() == css
+            and all('ordinal' not in doc for doc in metadata['documents'])
+            and all(re.search(r'<body class="(?:main|appendix|front)">', (generated / (file + '.html')).read_text())
+                    for file in ['preface', 'alpha', 'beta', 'appendix-a', 'appendix-b', 'afterword'])
+            and 'counter-reset:chapter' not in css.split('/* Count only')[0]
+            and 'counter-increment:chapter' not in css.split('/* Count only')[0])
+        for file in numbers:
+            pages = sorted({token_positions[ref['token']]['page'] for ref in refs if ref['source'] == file and ref['token'] in token_positions})
+            multi_page_documents[file] = pages
+            token = 'PAGE_STATE_' + file
+            match = re.search(re.escape(token) + r'=([^;]*);', flattened)
+            position = token_positions.get(token)
+            start = destinations.get(file + '.html#' + file + '-title')
+            page_state_checks.append({'file': file, 'expected': numbers[file], 'observed': match[1] if match else None,
+                                      'page': position['page'] if position else None, 'firstPage': start['page'] if start else None,
+                                      'matches': bool(match and match[1] == numbers[file] and position and start and position['page'] > start['page'])})
     content_markers = [marker for file in numbers for i in [1, 2] for marker in [f'DATA_{file}_{i}', f'CODE_{file}_{i}']] if not profile.get('single') else []
     summary = {
         'name': name, 'pages': len(reader.pages), 'creator': reader.metadata.creator,
@@ -236,6 +266,8 @@ for profile in profiles:
         'sharedIdChecks': len(shared_checks), 'matchedSharedIdReferences': sum(c['matches'] for c in shared_checks),
         'sharedIdPdfLinks': sum(c['hasDestination'] and c['hasPdfLink'] for c in shared_checks),
         'singleReferencePdfLinks': sum(c['hasDestination'] and c['hasPdfLink'] for c in single_links),
+        **({'noPerDocumentChapterSeeds': bool(page_counter_input_checks), 'referencePagesByDocument': multi_page_documents,
+            'laterPageCounterChecks': page_state_checks} if profile.get('pageCounters') else {}),
         'singleHeadingChecks': (all(w in flattened for w in ['第1章導入','1.1準備','1.1.1詳細','1.2実行','1.2.1確認','SINGLE_H2=1.1;','SINGLE_H3=1.1.1詳細;']) if profile.get('single') else None),
         'contentMarkers': len(content_markers), 'preservedContentMarkers': sum(m in flattened for m in content_markers),
         'literalCodeReferenceCount': flattened.count('[参照](alpha.html#alpha-title){.ref}'),
@@ -245,9 +277,9 @@ for profile in profiles:
     print(name, f"refs {summary['matchedReferences']}/{len(detail)}, captions {summary['matchedCaptions']}/{len(captions)}, toc {summary['tocPageMatches']}/{len(toc.links)}")
 
 out = {'copyright': 'Copyright 2026 HASEBA Junya (7pairs)', 'license': 'Apache-2.0', 'profiles': results}
-(root / 'results/step2-observations.json').write_text(json.dumps(out, ensure_ascii=False, indent=2) + '\n')
+(root / ('results/step2a-observations.json' if options.page_counters else 'results/step2-observations.json')).write_text(json.dumps(out, ensure_ascii=False, indent=2) + '\n')
 for r in results:
-    if r['name'] in ['b-base', 'b-body-swapped', 'b-appendix-swapped', 'b-depth3', 'b-hyphen']:
+    if oracle_name(r['name']) in ['b-base', 'b-body-swapped', 'b-appendix-swapped', 'b-depth3', 'b-hyphen']:
         assert r['matchedReferences'] == r['references'], (r['name'], r['mismatches'])
         assert r['matchedCaptions'] == r['captionChecks'], r['name']
         assert r['tocPageMatches'] == r['tocItems'], r['name']
@@ -257,6 +289,10 @@ for r in results:
         assert r['referencePdfLinks'] == r['references'], r['name']
         assert r['preservedContentMarkers'] == r['contentMarkers'] == 16, r['name']
         assert r['literalCodeReferenceCount'] == 8, r['name']
+        if options.page_counters:
+            assert r['noPerDocumentChapterSeeds'], r['name']
+            assert len(r['referencePagesByDocument']) == 4 and all(len(pages) >= 2 for pages in r['referencePagesByDocument'].values()), r['name']
+            assert len(r['laterPageCounterChecks']) == 4 and all(c['matches'] for c in r['laterPageCounterChecks']), r['name']
     if r['name'] == 'a-single':
         assert r['singleHeadingChecks'] and r['singleReferencePdfLinks'] == 2, r['name']
         assert r['tocChecksPassed'] and r['tocPdfLinks'] == r['tocExpectedItems'] == 3, r['name']

@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 
 [手順書0005](../../docs/plans/0005-investigate-numbering-and-references.md)に基づき、旧要件のT03～T05について、既存機能で満たせる範囲とclonoで補う処理を調べる。
 
-- 現在地：手順2まで完了。章開始値の補助を省けるか調べる手順2Aを手順書に追加した。手順2A・3・4は未着手。
+- 現在地：手順2Aの実施・検証・独立レビュー・二人の確認は完了。手順3ではページ側の採番方式を使う。手順3・4は未着手。
 - [参照資料と公開パッケージの識別情報](sources.md)
 - [候補・検証項目・期待値・環境とリスクの確認](results/verification.md)
 - [要件の出発点](../legacy-preprocessor/results/requirements.md#12-要件に結び付けた後続の確認事項)
@@ -44,6 +44,23 @@ Python側には`pypdf`・`pdfplumber`・Pillow、外部コマンドにはPoppler
 目次は、生成物から独立した期待項目と順序を使い、番号・本文・ページ番号を行単位で照合する。各行のPDF注釈はファイル名と見出しIDまで確認する。同名IDへの参照と単一原稿の参照も自動判定する。`--check-regressions`を付けると、基準構成から読み取った検査データのコピーに欠落・重複・順序変更・章番号の誤り・同ページ内の誤リンクを与え、5種類とも検出できることを確認する。保存済みのHTML・PDFは変更しない。
 
 手順3の見出し差し替え例はまだ作成・検証していない。
+
+## 手順2A：ページ側カウンターの検証と再現方法
+
+[検証結果の第10節](results/verification.md#10-手順2aページ側のカウンター方式の追加検証)に結果を記載した。今回の1原稿1章の構成では、ページ側で本文と付録を別々に数えることにより、原稿順から算出した章開始値の注入を省けた。他のID・キャプションの補助は維持している。
+
+上記の手順2の生成物を用意した後、このディレクトリで次を実行する。既存の結果を比較用に残し、`p-`で始まる5構成を別に生成する。
+
+```sh
+node scripts/check-environment.mjs --page-counters
+node scripts/build.mjs --page-counters
+python3 scripts/verify-pdfs.py --page-counters --check-regressions
+python3 scripts/render-pdfs.py --page-counters
+```
+
+入力は`fixtures/page-counter-profiles.json`と`fixtures/page-counters.css`で、原稿は手順2と共通である。`build.mjs --page-counters p-base`のように構成を絞ることもできる。原稿末尾には、そのページ自身の章カウンターを確認する検査表示を追加する。目次・リンクの検査に加え、生成HTML・CSSに原稿ごとの章開始値がないこと、章先頭より後のページでも章の値を維持することを自動判定する。
+
+集計は[step2a-observations.json](results/step2a-observations.json)、環境と既存PDFのハッシュ確認は[step2a-environment.json](results/step2a-environment.json)、最終版の実クリック確認は[step2a-viewing-observations.json](results/step2a-viewing-observations.json)に保存した。PDF・中間生成物は従来と同じ保存先のGit管理外に置く。結果の内容確認と独立レビューを終え、手順3ではページ側の採番方式を使うことに合意した。
 
 ## 資料の追跡と表示
 

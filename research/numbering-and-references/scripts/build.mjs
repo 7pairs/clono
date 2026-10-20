@@ -12,9 +12,10 @@ import remarkStringify from 'remark-stringify';
 import {stringify as vfm} from '@vivliostyle/vfm';
 import {JSDOM} from '@vivliostyle/jsdom';
 
-const profiles=JSON.parse(await readFile('fixtures/profiles.json','utf8')).profiles;
+const pageCounters=process.argv.includes('--page-counters');
+const profiles=JSON.parse(await readFile(pageCounters?'fixtures/page-counter-profiles.json':'fixtures/profiles.json','utf8')).profiles;
 const allDocs=JSON.parse(await readFile('fixtures/documents.json','utf8')).documents;
-const requested=new Set(process.argv.slice(2));
+const requested=new Set(process.argv.slice(2).filter(arg=>arg!=='--page-counters'));
 const parser=unified().use(remarkParse).use(remarkGfm).use(remarkDirective).use(remarkStringify);
 const escape=s=>s.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
 for(const profile of profiles.filter(p=>!requested.size||requested.has(p.name))) {
@@ -25,7 +26,7 @@ for(const profile of profiles.filter(p=>!requested.size||requested.has(p.name)))
   [docs[positions[0]],docs[positions[1]]]=[docs[positions[1]],docs[positions[0]]];
  }
  const counts={main:0,appendix:0};const metadata=[];
- let css=await readFile('fixtures/book.css','utf8');
+ let css=await readFile(profile.pageCounters?'fixtures/page-counters.css':'fixtures/book.css','utf8');
  if(profile.separator) css=css.replaceAll('"."',`"${profile.separator}"`);
  await writeFile(`${out}/book.css`,css);await copyFile('fixtures/sample.svg',`${out}/sample.svg`);
  for(const doc of docs) {
@@ -52,7 +53,10 @@ for(const profile of profiles.filter(p=>!requested.size||requested.has(p.name)))
    }
    html=dom.window.document.body.innerHTML;
   }
-  const ordinal=doc.kind==='front'?0:++counts[doc.kind];
+  if(profile.pageCounters&&doc.kind!=='front') {
+   html+=`<p class="page-state">PAGE_STATE_${doc.file}=</p>`;
+  }
+  const ordinal=profile.pageCounters?undefined:(doc.kind==='front'?0:++counts[doc.kind]);
   const seed=profile.supplement&&ordinal?` style="counter-reset:chapter ${ordinal-1} section 0 subsection 0 fig 0 tbl 0 listing 0"`:'';
   await writeFile(`${out}/${doc.file}.html`,`<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>${escape(doc.title)}</title><link rel="stylesheet" href="book.css"></head><body class="${doc.kind}"${seed}>${html}</body></html>`);
   metadata.push({...doc,ordinal,tableCount,sourceSha256:createHash('sha256').update(source).digest('hex')});
