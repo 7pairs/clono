@@ -8,6 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 [手順書0005](../../docs/plans/0005-investigate-numbering-and-references.md)に基づき、旧要件のT03～T05について、既存機能で満たせる範囲とclonoで補う処理を調べる。
 
 - 現在地：全手順の実施・内部確認完了。外部レビューと作業全体の完了状況は、対応するPRで確認する。
+- 外部レビューの3指摘への修正・検証・独立レビュー・二人の確認は完了。外部レビューによる修正確認は未実施。[対応記録](results/verification.md#13-外部レビューへの対応)を参照する。
 - [責務分担・成立条件・未確認事項・全体の見直し](results/verification.md#12-手順4責務分担と全体の見直し)
 - [参照資料と公開パッケージの識別情報](sources.md)
 - [候補・検証項目・期待値・環境とリスクの確認](results/verification.md)
@@ -69,6 +70,8 @@ python3 scripts/render-pdfs.py
 集計結果は[step2-observations.json](results/step2-observations.json)、環境と依存定義のハッシュは[environment.json](results/environment.json)、PDF閲覧時の確認は[viewing-observations.json](results/viewing-observations.json)に残す。検査用PythonはPDFから文字列とリンク注釈を調べる。閲覧操作と画像の目視確認は、その実行だけで自動的に再現したことにはならない。
 
 環境JSONは調査時点の記録として保持する。外部レビュー対応後の`check-environment.mjs`は、既存依存の定義・解決内容とJSDOMの直接宣言を照合し、通常・`--page-counters`・`--headings`それぞれの結果を`environment-current.json`・`step2a-environment-current.json`・`step3-environment-current.json`へ保存する。
+
+詳細は[外部レビュー対応](results/verification.md#13-外部レビューへの対応)を参照する。
 
 目次は、生成物から独立した期待項目と順序を使い、番号・本文・ページ番号を行単位で照合する。各行のPDF注釈はファイル名と見出しIDまで確認する。同名IDへの参照と単一原稿の参照も自動判定する。`--check-regressions`を付けると、基準構成から読み取った検査データのコピーに欠落・重複・順序変更・章番号の誤り・同ページ内の誤リンクを与え、5種類とも検出できることを確認する。保存済みのHTML・PDFは変更しない。
 
