@@ -1,0 +1,60 @@
+<!--
+Copyright 2026 HASEBA Junya (7pairs)
+SPDX-License-Identifier: Apache-2.0
+-->
+
+# 索引調査の参照資料
+
+確認日：2026-10-22（日本時間）。[手順書](../../docs/plans/0006-investigate-book-index.md)・[調査結果](results/verification.md)。資料上の説明、コードの読解、今後の検証案を区別する。ここでの参照は採用や動作保証を意味しない。
+
+## 1. Vivliostyleの公式資料と対象版
+
+| ID | 資料 | 確認した内容 |
+|---|---|---|
+| V01 | [公式ドキュメントの入口](https://docs.vivliostyle.org/en/) | 2026-09-15更新の案内はCore 2.45.1、CLI 11.3.3、VFM 2.7.2を対象としている。ドキュメントの更新版と最新公開版は区別する |
+| V02 | [Supported CSS Features](https://docs.vivliostyle.org/en/reference/supported-css-features/) | `target-counter()`・`target-counters()`・`target-text()`は`content`内で対応。段組みのプロパティも掲載。語の収集・読み順整列・ページ番号重複排除を行う索引専用機能の説明は、この一覧では見つからなかった |
+| V03 | [CLI Config Reference](https://docs.vivliostyle.org/en/cli/config/)・[11.3.3の設定スキーマ](https://github.com/vivliostyle/vivliostyle-cli/blob/v11.3.3/src/config/schema.ts) | `toc`、`documentProcessor`、記事・目次・表紙の設定を確認。索引の収集・日本語照合・重複ページ集約を一括で指定する設定は確認できなかった |
+| V04 | [VFMの構文](https://docs.vivliostyle.org/en/vfm/vfm/)・[パッケージの更新履歴](https://github.com/vivliostyle/vfm/blob/5bb52bb12c56f6695e51fc0737a4fdbc2dc9a5a4/packages/vfm/CHANGELOG.md) | 公開構文一覧と2.7.2までのパッケージ更新履歴を確認。索引用の語・読みの収集構文は確認できなかった。ルートの古いCHANGELOGだけで現在の機能を判断しない |
+| V05 | [Core 2.45.1のcounters.ts](https://github.com/vivliostyle/vivliostyle.js/blob/v2.45.1/packages/core/src/vivliostyle/counters.ts) | URL・IDに対応するカウンターの取得と未解決参照の扱いを読解。`target-counter()`は参照先の値を返す処理であり、索引項目の整列や複数リンク間の重複排除を担う処理とは区別する |
+| V06 | [CLI 11.4.0のリリース](https://github.com/vivliostyle/vivliostyle-cli/releases/tag/v11.4.0)・[更新履歴](https://github.com/vivliostyle/vivliostyle-cli/blob/v11.4.0/CHANGELOG.md) | 2026-10-19公開。npmのlatestも11.4.0だった。Core 2.45.2への更新、PDF後処理等の変更を確認。索引専用機能の追加は当該更新記録では見つからなかった |
+| V07 | [Core更新履歴](https://github.com/vivliostyle/vivliostyle.js/blob/40142872f1ed9e9b52798798953250418b227a92/CHANGELOG.md) | 先頭の公開版は2.45.2。2.45.1との差はleader等の修正で、索引生成機能の追加ではなかった。全履歴の索引関連語も検索したが、不在の完全な証明とはしない |
+| V08 | [目次とページ参照の公式例](https://vivliostyle.org/tutorials/create-table-of-contents/) | リンク先のページ番号をCSSで表示する例。索引一覧の自動収集を実証する例とは扱わない |
+
+npmでは`npm view @vivliostyle/cli version --json`相当のメタデータ参照で11.4.0、`npm view @vivliostyle/vfm version --json`で2.7.2を確認した。GitHubのCLI最新リリースAPIでもv11.4.0、公開日時2026-10-19T13:54:17Zを確認した。インストールやバージョン変更はしていない。
+
+## 2. 規格と照合処理
+
+| ID | 資料 | 確認した内容・限界 |
+|---|---|---|
+| J01 | [日本規格協会：JIS X 4061:1996](https://webdesk.jsa.or.jp/books/W11M0090/index/?bunsyo_id=JIS+X+4061:1996) | 標題は「日本語文字列照合順番」。状態は有効、確認日は2022-10-20。概要には単純照合、読み・表記照合、代表読み照合の3方法がある。商品情報と概要を確認したが、規格全文は未読 |
+| J02 | [JISC](https://www.jisc.go.jp/)・[JIS検索](https://www.jisc.go.jp/app/jis/general/GnrJISSearch.html) | ブラウザーでX4061を検索し、詳細画面で制定日1996-11-20、最新確認日2022-10-20を照合した。通常PDFはログインが必要と表示された。ログイン不要と案内される音声PDFのリンクも確認したが、クリック後に本文の表示・新規タブを確認できず、本文は未読。条項別の適合判定はしない |
+| J03 | [ECMA-402 Collator Objects](https://tc39.es/ecma402/#collator-objects) | `Intl.Collator`の比較は実装依存。`sensitivity`はbase・accent・case・variant。日本語ロケールの指定だけでJIS全面準拠とは判断しない |
+| J04 | [Node.js 24系の国際化資料](https://nodejs.org/docs/latest-v24.x/api/intl.html) | HTTP取得した資料の表題はv24.22.1。ICUを用い、標準配布はfull-icuという説明を確認した。実行予定の24.22.0とは版を区別し、実際の設定と版は実行環境で記録する |
+| J05 | [ICU Collation Concepts](https://unicode-org.github.io/icu/userguide/collation/concepts.html#sorting-of-japanese-text-jis-x-4061) | JISとの関係と、平仮名・片仮名の区別に第4レベルを使う説明。ICU内部の能力とJavaScriptから指定できる範囲は同一としない |
+| J06 | [CLDR 48の日本語照合データ](https://github.com/unicode-org/cldr/blob/release-48/common/collation/ja.xml)・[ライセンス](https://github.com/unicode-org/cldr/blob/release-48/LICENSE) | 清濁・長音/小書き/繰返し/通常の仮名・平仮名/片仮名についてJIS 4.4.10.2への参照がある。規格全文の代わりではなく、候補実装が意図する規則の一次資料として読む。Unicode License V3 |
+| J07 | [Lingua::JA::Sort::JIS 0.10](https://metacpan.org/release/SADAHIRO/Lingua-JA-Sort-JIS-0.10/view/JIS.pod) | JIS X 4061-1996の実装を標榜。比較レベル・漢字クラス・読みと表記を順に比較する例を提供。Perlの別実行環境が必要で、古いUnicodeの扱いに注意書きがある。ライセンスはPerlと同条件。実行していない |
+| J08 | [Go jisx4061 v0.1.0](https://github.com/shogo82148/jisx4061/blob/v0.1.0/x4061.go)・[ライセンス](https://github.com/shogo82148/jisx4061/blob/v0.1.0/LICENSE) | 単純照合・基本照合規則・拡張漢字クラスを採ると明記。Goの別実行環境が必要。MIT。全文規格や独立した期待値に代えて正解扱いはしない。実行していない |
+
+非公式の規格転載ページも検索結果に出たが、本調査の規格への適合判断の根拠には採用していない。規格本文の入手・閲覧と、処理系定義事項の確認は残る。
+
+## 3. 外部の索引実装例
+
+| ID | 資料 | 読解した内容と利用上の区別 |
+|---|---|---|
+| E01 | [AyumuTakaiの索引サンプル](https://github.com/AyumuTakai/vivliostyle-index-sample/tree/525c91e548f8f8c7aa0ef4cb202e0bde8767fc11) | README、scripts.js、設定、LICENSEを確認。置換処理で語と読みを集めて索引を生成する。参照は読みをキーにまとめ、最初の語を見出しにするため、同じ読みの異なる語も一つの項目になる。同読み異語を分ける今回の要件とは異なり、この統合方法は継承しない。READMEは同一ページの重複に手動無効化を案内。仮名と英字を変換して文字列比較する方式で、JIS対応を保証しない。MIT。旧置換記法を製品へ継承する候補とはしない |
+| E02 | [techbook-templateのgen-index.mjs](https://github.com/tomio2480/techbook-template/blob/749f8a8bfad8673b45a3dcc51b5c232ade793a06/scripts/gen-index.mjs) | README、生成コード、LICENSEを確認。語・読み付きアンカーを収集して一覧の骨組みを生成する。コードは読みの平仮名化後に符号位置で比較し、同じキーでは表記を比較する。JIS照合の代用にはしない。MIT |
+| E03 | [Vivlio Starterの重複排除](https://github.com/Atelier-Mirai/vivlio-starter/blob/374df9730f3538d825e89937d1ea6b703193df64/lib/vivlio_starter/cli/build/backlink_deduplicator.rb)・[工程の接続](https://github.com/Atelier-Mirai/vivlio-starter/blob/374df9730f3538d825e89937d1ea6b703193df64/lib/vivlio_starter/cli/build/backlink_dedup_orchestrator.rb)・[PDFページ対応の抽出](https://github.com/Atelier-Mirai/vivlio-starter/blob/374df9730f3538d825e89937d1ea6b703193df64/lib/vivlio_starter/cli/build/pdf_page_map_extractor.rb)・[LICENSE](https://github.com/Atelier-Mirai/vivlio-starter/blob/374df9730f3538d825e89937d1ea6b703193df64/LICENSE) | 生成PDFのnamed destinationsから対応を取り、索引HTMLの同ページへのリンクを整理し、必要なら再組版する流れを確認。ページ対応を取得できない索引リンクも削除するが、その動作は今回継承せず、不足として検出する。Ruby・pdf/reader等を使う。MIT。規模の大きい本作りツール全体の採用や、その実測結果をclonoへ移す判断はしていない |
+
+既存ツールの丸ごと採用、コードの部分再利用、考え方の参照は別に判断する。今回は参照と読解のみで、第三者のコードやデータは成果物に取り込んでいない。後続で取り込む場合は、対象ファイルのライセンス・著作権表示・依存を改めて確認する。
+
+## 4. アクセス状況と再確認
+
+Vivliostyleの公式入口・ドキュメント、JSAの商品情報、JISCの入口、Unicode/ICU、GitHubの公開コードは取得できた範囲で確認した。メンテナンス告知によって保留にしたサイトは、今回の範囲ではない。
+
+一部のGitHub画面はWeb取得でcache missとなったため、同じ公開リポジトリの公式API・raw配信で対象を確認した。推測したドキュメントURLの取得エラーは、公式入口から正しいリンクを辿って解消した。これらをPHPの脆弱性やサイトのメンテナンスが原因とは推定しない。
+
+JIS本文の未読はメンテナンスと判定したものではない。通常PDFにはログインが必要で、ログイン不要とされる音声PDFも今回のブラウザーでは本文を表示できなかった。アカウント登録・ログイン・購入は行っていない。後日、利用できる公式の閲覧経路を二人で確認し、規格に基づく期待値を確定する。今後メンテナンス告知が出たサイトは連続して取得を試みず、確認を保留する。
+
+### 資料調査後の報告と保留方針
+
+2026-10-22、開発者から、利用者登録で仮パスワード発行までは進んだがログイン画面に「メンテナンス中」と表示されたとの報告があった。二人で、JIS本文の確認と厳密な適合判定を復旧後へ保留することに合意した。PHPの利用や、メンテナンスの原因は未確認とする。上記の取得状況は、開発者の報告前にそらが確認した時点の記録として残す。
