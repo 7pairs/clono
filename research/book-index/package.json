@@ -1,0 +1,21 @@
+{
+  "name": "clono-environment-probe",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@vivliostyle/vfm": "2.7.2",
+    "unified": "11.0.5",
+    "remark-parse": "11.0.0",
+    "remark-directive": "4.0.0",
+    "remark-gfm": "4.0.1",
+    "remark-rehype": "11.1.2",
+    "rehype-stringify": "10.0.1",
+    "remark-stringify": "11.0.0"
+  },
+  "devDependencies": {
+    "@vivliostyle/cli": "11.3.3",
+    "@vivliostyle/jsdom": "25.0.1-vivliostyle-cli.2",
+    "shadow-cljs": "3.5.7"
+  }
+}
