@@ -1,0 +1,172 @@
+test_invalid_physical_page_fails (__main__.PageAggregationTests.test_invalid_physical_page_fails)
+When a named destination has no valid physical page, then mapping fails ... ERROR
+test_missing_maps_fail_without_silent_reference_loss (__main__.PageAggregationTests.test_missing_maps_fail_without_silent_reference_loss)
+When several references lack pages, then diagnostics identify every missing source and ID ... ERROR
+test_only_same_item_same_page_references_are_removed (__main__.PageAggregationTests.test_only_same_item_same_page_references_are_removed)
+When an item repeats on one page, then only the first reference on that page survives ... ERROR
+test_pdf_maps_match_independent_expected_pages (__main__.PageAggregationTests.test_pdf_maps_match_independent_expected_pages)
+When four existing PDFs are read, then all source-ID pairs resolve to expected pages ... 
+  test_pdf_maps_match_independent_expected_pages (__main__.PageAggregationTests.test_pdf_maps_match_independent_expected_pages) (profile='base-2')
+When four existing PDFs are read, then all source-ID pairs resolve to expected pages ... ERROR
+  test_pdf_maps_match_independent_expected_pages (__main__.PageAggregationTests.test_pdf_maps_match_independent_expected_pages) (profile='swapped-2')
+When four existing PDFs are read, then all source-ID pairs resolve to expected pages ... ERROR
+  test_pdf_maps_match_independent_expected_pages (__main__.PageAggregationTests.test_pdf_maps_match_independent_expected_pages) (profile='base-3')
+When four existing PDFs are read, then all source-ID pairs resolve to expected pages ... ERROR
+  test_pdf_maps_match_independent_expected_pages (__main__.PageAggregationTests.test_pdf_maps_match_independent_expected_pages) (profile='base-4')
+When four existing PDFs are read, then all source-ID pairs resolve to expected pages ... ERROR
+test_real_pdf_missing_unknown_and_ambiguous_destinations_fail (__main__.PageAggregationTests.test_real_pdf_missing_unknown_and_ambiguous_destinations_fail)
+When real PDF names are missing, unsupported or ambiguous, then mapping is rejected ... 
+  test_real_pdf_missing_unknown_and_ambiguous_destinations_fail (__main__.PageAggregationTests.test_real_pdf_missing_unknown_and_ambiguous_destinations_fail) (mutation='missing')
+When real PDF names are missing, unsupported or ambiguous, then mapping is rejected ... ERROR
+  test_real_pdf_missing_unknown_and_ambiguous_destinations_fail (__main__.PageAggregationTests.test_real_pdf_missing_unknown_and_ambiguous_destinations_fail) (mutation='unsupported')
+When real PDF names are missing, unsupported or ambiguous, then mapping is rejected ... ERROR
+  test_real_pdf_missing_unknown_and_ambiguous_destinations_fail (__main__.PageAggregationTests.test_real_pdf_missing_unknown_and_ambiguous_destinations_fail) (mutation='ambiguous')
+When real PDF names are missing, unsupported or ambiguous, then mapping is rejected ... ERROR
+test_same_page_different_items_and_readings_remain (__main__.PageAggregationTests.test_same_page_different_items_and_readings_remain)
+When terms or readings differ on one page, then they retain separate references ... ERROR
+test_source_is_part_of_destination_identity (__main__.PageAggregationTests.test_source_is_part_of_destination_identity)
+When documents share a fragment ID, then each source resolves independently ... ERROR
+
+======================================================================
+ERROR: test_invalid_physical_page_fails (__main__.PageAggregationTests.test_invalid_physical_page_fails)
+When a named destination has no valid physical page, then mapping fails
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page-aggregation.test.py", line 103, in test_invalid_physical_page_fails
+    extract_page_map(reader, [occurrence('a.md', 'one')])
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page_aggregation.py", line 8, in extract_page_map
+    raise NotImplementedError('PDF page mapping not implemented')
+NotImplementedError: PDF page mapping not implemented
+
+======================================================================
+ERROR: test_missing_maps_fail_without_silent_reference_loss (__main__.PageAggregationTests.test_missing_maps_fail_without_silent_reference_loss)
+When several references lack pages, then diagnostics identify every missing source and ID
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page-aggregation.test.py", line 76, in test_missing_maps_fail_without_silent_reference_loss
+    aggregate_pages(items, {})
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page_aggregation.py", line 12, in aggregate_pages
+    raise NotImplementedError('Page aggregation not implemented')
+NotImplementedError: Page aggregation not implemented
+
+======================================================================
+ERROR: test_only_same_item_same_page_references_are_removed (__main__.PageAggregationTests.test_only_same_item_same_page_references_are_removed)
+When an item repeats on one page, then only the first reference on that page survives
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page-aggregation.test.py", line 46, in test_only_same_item_same_page_references_are_removed
+    result = aggregate_pages(profile['items'], page_map)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page_aggregation.py", line 12, in aggregate_pages
+    raise NotImplementedError('Page aggregation not implemented')
+NotImplementedError: Page aggregation not implemented
+
+======================================================================
+ERROR: test_pdf_maps_match_independent_expected_pages (__main__.PageAggregationTests.test_pdf_maps_match_independent_expected_pages) (profile='base-2')
+When four existing PDFs are read, then all source-ID pairs resolve to expected pages
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page-aggregation.test.py", line 31, in test_pdf_maps_match_independent_expected_pages
+    result = extract_page_map(reader, profile['occurrences'])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page_aggregation.py", line 8, in extract_page_map
+    raise NotImplementedError('PDF page mapping not implemented')
+NotImplementedError: PDF page mapping not implemented
+
+======================================================================
+ERROR: test_pdf_maps_match_independent_expected_pages (__main__.PageAggregationTests.test_pdf_maps_match_independent_expected_pages) (profile='swapped-2')
+When four existing PDFs are read, then all source-ID pairs resolve to expected pages
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page-aggregation.test.py", line 31, in test_pdf_maps_match_independent_expected_pages
+    result = extract_page_map(reader, profile['occurrences'])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page_aggregation.py", line 8, in extract_page_map
+    raise NotImplementedError('PDF page mapping not implemented')
+NotImplementedError: PDF page mapping not implemented
+
+======================================================================
+ERROR: test_pdf_maps_match_independent_expected_pages (__main__.PageAggregationTests.test_pdf_maps_match_independent_expected_pages) (profile='base-3')
+When four existing PDFs are read, then all source-ID pairs resolve to expected pages
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page-aggregation.test.py", line 31, in test_pdf_maps_match_independent_expected_pages
+    result = extract_page_map(reader, profile['occurrences'])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page_aggregation.py", line 8, in extract_page_map
+    raise NotImplementedError('PDF page mapping not implemented')
+NotImplementedError: PDF page mapping not implemented
+
+======================================================================
+ERROR: test_pdf_maps_match_independent_expected_pages (__main__.PageAggregationTests.test_pdf_maps_match_independent_expected_pages) (profile='base-4')
+When four existing PDFs are read, then all source-ID pairs resolve to expected pages
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page-aggregation.test.py", line 31, in test_pdf_maps_match_independent_expected_pages
+    result = extract_page_map(reader, profile['occurrences'])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page_aggregation.py", line 8, in extract_page_map
+    raise NotImplementedError('PDF page mapping not implemented')
+NotImplementedError: PDF page mapping not implemented
+
+======================================================================
+ERROR: test_real_pdf_missing_unknown_and_ambiguous_destinations_fail (__main__.PageAggregationTests.test_real_pdf_missing_unknown_and_ambiguous_destinations_fail) (mutation='missing')
+When real PDF names are missing, unsupported or ambiguous, then mapping is rejected
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page-aggregation.test.py", line 96, in test_real_pdf_missing_unknown_and_ambiguous_destinations_fail
+    extract_page_map(reader, COLLECTED[0]['occurrences'], named=named)
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page_aggregation.py", line 8, in extract_page_map
+    raise NotImplementedError('PDF page mapping not implemented')
+NotImplementedError: PDF page mapping not implemented
+
+======================================================================
+ERROR: test_real_pdf_missing_unknown_and_ambiguous_destinations_fail (__main__.PageAggregationTests.test_real_pdf_missing_unknown_and_ambiguous_destinations_fail) (mutation='unsupported')
+When real PDF names are missing, unsupported or ambiguous, then mapping is rejected
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page-aggregation.test.py", line 96, in test_real_pdf_missing_unknown_and_ambiguous_destinations_fail
+    extract_page_map(reader, COLLECTED[0]['occurrences'], named=named)
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page_aggregation.py", line 8, in extract_page_map
+    raise NotImplementedError('PDF page mapping not implemented')
+NotImplementedError: PDF page mapping not implemented
+
+======================================================================
+ERROR: test_real_pdf_missing_unknown_and_ambiguous_destinations_fail (__main__.PageAggregationTests.test_real_pdf_missing_unknown_and_ambiguous_destinations_fail) (mutation='ambiguous')
+When real PDF names are missing, unsupported or ambiguous, then mapping is rejected
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page-aggregation.test.py", line 96, in test_real_pdf_missing_unknown_and_ambiguous_destinations_fail
+    extract_page_map(reader, COLLECTED[0]['occurrences'], named=named)
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page_aggregation.py", line 8, in extract_page_map
+    raise NotImplementedError('PDF page mapping not implemented')
+NotImplementedError: PDF page mapping not implemented
+
+======================================================================
+ERROR: test_same_page_different_items_and_readings_remain (__main__.PageAggregationTests.test_same_page_different_items_and_readings_remain)
+When terms or readings differ on one page, then they retain separate references
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page-aggregation.test.py", line 58, in test_same_page_different_items_and_readings_remain
+    result = aggregate_pages(items, dict(mapped('a.html', id_, 1) for id_ in ['one', 'two', 'three']))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page_aggregation.py", line 12, in aggregate_pages
+    raise NotImplementedError('Page aggregation not implemented')
+NotImplementedError: Page aggregation not implemented
+
+======================================================================
+ERROR: test_source_is_part_of_destination_identity (__main__.PageAggregationTests.test_source_is_part_of_destination_identity)
+When documents share a fragment ID, then each source resolves independently
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page-aggregation.test.py", line 67, in test_source_is_part_of_destination_identity
+    result = extract_page_map(reader, [occurrence('a.md', 'same'), occurrence('b.md', 'same')])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page_aggregation.py", line 8, in extract_page_map
+    raise NotImplementedError('PDF page mapping not implemented')
+NotImplementedError: PDF page mapping not implemented
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.014s
+
+FAILED (errors=12)

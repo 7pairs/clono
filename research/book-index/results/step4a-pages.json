@@ -1,0 +1,1077 @@
+{
+  "status": "verified",
+  "command": ".venv/bin/python scripts/aggregate-pages.py",
+  "inputHashes": {
+    "fixtures/a.md": "63987dd1eb564ea5961872a5840f0c9e9e97efc3bc7c8d292daaa2703af9c517",
+    "fixtures/b.md": "706af4da72e69f77802e3c703a84e9fe8ccf5f6831c244e018390fbbf00adc06",
+    "results/step2-conversion.json": "e46801a36ede0b6fafdf8de2dcb8e3c4263f84da270411aab65be889ef948f36",
+    "results/step2-pdf.json": "33274d9c9344c7b7fa9a586e750625c090469c7e8617b05a570c6d7d791d72d4",
+    "fixtures/page-aggregation-expected.json": "89f55a673b3b8bb2ec351dcda8fab39260e4bff2edecd8f8c2145098e159b391",
+    "scripts/page_aggregation.py": "f59c016059f7532f93dcbc2a34d8a3e1b23c3e3df1a377327862410bb629ee90",
+    "scripts/aggregate-pages.py": "d70b0755e7c379e72aef81b297033ffe7b9a0ebaa96ab915c7b1572a0444736b"
+  },
+  "profiles": [
+    {
+      "name": "base-2",
+      "pdfSha256": "aad31ca299bacf0fdf669ac13e19f13470169ecc1c7721c469fbe71a29ec1165",
+      "pageCount": 4,
+      "creator": "Vivliostyle (Vivliostyle.js 2.45.1; Chrome/153.0.8010.36)",
+      "elapsedMs": 10.117625002749264,
+      "pageMap": [
+        {
+          "source": "a.html",
+          "id": "idx-a-1",
+          "physicalPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-1"
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-2",
+          "physicalPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-2"
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-3",
+          "physicalPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-3"
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-4",
+          "physicalPage": 2,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-4"
+        },
+        {
+          "source": "b.html",
+          "id": "idx-b-3",
+          "physicalPage": 3,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-3"
+        },
+        {
+          "source": "b.html",
+          "id": "idx-b-2",
+          "physicalPage": 3,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-2"
+        },
+        {
+          "source": "b.html",
+          "id": "idx-b-1",
+          "physicalPage": 3,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-1"
+        }
+      ],
+      "items": [
+        {
+          "term": "Android",
+          "reading": "あんどろいど",
+          "before": [
+            {
+              "source": "a.html",
+              "id": "idx-a-3",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-3",
+              "href": "a.html#idx-a-3",
+              "originalSource": "a.md",
+              "position": {
+                "line": 10,
+                "column": 1
+              }
+            }
+          ],
+          "kept": [
+            {
+              "source": "a.html",
+              "id": "idx-a-3",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-3",
+              "href": "a.html#idx-a-3",
+              "originalSource": "a.md",
+              "position": {
+                "line": 10,
+                "column": 1
+              }
+            }
+          ],
+          "removed": []
+        },
+        {
+          "term": "位置情報",
+          "reading": "いちじょうほう",
+          "before": [
+            {
+              "source": "a.html",
+              "id": "idx-a-1",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-1",
+              "href": "a.html#idx-a-1",
+              "originalSource": "a.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              }
+            },
+            {
+              "source": "a.html",
+              "id": "idx-a-2",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-2",
+              "href": "a.html#idx-a-2",
+              "originalSource": "a.md",
+              "position": {
+                "line": 8,
+                "column": 1
+              }
+            },
+            {
+              "source": "b.html",
+              "id": "idx-b-1",
+              "physicalPage": 3,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-1",
+              "href": "b.html#idx-b-1",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              }
+            }
+          ],
+          "kept": [
+            {
+              "source": "a.html",
+              "id": "idx-a-1",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-1",
+              "href": "a.html#idx-a-1",
+              "originalSource": "a.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              }
+            },
+            {
+              "source": "b.html",
+              "id": "idx-b-1",
+              "physicalPage": 3,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-1",
+              "href": "b.html#idx-b-1",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              }
+            }
+          ],
+          "removed": [
+            {
+              "source": "a.html",
+              "id": "idx-a-2",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-2",
+              "href": "a.html#idx-a-2",
+              "originalSource": "a.md",
+              "position": {
+                "line": 8,
+                "column": 1
+              },
+              "keptSource": "a.html",
+              "keptId": "idx-a-1"
+            }
+          ]
+        },
+        {
+          "term": "API",
+          "reading": "えーぴーあい",
+          "before": [
+            {
+              "source": "b.html",
+              "id": "idx-b-3",
+              "physicalPage": 3,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-3",
+              "href": "b.html#idx-b-3",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 60
+              }
+            }
+          ],
+          "kept": [
+            {
+              "source": "b.html",
+              "id": "idx-b-3",
+              "physicalPage": 3,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-3",
+              "href": "b.html#idx-b-3",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 60
+              }
+            }
+          ],
+          "removed": []
+        },
+        {
+          "term": "テスト",
+          "reading": "てすと",
+          "before": [
+            {
+              "source": "a.html",
+              "id": "idx-a-4",
+              "physicalPage": 2,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-4",
+              "href": "a.html#idx-a-4",
+              "originalSource": "a.md",
+              "position": {
+                "line": 16,
+                "column": 1
+              }
+            },
+            {
+              "source": "b.html",
+              "id": "idx-b-2",
+              "physicalPage": 3,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-2",
+              "href": "b.html#idx-b-2",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 33
+              }
+            }
+          ],
+          "kept": [
+            {
+              "source": "a.html",
+              "id": "idx-a-4",
+              "physicalPage": 2,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-4",
+              "href": "a.html#idx-a-4",
+              "originalSource": "a.md",
+              "position": {
+                "line": 16,
+                "column": 1
+              }
+            },
+            {
+              "source": "b.html",
+              "id": "idx-b-2",
+              "physicalPage": 3,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-2",
+              "href": "b.html#idx-b-2",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 33
+              }
+            }
+          ],
+          "removed": []
+        }
+      ],
+      "beforeCount": 7,
+      "afterCount": 6
+    },
+    {
+      "name": "swapped-2",
+      "pdfSha256": "550b805731891b2f6787b7377fe453d04096ebf58d1bb7c21aa2eadea1d21d84",
+      "pageCount": 4,
+      "creator": "Vivliostyle (Vivliostyle.js 2.45.1; Chrome/153.0.8010.36)",
+      "elapsedMs": 9.602000005543232,
+      "pageMap": [
+        {
+          "source": "b.html",
+          "id": "idx-b-3",
+          "physicalPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-3"
+        },
+        {
+          "source": "b.html",
+          "id": "idx-b-2",
+          "physicalPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-2"
+        },
+        {
+          "source": "b.html",
+          "id": "idx-b-1",
+          "physicalPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-1"
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-1",
+          "physicalPage": 2,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-1"
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-2",
+          "physicalPage": 2,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-2"
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-3",
+          "physicalPage": 2,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-3"
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-4",
+          "physicalPage": 3,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-4"
+        }
+      ],
+      "items": [
+        {
+          "term": "Android",
+          "reading": "あんどろいど",
+          "before": [
+            {
+              "source": "a.html",
+              "id": "idx-a-3",
+              "physicalPage": 2,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-3",
+              "href": "a.html#idx-a-3",
+              "originalSource": "a.md",
+              "position": {
+                "line": 10,
+                "column": 1
+              }
+            }
+          ],
+          "kept": [
+            {
+              "source": "a.html",
+              "id": "idx-a-3",
+              "physicalPage": 2,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-3",
+              "href": "a.html#idx-a-3",
+              "originalSource": "a.md",
+              "position": {
+                "line": 10,
+                "column": 1
+              }
+            }
+          ],
+          "removed": []
+        },
+        {
+          "term": "位置情報",
+          "reading": "いちじょうほう",
+          "before": [
+            {
+              "source": "b.html",
+              "id": "idx-b-1",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-1",
+              "href": "b.html#idx-b-1",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              }
+            },
+            {
+              "source": "a.html",
+              "id": "idx-a-1",
+              "physicalPage": 2,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-1",
+              "href": "a.html#idx-a-1",
+              "originalSource": "a.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              }
+            },
+            {
+              "source": "a.html",
+              "id": "idx-a-2",
+              "physicalPage": 2,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-2",
+              "href": "a.html#idx-a-2",
+              "originalSource": "a.md",
+              "position": {
+                "line": 8,
+                "column": 1
+              }
+            }
+          ],
+          "kept": [
+            {
+              "source": "b.html",
+              "id": "idx-b-1",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-1",
+              "href": "b.html#idx-b-1",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              }
+            },
+            {
+              "source": "a.html",
+              "id": "idx-a-1",
+              "physicalPage": 2,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-1",
+              "href": "a.html#idx-a-1",
+              "originalSource": "a.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              }
+            }
+          ],
+          "removed": [
+            {
+              "source": "a.html",
+              "id": "idx-a-2",
+              "physicalPage": 2,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-2",
+              "href": "a.html#idx-a-2",
+              "originalSource": "a.md",
+              "position": {
+                "line": 8,
+                "column": 1
+              },
+              "keptSource": "a.html",
+              "keptId": "idx-a-1"
+            }
+          ]
+        },
+        {
+          "term": "API",
+          "reading": "えーぴーあい",
+          "before": [
+            {
+              "source": "b.html",
+              "id": "idx-b-3",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-3",
+              "href": "b.html#idx-b-3",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 60
+              }
+            }
+          ],
+          "kept": [
+            {
+              "source": "b.html",
+              "id": "idx-b-3",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-3",
+              "href": "b.html#idx-b-3",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 60
+              }
+            }
+          ],
+          "removed": []
+        },
+        {
+          "term": "テスト",
+          "reading": "てすと",
+          "before": [
+            {
+              "source": "b.html",
+              "id": "idx-b-2",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-2",
+              "href": "b.html#idx-b-2",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 33
+              }
+            },
+            {
+              "source": "a.html",
+              "id": "idx-a-4",
+              "physicalPage": 3,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-4",
+              "href": "a.html#idx-a-4",
+              "originalSource": "a.md",
+              "position": {
+                "line": 16,
+                "column": 1
+              }
+            }
+          ],
+          "kept": [
+            {
+              "source": "b.html",
+              "id": "idx-b-2",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-2",
+              "href": "b.html#idx-b-2",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 33
+              }
+            },
+            {
+              "source": "a.html",
+              "id": "idx-a-4",
+              "physicalPage": 3,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-4",
+              "href": "a.html#idx-a-4",
+              "originalSource": "a.md",
+              "position": {
+                "line": 16,
+                "column": 1
+              }
+            }
+          ],
+          "removed": []
+        }
+      ],
+      "beforeCount": 7,
+      "afterCount": 6
+    },
+    {
+      "name": "base-3",
+      "pdfSha256": "24ef52cbc97315569dd3bdba1e98ac06f12fd8b1816d0fdcaf4a9f747b35178a",
+      "pageCount": 4,
+      "creator": "Vivliostyle (Vivliostyle.js 2.45.1; Chrome/153.0.8010.36)",
+      "elapsedMs": 9.603540995158255,
+      "pageMap": [
+        {
+          "source": "a.html",
+          "id": "idx-a-1",
+          "physicalPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-1"
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-2",
+          "physicalPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-2"
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-3",
+          "physicalPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-3"
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-4",
+          "physicalPage": 2,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-4"
+        },
+        {
+          "source": "b.html",
+          "id": "idx-b-3",
+          "physicalPage": 3,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-3"
+        },
+        {
+          "source": "b.html",
+          "id": "idx-b-2",
+          "physicalPage": 3,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-2"
+        },
+        {
+          "source": "b.html",
+          "id": "idx-b-1",
+          "physicalPage": 3,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-1"
+        }
+      ],
+      "items": [
+        {
+          "term": "Android",
+          "reading": "あんどろいど",
+          "before": [
+            {
+              "source": "a.html",
+              "id": "idx-a-3",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-3",
+              "href": "a.html#idx-a-3",
+              "originalSource": "a.md",
+              "position": {
+                "line": 10,
+                "column": 1
+              }
+            }
+          ],
+          "kept": [
+            {
+              "source": "a.html",
+              "id": "idx-a-3",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-3",
+              "href": "a.html#idx-a-3",
+              "originalSource": "a.md",
+              "position": {
+                "line": 10,
+                "column": 1
+              }
+            }
+          ],
+          "removed": []
+        },
+        {
+          "term": "位置情報",
+          "reading": "いちじょうほう",
+          "before": [
+            {
+              "source": "a.html",
+              "id": "idx-a-1",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-1",
+              "href": "a.html#idx-a-1",
+              "originalSource": "a.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              }
+            },
+            {
+              "source": "a.html",
+              "id": "idx-a-2",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-2",
+              "href": "a.html#idx-a-2",
+              "originalSource": "a.md",
+              "position": {
+                "line": 8,
+                "column": 1
+              }
+            },
+            {
+              "source": "b.html",
+              "id": "idx-b-1",
+              "physicalPage": 3,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-1",
+              "href": "b.html#idx-b-1",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              }
+            }
+          ],
+          "kept": [
+            {
+              "source": "a.html",
+              "id": "idx-a-1",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-1",
+              "href": "a.html#idx-a-1",
+              "originalSource": "a.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              }
+            },
+            {
+              "source": "b.html",
+              "id": "idx-b-1",
+              "physicalPage": 3,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-1",
+              "href": "b.html#idx-b-1",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              }
+            }
+          ],
+          "removed": [
+            {
+              "source": "a.html",
+              "id": "idx-a-2",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-2",
+              "href": "a.html#idx-a-2",
+              "originalSource": "a.md",
+              "position": {
+                "line": 8,
+                "column": 1
+              },
+              "keptSource": "a.html",
+              "keptId": "idx-a-1"
+            }
+          ]
+        },
+        {
+          "term": "API",
+          "reading": "えーぴーあい",
+          "before": [
+            {
+              "source": "b.html",
+              "id": "idx-b-3",
+              "physicalPage": 3,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-3",
+              "href": "b.html#idx-b-3",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 60
+              }
+            }
+          ],
+          "kept": [
+            {
+              "source": "b.html",
+              "id": "idx-b-3",
+              "physicalPage": 3,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-3",
+              "href": "b.html#idx-b-3",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 60
+              }
+            }
+          ],
+          "removed": []
+        },
+        {
+          "term": "テスト",
+          "reading": "てすと",
+          "before": [
+            {
+              "source": "a.html",
+              "id": "idx-a-4",
+              "physicalPage": 2,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-4",
+              "href": "a.html#idx-a-4",
+              "originalSource": "a.md",
+              "position": {
+                "line": 16,
+                "column": 1
+              }
+            },
+            {
+              "source": "b.html",
+              "id": "idx-b-2",
+              "physicalPage": 3,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-2",
+              "href": "b.html#idx-b-2",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 33
+              }
+            }
+          ],
+          "kept": [
+            {
+              "source": "a.html",
+              "id": "idx-a-4",
+              "physicalPage": 2,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-4",
+              "href": "a.html#idx-a-4",
+              "originalSource": "a.md",
+              "position": {
+                "line": 16,
+                "column": 1
+              }
+            },
+            {
+              "source": "b.html",
+              "id": "idx-b-2",
+              "physicalPage": 3,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-2",
+              "href": "b.html#idx-b-2",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 33
+              }
+            }
+          ],
+          "removed": []
+        }
+      ],
+      "beforeCount": 7,
+      "afterCount": 6
+    },
+    {
+      "name": "base-4",
+      "pdfSha256": "3cbaaa55408fa929d0db3abdbe2d1abef14b37c58f896fa663dd2f114ae79c79",
+      "pageCount": 4,
+      "creator": "Vivliostyle (Vivliostyle.js 2.45.1; Chrome/153.0.8010.36)",
+      "elapsedMs": 9.312584006693214,
+      "pageMap": [
+        {
+          "source": "a.html",
+          "id": "idx-a-1",
+          "physicalPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-1"
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-2",
+          "physicalPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-2"
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-3",
+          "physicalPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-3"
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-4",
+          "physicalPage": 2,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-4"
+        },
+        {
+          "source": "b.html",
+          "id": "idx-b-3",
+          "physicalPage": 3,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-3"
+        },
+        {
+          "source": "b.html",
+          "id": "idx-b-2",
+          "physicalPage": 3,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-2"
+        },
+        {
+          "source": "b.html",
+          "id": "idx-b-1",
+          "physicalPage": 3,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-1"
+        }
+      ],
+      "items": [
+        {
+          "term": "Android",
+          "reading": "あんどろいど",
+          "before": [
+            {
+              "source": "a.html",
+              "id": "idx-a-3",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-3",
+              "href": "a.html#idx-a-3",
+              "originalSource": "a.md",
+              "position": {
+                "line": 10,
+                "column": 1
+              }
+            }
+          ],
+          "kept": [
+            {
+              "source": "a.html",
+              "id": "idx-a-3",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-3",
+              "href": "a.html#idx-a-3",
+              "originalSource": "a.md",
+              "position": {
+                "line": 10,
+                "column": 1
+              }
+            }
+          ],
+          "removed": []
+        },
+        {
+          "term": "位置情報",
+          "reading": "いちじょうほう",
+          "before": [
+            {
+              "source": "a.html",
+              "id": "idx-a-1",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-1",
+              "href": "a.html#idx-a-1",
+              "originalSource": "a.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              }
+            },
+            {
+              "source": "a.html",
+              "id": "idx-a-2",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-2",
+              "href": "a.html#idx-a-2",
+              "originalSource": "a.md",
+              "position": {
+                "line": 8,
+                "column": 1
+              }
+            },
+            {
+              "source": "b.html",
+              "id": "idx-b-1",
+              "physicalPage": 3,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-1",
+              "href": "b.html#idx-b-1",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              }
+            }
+          ],
+          "kept": [
+            {
+              "source": "a.html",
+              "id": "idx-a-1",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-1",
+              "href": "a.html#idx-a-1",
+              "originalSource": "a.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              }
+            },
+            {
+              "source": "b.html",
+              "id": "idx-b-1",
+              "physicalPage": 3,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-1",
+              "href": "b.html#idx-b-1",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              }
+            }
+          ],
+          "removed": [
+            {
+              "source": "a.html",
+              "id": "idx-a-2",
+              "physicalPage": 1,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-2",
+              "href": "a.html#idx-a-2",
+              "originalSource": "a.md",
+              "position": {
+                "line": 8,
+                "column": 1
+              },
+              "keptSource": "a.html",
+              "keptId": "idx-a-1"
+            }
+          ]
+        },
+        {
+          "term": "API",
+          "reading": "えーぴーあい",
+          "before": [
+            {
+              "source": "b.html",
+              "id": "idx-b-3",
+              "physicalPage": 3,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-3",
+              "href": "b.html#idx-b-3",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 60
+              }
+            }
+          ],
+          "kept": [
+            {
+              "source": "b.html",
+              "id": "idx-b-3",
+              "physicalPage": 3,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-3",
+              "href": "b.html#idx-b-3",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 60
+              }
+            }
+          ],
+          "removed": []
+        },
+        {
+          "term": "テスト",
+          "reading": "てすと",
+          "before": [
+            {
+              "source": "a.html",
+              "id": "idx-a-4",
+              "physicalPage": 2,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-4",
+              "href": "a.html#idx-a-4",
+              "originalSource": "a.md",
+              "position": {
+                "line": 16,
+                "column": 1
+              }
+            },
+            {
+              "source": "b.html",
+              "id": "idx-b-2",
+              "physicalPage": 3,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-2",
+              "href": "b.html#idx-b-2",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 33
+              }
+            }
+          ],
+          "kept": [
+            {
+              "source": "a.html",
+              "id": "idx-a-4",
+              "physicalPage": 2,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-4",
+              "href": "a.html#idx-a-4",
+              "originalSource": "a.md",
+              "position": {
+                "line": 16,
+                "column": 1
+              }
+            },
+            {
+              "source": "b.html",
+              "id": "idx-b-2",
+              "physicalPage": 3,
+              "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-2",
+              "href": "b.html#idx-b-2",
+              "originalSource": "b.md",
+              "position": {
+                "line": 6,
+                "column": 33
+              }
+            }
+          ],
+          "removed": []
+        }
+      ],
+      "beforeCount": 7,
+      "afterCount": 6
+    }
+  ],
+  "environment": {
+    "python": "3.12.14 (main, Aug 25 2026, 13:50:33) [Clang 22.1.3 ]",
+    "pypdf": "6.21.1",
+    "platform": "macOS-27.0.1-arm64-arm-64bit"
+  },
+  "summary": {
+    "profiles": 4,
+    "before": 28,
+    "kept": 24,
+    "removed": 4,
+    "pdfRebuilt": false,
+    "htmlRegenerated": false,
+    "additionalDependencies": []
+  }
+}

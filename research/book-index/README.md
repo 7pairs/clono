@@ -5,13 +5,15 @@ SPDX-License-Identifier: Apache-2.0
 
 # 索引の既存機能調査
 
-対象は[手順書0006](../../docs/plans/0006-investigate-book-index.md)のT08～T10。手順1～3は、実施・検証・独立レビューと二人の確認を終え、完了した。標準APIを候補に残し、規格との差異は今回解消せず、製品での扱いを手順5へ引き継ぐ。手順4A以降は未着手。規格全体の精査と候補実装の適合判定は未実施。
+対象は[手順書0006](../../docs/plans/0006-investigate-book-index.md)のT08～T10。手順1～3・4Aは、実施・検証・独立レビュー・必要な修正と再レビュー・二人の確認を終え、完了した。4Bの検証計画も内容確認・レビュー済み。4B・5は未着手で、コミットと着手依頼を受けて進む。標準APIの照合に関する制約と製品での扱いは手順5へ引き継ぐ。規格全体の精査と候補実装の適合判定は未実施。
 
 - [参照資料](sources.md)：公式資料、対象版の公開コード、規格情報、外部実装例。
 - [調査結果と検証計画](results/verification.md)：既存機能の対応範囲、照合処理の候補、合意した手順2・3・4A・4Bへの案内、未確認事項。
 - [手順3の追加調査](results/step3-research.md)：漢字クラス、文字の扱い、Intlの指定範囲、計画具体化の根拠となった提案。
 - [手順3の比較実験計画](results/step3-plan.md)：合意・レビュー済みの比較方法、入力と期待値、検査項目、環境確認と実施順序。
 - [手順3の実験結果](results/step3.md)：R14組・K6組の実測、12件の検査、情報保持、規格との差異、負担と残る制約。
+- [手順4Aの結果](results/step4a.md)：既存4PDFのページ対応、28リンクから24リンクへの集約候補、方式と負担。
+- [手順4Bの検証計画](results/step4b-plan.md)：内容確認・レビュー済みの6構成と検査項目。実験は未着手。
 
 手順1は資料調査のみ。手順2では、固定版の専用環境でAST補助、索引生成、4構成の組版とPDF検査を実施した。[手順2の結果](results/step2.md)から根拠を辿れる。
 
@@ -52,6 +54,15 @@ node scripts/compare-collation.mjs
 
 比較結果はresults/step3-comparisons.jsonへ保存する。実行前にNode版と日本語ロケールへの解決を確認し、不一致なら差異と未開始の状態を保存して終了する。入力・独立した期待値・環境・判定の扱いは[実験結果](results/step3.md)を参照する。手順2のindex.mjs・既存テスト・生成物は変更していない。
 
+## 手順4Aの再現
+
+手順4Aの再現は、手順2の既存PDFと専用Python環境を用意し、以下を実行する。手順4A自体ではHTML・PDFを再生成しない。入力と根拠、4Bへ進む前の確認は[4Aの結果](results/step4a.md)を参照する。
+
+```sh
+.venv/bin/python scripts/page-aggregation.test.py
+.venv/bin/python scripts/aggregate-pages.py
+```
+
 ## ファイルとライセンス表示
 
 この調査で作成したコード・入力・結果はCopyright 2026 HASEBA Junya (7pairs)、SPDX-License-Identifier: Apache-2.0とする。第三者の実装コードや規格本文は収録していない。依存パッケージにはそれぞれのライセンスが適用される。
@@ -61,8 +72,10 @@ node scripts/compare-collation.mjs
 | fixtures/conflict-a.md、conflict-b.md、missing.md | 上記の著作権・ライセンスを適用。診断の行番号を固定するためヘッダを省略 |
 | fixtures/expected.json、package.json、package-lock.json | 上記の著作権・ライセンスを適用。JSONのため本表で表示 |
 | fixtures/collation-cases.json、collation-expected.json | 上記の著作権・ライセンスを適用。JSONのため本表で表示。自作の比較入力と、計画から転記した期待値・根拠 |
+| fixtures/page-aggregation-expected.json | 上記の著作権・ライセンスを適用。JSONのため本表で表示。固定ページ配置から手書きした集約の期待値 |
 | results/environment.json、step2-conversion.json、step2-pdf.json | 上記の著作権・ライセンスを適用。調査コードが生成する観測記録 |
 | results/step3-comparisons.json | 上記の著作権・ライセンスを適用。調査コードが生成する環境・比較・判定の記録 |
+| results/step4a-pages.json | 上記の著作権・ライセンスを適用。調査コードが生成する環境・ページ対応・集約候補の記録 |
 | results/python-freeze.txt、results/logs/*.txt | 上記の著作権・ライセンスを適用。ツールが生成する環境・検証記録 |
 
 生成PDFと中間ファイルもこの調査の自作入力・処理から生成するが、リポジトリには収録しない。利用者の原稿や生成した本一般へのライセンス適用を意味しない。
