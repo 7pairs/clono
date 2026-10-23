@@ -70,3 +70,29 @@ JIS本文の未読はメンテナンスと判定したものではない。通�
 5.2では読み列を比較し、同順位の場合に表記列を比較する手順を確認した。4.4.10では仮名の基底文字、長音・繰返しと照合属性の扱いを確認した。これらは追加調査と検証計画の根拠となる条項の所在を示すもので、`Intl.Collator`が同じ結果を返すと確認した記録ではない。
 
 規格本文やビューアーの画像はリポジトリへ収録していない。今回の閲覧と、漢字クラス等を追加調査してから検証計画を確定する方針は、[検証資料の第11節](results/verification.md#11-jis本文閲覧と手順3の計画変更)と手順書に反映した。
+
+## 6. 手順3の追加調査（2026-10-23）
+
+J09の本文を引き続き閲覧し、4.4.7の数字、4.4.9のラテンアルファベット、4.4.11の漢字クラスを追加確認した。第1～6節の関連条項と以下の資料を照合した。第5節の未実施事項は追加調査前の記録として残す。[追加調査の結果](results/step3-research.md)は、静的調査の結論と未合意の検証案を分けている。比較実験や適合判定は未実施。
+
+| ID | 資料 | 確認した内容・限界 |
+|---|---|---|
+| J10 | [ECMA-402 2025：Collator Objects](https://tc39.es/ecma402/2025/#collator-objects) | 第10節。比較の実装依存性、正準等価な文字列の同順位、関連するロケール拡張キーがco・kn・kfに限られること。規格の要求と、対象版での実測は区別する |
+| J11 | [Node.js v24.22.0に同梱されるV8のjs-collator.cc](https://github.com/nodejs/node/blob/v24.22.0/deps/v8/src/objects/js-collator.cc) | 360行の関連拡張キー、477行の正規化有効化、500～515行の感度とICUレベル、記号の扱いを静的に確認。variantはTERTIARY。実行時の比較結果は未測定 |
+| J12 | [Node.js v24.22.0の国際化資料](https://nodejs.org/download/release/v24.22.0/docs/api/intl.html)・[同タグのICU版表示](https://github.com/nodejs/node/blob/v24.22.0/deps/icu-small/source/common/unicode/uvernum.h) | ICUを使う構成と標準配布のfull-icu、ICU 78.3の版表示。標準配布の説明だけで実行環境を推定せず、手順2の実版記録と合わせて扱う |
+| J13 | [UTS #35 Part 5：Collation、Version 48.2](https://www.unicode.org/reports/tr35/tr35-78/tr35-collation.html#Root_Collation_Data_File_Formats) | unihanが部首・残画数の順序を使う説明。実行環境のCLDR 48および参照データrelease-48とは版を区別し、実行時データの同一性の根拠にはしない |
+| J14 | [Unicode公式配布のJIS0208.TXT](https://www.unicode.org/Public/MAPPINGS/OBSOLETE/EASTASIA/JIS/JIS0208.TXT) | JIS X 0208 (1990)からUnicodeへの対応表、Table version 2.0。OBSOLETE配下の歴史的資料で、ヘッダも可能な対応の一つと説明する。第2列のJISコードと第3列のUnicodeを静的に照合し、亜の0x3021（16区1点）・U+4E9C、一の0x306C（16区76点）・U+4E00、先頭5文字の対応、U+20BB7の未掲載を確認した。候補実装の出力から独立した入力・期待値案の補助とし、JIS本文や製品一般の文字対応の代わりにしない |
+
+J05の第4レベルの説明、J06のrelease-48にあるprivate-kana・standard・unihanの規則も再確認した。J06のXMLを参照したことは、JISへの適合や組込みデータとの同一性の確認を意味しない。
+
+再確認用に、取得した公開資料のSHA-256を記録する。取得内容は一時ディレクトリで参照し、第三者のソースやデータはリポジトリに収録していない。
+
+| 資料 | SHA-256 |
+|---|---|
+| J11：v24.22.0のjs-collator.cc | `24fb8035073e8dab05107ce7f96bb191c26abf524babe5c983f26d687a5c2c77` |
+| J06：release-48のcommon/collation/ja.xml | `a43b2ca5956e2ce84b20d943af9b5ce07563ec8a3beb4176b2b3d386fa11ab04` |
+| J12：v24.22.0のuvernum.h | `13cd24940babf5c6c1016131c9917742fc6cf198228689904d88116bb7d04118` |
+| J12：v24.22.0のintl.html | `e03d3118a7b3decc1fac6370210a52121f42f79d51e064ffee78adb2348ad4b0` |
+| J14：JIS0208.TXT | `1c571870457f19c97720631fa83ee491549a96ba1436da1296786a67d8632e87` |
+
+一部のWeb取得が失敗した資料は、同じ公式のraw配信または固定版ドキュメントから取得した。取得失敗をメンテナンスやPHPの利用と結び付けていない。今回、メンテナンス告知によって追加の確認を保留したサイトはない。
