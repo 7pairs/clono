@@ -1,0 +1,20 @@
+✔ When readings differ, then both modes use their sign without comparing forms (0.664458ms)
+✔ When readings tie, then only reading-form mode compares the original forms (0.087084ms)
+✔ When both keys tie, then ordering restores first occurrences before applying either mode (6.225667ms)
+✔ When exact terms and readings repeat, then one item retains every located occurrence (0.641792ms)
+✔ When different forms are canonically equivalent, then both items survive an equal comparison (0.327625ms)
+✔ When one term has different original readings or no reading, then source diagnostics remain available (0.579917ms)
+✔ When items are sorted in either mode, then original manuscripts and all occurrence data remain unchanged (0.532208ms)
+✔ When two manuscripts contain repeated terms, then four items and seven located occurrences are collected in reading order (9.36075ms)
+✔ When terms share a reading, then distinct items retain manuscript and occurrence order (1.396958ms)
+✔ When one term has conflicting readings, then both source locations and readings are reported (0.505917ms)
+✔ When an English term has no reading, then its location is reported (0.207667ms)
+✔ When prose and code contain directive examples, then only marked prose terms become index entries and HTML retains the content (37.901375ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1233.858875

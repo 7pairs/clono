@@ -1,0 +1,16 @@
+{
+  "status": "measured",
+  "stringCases": 14,
+  "itemCases": 6,
+  "pairRecords": 318,
+  "matches": 264,
+  "mismatches": 30,
+  "observations": 24,
+  "mismatchCases": [
+    "R04",
+    "K03",
+    "K06"
+  ],
+  "ecmaMismatches": 0,
+  "allCollectionAndOrderingChecksPassed": true
+}

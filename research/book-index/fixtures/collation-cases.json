@@ -1,0 +1,574 @@
+{
+  "strings": [
+    {
+      "id": "R01",
+      "values": [
+        {
+          "text": "あい",
+          "codePoints": [
+            "U+3042",
+            "U+3044"
+          ]
+        },
+        {
+          "text": "あお",
+          "codePoints": [
+            "U+3042",
+            "U+304A"
+          ]
+        },
+        {
+          "text": "いち",
+          "codePoints": [
+            "U+3044",
+            "U+3061"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R02",
+      "values": [
+        {
+          "text": "は",
+          "codePoints": [
+            "U+306F"
+          ]
+        },
+        {
+          "text": "ば",
+          "codePoints": [
+            "U+3070"
+          ]
+        },
+        {
+          "text": "ぱ",
+          "codePoints": [
+            "U+3071"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R03",
+      "values": [
+        {
+          "text": "あー",
+          "codePoints": [
+            "U+3042",
+            "U+30FC"
+          ]
+        },
+        {
+          "text": "あぁ",
+          "codePoints": [
+            "U+3042",
+            "U+3041"
+          ]
+        },
+        {
+          "text": "あゝ",
+          "codePoints": [
+            "U+3042",
+            "U+309D"
+          ]
+        },
+        {
+          "text": "ああ",
+          "codePoints": [
+            "U+3042",
+            "U+3042"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R04",
+      "values": [
+        {
+          "text": "ああ",
+          "codePoints": [
+            "U+3042",
+            "U+3042"
+          ]
+        },
+        {
+          "text": "アア",
+          "codePoints": [
+            "U+30A2",
+            "U+30A2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R05",
+      "values": [
+        {
+          "text": "いちじょうほう",
+          "codePoints": [
+            "U+3044",
+            "U+3061",
+            "U+3058",
+            "U+3087",
+            "U+3046",
+            "U+307B",
+            "U+3046"
+          ]
+        },
+        {
+          "text": "いちしようほう",
+          "codePoints": [
+            "U+3044",
+            "U+3061",
+            "U+3057",
+            "U+3088",
+            "U+3046",
+            "U+307B",
+            "U+3046"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R06",
+      "values": [
+        {
+          "text": "が",
+          "codePoints": [
+            "U+304C"
+          ]
+        },
+        {
+          "text": "が",
+          "codePoints": [
+            "U+304B",
+            "U+3099"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R07",
+      "values": [
+        {
+          "text": "テスト",
+          "codePoints": [
+            "U+30C6",
+            "U+30B9",
+            "U+30C8"
+          ]
+        },
+        {
+          "text": "ﾃｽﾄ",
+          "codePoints": [
+            "U+FF83",
+            "U+FF7D",
+            "U+FF84"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R08",
+      "values": [
+        {
+          "text": "ガ",
+          "codePoints": [
+            "U+30AC"
+          ]
+        },
+        {
+          "text": "ｶﾞ",
+          "codePoints": [
+            "U+FF76",
+            "U+FF9E"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R09",
+      "values": [
+        {
+          "text": "API",
+          "codePoints": [
+            "U+0041",
+            "U+0050",
+            "U+0049"
+          ]
+        },
+        {
+          "text": "ＡＰＩ",
+          "codePoints": [
+            "U+FF21",
+            "U+FF30",
+            "U+FF29"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R10",
+      "values": [
+        {
+          "text": "api",
+          "codePoints": [
+            "U+0061",
+            "U+0070",
+            "U+0069"
+          ]
+        },
+        {
+          "text": "API",
+          "codePoints": [
+            "U+0041",
+            "U+0050",
+            "U+0049"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R11",
+      "values": [
+        {
+          "text": "2",
+          "codePoints": [
+            "U+0032"
+          ]
+        },
+        {
+          "text": "２",
+          "codePoints": [
+            "U+FF12"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R12",
+      "values": [
+        {
+          "text": "API2",
+          "codePoints": [
+            "U+0041",
+            "U+0050",
+            "U+0049",
+            "U+0032"
+          ]
+        },
+        {
+          "text": "API10",
+          "codePoints": [
+            "U+0041",
+            "U+0050",
+            "U+0049",
+            "U+0031",
+            "U+0030"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R13",
+      "values": [
+        {
+          "text": "APITest",
+          "codePoints": [
+            "U+0041",
+            "U+0050",
+            "U+0049",
+            "U+0054",
+            "U+0065",
+            "U+0073",
+            "U+0074"
+          ]
+        },
+        {
+          "text": "API-Test",
+          "codePoints": [
+            "U+0041",
+            "U+0050",
+            "U+0049",
+            "U+002D",
+            "U+0054",
+            "U+0065",
+            "U+0073",
+            "U+0074"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R14",
+      "values": [
+        {
+          "text": "C",
+          "codePoints": [
+            "U+0043"
+          ]
+        },
+        {
+          "text": "C++",
+          "codePoints": [
+            "U+0043",
+            "U+002B",
+            "U+002B"
+          ]
+        }
+      ]
+    }
+  ],
+  "items": [
+    {
+      "id": "K01",
+      "items": [
+        {
+          "term": "児島",
+          "reading": "こじま",
+          "termCodePoints": [
+            "U+5150",
+            "U+5CF6"
+          ],
+          "readingCodePoints": [
+            "U+3053",
+            "U+3058",
+            "U+307E"
+          ]
+        },
+        {
+          "term": "小島",
+          "reading": "こじま",
+          "termCodePoints": [
+            "U+5C0F",
+            "U+5CF6"
+          ],
+          "readingCodePoints": [
+            "U+3053",
+            "U+3058",
+            "U+307E"
+          ]
+        }
+      ],
+      "variants": [
+        "forward",
+        "reverse"
+      ]
+    },
+    {
+      "id": "K02",
+      "items": [
+        {
+          "term": "亜",
+          "reading": "ひかく",
+          "termCodePoints": [
+            "U+4E9C"
+          ],
+          "readingCodePoints": [
+            "U+3072",
+            "U+304B",
+            "U+304F"
+          ]
+        },
+        {
+          "term": "一",
+          "reading": "ひかく",
+          "termCodePoints": [
+            "U+4E00"
+          ],
+          "readingCodePoints": [
+            "U+3072",
+            "U+304B",
+            "U+304F"
+          ]
+        }
+      ],
+      "variants": [
+        "forward",
+        "reverse"
+      ]
+    },
+    {
+      "id": "K03",
+      "items": [
+        {
+          "term": "〃",
+          "reading": "ひかく",
+          "termCodePoints": [
+            "U+3003"
+          ],
+          "readingCodePoints": [
+            "U+3072",
+            "U+304B",
+            "U+304F"
+          ]
+        },
+        {
+          "term": "仝",
+          "reading": "ひかく",
+          "termCodePoints": [
+            "U+4EDD"
+          ],
+          "readingCodePoints": [
+            "U+3072",
+            "U+304B",
+            "U+304F"
+          ]
+        },
+        {
+          "term": "々",
+          "reading": "ひかく",
+          "termCodePoints": [
+            "U+3005"
+          ],
+          "readingCodePoints": [
+            "U+3072",
+            "U+304B",
+            "U+304F"
+          ]
+        },
+        {
+          "term": "〆",
+          "reading": "ひかく",
+          "termCodePoints": [
+            "U+3006"
+          ],
+          "readingCodePoints": [
+            "U+3072",
+            "U+304B",
+            "U+304F"
+          ]
+        },
+        {
+          "term": "〇",
+          "reading": "ひかく",
+          "termCodePoints": [
+            "U+3007"
+          ],
+          "readingCodePoints": [
+            "U+3072",
+            "U+304B",
+            "U+304F"
+          ]
+        },
+        {
+          "term": "亜",
+          "reading": "ひかく",
+          "termCodePoints": [
+            "U+4E9C"
+          ],
+          "readingCodePoints": [
+            "U+3072",
+            "U+304B",
+            "U+304F"
+          ]
+        }
+      ],
+      "variants": [
+        "forward",
+        "reverse"
+      ]
+    },
+    {
+      "id": "K04",
+      "items": [
+        {
+          "term": "𠮷",
+          "reading": "ひかく",
+          "termCodePoints": [
+            "U+20BB7"
+          ],
+          "readingCodePoints": [
+            "U+3072",
+            "U+304B",
+            "U+304F"
+          ]
+        },
+        {
+          "term": "亜",
+          "reading": "ひかく",
+          "termCodePoints": [
+            "U+4E9C"
+          ],
+          "readingCodePoints": [
+            "U+3072",
+            "U+304B",
+            "U+304F"
+          ]
+        }
+      ],
+      "variants": [
+        "forward",
+        "reverse"
+      ]
+    },
+    {
+      "id": "K05",
+      "items": [
+        {
+          "term": "が",
+          "reading": "ひかく",
+          "termCodePoints": [
+            "U+304C"
+          ],
+          "readingCodePoints": [
+            "U+3072",
+            "U+304B",
+            "U+304F"
+          ]
+        },
+        {
+          "term": "が",
+          "reading": "ひかく",
+          "termCodePoints": [
+            "U+304B",
+            "U+3099"
+          ],
+          "readingCodePoints": [
+            "U+3072",
+            "U+304B",
+            "U+304F"
+          ]
+        }
+      ],
+      "variants": [
+        "forward",
+        "reverse",
+        "documents-forward",
+        "documents-reverse"
+      ]
+    },
+    {
+      "id": "K06",
+      "items": [
+        {
+          "term": "一",
+          "reading": "ああ",
+          "termCodePoints": [
+            "U+4E00"
+          ],
+          "readingCodePoints": [
+            "U+3042",
+            "U+3042"
+          ]
+        },
+        {
+          "term": "亜",
+          "reading": "アア",
+          "termCodePoints": [
+            "U+4E9C"
+          ],
+          "readingCodePoints": [
+            "U+30A2",
+            "U+30A2"
+          ]
+        }
+      ],
+      "variants": [
+        "forward",
+        "reverse"
+      ]
+    }
+  ]
+}

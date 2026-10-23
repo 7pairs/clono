@@ -1,0 +1,1 @@
+Saved-result audit: 5 source/input hashes match; R14/K6 cases and variants complete; 318 expected ranks/verdicts checked independently; 264 match, 30 mismatch, 24 observation. Red: 6 missing-behavior failures, 1 existing diagnostic pass. Green: 12 passed.

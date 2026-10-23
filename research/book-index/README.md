@@ -5,12 +5,13 @@ SPDX-License-Identifier: Apache-2.0
 
 # 索引の既存機能調査
 
-対象は[手順書0006](../../docs/plans/0006-investigate-book-index.md)のT08～T10。手順1・2は完了。2026-10-23に手順3の追加調査と、比較実験計画の具体化・合意・独立レビュー・修正・再レビュー・文書反映を実施した。比較実験と手順4A以降は未着手。規格全体の精査と候補実装の適合判定は未実施。
+対象は[手順書0006](../../docs/plans/0006-investigate-book-index.md)のT08～T10。手順1・2は完了。2026-10-23に手順3の計画に基づく比較実験・検証を実施した。成果物の独立レビューと二人の確認は未実施で、手順3完了とは扱わない。手順4A以降は未着手。規格全体の精査と候補実装の適合判定は未実施。
 
 - [参照資料](sources.md)：公式資料、対象版の公開コード、規格情報、外部実装例。
 - [調査結果と検証計画](results/verification.md)：既存機能の対応範囲、照合処理の候補、合意した手順2・3・4A・4Bへの案内、未確認事項。
 - [手順3の追加調査](results/step3-research.md)：漢字クラス、文字の扱い、Intlの指定範囲、計画具体化の根拠となった提案。
-- [手順3の比較実験計画](results/step3-plan.md)：合意・レビュー済みの比較方法、入力と期待値、検査項目、環境確認と実施順序。実験は未着手。
+- [手順3の比較実験計画](results/step3-plan.md)：合意・レビュー済みの比較方法、入力と期待値、検査項目、環境確認と実施順序。
+- [手順3の実験結果](results/step3.md)：R14組・K6組の実測、12件の検査、情報保持、規格との差異、負担と残る制約。
 
 手順1は資料調査のみ。手順2では、固定版の専用環境でAST補助、索引生成、4構成の組版とPDF検査を実施した。[手順2の結果](results/step2.md)から根拠を辿れる。
 
@@ -40,6 +41,17 @@ PDFは`results/pdf/`、再出力Markdown・HTML・収集結果・設定・PNGは
 
 期待値はfixtures/expected.jsonに手書きし、収集処理やPDF抽出結果から生成しない。同一ページの飛び先の置換・交換はverify-pdfs.test.pyで検査する。PDFをメモリー上で読み取り、名前付き参照先の座標だけを変えて抽出から判定まで実行する。PDF・結果ファイルは変更しない。検査の成功後も、PNGを開いて表示を確認する。
 
+## 手順3の再現
+
+手順2で用意したNode.js 24.22.0と固定済みの依存環境を使い、このディレクトリで実行する。追加依存やPython、組版処理は不要。
+
+```sh
+node --test scripts/index.test.mjs scripts/collation.test.mjs
+node scripts/compare-collation.mjs
+```
+
+比較結果はresults/step3-comparisons.jsonへ保存する。実行前にNode版と日本語ロケールへの解決を確認し、不一致なら差異と未開始の状態を保存して終了する。入力・独立した期待値・環境・判定の扱いは[実験結果](results/step3.md)を参照する。手順2のindex.mjs・既存テスト・生成物は変更していない。
+
 ## ファイルとライセンス表示
 
 この調査で作成したコード・入力・結果はCopyright 2026 HASEBA Junya (7pairs)、SPDX-License-Identifier: Apache-2.0とする。第三者の実装コードや規格本文は収録していない。依存パッケージにはそれぞれのライセンスが適用される。
@@ -48,7 +60,9 @@ PDFは`results/pdf/`、再出力Markdown・HTML・収集結果・設定・PNGは
 |---|---|
 | fixtures/conflict-a.md、conflict-b.md、missing.md | 上記の著作権・ライセンスを適用。診断の行番号を固定するためヘッダを省略 |
 | fixtures/expected.json、package.json、package-lock.json | 上記の著作権・ライセンスを適用。JSONのため本表で表示 |
+| fixtures/collation-cases.json、collation-expected.json | 上記の著作権・ライセンスを適用。JSONのため本表で表示。自作の比較入力と、計画から転記した期待値・根拠 |
 | results/environment.json、step2-conversion.json、step2-pdf.json | 上記の著作権・ライセンスを適用。調査コードが生成する観測記録 |
+| results/step3-comparisons.json | 上記の著作権・ライセンスを適用。調査コードが生成する環境・比較・判定の記録 |
 | results/python-freeze.txt、results/logs/*.txt | 上記の著作権・ライセンスを適用。ツールが生成する環境・検証記録 |
 
 生成PDFと中間ファイルもこの調査の自作入力・処理から生成するが、リポジトリには収録しない。利用者の原稿や生成した本一般へのライセンス適用を意味しない。
