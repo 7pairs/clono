@@ -40,13 +40,16 @@ function main() {
   const resolved = collator.resolvedOptions();
   const checks = {node: process.versions.node === '24.22.0', japanese: new Intl.Locale(resolved.locale).language === 'ja'};
   const report = {
-    createdAt: new Date().toISOString(), status: 'environment-check',
+    createdAt: new Date().toISOString(), status: 'running-not-final',
     command: 'node scripts/compare-collation.mjs',
     environment: {versions: process.versions, platform: process.platform, architecture: process.arch, osRelease: os.release(),
       requested: {locale: 'ja', usage: 'sort', sensitivity: 'variant', numeric: false, ignorePunctuation: false}, resolved, checks},
-    hashes: Object.fromEntries([inputPath, expectedPath, 'scripts/index.mjs', 'scripts/collation.mjs', 'scripts/compare-collation.mjs'].map(path => [path, digest(path)])),
+    hashes: {},
     stringCases: [], itemCases: [],
   };
+  // Invalidate prior success before hashing or reading any input.
+  writeFileSync(outputPath, JSON.stringify(report, null, 2) + '\n');
+  report.hashes = Object.fromEntries([inputPath, expectedPath, 'scripts/index.mjs', 'scripts/collation.mjs', 'scripts/compare-collation.mjs'].map(path => [path, digest(path)]));
   if (!Object.values(checks).every(Boolean)) {
     report.status = 'environment-mismatch-not-started';
     writeFileSync(outputPath, JSON.stringify(report, null, 2) + '\n');
