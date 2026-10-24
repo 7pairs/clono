@@ -1,0 +1,21 @@
+test_input_failure_replaces_previous_success_with_unfinished_attempt (__main__.PageAggregationTests.test_input_failure_replaces_previous_success_with_unfinished_attempt)
+When an input is missing or malformed, then a failed CLI attempt replaces prior success ... ok
+test_invalid_physical_page_fails (__main__.PageAggregationTests.test_invalid_physical_page_fails)
+When a named destination has no valid physical page, then mapping fails ... ok
+test_missing_maps_fail_without_silent_reference_loss (__main__.PageAggregationTests.test_missing_maps_fail_without_silent_reference_loss)
+When several references lack pages, then diagnostics identify every missing source and ID ... ok
+test_only_same_item_same_page_references_are_removed (__main__.PageAggregationTests.test_only_same_item_same_page_references_are_removed)
+When an item repeats on one page, then only the first reference on that page survives ... ok
+test_pdf_maps_match_independent_expected_pages (__main__.PageAggregationTests.test_pdf_maps_match_independent_expected_pages)
+When four existing PDFs are read, then all source-ID pairs resolve to expected pages ... ok
+test_real_pdf_missing_unknown_and_ambiguous_destinations_fail (__main__.PageAggregationTests.test_real_pdf_missing_unknown_and_ambiguous_destinations_fail)
+When real PDF names are missing, unsupported or ambiguous, then mapping is rejected ... ok
+test_same_page_different_items_and_readings_remain (__main__.PageAggregationTests.test_same_page_different_items_and_readings_remain)
+When terms or readings differ on one page, then they retain separate references ... ok
+test_source_is_part_of_destination_identity (__main__.PageAggregationTests.test_source_is_part_of_destination_identity)
+When documents share a fragment ID, then each source resolves independently ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.404s
+
+OK

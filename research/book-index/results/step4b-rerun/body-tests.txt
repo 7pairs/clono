@@ -1,0 +1,69 @@
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+test_duplicate_on_another_body_page_fails (__main__.BodyContextTests.test_duplicate_on_another_body_page_fails)
+When removed-reference text is duplicated off the expected page, then ambiguity is detected ... ok
+test_final_seven_contexts_survive_without_removed_named_destination (__main__.BodyContextTests.test_final_seven_contexts_survive_without_removed_named_destination)
+When final PDF names omit the removed reference, then text still identifies all seven pages ... ok
+test_index_copy_is_not_a_body_match (__main__.BodyContextTests.test_index_copy_is_not_a_body_match)
+When the same context exists only in the index, then missing body text cannot be rescued ... ok
+test_initial_seven_context_starts_match_named_destinations (__main__.BodyContextTests.test_initial_seven_context_starts_match_named_destinations)
+When the initial PDF is searched, then all seven starts match its named destinations ... ok
+test_missing_context_fails_from_extracted_characters (__main__.BodyContextTests.test_missing_context_fails_from_extracted_characters)
+When removed-reference text disappears, then identification reports that source and ID ... ok
+test_overlapping_context_ranges_have_distinct_starts (__main__.BodyContextTests.test_overlapping_context_ranges_have_distinct_starts)
+When three contexts overlap on body B, then each ID has its own unique start ... ok
+test_removed_context_moved_to_another_page_fails_page_check (__main__.BodyContextTests.test_removed_context_moved_to_another_page_fails_page_check)
+When the removed occurrence moves to page two, then it is found there and rejected ... ok
+test_swapped_named_positions_on_same_page_fail (__main__.BodyContextTests.test_swapped_named_positions_on_same_page_fail)
+When same-page named destinations exchange coordinates, then the start check rejects them ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.103s
+
+OK

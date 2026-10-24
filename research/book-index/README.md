@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # 索引の既存機能調査
 
-対象は[手順書0006](../../docs/plans/0006-investigate-book-index.md)のT08～T10。手順1～3・4Aは、実施・検証・独立レビュー・必要な修正と再レビュー・二人の確認を終え、完了した。4Bの検証計画も内容確認・レビュー済み。4BはB01で停止後、計画修正案の合意・独立レビュー・修正・再レビューを終えて文書に反映した。追加調査・試作の独立レビューは指摘なし。二人で方式・負担を確認し、本文文脈による方法をF07に採用する方針とした。具体化した再実行計画も独立レビューで指摘なしとなり、文書に反映した。再実行用の接続処理・検査の実装と6構成の組版、手順5は未着手。4B全体の完了確認も未実施。標準APIの照合に関する制約と製品での扱いは手順5へ引き継ぐ。規格全体の精査と候補実装の適合判定は未実施。
+対象は[手順書0006](../../docs/plans/0006-investigate-book-index.md)のT08～T10。手順1～3・4A・4Bは、実施・検証・独立レビュー・必要な修正と再レビュー・二人の確認を終え、完了した。4Bの6構成再実行は独立レビューで指摘なしとなり、結果・負担・限界を確認した。手順5は未着手で、コミットと着手依頼を受けて進む。標準APIの照合に関する制約と製品での扱い、ページ集約の採用・保留・見送りは手順5で評価する。規格全体の精査と候補実装の適合判定は未実施。
 
 - [参照資料](sources.md)：公式資料、対象版の公開コード、規格情報、外部実装例。
 - [調査結果と検証計画](results/verification.md)：既存機能の対応範囲、照合処理の候補、合意した手順2・3・4A・4Bへの案内、未確認事項。
@@ -15,6 +15,7 @@ SPDX-License-Identifier: Apache-2.0
 - [手順4Aの結果](results/step4a.md)：既存4PDFのページ対応、28リンクから24リンクへの集約候補、方式と負担。
 - [手順4Bの実施結果](results/step4b.md)：B01の2回の組版、名前付き参照先の欠落、停止理由と未確認事項。
 - [手順4Bの追加調査・試作結果](results/step4b-followup.md)：保存済みB01の全7箇所のページ確認、8検査、方式の負担と限界、独立レビューと二人の方針確認。
+- [手順4Bの6構成再実行結果](results/step4b-rerun.md)：計12回の組版、79リンク・84文脈の自動検査、最終28ページの目視と負担、独立レビューと二人の完了確認。
 - [手順4Bの検証計画](results/step4b-plan.md)：追加調査のレビューと合意を反映した6構成の再実行計画。保存先、接続部分の検査、12回の組版と28ページの目視確認を具体化。
 
 手順1は資料調査のみ。手順2では、固定版の専用環境でAST補助、索引生成、4構成の組版とPDF検査を実施した。[手順2の結果](results/step2.md)から根拠を辿れる。
@@ -101,7 +102,27 @@ PDFはresults/pdf/step4b-B01-first.pdfとstep4b-B01-final.pdf、入力・生成H
 
 結果はresults/step4b-followup/body-context.jsonへ保存する。開始時にこの試作の前回結果を未完了状態へ置き換え、失敗時はfailed-not-finalとする。停止時のPDF・JSON・ログ・生成HTML・CSSは読取りだけを行い、ハッシュを照合する。初回・最終PDFの全7文脈を本文全ページから探し、独立した固定ページとページ不変を照合する。本文Bの文脈の重なりは許容し、同じIDに開始候補が複数あれば診断して停止する。
 
-文字や位置情報への負の対照と参照先の座標交換は、実PDFから読み取った情報をメモリー上で変更する。PDFは書き換えない。ソースの根拠は、インストール済みの固定版に同梱されたソースマップから再確認する。全体の結果と限界は[追加調査・試作結果](results/step4b-followup.md)を参照する。再実行計画はレビュー・文書反映済みで、実装と6構成の組版はコミットと着手依頼を受けて進む。現行スクリプトは再実行計画への対応前であり、そのまま6構成の再実行に使わない。
+文字や位置情報への負の対照と参照先の座標交換は、実PDFから読み取った情報をメモリー上で変更する。PDFは書き換えない。ソースの根拠は、インストール済みの固定版に同梱されたソースマップから再確認する。全体の結果と限界は[追加調査・試作結果](results/step4b-followup.md)を参照する。再実行計画はレビュー・文書反映済みで、実装と6構成の組版はコミットと着手依頼を受けて進む。停止時のスクリプトは再実行計画への対応前であり、そのまま6構成の再実行に使わない。再実行用の入口は次節を参照する。
+
+## 手順4Bの6構成再実行の再現
+
+既存の固定環境と停止時・追加調査の成果物を用意し、このディレクトリから実行する。組版にはCLIのローカルサーバーとChromeの起動権限が必要になる。
+
+```sh
+.venv/bin/python scripts/rerun-inspection.test.py
+.venv/bin/python scripts/rerun-state.test.py
+node --test scripts/two-pass.test.mjs
+.venv/bin/python scripts/page-aggregation.test.py
+.venv/bin/python scripts/body-context.test.py
+.venv/bin/python scripts/build-two-pass-rerun.py
+.venv/bin/python scripts/render-two-pass-rerun.py
+```
+
+実行記録はresults/step4b-rerun/result.json、ログと検査記録は同じディレクトリ、PDFはresults/pdf/step4b-rerun/、生成物とPNGはresults/generated/step4b-rerun/構成ID/へ出力する。再現実行は再実行用の前回結果を置き換えるが、停止時と追加調査の成果物は上書きせずハッシュを照合する。入力読取り前に未完了状態を書き、失敗時は診断と実施済み範囲を残す。全6構成の自動検査に成功した場合だけverified-automaticとする。
+
+各構成の初回と追加組版は1回ずつで、正常系は計12回。本文文脈による全7箇所の検査と、残したリンクの名前付き参照先の検査を接続する。省いた名前付き参照先の欠落だけでは失敗にしない。表示番号・本文文脈・参照先・ノンブル・ページ数・列配置に不一致があれば停止し、組版を反復しない。
+
+画像化は自動検査成功とPDFのハッシュを確認してから行う。全28ページを目視し、確認結果を独立レビューの状態と区別して記録する。今回の目視記録はresults/step4b-rerun/visual-review.jsonに残したもので、再現実行で新しく作ったPDFの目視を代行しない。[再実行結果](results/step4b-rerun.md)から各記録を参照する。
 
 ## ファイルとライセンス表示
 
@@ -114,6 +135,7 @@ PDFはresults/pdf/step4b-B01-first.pdfとstep4b-B01-final.pdf、入力・生成H
 | fixtures/collation-cases.json、collation-expected.json | 上記の著作権・ライセンスを適用。JSONのため本表で表示。自作の比較入力と、計画から転記した期待値・根拠 |
 | fixtures/page-aggregation-expected.json | 上記の著作権・ライセンスを適用。JSONのため本表で表示。固定ページ配置から手書きした集約の期待値 |
 | fixtures/two-pass-expected.json | 上記の著作権・ライセンスを適用。JSONのため本表で表示。4B計画から固定した6構成の期待値 |
+| results/step4b-rerun/*.json、results/step4b-rerun/*.txt | 上記の著作権・ライセンスを適用。再実行の観測・画像化・目視・ツールの検査記録 |
 | results/step4b-followup/body-context.json、results/step4b-followup/*.txt | 上記の著作権・ライセンスを適用。試作が生成する観測結果とツールの検証記録 |
 | results/step4b-results.json、step4b-stop.json | 上記の著作権・ライセンスを適用。調査コードが生成する実行・停止後の観測記録 |
 | results/environment.json、step2-conversion.json、step2-pdf.json | 上記の著作権・ライセンスを適用。調査コードが生成する観測記録 |

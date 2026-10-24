@@ -1,0 +1,11 @@
+INFO Start building
+INFO Launching PDF build environment
+INFO Building pages
+INFO a.html a.md
+INFO b.html b.md
+INFO index.html 索引
+INFO Building PDF
+INFO Processing PDF
+SUCCESS Finished building results/pdf/step4b-rerun/B04-first.pdf
+📕 Built successfully!
+

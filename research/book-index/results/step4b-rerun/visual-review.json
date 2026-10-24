@@ -1,0 +1,83 @@
+{
+  "status": "reviewed-by-sora",
+  "reviewedAt": "2026-10-24T01:51:55.672294+00:00",
+  "pageCount": 28,
+  "profiles": [
+    {
+      "id": "B01",
+      "pdfSha256": "ae6d0139de1e274aadddad23a8db46d83e32ff453be16d27bb7c81999957fb22",
+      "pages": [
+        "results/generated/step4b-rerun/B01/images/page-1.png",
+        "results/generated/step4b-rerun/B01/images/page-2.png",
+        "results/generated/step4b-rerun/B01/images/page-3.png",
+        "results/generated/step4b-rerun/B01/images/page-4.png"
+      ],
+      "contact": "results/generated/step4b-rerun/B01/contact.png"
+    },
+    {
+      "id": "B02",
+      "pdfSha256": "851b9f90debcb3b276840ad014dfcc82a88666f0a36f3c88296a10fd321fadd4",
+      "pages": [
+        "results/generated/step4b-rerun/B02/images/page-1.png",
+        "results/generated/step4b-rerun/B02/images/page-2.png",
+        "results/generated/step4b-rerun/B02/images/page-3.png",
+        "results/generated/step4b-rerun/B02/images/page-4.png",
+        "results/generated/step4b-rerun/B02/images/page-5.png"
+      ],
+      "contact": "results/generated/step4b-rerun/B02/contact.png"
+    },
+    {
+      "id": "B03",
+      "pdfSha256": "dde17b2138abf505f7e506f9dceaf439528a9b2f0d3e45c60eff45b12b59a394",
+      "pages": [
+        "results/generated/step4b-rerun/B03/images/page-1.png",
+        "results/generated/step4b-rerun/B03/images/page-2.png",
+        "results/generated/step4b-rerun/B03/images/page-3.png",
+        "results/generated/step4b-rerun/B03/images/page-4.png"
+      ],
+      "contact": "results/generated/step4b-rerun/B03/contact.png"
+    },
+    {
+      "id": "B04",
+      "pdfSha256": "ef0d52afb721d8c59ac67d3b17b531ec7c8bf947974e87fa30ba71a2ed40e2fb",
+      "pages": [
+        "results/generated/step4b-rerun/B04/images/page-1.png",
+        "results/generated/step4b-rerun/B04/images/page-2.png",
+        "results/generated/step4b-rerun/B04/images/page-3.png",
+        "results/generated/step4b-rerun/B04/images/page-4.png",
+        "results/generated/step4b-rerun/B04/images/page-5.png"
+      ],
+      "contact": "results/generated/step4b-rerun/B04/contact.png"
+    },
+    {
+      "id": "B05",
+      "pdfSha256": "0a8fbffe44ffc7aff95b1642cbe0ddd1586219ecb5e690edd3baecad31d2fb97",
+      "pages": [
+        "results/generated/step4b-rerun/B05/images/page-1.png",
+        "results/generated/step4b-rerun/B05/images/page-2.png",
+        "results/generated/step4b-rerun/B05/images/page-3.png",
+        "results/generated/step4b-rerun/B05/images/page-4.png",
+        "results/generated/step4b-rerun/B05/images/page-5.png"
+      ],
+      "contact": "results/generated/step4b-rerun/B05/contact.png"
+    },
+    {
+      "id": "B06",
+      "pdfSha256": "20fa1491f1b12b100f1099d42ac070559da07bedddf6dfbdeb5b2eaae617b3ba",
+      "pages": [
+        "results/generated/step4b-rerun/B06/images/page-1.png",
+        "results/generated/step4b-rerun/B06/images/page-2.png",
+        "results/generated/step4b-rerun/B06/images/page-3.png",
+        "results/generated/step4b-rerun/B06/images/page-4.png",
+        "results/generated/step4b-rerun/B06/images/page-5.png"
+      ],
+      "contact": "results/generated/step4b-rerun/B06/contact.png"
+    }
+  ],
+  "checks": {
+    "allFinalPagesViewed": true,
+    "noClippingOrOverlap": true,
+    "noUnexpectedBlankPages": true,
+    "indexLabelsNumbersAndFolios": true
+  }
+}
