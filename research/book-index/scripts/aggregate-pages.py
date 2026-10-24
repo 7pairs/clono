@@ -23,14 +23,14 @@ def main():
     report = {'status': 'running-not-final', 'command': '.venv/bin/python scripts/aggregate-pages.py',
               'inputHashes': {}, 'profiles': []}
     # Invalidate prior success before hashing or reading any input.
-    output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
+    output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     original_paths = [ROOT / f'fixtures/{name}.md' for name in ['a', 'b']]
     fixed_paths = [ROOT / name for name in ['results/step2-conversion.json', 'results/step2-pdf.json',
                                            'fixtures/page-aggregation-expected.json', 'scripts/page_aggregation.py', 'scripts/aggregate-pages.py']]
     hashes = {str(path.relative_to(ROOT)): sha(path) for path in [*original_paths, *fixed_paths]}
-    conversion = json.loads((ROOT / 'results/step2-conversion.json').read_text())
-    baseline = json.loads((ROOT / 'results/step2-pdf.json').read_text())
-    expected = json.loads((ROOT / 'fixtures/page-aggregation-expected.json').read_text())['profiles']
+    conversion = json.loads((ROOT / 'results/step2-conversion.json').read_text(encoding='utf-8'))
+    baseline = json.loads((ROOT / 'results/step2-pdf.json').read_text(encoding='utf-8'))
+    expected = json.loads((ROOT / 'fixtures/page-aggregation-expected.json').read_text(encoding='utf-8'))['profiles']
     report['environment'] = {'python': sys.version, 'pypdf': pypdf.__version__, 'platform': platform.platform()}
     report['inputHashes'] = hashes
     for profile in conversion['profiles']:
@@ -60,7 +60,7 @@ def main():
     report['status'] = 'verified'
     report['summary'] = {'profiles': 4, 'before': 28, 'kept': 24, 'removed': 4,
                          'pdfRebuilt': False, 'htmlRegenerated': False, 'additionalDependencies': []}
-    output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
+    output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print('PASS: 4 existing PDFs; 28 mapped references -> 24 retained / 4 same-item same-page duplicates; no rebuild')
 
 
