@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # 索引の既存機能調査
 
-対象は[手順書0006](../../docs/plans/0006-investigate-book-index.md)のT08～T10。手順1～3・4Aは、実施・検証・独立レビュー・必要な修正と再レビュー・二人の確認を終え、完了した。4Bの検証計画も内容確認・レビュー済み。4B・5は未着手で、コミットと着手依頼を受けて進む。標準APIの照合に関する制約と製品での扱いは手順5へ引き継ぐ。規格全体の精査と候補実装の適合判定は未実施。
+対象は[手順書0006](../../docs/plans/0006-investigate-book-index.md)のT08～T10。手順1～3・4Aは、実施・検証・独立レビュー・必要な修正と再レビュー・二人の確認を終え、完了した。4Bの検証計画も内容確認・レビュー済み。4BはB01の追加組版後に参照先欠落を検出して停止し、継続方法の相談待ち。4Bの独立レビューは未実施で、5も未着手。標準APIの照合に関する制約と製品での扱いは手順5へ引き継ぐ。規格全体の精査と候補実装の適合判定は未実施。
 
 - [参照資料](sources.md)：公式資料、対象版の公開コード、規格情報、外部実装例。
 - [調査結果と検証計画](results/verification.md)：既存機能の対応範囲、照合処理の候補、合意した手順2・3・4A・4Bへの案内、未確認事項。
@@ -13,7 +13,8 @@ SPDX-License-Identifier: Apache-2.0
 - [手順3の比較実験計画](results/step3-plan.md)：合意・レビュー済みの比較方法、入力と期待値、検査項目、環境確認と実施順序。
 - [手順3の実験結果](results/step3.md)：R14組・K6組の実測、12件の検査、情報保持、規格との差異、負担と残る制約。
 - [手順4Aの結果](results/step4a.md)：既存4PDFのページ対応、28リンクから24リンクへの集約候補、方式と負担。
-- [手順4Bの検証計画](results/step4b-plan.md)：内容確認・レビュー済みの6構成と検査項目。実験は未着手。
+- [手順4Bの実施結果](results/step4b.md)：B01の2回の組版、名前付き参照先の欠落、停止理由と未確認事項。
+- [手順4Bの検証計画](results/step4b-plan.md)：内容確認・レビュー済みの6構成と検査項目。B01で停止した実施結果は次の資料を参照。
 
 手順1は資料調査のみ。手順2では、固定版の専用環境でAST補助、索引生成、4構成の組版とPDF検査を実施した。[手順2の結果](results/step2.md)から根拠を辿れる。
 
@@ -63,6 +64,28 @@ node scripts/compare-collation.mjs
 .venv/bin/python scripts/aggregate-pages.py
 ```
 
+## 手順4Bの再現と停止後の確認
+
+手順2の固定環境で、以下を実行する。組版にはローカルサーバーとChromeの起動権限が必要になる。
+
+```sh
+node --test scripts/two-pass.test.mjs
+.venv/bin/python scripts/two-pass.test.py
+.venv/bin/python scripts/page-aggregation.test.py
+.venv/bin/python scripts/build-two-pass.py
+```
+
+build-two-pass.pyは全6構成を順に実行するが、今回の環境ではB01の追加組版後に名前付き参照先の欠落で失敗終了する。B02以降へ進めたり、成功するまで再組版したりしない。実行開始時に前回の結果を未完了記録で置き換え、失敗時はfailed-not-finalとして保存する。現在の失敗結果は、全構成の成功記録ではない。
+
+その失敗結果とB01の2PDFがある状態で、読取り専用の診断を実行できる。
+
+```sh
+.venv/bin/python scripts/inspect-two-pass-stop.py
+pdftoppm -scale-to 1000 -png results/pdf/step4b-B01-final.pdf results/generated/step4b/B01/page
+```
+
+PDFはresults/pdf/step4b-B01-first.pdfとstep4b-B01-final.pdf、入力・生成HTML・構成別設定はresults/generated/step4b/B01/に置く。期待値はfixtures/two-pass-expected.jsonに計画から固定し、集約処理やPDF抽出結果から作成しない。結果の限界と相談事項は[4Bの実施結果](results/step4b.md)を参照する。
+
 ## ファイルとライセンス表示
 
 この調査で作成したコード・入力・結果はCopyright 2026 HASEBA Junya (7pairs)、SPDX-License-Identifier: Apache-2.0とする。第三者の実装コードや規格本文は収録していない。依存パッケージにはそれぞれのライセンスが適用される。
@@ -73,6 +96,8 @@ node scripts/compare-collation.mjs
 | fixtures/expected.json、package.json、package-lock.json | 上記の著作権・ライセンスを適用。JSONのため本表で表示 |
 | fixtures/collation-cases.json、collation-expected.json | 上記の著作権・ライセンスを適用。JSONのため本表で表示。自作の比較入力と、計画から転記した期待値・根拠 |
 | fixtures/page-aggregation-expected.json | 上記の著作権・ライセンスを適用。JSONのため本表で表示。固定ページ配置から手書きした集約の期待値 |
+| fixtures/two-pass-expected.json | 上記の著作権・ライセンスを適用。JSONのため本表で表示。4B計画から固定した6構成の期待値 |
+| results/step4b-results.json、step4b-stop.json | 上記の著作権・ライセンスを適用。調査コードが生成する実行・停止後の観測記録 |
 | results/environment.json、step2-conversion.json、step2-pdf.json | 上記の著作権・ライセンスを適用。調査コードが生成する観測記録 |
 | results/step3-comparisons.json | 上記の著作権・ライセンスを適用。調査コードが生成する環境・比較・判定の記録 |
 | results/step4a-pages.json | 上記の著作権・ライセンスを適用。調査コードが生成する環境・ページ対応・集約候補の記録 |

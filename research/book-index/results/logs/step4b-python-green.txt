@@ -1,0 +1,39 @@
+test_any_body_page_change_is_rejected (__main__.TwoPassTests.test_any_body_page_change_is_rejected)
+When even a removed occurrence changes page, then the second pass cannot be accepted ... ok
+test_link_corruption_is_rejected (__main__.TwoPassTests.test_link_corruption_is_rejected)
+When a link is lost or its number source or page changes, then fixed reference validation fails ... ok
+test_missing_mapping_prevents_html_and_pdf_output (__main__.TwoPassTests.test_missing_mapping_prevents_html_and_pdf_output)
+When one page mapping is missing, then neither final HTML nor another PDF is generated ... ok
+test_pdf_inspection_reads_all_original_destinations (__main__.TwoPassTests.test_pdf_inspection_reads_all_original_destinations)
+When an initial PDF is inspected, then seven original contexts and links match fixed expectations ... Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+ok
+test_second_pass_runs_once_after_aggregation (__main__.TwoPassTests.test_second_pass_runs_once_after_aggregation)
+When all mappings exist, then HTML is written before exactly one additional PDF build ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.043s
+
+OK

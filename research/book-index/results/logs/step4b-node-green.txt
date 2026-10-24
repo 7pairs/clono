@@ -1,0 +1,11 @@
+✔ When each profile is prepared, then all seven occurrences retain exact terms readings and IDs (16.744125ms)
+✔ When an index spans two explicit pages, then each group retains its terms readings and links (31.714334ms)
+✔ When retained references are selected, then removed references can return from a fresh collection (10.497125ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 752.811917
