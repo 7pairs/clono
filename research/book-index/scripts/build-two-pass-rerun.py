@@ -25,11 +25,11 @@ def digest(path):
 
 
 def save(path, value):
-    Path(path).write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n')
+    Path(path).write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
 
 def command(args):
-    return subprocess.run(args, cwd=ROOT, check=True, text=True, capture_output=True, timeout=90)
+    return subprocess.run(args, cwd=ROOT, check=True, text=True, encoding='utf-8', capture_output=True, timeout=90)
 
 
 def run_attempt(path, work):
@@ -50,9 +50,9 @@ def run_attempt(path, work):
 
 
 def execute(report):
-    profiles = json.loads(Path('fixtures/two-pass-expected.json').read_text())['profiles']
+    profiles = json.loads(Path('fixtures/two-pass-expected.json').read_text(encoding='utf-8'))['profiles']
     pinned = {'@vivliostyle/cli': '11.3.3', '@vivliostyle/vfm': '2.7.2', '@vivliostyle/viewer': '2.45.1'}
-    versions = {name: json.loads(Path(f'node_modules/{name}/package.json').read_text())['version'] for name in pinned}
+    versions = {name: json.loads(Path(f'node_modules/{name}/package.json').read_text(encoding='utf-8'))['version'] for name in pinned}
     assert versions == pinned
     node = command(['node', '--version']).stdout.strip()
     assert node == 'v24.22.0'
@@ -78,7 +78,7 @@ def execute(report):
         report['profiles'].append(case)
         out = (ROOT / 'results/generated/step4b-rerun' / profile['id']).resolve()
         command(['node', 'scripts/two-pass.mjs', 'prepare', str(out), profile['id']])
-        manifest = json.loads((out / 'collection.json').read_text())
+        manifest = json.loads((out / 'collection.json').read_text(encoding='utf-8'))
         collected = manifest['collected']
         case['originals'] = manifest['originals']
         case['occurrences'] = collected['occurrences']
@@ -98,9 +98,9 @@ def execute(report):
             save(config_path, config)
             started = time.perf_counter()
             result = subprocess.run(['./node_modules/.bin/vivliostyle', 'build', '-c', str(config_path)], cwd=ROOT,
-                                    capture_output=True, text=True, timeout=90)
+                                    capture_output=True, text=True, encoding='utf-8', timeout=90)
             log = Path('results/step4b-rerun') / f"{profile['id']}-{stage}.txt"
-            log.write_text(result.stdout + '\n' + result.stderr)
+            log.write_text(result.stdout + '\n' + result.stderr, encoding='utf-8')
             result.check_returncode()
             case['builds'].append({'stage': stage, 'elapsedMs': round((time.perf_counter() - started) * 1000),
                                    'pdf': str(pdf.relative_to(ROOT)), 'sha256': digest(pdf), 'log': str(log)})
