@@ -30,6 +30,9 @@ def main():
     hashes = {str(path.relative_to(ROOT)): sha(path) for path in [*original_paths, *fixed_paths]}
     conversion = json.loads((ROOT / 'results/step2-conversion.json').read_text(encoding='utf-8'))
     baseline = json.loads((ROOT / 'results/step2-pdf.json').read_text(encoding='utf-8'))
+    # Historical reports have no status; keep their existing PDF/hash checks.
+    if 'status' in baseline:
+        assert baseline['status'] == 'verified', 'PDF verification is not complete: results/step2-pdf.json'
     expected = json.loads((ROOT / 'fixtures/page-aggregation-expected.json').read_text(encoding='utf-8'))['profiles']
     report['environment'] = {'python': sys.version, 'pypdf': pypdf.__version__, 'platform': platform.platform()}
     report['inputHashes'] = hashes
