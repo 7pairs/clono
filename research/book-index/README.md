@@ -27,10 +27,10 @@ SPDX-License-Identifier: Apache-2.0
 
 ## 手順2の再現
 
-以下はこのディレクトリを作業場所にして実行する。Node.js 24.22.0、Python 3.12、Popplerを用意する。今回のPythonはCodex付属の3.12.14を使った。`python3.12`がPATHにない場合は、その実行ファイルのパスを指定する。
+以下のコマンドはリポジトリのルートから実行する。先頭の`cd`でこのディレクトリへ移動し、以降の作業を行う。Node.js 24.22.0、Python 3.12、Popplerを用意する。今回のPythonはCodex付属の3.12.14を使った。`python3.12`がPATHにない場合は、その実行ファイルのパスを指定する。
 
 ```sh
-cd /Users/jun-haseba/GitHub/clono/research/book-index
+cd research/book-index
 python3.12 -m venv .venv
 .venv/bin/python -m pip install -r results/python-freeze.txt
 npm ci --ignore-scripts --no-audit --no-fund
