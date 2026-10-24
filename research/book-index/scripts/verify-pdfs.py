@@ -11,7 +11,7 @@ from urllib.parse import urlsplit
 import pdfplumber
 from pypdf import PdfReader
 ROOT=Path(__file__).resolve().parents[1]
-expected=json.loads((ROOT/'fixtures/expected.json').read_text())
+expected=json.loads((ROOT/'fixtures/expected.json').read_text(encoding='utf-8'))
 
 def check_rows(rows, profile):
     assert len(rows)==7, 'Missing or extra link'
@@ -91,5 +91,5 @@ for name in ['missing-link','wrong-printed-page','wrong-target-page','duplicate-
     except AssertionError: controls.append({'case':name,'rejected':True})
     else: raise AssertionError(f'Control was not rejected: {name}')
 result={'profiles':profiles,'negativeControls':controls,'scope':'Observed named-destination format depends on Viewer/Chromium; no deduplication or second typesetting pass'}
-(ROOT/'results/step2-pdf.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
+(ROOT/'results/step2-pdf.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 print('PASS: 4 PDFs, 16 pages, 28 links; printed numbers, sources, IDs, target pages/positions, folios, columns; 4 negative controls rejected')
