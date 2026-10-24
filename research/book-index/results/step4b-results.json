@@ -1,0 +1,688 @@
+{
+  "status": "failed-not-final",
+  "startedAt": "2026-10-24T00:47:39.913000+00:00",
+  "profiles": [
+    {
+      "id": "B01",
+      "expected": {
+        "id": "B01",
+        "columns": 2,
+        "insert": false,
+        "move": false,
+        "split": false,
+        "pageCount": 4,
+        "indexPages": [
+          4
+        ],
+        "markers": [
+          "A-ONE",
+          "A-TWO",
+          "B-ONE"
+        ],
+        "firstReferences": [
+          [
+            "Android",
+            "a.html",
+            "idx-a-3",
+            1
+          ],
+          [
+            "位置情報",
+            "a.html",
+            "idx-a-1",
+            1
+          ],
+          [
+            "位置情報",
+            "a.html",
+            "idx-a-2",
+            1
+          ],
+          [
+            "位置情報",
+            "b.html",
+            "idx-b-1",
+            3
+          ],
+          [
+            "API",
+            "b.html",
+            "idx-b-3",
+            3
+          ],
+          [
+            "テスト",
+            "a.html",
+            "idx-a-4",
+            2
+          ],
+          [
+            "テスト",
+            "b.html",
+            "idx-b-2",
+            3
+          ]
+        ],
+        "finalReferences": [
+          [
+            "Android",
+            "a.html",
+            "idx-a-3",
+            1
+          ],
+          [
+            "位置情報",
+            "a.html",
+            "idx-a-1",
+            1
+          ],
+          [
+            "位置情報",
+            "b.html",
+            "idx-b-1",
+            3
+          ],
+          [
+            "API",
+            "b.html",
+            "idx-b-3",
+            3
+          ],
+          [
+            "テスト",
+            "a.html",
+            "idx-a-4",
+            2
+          ],
+          [
+            "テスト",
+            "b.html",
+            "idx-b-2",
+            3
+          ]
+        ]
+      },
+      "builds": [
+        {
+          "stage": "first",
+          "elapsedMs": 4467,
+          "pdf": "results/pdf/step4b-B01-first.pdf",
+          "sha256": "18c5418c0950c7888302268c1f49e593b9d323f2deb4b94f816cf08522d2f547",
+          "log": "results/logs/step4b-B01-first.txt"
+        },
+        {
+          "stage": "final",
+          "elapsedMs": 2348,
+          "pdf": "results/pdf/step4b-B01-final.pdf",
+          "sha256": "d4f7d55cb5911a77f1acef15735f6e54971acb1e13c9141ee41b6dcf628888e7",
+          "log": "results/logs/step4b-B01-final.txt"
+        }
+      ],
+      "originals": [
+        {
+          "name": "a.md",
+          "markdown": "<!-- Copyright 2026 HASEBA Junya (7pairs); SPDX-License-Identifier: Apache-2.0 -->\n# 本文A\n\nA-ONE 本文と**強調**、`inline-code`を保持する。\n\n:index[位置情報]{reading=\"いちじょうほう\"}を調べる。\n\n:index[位置情報]{reading=\"いちじょうほう\"}をもう一度確認する。\n\n:index[Android]{reading=\"あんどろいど\"}で実行する。\n\n<div class=\"page-break\"></div>\n\n## A-TWO\n\n:index[テスト]{reading=\"てすと\"}を実施する。\n"
+        },
+        {
+          "name": "b.md",
+          "markdown": "<!-- Copyright 2026 HASEBA Junya (7pairs); SPDX-License-Identifier: Apache-2.0 -->\n# 本文B\n\nB-ONE\n\n:index[位置情報]{reading=\"いちじょうほう\"}と:index[テスト]{reading=\"てすと\"}と:index[API]{reading=\"えーぴーあい\"}を確認する。\n"
+        }
+      ],
+      "occurrences": [
+        {
+          "source": "a.md",
+          "position": {
+            "line": 6,
+            "column": 1
+          },
+          "term": "位置情報",
+          "reading": "いちじょうほう",
+          "id": "idx-a-1"
+        },
+        {
+          "source": "a.md",
+          "position": {
+            "line": 8,
+            "column": 1
+          },
+          "term": "位置情報",
+          "reading": "いちじょうほう",
+          "id": "idx-a-2"
+        },
+        {
+          "source": "a.md",
+          "position": {
+            "line": 10,
+            "column": 1
+          },
+          "term": "Android",
+          "reading": "あんどろいど",
+          "id": "idx-a-3"
+        },
+        {
+          "source": "a.md",
+          "position": {
+            "line": 16,
+            "column": 1
+          },
+          "term": "テスト",
+          "reading": "てすと",
+          "id": "idx-a-4"
+        },
+        {
+          "source": "b.md",
+          "position": {
+            "line": 6,
+            "column": 1
+          },
+          "term": "位置情報",
+          "reading": "いちじょうほう",
+          "id": "idx-b-1"
+        },
+        {
+          "source": "b.md",
+          "position": {
+            "line": 6,
+            "column": 33
+          },
+          "term": "テスト",
+          "reading": "てすと",
+          "id": "idx-b-2"
+        },
+        {
+          "source": "b.md",
+          "position": {
+            "line": 6,
+            "column": 60
+          },
+          "term": "API",
+          "reading": "えーぴーあい",
+          "id": "idx-b-3"
+        }
+      ],
+      "bodyAndCssSha256": {
+        "a.html": "35c68b466c6a29a93b1a0c8def02c8e89d1b2676aff98e5cd774f497a6605075",
+        "b.html": "771a73d4ba603d613be983a8ff12b3570a018ecf62462f2a31b12d46b4e0e2c4",
+        "book.css": "e4ef7f4e9ae3977f43836448282c620d251d050d2eebaa80363f3bd43ff35475"
+      },
+      "first": {
+        "pageCount": 4,
+        "creator": "Vivliostyle (Vivliostyle.js 2.45.1; Chrome/153.0.8010.36)",
+        "pageMap": [
+          {
+            "source": "a.html",
+            "id": "idx-a-1",
+            "physicalPage": 1,
+            "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-1"
+          },
+          {
+            "source": "a.html",
+            "id": "idx-a-2",
+            "physicalPage": 1,
+            "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-2"
+          },
+          {
+            "source": "a.html",
+            "id": "idx-a-3",
+            "physicalPage": 1,
+            "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-3"
+          },
+          {
+            "source": "a.html",
+            "id": "idx-a-4",
+            "physicalPage": 2,
+            "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-4"
+          },
+          {
+            "source": "b.html",
+            "id": "idx-b-3",
+            "physicalPage": 3,
+            "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-3"
+          },
+          {
+            "source": "b.html",
+            "id": "idx-b-2",
+            "physicalPage": 3,
+            "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-2"
+          },
+          {
+            "source": "b.html",
+            "id": "idx-b-1",
+            "physicalPage": 3,
+            "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-1"
+          }
+        ],
+        "contexts": [
+          {
+            "source": "a.html",
+            "id": "idx-a-1",
+            "physicalPage": 1,
+            "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-1",
+            "text": "位置情報を調べる。",
+            "left": 33.75,
+            "top": 475.16998
+          },
+          {
+            "source": "a.html",
+            "id": "idx-a-2",
+            "physicalPage": 1,
+            "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-2",
+            "text": "位置情報をもう⼀度確認する。",
+            "left": 33.75,
+            "top": 448.16998
+          },
+          {
+            "source": "a.html",
+            "id": "idx-a-3",
+            "physicalPage": 1,
+            "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-3",
+            "text": "Androidで実⾏する。",
+            "left": 33.75,
+            "top": 421.16998
+          },
+          {
+            "source": "a.html",
+            "id": "idx-a-4",
+            "physicalPage": 2,
+            "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-4",
+            "text": "テストを実施する。",
+            "left": 33.75,
+            "top": 503.66998
+          },
+          {
+            "source": "b.html",
+            "id": "idx-b-3",
+            "physicalPage": 3,
+            "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-3",
+            "text": "APIを確認する。",
+            "left": 123.75,
+            "top": 475.16998
+          },
+          {
+            "source": "b.html",
+            "id": "idx-b-2",
+            "physicalPage": 3,
+            "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-2",
+            "text": "テストとAPIを確認する。",
+            "left": 83.25,
+            "top": 475.16998
+          },
+          {
+            "source": "b.html",
+            "id": "idx-b-1",
+            "physicalPage": 3,
+            "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-1",
+            "text": "位置情報とテストとAPIを確認する。",
+            "left": 33.75,
+            "top": 475.16998
+          }
+        ],
+        "links": [
+          {
+            "term": "Android",
+            "source": "a.html",
+            "id": "idx-a-3",
+            "printed": 1,
+            "targetPage": 1,
+            "indexPage": 4,
+            "linkRect": [
+              33.9375,
+              471.51373,
+              39.84375,
+              481.54498
+            ]
+          },
+          {
+            "term": "位置情報",
+            "source": "a.html",
+            "id": "idx-a-1",
+            "printed": 1,
+            "targetPage": 1,
+            "indexPage": 4,
+            "linkRect": [
+              33.9375,
+              431.57623,
+              39.84375,
+              441.60748
+            ]
+          },
+          {
+            "term": "位置情報",
+            "source": "a.html",
+            "id": "idx-a-2",
+            "printed": 1,
+            "targetPage": 1,
+            "indexPage": 4,
+            "linkRect": [
+              46.3125,
+              431.57623,
+              52.125,
+              441.60748
+            ]
+          },
+          {
+            "term": "位置情報",
+            "source": "b.html",
+            "id": "idx-b-1",
+            "printed": 3,
+            "targetPage": 3,
+            "indexPage": 4,
+            "linkRect": [
+              58.59375,
+              431.57623,
+              64.5,
+              441.60748
+            ]
+          },
+          {
+            "term": "API",
+            "source": "b.html",
+            "id": "idx-b-3",
+            "printed": 3,
+            "targetPage": 3,
+            "indexPage": 4,
+            "linkRect": [
+              215.34375,
+              471.51373,
+              221.25,
+              481.54498
+            ]
+          },
+          {
+            "term": "テスト",
+            "source": "a.html",
+            "id": "idx-a-4",
+            "printed": 2,
+            "targetPage": 2,
+            "indexPage": 4,
+            "linkRect": [
+              215.34375,
+              431.57623,
+              221.25,
+              441.60748
+            ]
+          },
+          {
+            "term": "テスト",
+            "source": "b.html",
+            "id": "idx-b-2",
+            "printed": 3,
+            "targetPage": 3,
+            "indexPage": 4,
+            "linkRect": [
+              227.71875,
+              431.57623,
+              233.625,
+              441.60748
+            ]
+          }
+        ],
+        "checks": {
+          "foliosAndMarkers": true,
+          "allSevenContexts": true,
+          "labelsAndColumns": true,
+          "numbersAndTargets": true
+        }
+      },
+      "aggregation": {
+        "items": [
+          {
+            "term": "Android",
+            "reading": "あんどろいど",
+            "before": [
+              {
+                "source": "a.html",
+                "id": "idx-a-3",
+                "physicalPage": 1,
+                "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-3",
+                "href": "a.html#idx-a-3",
+                "originalSource": "a.md",
+                "position": {
+                  "line": 10,
+                  "column": 1
+                }
+              }
+            ],
+            "kept": [
+              {
+                "source": "a.html",
+                "id": "idx-a-3",
+                "physicalPage": 1,
+                "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-3",
+                "href": "a.html#idx-a-3",
+                "originalSource": "a.md",
+                "position": {
+                  "line": 10,
+                  "column": 1
+                }
+              }
+            ],
+            "removed": []
+          },
+          {
+            "term": "位置情報",
+            "reading": "いちじょうほう",
+            "before": [
+              {
+                "source": "a.html",
+                "id": "idx-a-1",
+                "physicalPage": 1,
+                "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-1",
+                "href": "a.html#idx-a-1",
+                "originalSource": "a.md",
+                "position": {
+                  "line": 6,
+                  "column": 1
+                }
+              },
+              {
+                "source": "a.html",
+                "id": "idx-a-2",
+                "physicalPage": 1,
+                "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-2",
+                "href": "a.html#idx-a-2",
+                "originalSource": "a.md",
+                "position": {
+                  "line": 8,
+                  "column": 1
+                }
+              },
+              {
+                "source": "b.html",
+                "id": "idx-b-1",
+                "physicalPage": 3,
+                "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-1",
+                "href": "b.html#idx-b-1",
+                "originalSource": "b.md",
+                "position": {
+                  "line": 6,
+                  "column": 1
+                }
+              }
+            ],
+            "kept": [
+              {
+                "source": "a.html",
+                "id": "idx-a-1",
+                "physicalPage": 1,
+                "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-1",
+                "href": "a.html#idx-a-1",
+                "originalSource": "a.md",
+                "position": {
+                  "line": 6,
+                  "column": 1
+                }
+              },
+              {
+                "source": "b.html",
+                "id": "idx-b-1",
+                "physicalPage": 3,
+                "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-1",
+                "href": "b.html#idx-b-1",
+                "originalSource": "b.md",
+                "position": {
+                  "line": 6,
+                  "column": 1
+                }
+              }
+            ],
+            "removed": [
+              {
+                "source": "a.html",
+                "id": "idx-a-2",
+                "physicalPage": 1,
+                "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-2",
+                "href": "a.html#idx-a-2",
+                "originalSource": "a.md",
+                "position": {
+                  "line": 8,
+                  "column": 1
+                },
+                "keptSource": "a.html",
+                "keptId": "idx-a-1"
+              }
+            ]
+          },
+          {
+            "term": "API",
+            "reading": "えーぴーあい",
+            "before": [
+              {
+                "source": "b.html",
+                "id": "idx-b-3",
+                "physicalPage": 3,
+                "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-3",
+                "href": "b.html#idx-b-3",
+                "originalSource": "b.md",
+                "position": {
+                  "line": 6,
+                  "column": 60
+                }
+              }
+            ],
+            "kept": [
+              {
+                "source": "b.html",
+                "id": "idx-b-3",
+                "physicalPage": 3,
+                "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-3",
+                "href": "b.html#idx-b-3",
+                "originalSource": "b.md",
+                "position": {
+                  "line": 6,
+                  "column": 60
+                }
+              }
+            ],
+            "removed": []
+          },
+          {
+            "term": "テスト",
+            "reading": "てすと",
+            "before": [
+              {
+                "source": "a.html",
+                "id": "idx-a-4",
+                "physicalPage": 2,
+                "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-4",
+                "href": "a.html#idx-a-4",
+                "originalSource": "a.md",
+                "position": {
+                  "line": 16,
+                  "column": 1
+                }
+              },
+              {
+                "source": "b.html",
+                "id": "idx-b-2",
+                "physicalPage": 3,
+                "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-2",
+                "href": "b.html#idx-b-2",
+                "originalSource": "b.md",
+                "position": {
+                  "line": 6,
+                  "column": 33
+                }
+              }
+            ],
+            "kept": [
+              {
+                "source": "a.html",
+                "id": "idx-a-4",
+                "physicalPage": 2,
+                "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-4",
+                "href": "a.html#idx-a-4",
+                "originalSource": "a.md",
+                "position": {
+                  "line": 16,
+                  "column": 1
+                }
+              },
+              {
+                "source": "b.html",
+                "id": "idx-b-2",
+                "physicalPage": 3,
+                "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-2",
+                "href": "b.html#idx-b-2",
+                "originalSource": "b.md",
+                "position": {
+                  "line": 6,
+                  "column": 33
+                }
+              }
+            ],
+            "removed": []
+          }
+        ],
+        "beforeCount": 7,
+        "afterCount": 6
+      }
+    }
+  ],
+  "buildCount": 2,
+  "environment": {
+    "node": "v24.22.0",
+    "python": "3.12.14 (main, Aug 25 2026, 13:50:33) [Clang 22.1.3 ]",
+    "packages": {
+      "pypdf": "6.21.1",
+      "pdfplumber": "0.11.9",
+      "Pillow": "13.0.0"
+    },
+    "versions": {
+      "@vivliostyle/cli": "11.3.3",
+      "@vivliostyle/vfm": "2.7.2",
+      "@vivliostyle/viewer": "2.45.1"
+    },
+    "poppler": "pdftoppm version 26.05.0\nCopyright 2005-2026 The Poppler Developers - http://poppler.freedesktop.org\nCopyright 1996-2011, 2022 Glyph & Cog, LLC",
+    "macOS": "27.0.1"
+  },
+  "inputSha256": {
+    "fixtures/a.md": "63987dd1eb564ea5961872a5840f0c9e9e97efc3bc7c8d292daaa2703af9c517",
+    "fixtures/b.md": "706af4da72e69f77802e3c703a84e9fe8ccf5f6831c244e018390fbbf00adc06",
+    "fixtures/book.css": "811898cef0bb9597368c20a6177bdb274278a1bf0ee370e5448d11ad50c3a0a1",
+    "fixtures/expected.json": "a6ebe59cab32253a12c5880277193ba4037e62a80eb652a47e3d8c5773fa515c",
+    "package.json": "e2b6b2e30ab05748434cb22a80d37a9d8e8509db266ae7baf2aaa9614ade3ec0",
+    "package-lock.json": "862ec9fdb05234813a7681eca0d7467183b75091e5da964918c7e04ffa9b00ba",
+    "results/step2-conversion.json": "e46801a36ede0b6fafdf8de2dcb8e3c4263f84da270411aab65be889ef948f36",
+    "results/step2-pdf.json": "33274d9c9344c7b7fa9a586e750625c090469c7e8617b05a570c6d7d791d72d4",
+    "results/pdf/base-2.pdf": "aad31ca299bacf0fdf669ac13e19f13470169ecc1c7721c469fbe71a29ec1165",
+    "results/pdf/base-3.pdf": "24ef52cbc97315569dd3bdba1e98ac06f12fd8b1816d0fdcaf4a9f747b35178a",
+    "results/pdf/base-4.pdf": "3cbaaa55408fa929d0db3abdbe2d1abef14b37c58f896fa663dd2f114ae79c79",
+    "results/pdf/swapped-2.pdf": "550b805731891b2f6787b7377fe453d04096ebf58d1bb7c21aa2eadea1d21d84",
+    "fixtures/two-pass-expected.json": "808b13d46c555673c3bf83e4230552baebf9a5d4c2df6853d2428fcd18d8d272"
+  },
+  "implementationSha256": {
+    "scripts/build-two-pass.py": "18bb50a7c2c38250cf35afe8c31343d37523c098cde273f478ce2697b17fe227",
+    "scripts/two_pass.py": "ae1f5bc569cd8d9f7bd445d794da1fc690e976b9db3ac6e35e01507bf77e83e3",
+    "scripts/two-pass.mjs": "5eb40cc7916587683ea7ffcf0cac0ee4396eefa5c7a4d3d04220ed4f570e4ff0",
+    "scripts/page_aggregation.py": "f59c016059f7532f93dcbc2a34d8a3e1b23c3e3df1a377327862410bb629ee90",
+    "scripts/index.mjs": "5124ddece189782b453ad27297024385af2193217d418e6f90d7d07d9eca0ec2"
+  },
+  "F09": {
+    "diagnostic": "Missing page mappings: a.html#idx-a-2",
+    "htmlCalls": 0,
+    "pdfCalls": 0,
+    "verified": true
+  },
+  "error": "PageMappingError('Missing PDF destinations: a.html#idx-a-2')"
+}

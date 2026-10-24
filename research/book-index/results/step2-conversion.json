@@ -1,0 +1,781 @@
+{
+  "profiles": [
+    {
+      "name": "base-2",
+      "columns": 2,
+      "order": [
+        "a",
+        "b"
+      ],
+      "items": [
+        {
+          "term": "Android",
+          "reading": "あんどろいど",
+          "sortKey": "あんどろいど",
+          "occurrences": [
+            {
+              "source": "a.md",
+              "position": {
+                "line": 10,
+                "column": 1
+              },
+              "term": "Android",
+              "reading": "あんどろいど",
+              "id": "idx-a-3"
+            }
+          ]
+        },
+        {
+          "term": "位置情報",
+          "reading": "いちじょうほう",
+          "sortKey": "いちじょうほう",
+          "occurrences": [
+            {
+              "source": "a.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              },
+              "term": "位置情報",
+              "reading": "いちじょうほう",
+              "id": "idx-a-1"
+            },
+            {
+              "source": "a.md",
+              "position": {
+                "line": 8,
+                "column": 1
+              },
+              "term": "位置情報",
+              "reading": "いちじょうほう",
+              "id": "idx-a-2"
+            },
+            {
+              "source": "b.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              },
+              "term": "位置情報",
+              "reading": "いちじょうほう",
+              "id": "idx-b-1"
+            }
+          ]
+        },
+        {
+          "term": "API",
+          "reading": "えーぴーあい",
+          "sortKey": "えーぴーあい",
+          "occurrences": [
+            {
+              "source": "b.md",
+              "position": {
+                "line": 6,
+                "column": 60
+              },
+              "term": "API",
+              "reading": "えーぴーあい",
+              "id": "idx-b-3"
+            }
+          ]
+        },
+        {
+          "term": "テスト",
+          "reading": "てすと",
+          "sortKey": "てすと",
+          "occurrences": [
+            {
+              "source": "a.md",
+              "position": {
+                "line": 16,
+                "column": 1
+              },
+              "term": "テスト",
+              "reading": "てすと",
+              "id": "idx-a-4"
+            },
+            {
+              "source": "b.md",
+              "position": {
+                "line": 6,
+                "column": 33
+              },
+              "term": "テスト",
+              "reading": "てすと",
+              "id": "idx-b-2"
+            }
+          ]
+        }
+      ],
+      "occurrences": [
+        {
+          "source": "a.md",
+          "position": {
+            "line": 6,
+            "column": 1
+          },
+          "term": "位置情報",
+          "reading": "いちじょうほう",
+          "id": "idx-a-1"
+        },
+        {
+          "source": "a.md",
+          "position": {
+            "line": 8,
+            "column": 1
+          },
+          "term": "位置情報",
+          "reading": "いちじょうほう",
+          "id": "idx-a-2"
+        },
+        {
+          "source": "a.md",
+          "position": {
+            "line": 10,
+            "column": 1
+          },
+          "term": "Android",
+          "reading": "あんどろいど",
+          "id": "idx-a-3"
+        },
+        {
+          "source": "a.md",
+          "position": {
+            "line": 16,
+            "column": 1
+          },
+          "term": "テスト",
+          "reading": "てすと",
+          "id": "idx-a-4"
+        },
+        {
+          "source": "b.md",
+          "position": {
+            "line": 6,
+            "column": 1
+          },
+          "term": "位置情報",
+          "reading": "いちじょうほう",
+          "id": "idx-b-1"
+        },
+        {
+          "source": "b.md",
+          "position": {
+            "line": 6,
+            "column": 33
+          },
+          "term": "テスト",
+          "reading": "てすと",
+          "id": "idx-b-2"
+        },
+        {
+          "source": "b.md",
+          "position": {
+            "line": 6,
+            "column": 60
+          },
+          "term": "API",
+          "reading": "えーぴーあい",
+          "id": "idx-b-3"
+        }
+      ],
+      "links": [
+        "a.html#idx-a-3",
+        "a.html#idx-a-1",
+        "a.html#idx-a-2",
+        "b.html#idx-b-1",
+        "b.html#idx-b-3",
+        "a.html#idx-a-4",
+        "b.html#idx-b-2"
+      ],
+      "htmlChecks": true,
+      "elapsedMs": 2401,
+      "pdfSha256": "aad31ca299bacf0fdf669ac13e19f13470169ecc1c7721c469fbe71a29ec1165"
+    },
+    {
+      "name": "swapped-2",
+      "columns": 2,
+      "order": [
+        "b",
+        "a"
+      ],
+      "items": [
+        {
+          "term": "Android",
+          "reading": "あんどろいど",
+          "sortKey": "あんどろいど",
+          "occurrences": [
+            {
+              "source": "a.md",
+              "position": {
+                "line": 10,
+                "column": 1
+              },
+              "term": "Android",
+              "reading": "あんどろいど",
+              "id": "idx-a-3"
+            }
+          ]
+        },
+        {
+          "term": "位置情報",
+          "reading": "いちじょうほう",
+          "sortKey": "いちじょうほう",
+          "occurrences": [
+            {
+              "source": "b.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              },
+              "term": "位置情報",
+              "reading": "いちじょうほう",
+              "id": "idx-b-1"
+            },
+            {
+              "source": "a.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              },
+              "term": "位置情報",
+              "reading": "いちじょうほう",
+              "id": "idx-a-1"
+            },
+            {
+              "source": "a.md",
+              "position": {
+                "line": 8,
+                "column": 1
+              },
+              "term": "位置情報",
+              "reading": "いちじょうほう",
+              "id": "idx-a-2"
+            }
+          ]
+        },
+        {
+          "term": "API",
+          "reading": "えーぴーあい",
+          "sortKey": "えーぴーあい",
+          "occurrences": [
+            {
+              "source": "b.md",
+              "position": {
+                "line": 6,
+                "column": 60
+              },
+              "term": "API",
+              "reading": "えーぴーあい",
+              "id": "idx-b-3"
+            }
+          ]
+        },
+        {
+          "term": "テスト",
+          "reading": "てすと",
+          "sortKey": "てすと",
+          "occurrences": [
+            {
+              "source": "b.md",
+              "position": {
+                "line": 6,
+                "column": 33
+              },
+              "term": "テスト",
+              "reading": "てすと",
+              "id": "idx-b-2"
+            },
+            {
+              "source": "a.md",
+              "position": {
+                "line": 16,
+                "column": 1
+              },
+              "term": "テスト",
+              "reading": "てすと",
+              "id": "idx-a-4"
+            }
+          ]
+        }
+      ],
+      "occurrences": [
+        {
+          "source": "b.md",
+          "position": {
+            "line": 6,
+            "column": 1
+          },
+          "term": "位置情報",
+          "reading": "いちじょうほう",
+          "id": "idx-b-1"
+        },
+        {
+          "source": "b.md",
+          "position": {
+            "line": 6,
+            "column": 33
+          },
+          "term": "テスト",
+          "reading": "てすと",
+          "id": "idx-b-2"
+        },
+        {
+          "source": "b.md",
+          "position": {
+            "line": 6,
+            "column": 60
+          },
+          "term": "API",
+          "reading": "えーぴーあい",
+          "id": "idx-b-3"
+        },
+        {
+          "source": "a.md",
+          "position": {
+            "line": 6,
+            "column": 1
+          },
+          "term": "位置情報",
+          "reading": "いちじょうほう",
+          "id": "idx-a-1"
+        },
+        {
+          "source": "a.md",
+          "position": {
+            "line": 8,
+            "column": 1
+          },
+          "term": "位置情報",
+          "reading": "いちじょうほう",
+          "id": "idx-a-2"
+        },
+        {
+          "source": "a.md",
+          "position": {
+            "line": 10,
+            "column": 1
+          },
+          "term": "Android",
+          "reading": "あんどろいど",
+          "id": "idx-a-3"
+        },
+        {
+          "source": "a.md",
+          "position": {
+            "line": 16,
+            "column": 1
+          },
+          "term": "テスト",
+          "reading": "てすと",
+          "id": "idx-a-4"
+        }
+      ],
+      "links": [
+        "a.html#idx-a-3",
+        "b.html#idx-b-1",
+        "a.html#idx-a-1",
+        "a.html#idx-a-2",
+        "b.html#idx-b-3",
+        "b.html#idx-b-2",
+        "a.html#idx-a-4"
+      ],
+      "htmlChecks": true,
+      "elapsedMs": 2334,
+      "pdfSha256": "550b805731891b2f6787b7377fe453d04096ebf58d1bb7c21aa2eadea1d21d84"
+    },
+    {
+      "name": "base-3",
+      "columns": 3,
+      "order": [
+        "a",
+        "b"
+      ],
+      "items": [
+        {
+          "term": "Android",
+          "reading": "あんどろいど",
+          "sortKey": "あんどろいど",
+          "occurrences": [
+            {
+              "source": "a.md",
+              "position": {
+                "line": 10,
+                "column": 1
+              },
+              "term": "Android",
+              "reading": "あんどろいど",
+              "id": "idx-a-3"
+            }
+          ]
+        },
+        {
+          "term": "位置情報",
+          "reading": "いちじょうほう",
+          "sortKey": "いちじょうほう",
+          "occurrences": [
+            {
+              "source": "a.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              },
+              "term": "位置情報",
+              "reading": "いちじょうほう",
+              "id": "idx-a-1"
+            },
+            {
+              "source": "a.md",
+              "position": {
+                "line": 8,
+                "column": 1
+              },
+              "term": "位置情報",
+              "reading": "いちじょうほう",
+              "id": "idx-a-2"
+            },
+            {
+              "source": "b.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              },
+              "term": "位置情報",
+              "reading": "いちじょうほう",
+              "id": "idx-b-1"
+            }
+          ]
+        },
+        {
+          "term": "API",
+          "reading": "えーぴーあい",
+          "sortKey": "えーぴーあい",
+          "occurrences": [
+            {
+              "source": "b.md",
+              "position": {
+                "line": 6,
+                "column": 60
+              },
+              "term": "API",
+              "reading": "えーぴーあい",
+              "id": "idx-b-3"
+            }
+          ]
+        },
+        {
+          "term": "テスト",
+          "reading": "てすと",
+          "sortKey": "てすと",
+          "occurrences": [
+            {
+              "source": "a.md",
+              "position": {
+                "line": 16,
+                "column": 1
+              },
+              "term": "テスト",
+              "reading": "てすと",
+              "id": "idx-a-4"
+            },
+            {
+              "source": "b.md",
+              "position": {
+                "line": 6,
+                "column": 33
+              },
+              "term": "テスト",
+              "reading": "てすと",
+              "id": "idx-b-2"
+            }
+          ]
+        }
+      ],
+      "occurrences": [
+        {
+          "source": "a.md",
+          "position": {
+            "line": 6,
+            "column": 1
+          },
+          "term": "位置情報",
+          "reading": "いちじょうほう",
+          "id": "idx-a-1"
+        },
+        {
+          "source": "a.md",
+          "position": {
+            "line": 8,
+            "column": 1
+          },
+          "term": "位置情報",
+          "reading": "いちじょうほう",
+          "id": "idx-a-2"
+        },
+        {
+          "source": "a.md",
+          "position": {
+            "line": 10,
+            "column": 1
+          },
+          "term": "Android",
+          "reading": "あんどろいど",
+          "id": "idx-a-3"
+        },
+        {
+          "source": "a.md",
+          "position": {
+            "line": 16,
+            "column": 1
+          },
+          "term": "テスト",
+          "reading": "てすと",
+          "id": "idx-a-4"
+        },
+        {
+          "source": "b.md",
+          "position": {
+            "line": 6,
+            "column": 1
+          },
+          "term": "位置情報",
+          "reading": "いちじょうほう",
+          "id": "idx-b-1"
+        },
+        {
+          "source": "b.md",
+          "position": {
+            "line": 6,
+            "column": 33
+          },
+          "term": "テスト",
+          "reading": "てすと",
+          "id": "idx-b-2"
+        },
+        {
+          "source": "b.md",
+          "position": {
+            "line": 6,
+            "column": 60
+          },
+          "term": "API",
+          "reading": "えーぴーあい",
+          "id": "idx-b-3"
+        }
+      ],
+      "links": [
+        "a.html#idx-a-3",
+        "a.html#idx-a-1",
+        "a.html#idx-a-2",
+        "b.html#idx-b-1",
+        "b.html#idx-b-3",
+        "a.html#idx-a-4",
+        "b.html#idx-b-2"
+      ],
+      "htmlChecks": true,
+      "elapsedMs": 2277,
+      "pdfSha256": "24ef52cbc97315569dd3bdba1e98ac06f12fd8b1816d0fdcaf4a9f747b35178a"
+    },
+    {
+      "name": "base-4",
+      "columns": 4,
+      "order": [
+        "a",
+        "b"
+      ],
+      "items": [
+        {
+          "term": "Android",
+          "reading": "あんどろいど",
+          "sortKey": "あんどろいど",
+          "occurrences": [
+            {
+              "source": "a.md",
+              "position": {
+                "line": 10,
+                "column": 1
+              },
+              "term": "Android",
+              "reading": "あんどろいど",
+              "id": "idx-a-3"
+            }
+          ]
+        },
+        {
+          "term": "位置情報",
+          "reading": "いちじょうほう",
+          "sortKey": "いちじょうほう",
+          "occurrences": [
+            {
+              "source": "a.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              },
+              "term": "位置情報",
+              "reading": "いちじょうほう",
+              "id": "idx-a-1"
+            },
+            {
+              "source": "a.md",
+              "position": {
+                "line": 8,
+                "column": 1
+              },
+              "term": "位置情報",
+              "reading": "いちじょうほう",
+              "id": "idx-a-2"
+            },
+            {
+              "source": "b.md",
+              "position": {
+                "line": 6,
+                "column": 1
+              },
+              "term": "位置情報",
+              "reading": "いちじょうほう",
+              "id": "idx-b-1"
+            }
+          ]
+        },
+        {
+          "term": "API",
+          "reading": "えーぴーあい",
+          "sortKey": "えーぴーあい",
+          "occurrences": [
+            {
+              "source": "b.md",
+              "position": {
+                "line": 6,
+                "column": 60
+              },
+              "term": "API",
+              "reading": "えーぴーあい",
+              "id": "idx-b-3"
+            }
+          ]
+        },
+        {
+          "term": "テスト",
+          "reading": "てすと",
+          "sortKey": "てすと",
+          "occurrences": [
+            {
+              "source": "a.md",
+              "position": {
+                "line": 16,
+                "column": 1
+              },
+              "term": "テスト",
+              "reading": "てすと",
+              "id": "idx-a-4"
+            },
+            {
+              "source": "b.md",
+              "position": {
+                "line": 6,
+                "column": 33
+              },
+              "term": "テスト",
+              "reading": "てすと",
+              "id": "idx-b-2"
+            }
+          ]
+        }
+      ],
+      "occurrences": [
+        {
+          "source": "a.md",
+          "position": {
+            "line": 6,
+            "column": 1
+          },
+          "term": "位置情報",
+          "reading": "いちじょうほう",
+          "id": "idx-a-1"
+        },
+        {
+          "source": "a.md",
+          "position": {
+            "line": 8,
+            "column": 1
+          },
+          "term": "位置情報",
+          "reading": "いちじょうほう",
+          "id": "idx-a-2"
+        },
+        {
+          "source": "a.md",
+          "position": {
+            "line": 10,
+            "column": 1
+          },
+          "term": "Android",
+          "reading": "あんどろいど",
+          "id": "idx-a-3"
+        },
+        {
+          "source": "a.md",
+          "position": {
+            "line": 16,
+            "column": 1
+          },
+          "term": "テスト",
+          "reading": "てすと",
+          "id": "idx-a-4"
+        },
+        {
+          "source": "b.md",
+          "position": {
+            "line": 6,
+            "column": 1
+          },
+          "term": "位置情報",
+          "reading": "いちじょうほう",
+          "id": "idx-b-1"
+        },
+        {
+          "source": "b.md",
+          "position": {
+            "line": 6,
+            "column": 33
+          },
+          "term": "テスト",
+          "reading": "てすと",
+          "id": "idx-b-2"
+        },
+        {
+          "source": "b.md",
+          "position": {
+            "line": 6,
+            "column": 60
+          },
+          "term": "API",
+          "reading": "えーぴーあい",
+          "id": "idx-b-3"
+        }
+      ],
+      "links": [
+        "a.html#idx-a-3",
+        "a.html#idx-a-1",
+        "a.html#idx-a-2",
+        "b.html#idx-b-1",
+        "b.html#idx-b-3",
+        "a.html#idx-a-4",
+        "b.html#idx-b-2"
+      ],
+      "htmlChecks": true,
+      "elapsedMs": 2371,
+      "pdfSha256": "3cbaaa55408fa929d0db3abdbe2d1abef14b37c58f896fa663dd2f114ae79c79"
+    }
+  ],
+  "diagnostics": {
+    "conflict": "位置情報: conflict-a.md:1:1 reading=いちじょうほう; conflict-b.md:3:1 reading=いちしようほう",
+    "missing": "missing.md:1:1: reading required for API"
+  },
+  "sourceSha256": {
+    "a.md": "63987dd1eb564ea5961872a5840f0c9e9e97efc3bc7c8d292daaa2703af9c517",
+    "b.md": "706af4da72e69f77802e3c703a84e9fe8ccf5f6831c244e018390fbbf00adc06",
+    "preservation.md": "47bccb55b33d681b3d99dbdc01646406b7fb3fafa938c6965c00a29d6f140449"
+  }
+}

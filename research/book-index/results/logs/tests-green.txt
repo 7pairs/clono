@@ -1,0 +1,13 @@
+✔ When two manuscripts contain repeated terms, then four items and seven located occurrences are collected in reading order (9.916333ms)
+✔ When terms share a reading, then distinct items retain manuscript and occurrence order (1.79975ms)
+✔ When one term has conflicting readings, then both source locations and readings are reported (0.725709ms)
+✔ When an English term has no reading, then its location is reported (0.273417ms)
+✔ When prose and code contain directive examples, then only marked prose terms become index entries and HTML retains the content (41.574125ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 619.17425

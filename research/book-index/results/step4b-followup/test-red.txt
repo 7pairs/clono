@@ -1,0 +1,162 @@
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+test_duplicate_on_another_body_page_fails (__main__.BodyContextTests.test_duplicate_on_another_body_page_fails)
+When removed-reference text is duplicated off the expected page, then ambiguity is detected ... ERROR
+test_final_seven_contexts_survive_without_removed_named_destination (__main__.BodyContextTests.test_final_seven_contexts_survive_without_removed_named_destination)
+When final PDF names omit the removed reference, then text still identifies all seven pages ... ERROR
+test_index_copy_is_not_a_body_match (__main__.BodyContextTests.test_index_copy_is_not_a_body_match)
+When the same context exists only in the index, then missing body text cannot be rescued ... ERROR
+test_initial_seven_context_starts_match_named_destinations (__main__.BodyContextTests.test_initial_seven_context_starts_match_named_destinations)
+When the initial PDF is searched, then all seven starts match its named destinations ... ERROR
+test_missing_context_fails_from_extracted_characters (__main__.BodyContextTests.test_missing_context_fails_from_extracted_characters)
+When removed-reference text disappears, then identification reports that source and ID ... ERROR
+test_overlapping_context_ranges_have_distinct_starts (__main__.BodyContextTests.test_overlapping_context_ranges_have_distinct_starts)
+When three contexts overlap on body B, then each ID has its own unique start ... ERROR
+test_removed_context_moved_to_another_page_fails_page_check (__main__.BodyContextTests.test_removed_context_moved_to_another_page_fails_page_check)
+When the removed occurrence moves to page two, then it is found there and rejected ... ERROR
+test_swapped_named_positions_on_same_page_fail (__main__.BodyContextTests.test_swapped_named_positions_on_same_page_fail)
+When same-page named destinations exchange coordinates, then the start check rejects them ... ERROR
+
+======================================================================
+ERROR: test_duplicate_on_another_body_page_fails (__main__.BodyContextTests.test_duplicate_on_another_body_page_fails)
+When removed-reference text is duplicated off the expected page, then ambiguity is detected
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/body-context.test.py", line 67, in test_duplicate_on_another_body_page_fails
+    locate_contexts(pages, OCCURRENCES, CONTEXTS, [4])
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/body_context.py", line 18, in locate_contexts
+    raise NotImplementedError('Context-based identification is not implemented')
+NotImplementedError: Context-based identification is not implemented
+
+======================================================================
+ERROR: test_final_seven_contexts_survive_without_removed_named_destination (__main__.BodyContextTests.test_final_seven_contexts_survive_without_removed_named_destination)
+When final PDF names omit the removed reference, then text still identifies all seven pages
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/body-context.test.py", line 40, in test_final_seven_contexts_survive_without_removed_named_destination
+    found = locate_contexts(self.final, OCCURRENCES, CONTEXTS, [4])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/body_context.py", line 18, in locate_contexts
+    raise NotImplementedError('Context-based identification is not implemented')
+NotImplementedError: Context-based identification is not implemented
+
+======================================================================
+ERROR: test_index_copy_is_not_a_body_match (__main__.BodyContextTests.test_index_copy_is_not_a_body_match)
+When the same context exists only in the index, then missing body text cannot be rescued
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/body-context.test.py", line 87, in test_index_copy_is_not_a_body_match
+    locate_contexts(pages, OCCURRENCES, CONTEXTS, [4])
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/body_context.py", line 18, in locate_contexts
+    raise NotImplementedError('Context-based identification is not implemented')
+NotImplementedError: Context-based identification is not implemented
+
+======================================================================
+ERROR: test_initial_seven_context_starts_match_named_destinations (__main__.BodyContextTests.test_initial_seven_context_starts_match_named_destinations)
+When the initial PDF is searched, then all seven starts match its named destinations
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/body-context.test.py", line 34, in test_initial_seven_context_starts_match_named_destinations
+    found = locate_contexts(self.first, OCCURRENCES, CONTEXTS, [4])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/body_context.py", line 18, in locate_contexts
+    raise NotImplementedError('Context-based identification is not implemented')
+NotImplementedError: Context-based identification is not implemented
+
+======================================================================
+ERROR: test_missing_context_fails_from_extracted_characters (__main__.BodyContextTests.test_missing_context_fails_from_extracted_characters)
+When removed-reference text disappears, then identification reports that source and ID
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/body-context.test.py", line 60, in test_missing_context_fails_from_extracted_characters
+    locate_contexts(pages, OCCURRENCES, CONTEXTS, [4])
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/body_context.py", line 18, in locate_contexts
+    raise NotImplementedError('Context-based identification is not implemented')
+NotImplementedError: Context-based identification is not implemented
+
+======================================================================
+ERROR: test_overlapping_context_ranges_have_distinct_starts (__main__.BodyContextTests.test_overlapping_context_ranges_have_distinct_starts)
+When three contexts overlap on body B, then each ID has its own unique start
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/body-context.test.py", line 48, in test_overlapping_context_ranges_have_distinct_starts
+    found = locate_contexts(self.final, OCCURRENCES, CONTEXTS, [4])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/body_context.py", line 18, in locate_contexts
+    raise NotImplementedError('Context-based identification is not implemented')
+NotImplementedError: Context-based identification is not implemented
+
+======================================================================
+ERROR: test_removed_context_moved_to_another_page_fails_page_check (__main__.BodyContextTests.test_removed_context_moved_to_another_page_fails_page_check)
+When the removed occurrence moves to page two, then it is found there and rejected
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/body-context.test.py", line 75, in test_removed_context_moved_to_another_page_fails_page_check
+    found = locate_contexts(pages, OCCURRENCES, CONTEXTS, [4])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/body_context.py", line 18, in locate_contexts
+    raise NotImplementedError('Context-based identification is not implemented')
+NotImplementedError: Context-based identification is not implemented
+
+======================================================================
+ERROR: test_swapped_named_positions_on_same_page_fail (__main__.BodyContextTests.test_swapped_named_positions_on_same_page_fail)
+When same-page named destinations exchange coordinates, then the start check rejects them
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/body-context.test.py", line 91, in test_swapped_named_positions_on_same_page_fail
+    found = locate_contexts(self.first, OCCURRENCES, CONTEXTS, [4])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/body_context.py", line 18, in locate_contexts
+    raise NotImplementedError('Context-based identification is not implemented')
+NotImplementedError: Context-based identification is not implemented
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.075s
+
+FAILED (errors=8)

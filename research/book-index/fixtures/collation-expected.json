@@ -1,0 +1,283 @@
+{
+  "commonConditions": [
+    "JIS basic collation rule and basic Kanji class are comparison references, not implemented guarantees",
+    "Literal kana, Latin letters and digits use the character correspondence in step3-plan section 2",
+    "Original input is not normalized or folded before comparison",
+    "J14 is a historical possible mapping, applied only to the selected characters"
+  ],
+  "cases": {
+    "R01": {
+      "kind": "jis",
+      "groups": [
+        [
+          "あい"
+        ],
+        [
+          "あお"
+        ],
+        [
+          "いち"
+        ]
+      ],
+      "reference": "JIS 4.1, 4.4.10"
+    },
+    "R02": {
+      "kind": "jis",
+      "groups": [
+        [
+          "は"
+        ],
+        [
+          "ば"
+        ],
+        [
+          "ぱ"
+        ]
+      ],
+      "reference": "JIS 4.4.10.2"
+    },
+    "R03": {
+      "kind": "jis",
+      "groups": [
+        [
+          "あー"
+        ],
+        [
+          "あぁ"
+        ],
+        [
+          "あゝ"
+        ],
+        [
+          "ああ"
+        ]
+      ],
+      "reference": "JIS 4.4.10"
+    },
+    "R04": {
+      "kind": "jis",
+      "groups": [
+        [
+          "ああ"
+        ],
+        [
+          "アア"
+        ]
+      ],
+      "reference": "JIS 4.4.10.2"
+    },
+    "R05": {
+      "kind": "jis",
+      "groups": [
+        [
+          "いちしようほう"
+        ],
+        [
+          "いちじょうほう"
+        ]
+      ],
+      "reference": "JIS 4.1, 4.4.10"
+    },
+    "R06": {
+      "kind": "ecma",
+      "groups": [
+        [
+          "が",
+          "が"
+        ]
+      ],
+      "reference": "J10: CompareStrings canonical equivalence"
+    },
+    "R07": {
+      "kind": "observation",
+      "groups": null,
+      "reference": "step3-plan section 3: width mapping not defined"
+    },
+    "R08": {
+      "kind": "observation",
+      "groups": null,
+      "reference": "step3-plan section 3: width mapping not defined"
+    },
+    "R09": {
+      "kind": "observation",
+      "groups": null,
+      "reference": "step3-plan section 3: width mapping not defined"
+    },
+    "R10": {
+      "kind": "jis",
+      "groups": [
+        [
+          "api"
+        ],
+        [
+          "API"
+        ]
+      ],
+      "reference": "JIS 4.4.9"
+    },
+    "R11": {
+      "kind": "observation",
+      "groups": null,
+      "reference": "step3-plan section 3: width mapping not defined"
+    },
+    "R12": {
+      "kind": "jis",
+      "groups": [
+        [
+          "API10"
+        ],
+        [
+          "API2"
+        ]
+      ],
+      "reference": "JIS 4.1, 4.4.7"
+    },
+    "R13": {
+      "kind": "jis",
+      "groups": [
+        [
+          "API-Test"
+        ],
+        [
+          "APITest"
+        ]
+      ],
+      "reference": "JIS 4.3",
+      "conditions": [
+        "U+002D is mapped to the JIS hyphen for this experiment"
+      ]
+    },
+    "R14": {
+      "kind": "jis",
+      "groups": [
+        [
+          "C"
+        ],
+        [
+          "C++"
+        ]
+      ],
+      "reference": "JIS 4.1",
+      "conditions": [
+        "U+002B is mapped to the JIS addition sign for this experiment"
+      ]
+    },
+    "K01": {
+      "kind": "jis",
+      "readingGroups": [
+        [
+          "児島",
+          "小島"
+        ]
+      ],
+      "finalGroups": [
+        [
+          "児島"
+        ],
+        [
+          "小島"
+        ]
+      ],
+      "reference": "JIS 5.2, 4.4.11"
+    },
+    "K02": {
+      "kind": "jis",
+      "readingGroups": [
+        [
+          "亜",
+          "一"
+        ]
+      ],
+      "finalGroups": [
+        [
+          "亜"
+        ],
+        [
+          "一"
+        ]
+      ],
+      "reference": "JIS 4.4.11; J14: 16-01 / 16-76"
+    },
+    "K03": {
+      "kind": "jis",
+      "readingGroups": [
+        [
+          "〃",
+          "仝",
+          "々",
+          "〆",
+          "〇",
+          "亜"
+        ]
+      ],
+      "finalGroups": [
+        [
+          "〃"
+        ],
+        [
+          "仝"
+        ],
+        [
+          "々"
+        ],
+        [
+          "〆"
+        ],
+        [
+          "〇"
+        ],
+        [
+          "亜"
+        ]
+      ],
+      "reference": "JIS 4.4.11; J14 character mapping"
+    },
+    "K04": {
+      "kind": "observation",
+      "readingGroups": [
+        [
+          "𠮷",
+          "亜"
+        ]
+      ],
+      "finalGroups": null,
+      "reference": "step3-plan section 4: additional character policy not defined"
+    },
+    "K05": {
+      "kind": "ecma",
+      "readingGroups": [
+        [
+          "が",
+          "が"
+        ]
+      ],
+      "finalGroups": [
+        [
+          "が",
+          "が"
+        ]
+      ],
+      "reference": "J10: CompareStrings canonical equivalence"
+    },
+    "K06": {
+      "kind": "jis",
+      "readingGroups": [
+        [
+          "一"
+        ],
+        [
+          "亜"
+        ]
+      ],
+      "finalGroups": [
+        [
+          "一"
+        ],
+        [
+          "亜"
+        ]
+      ],
+      "reference": "JIS 4.4.10.2, 5.2: reading decides before form"
+    }
+  }
+}

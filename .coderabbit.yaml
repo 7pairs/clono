@@ -4,6 +4,9 @@
 language: "ja-JP"
 
 reviews:
+  path_filters:
+    - "!research/book-index/results/**/*.txt"
+
   auto_review:
     enabled: true
     base_branches:

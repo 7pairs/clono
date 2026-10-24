@@ -1,0 +1,567 @@
+{
+  "profiles": [
+    {
+      "name": "base-2",
+      "pageCount": 4,
+      "creator": "Vivliostyle (Vivliostyle.js 2.45.1; Chrome/153.0.8010.36)",
+      "pdfSha256": "aad31ca299bacf0fdf669ac13e19f13470169ecc1c7721c469fbe71a29ec1165",
+      "checks": {
+        "folios": true,
+        "markers": true,
+        "labelsAndColumns": true,
+        "printedNumbers": true,
+        "linkSourcesAndIds": true,
+        "targetPagesAndPositions": true,
+        "occurrenceContexts": true
+      },
+      "links": [
+        {
+          "term": "Android",
+          "source": "a.html",
+          "id": "idx-a-3",
+          "printed": 1,
+          "targetPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-3",
+          "left": 33.75,
+          "top": 421.16998,
+          "linkRect": [
+            33.9375,
+            471.51373,
+            39.84375,
+            481.54498
+          ],
+          "targetContext": "Androidで実⾏する。"
+        },
+        {
+          "term": "位置情報",
+          "source": "a.html",
+          "id": "idx-a-1",
+          "printed": 1,
+          "targetPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-1",
+          "left": 33.75,
+          "top": 475.16998,
+          "linkRect": [
+            33.9375,
+            431.57623,
+            39.84375,
+            441.60748
+          ],
+          "targetContext": "位置情報を調べる。"
+        },
+        {
+          "term": "位置情報",
+          "source": "a.html",
+          "id": "idx-a-2",
+          "printed": 1,
+          "targetPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-2",
+          "left": 33.75,
+          "top": 448.16998,
+          "linkRect": [
+            46.3125,
+            431.57623,
+            52.125,
+            441.60748
+          ],
+          "targetContext": "位置情報をもう⼀度確認する。"
+        },
+        {
+          "term": "位置情報",
+          "source": "b.html",
+          "id": "idx-b-1",
+          "printed": 3,
+          "targetPage": 3,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-1",
+          "left": 33.75,
+          "top": 475.16998,
+          "linkRect": [
+            58.59375,
+            431.57623,
+            64.5,
+            441.60748
+          ],
+          "targetContext": "位置情報とテストとAPIを確認する。"
+        },
+        {
+          "term": "API",
+          "source": "b.html",
+          "id": "idx-b-3",
+          "printed": 3,
+          "targetPage": 3,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-3",
+          "left": 123.75,
+          "top": 475.16998,
+          "linkRect": [
+            215.34375,
+            471.51373,
+            221.25,
+            481.54498
+          ],
+          "targetContext": "APIを確認する。"
+        },
+        {
+          "term": "テスト",
+          "source": "a.html",
+          "id": "idx-a-4",
+          "printed": 2,
+          "targetPage": 2,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-4",
+          "left": 33.75,
+          "top": 503.66998,
+          "linkRect": [
+            215.34375,
+            431.57623,
+            221.25,
+            441.60748
+          ],
+          "targetContext": "テストを実施する。"
+        },
+        {
+          "term": "テスト",
+          "source": "b.html",
+          "id": "idx-b-2",
+          "printed": 3,
+          "targetPage": 3,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-2",
+          "left": 83.25,
+          "top": 475.16998,
+          "linkRect": [
+            227.71875,
+            431.57623,
+            233.625,
+            441.60748
+          ],
+          "targetContext": "テストとAPIを確認する。"
+        }
+      ]
+    },
+    {
+      "name": "swapped-2",
+      "pageCount": 4,
+      "creator": "Vivliostyle (Vivliostyle.js 2.45.1; Chrome/153.0.8010.36)",
+      "pdfSha256": "550b805731891b2f6787b7377fe453d04096ebf58d1bb7c21aa2eadea1d21d84",
+      "checks": {
+        "folios": true,
+        "markers": true,
+        "labelsAndColumns": true,
+        "printedNumbers": true,
+        "linkSourcesAndIds": true,
+        "targetPagesAndPositions": true,
+        "occurrenceContexts": true
+      },
+      "links": [
+        {
+          "term": "Android",
+          "source": "a.html",
+          "id": "idx-a-3",
+          "printed": 2,
+          "targetPage": 2,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-3",
+          "left": 33.75,
+          "top": 421.16998,
+          "linkRect": [
+            33.9375,
+            471.51373,
+            39.84375,
+            481.54498
+          ],
+          "targetContext": "Androidで実⾏する。"
+        },
+        {
+          "term": "位置情報",
+          "source": "b.html",
+          "id": "idx-b-1",
+          "printed": 1,
+          "targetPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-1",
+          "left": 33.75,
+          "top": 475.16998,
+          "linkRect": [
+            33.9375,
+            431.57623,
+            39.84375,
+            441.60748
+          ],
+          "targetContext": "位置情報とテストとAPIを確認する。"
+        },
+        {
+          "term": "位置情報",
+          "source": "a.html",
+          "id": "idx-a-1",
+          "printed": 2,
+          "targetPage": 2,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-1",
+          "left": 33.75,
+          "top": 475.16998,
+          "linkRect": [
+            46.3125,
+            431.57623,
+            52.125,
+            441.60748
+          ],
+          "targetContext": "位置情報を調べる。"
+        },
+        {
+          "term": "位置情報",
+          "source": "a.html",
+          "id": "idx-a-2",
+          "printed": 2,
+          "targetPage": 2,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-2",
+          "left": 33.75,
+          "top": 448.16998,
+          "linkRect": [
+            58.59375,
+            431.57623,
+            64.5,
+            441.60748
+          ],
+          "targetContext": "位置情報をもう⼀度確認する。"
+        },
+        {
+          "term": "API",
+          "source": "b.html",
+          "id": "idx-b-3",
+          "printed": 1,
+          "targetPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-3",
+          "left": 123.75,
+          "top": 475.16998,
+          "linkRect": [
+            215.34375,
+            471.51373,
+            221.25,
+            481.54498
+          ],
+          "targetContext": "APIを確認する。"
+        },
+        {
+          "term": "テスト",
+          "source": "b.html",
+          "id": "idx-b-2",
+          "printed": 1,
+          "targetPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-2",
+          "left": 83.25,
+          "top": 475.16998,
+          "linkRect": [
+            215.34375,
+            431.57623,
+            221.25,
+            441.60748
+          ],
+          "targetContext": "テストとAPIを確認する。"
+        },
+        {
+          "term": "テスト",
+          "source": "a.html",
+          "id": "idx-a-4",
+          "printed": 3,
+          "targetPage": 3,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-4",
+          "left": 33.75,
+          "top": 503.66998,
+          "linkRect": [
+            227.71875,
+            431.57623,
+            233.625,
+            441.60748
+          ],
+          "targetContext": "テストを実施する。"
+        }
+      ]
+    },
+    {
+      "name": "base-3",
+      "pageCount": 4,
+      "creator": "Vivliostyle (Vivliostyle.js 2.45.1; Chrome/153.0.8010.36)",
+      "pdfSha256": "24ef52cbc97315569dd3bdba1e98ac06f12fd8b1816d0fdcaf4a9f747b35178a",
+      "checks": {
+        "folios": true,
+        "markers": true,
+        "labelsAndColumns": true,
+        "printedNumbers": true,
+        "linkSourcesAndIds": true,
+        "targetPagesAndPositions": true,
+        "occurrenceContexts": true
+      },
+      "links": [
+        {
+          "term": "Android",
+          "source": "a.html",
+          "id": "idx-a-3",
+          "printed": 1,
+          "targetPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-3",
+          "left": 33.75,
+          "top": 421.16998,
+          "linkRect": [
+            33.9375,
+            471.51373,
+            39.84375,
+            481.54498
+          ],
+          "targetContext": "Androidで実⾏する。"
+        },
+        {
+          "term": "位置情報",
+          "source": "a.html",
+          "id": "idx-a-1",
+          "printed": 1,
+          "targetPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-1",
+          "left": 33.75,
+          "top": 475.16998,
+          "linkRect": [
+            33.9375,
+            431.57623,
+            39.84375,
+            441.60748
+          ],
+          "targetContext": "位置情報を調べる。"
+        },
+        {
+          "term": "位置情報",
+          "source": "a.html",
+          "id": "idx-a-2",
+          "printed": 1,
+          "targetPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-2",
+          "left": 33.75,
+          "top": 448.16998,
+          "linkRect": [
+            46.3125,
+            431.57623,
+            52.125,
+            441.60748
+          ],
+          "targetContext": "位置情報をもう⼀度確認する。"
+        },
+        {
+          "term": "位置情報",
+          "source": "b.html",
+          "id": "idx-b-1",
+          "printed": 3,
+          "targetPage": 3,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-1",
+          "left": 33.75,
+          "top": 475.16998,
+          "linkRect": [
+            58.59375,
+            431.57623,
+            64.5,
+            441.60748
+          ],
+          "targetContext": "位置情報とテストとAPIを確認する。"
+        },
+        {
+          "term": "API",
+          "source": "b.html",
+          "id": "idx-b-3",
+          "printed": 3,
+          "targetPage": 3,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-3",
+          "left": 123.75,
+          "top": 475.16998,
+          "linkRect": [
+            154.875,
+            471.51373,
+            160.78125,
+            481.54498
+          ],
+          "targetContext": "APIを確認する。"
+        },
+        {
+          "term": "テスト",
+          "source": "a.html",
+          "id": "idx-a-4",
+          "printed": 2,
+          "targetPage": 2,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-4",
+          "left": 33.75,
+          "top": 503.66998,
+          "linkRect": [
+            154.875,
+            431.57623,
+            160.78125,
+            441.60748
+          ],
+          "targetContext": "テストを実施する。"
+        },
+        {
+          "term": "テスト",
+          "source": "b.html",
+          "id": "idx-b-2",
+          "printed": 3,
+          "targetPage": 3,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-2",
+          "left": 83.25,
+          "top": 475.16998,
+          "linkRect": [
+            167.25,
+            431.57623,
+            173.15625,
+            441.60748
+          ],
+          "targetContext": "テストとAPIを確認する。"
+        }
+      ]
+    },
+    {
+      "name": "base-4",
+      "pageCount": 4,
+      "creator": "Vivliostyle (Vivliostyle.js 2.45.1; Chrome/153.0.8010.36)",
+      "pdfSha256": "3cbaaa55408fa929d0db3abdbe2d1abef14b37c58f896fa663dd2f114ae79c79",
+      "checks": {
+        "folios": true,
+        "markers": true,
+        "labelsAndColumns": true,
+        "printedNumbers": true,
+        "linkSourcesAndIds": true,
+        "targetPagesAndPositions": true,
+        "occurrenceContexts": true
+      },
+      "links": [
+        {
+          "term": "Android",
+          "source": "a.html",
+          "id": "idx-a-3",
+          "printed": 1,
+          "targetPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-3",
+          "left": 33.75,
+          "top": 421.16998,
+          "linkRect": [
+            33.9375,
+            471.51373,
+            39.84375,
+            481.54498
+          ],
+          "targetContext": "Androidで実⾏する。"
+        },
+        {
+          "term": "位置情報",
+          "source": "a.html",
+          "id": "idx-a-1",
+          "printed": 1,
+          "targetPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-1",
+          "left": 33.75,
+          "top": 475.16998,
+          "linkRect": [
+            124.6875,
+            471.51373,
+            130.5,
+            481.54498
+          ],
+          "targetContext": "位置情報を調べる。"
+        },
+        {
+          "term": "位置情報",
+          "source": "a.html",
+          "id": "idx-a-2",
+          "printed": 1,
+          "targetPage": 1,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-2",
+          "left": 33.75,
+          "top": 448.16998,
+          "linkRect": [
+            136.96875,
+            471.51373,
+            142.875,
+            481.54498
+          ],
+          "targetContext": "位置情報をもう⼀度確認する。"
+        },
+        {
+          "term": "位置情報",
+          "source": "b.html",
+          "id": "idx-b-1",
+          "printed": 3,
+          "targetPage": 3,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-1",
+          "left": 33.75,
+          "top": 475.16998,
+          "linkRect": [
+            149.34375,
+            471.51373,
+            155.25,
+            481.54498
+          ],
+          "targetContext": "位置情報とテストとAPIを確認する。"
+        },
+        {
+          "term": "API",
+          "source": "b.html",
+          "id": "idx-b-3",
+          "printed": 3,
+          "targetPage": 3,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-3",
+          "left": 123.75,
+          "top": 475.16998,
+          "linkRect": [
+            215.34375,
+            471.51373,
+            221.25,
+            481.54498
+          ],
+          "targetContext": "APIを確認する。"
+        },
+        {
+          "term": "テスト",
+          "source": "a.html",
+          "id": "idx-a-4",
+          "printed": 2,
+          "targetPage": 2,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fa:002ehtml:0023idx-a-4",
+          "left": 33.75,
+          "top": 503.66998,
+          "linkRect": [
+            306.09375,
+            471.51373,
+            311.90625,
+            481.54498
+          ],
+          "targetContext": "テストを実施する。"
+        },
+        {
+          "term": "テスト",
+          "source": "b.html",
+          "id": "idx-b-2",
+          "printed": 3,
+          "targetPage": 3,
+          "destination": "/viv-id-http:003a:002f:002flocalhost:003a13000:002fvivliostyle:002fb:002ehtml:0023idx-b-2",
+          "left": 83.25,
+          "top": 475.16998,
+          "linkRect": [
+            318.375,
+            471.51373,
+            324.28125,
+            481.54498
+          ],
+          "targetContext": "テストとAPIを確認する。"
+        }
+      ]
+    }
+  ],
+  "negativeControls": [
+    {
+      "case": "missing-link",
+      "rejected": true
+    },
+    {
+      "case": "wrong-printed-page",
+      "rejected": true
+    },
+    {
+      "case": "wrong-target-page",
+      "rejected": true
+    },
+    {
+      "case": "duplicate-id",
+      "rejected": true
+    }
+  ],
+  "scope": "Observed named-destination format depends on Viewer/Chromium; no deduplication or second typesetting pass"
+}

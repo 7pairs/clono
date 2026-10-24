@@ -1,0 +1,1 @@
+PASS: 4 existing PDFs; 28 mapped references -> 24 retained / 4 same-item same-page duplicates; no rebuild

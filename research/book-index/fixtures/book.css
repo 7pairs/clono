@@ -1,0 +1,13 @@
+/* Copyright 2026 HASEBA Junya (7pairs)
+ * SPDX-License-Identifier: Apache-2.0 */
+@page { size: A5; margin: 16mm 12mm 18mm; @bottom-center { content: counter(page); font-size: 9pt; } }
+:root { font-family: "Hiragino Mincho ProN", serif; font-size: 10pt; line-height: 1.7; }
+body { margin: 0; }
+h1 { font-size: 18pt; margin: 0 0 1em; }
+h2 { font-size: 14pt; }
+.page-break { break-before: page; }
+.index { column-count: var(--columns); column-gap: 4mm; }
+.index p { break-inside: avoid; margin: 0 0 .6em; }
+.index-term { display: block; font-weight: bold; }
+a.index-ref { color: black; text-decoration: none; }
+a.index-ref::after { content: target-counter(attr(href), page); }

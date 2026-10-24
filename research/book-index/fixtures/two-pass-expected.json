@@ -1,0 +1,603 @@
+{
+  "basis": "Reviewed step4b-plan sections 2 and 3; independent fixed page/reference expectations",
+  "profiles": [
+    {
+      "id": "B01",
+      "columns": 2,
+      "insert": false,
+      "move": false,
+      "split": false,
+      "pageCount": 4,
+      "indexPages": [
+        4
+      ],
+      "markers": [
+        "A-ONE",
+        "A-TWO",
+        "B-ONE"
+      ],
+      "firstReferences": [
+        [
+          "Android",
+          "a.html",
+          "idx-a-3",
+          1
+        ],
+        [
+          "位置情報",
+          "a.html",
+          "idx-a-1",
+          1
+        ],
+        [
+          "位置情報",
+          "a.html",
+          "idx-a-2",
+          1
+        ],
+        [
+          "位置情報",
+          "b.html",
+          "idx-b-1",
+          3
+        ],
+        [
+          "API",
+          "b.html",
+          "idx-b-3",
+          3
+        ],
+        [
+          "テスト",
+          "a.html",
+          "idx-a-4",
+          2
+        ],
+        [
+          "テスト",
+          "b.html",
+          "idx-b-2",
+          3
+        ]
+      ],
+      "finalReferences": [
+        [
+          "Android",
+          "a.html",
+          "idx-a-3",
+          1
+        ],
+        [
+          "位置情報",
+          "a.html",
+          "idx-a-1",
+          1
+        ],
+        [
+          "位置情報",
+          "b.html",
+          "idx-b-1",
+          3
+        ],
+        [
+          "API",
+          "b.html",
+          "idx-b-3",
+          3
+        ],
+        [
+          "テスト",
+          "a.html",
+          "idx-a-4",
+          2
+        ],
+        [
+          "テスト",
+          "b.html",
+          "idx-b-2",
+          3
+        ]
+      ]
+    },
+    {
+      "id": "B02",
+      "columns": 2,
+      "insert": true,
+      "move": false,
+      "split": false,
+      "pageCount": 5,
+      "indexPages": [
+        5
+      ],
+      "markers": [
+        "A-ONE",
+        "A-TWO",
+        "INSERT-ONE",
+        "B-ONE"
+      ],
+      "firstReferences": [
+        [
+          "Android",
+          "a.html",
+          "idx-a-3",
+          1
+        ],
+        [
+          "位置情報",
+          "a.html",
+          "idx-a-1",
+          1
+        ],
+        [
+          "位置情報",
+          "a.html",
+          "idx-a-2",
+          1
+        ],
+        [
+          "位置情報",
+          "b.html",
+          "idx-b-1",
+          4
+        ],
+        [
+          "API",
+          "b.html",
+          "idx-b-3",
+          4
+        ],
+        [
+          "テスト",
+          "a.html",
+          "idx-a-4",
+          2
+        ],
+        [
+          "テスト",
+          "b.html",
+          "idx-b-2",
+          4
+        ]
+      ],
+      "finalReferences": [
+        [
+          "Android",
+          "a.html",
+          "idx-a-3",
+          1
+        ],
+        [
+          "位置情報",
+          "a.html",
+          "idx-a-1",
+          1
+        ],
+        [
+          "位置情報",
+          "b.html",
+          "idx-b-1",
+          4
+        ],
+        [
+          "API",
+          "b.html",
+          "idx-b-3",
+          4
+        ],
+        [
+          "テスト",
+          "a.html",
+          "idx-a-4",
+          2
+        ],
+        [
+          "テスト",
+          "b.html",
+          "idx-b-2",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "B03",
+      "columns": 2,
+      "insert": false,
+      "move": true,
+      "split": false,
+      "pageCount": 4,
+      "indexPages": [
+        4
+      ],
+      "markers": [
+        "A-ONE",
+        "A-TWO",
+        "B-ONE"
+      ],
+      "firstReferences": [
+        [
+          "Android",
+          "a.html",
+          "idx-a-3",
+          2
+        ],
+        [
+          "位置情報",
+          "a.html",
+          "idx-a-1",
+          1
+        ],
+        [
+          "位置情報",
+          "a.html",
+          "idx-a-2",
+          2
+        ],
+        [
+          "位置情報",
+          "b.html",
+          "idx-b-1",
+          3
+        ],
+        [
+          "API",
+          "b.html",
+          "idx-b-3",
+          3
+        ],
+        [
+          "テスト",
+          "a.html",
+          "idx-a-4",
+          2
+        ],
+        [
+          "テスト",
+          "b.html",
+          "idx-b-2",
+          3
+        ]
+      ],
+      "finalReferences": [
+        [
+          "Android",
+          "a.html",
+          "idx-a-3",
+          2
+        ],
+        [
+          "位置情報",
+          "a.html",
+          "idx-a-1",
+          1
+        ],
+        [
+          "位置情報",
+          "a.html",
+          "idx-a-2",
+          2
+        ],
+        [
+          "位置情報",
+          "b.html",
+          "idx-b-1",
+          3
+        ],
+        [
+          "API",
+          "b.html",
+          "idx-b-3",
+          3
+        ],
+        [
+          "テスト",
+          "a.html",
+          "idx-a-4",
+          2
+        ],
+        [
+          "テスト",
+          "b.html",
+          "idx-b-2",
+          3
+        ]
+      ]
+    },
+    {
+      "id": "B04",
+      "columns": 2,
+      "insert": false,
+      "move": false,
+      "split": true,
+      "pageCount": 5,
+      "indexPages": [
+        4,
+        5
+      ],
+      "markers": [
+        "A-ONE",
+        "A-TWO",
+        "B-ONE"
+      ],
+      "firstReferences": [
+        [
+          "Android",
+          "a.html",
+          "idx-a-3",
+          1
+        ],
+        [
+          "位置情報",
+          "a.html",
+          "idx-a-1",
+          1
+        ],
+        [
+          "位置情報",
+          "a.html",
+          "idx-a-2",
+          1
+        ],
+        [
+          "位置情報",
+          "b.html",
+          "idx-b-1",
+          3
+        ],
+        [
+          "API",
+          "b.html",
+          "idx-b-3",
+          3
+        ],
+        [
+          "テスト",
+          "a.html",
+          "idx-a-4",
+          2
+        ],
+        [
+          "テスト",
+          "b.html",
+          "idx-b-2",
+          3
+        ]
+      ],
+      "finalReferences": [
+        [
+          "Android",
+          "a.html",
+          "idx-a-3",
+          1
+        ],
+        [
+          "位置情報",
+          "a.html",
+          "idx-a-1",
+          1
+        ],
+        [
+          "位置情報",
+          "b.html",
+          "idx-b-1",
+          3
+        ],
+        [
+          "API",
+          "b.html",
+          "idx-b-3",
+          3
+        ],
+        [
+          "テスト",
+          "a.html",
+          "idx-a-4",
+          2
+        ],
+        [
+          "テスト",
+          "b.html",
+          "idx-b-2",
+          3
+        ]
+      ]
+    },
+    {
+      "id": "B05",
+      "columns": 3,
+      "insert": false,
+      "move": false,
+      "split": true,
+      "pageCount": 5,
+      "indexPages": [
+        4,
+        5
+      ],
+      "markers": [
+        "A-ONE",
+        "A-TWO",
+        "B-ONE"
+      ],
+      "firstReferences": [
+        [
+          "Android",
+          "a.html",
+          "idx-a-3",
+          1
+        ],
+        [
+          "位置情報",
+          "a.html",
+          "idx-a-1",
+          1
+        ],
+        [
+          "位置情報",
+          "a.html",
+          "idx-a-2",
+          1
+        ],
+        [
+          "位置情報",
+          "b.html",
+          "idx-b-1",
+          3
+        ],
+        [
+          "API",
+          "b.html",
+          "idx-b-3",
+          3
+        ],
+        [
+          "テスト",
+          "a.html",
+          "idx-a-4",
+          2
+        ],
+        [
+          "テスト",
+          "b.html",
+          "idx-b-2",
+          3
+        ]
+      ],
+      "finalReferences": [
+        [
+          "Android",
+          "a.html",
+          "idx-a-3",
+          1
+        ],
+        [
+          "位置情報",
+          "a.html",
+          "idx-a-1",
+          1
+        ],
+        [
+          "位置情報",
+          "b.html",
+          "idx-b-1",
+          3
+        ],
+        [
+          "API",
+          "b.html",
+          "idx-b-3",
+          3
+        ],
+        [
+          "テスト",
+          "a.html",
+          "idx-a-4",
+          2
+        ],
+        [
+          "テスト",
+          "b.html",
+          "idx-b-2",
+          3
+        ]
+      ]
+    },
+    {
+      "id": "B06",
+      "columns": 4,
+      "insert": false,
+      "move": false,
+      "split": true,
+      "pageCount": 5,
+      "indexPages": [
+        4,
+        5
+      ],
+      "markers": [
+        "A-ONE",
+        "A-TWO",
+        "B-ONE"
+      ],
+      "firstReferences": [
+        [
+          "Android",
+          "a.html",
+          "idx-a-3",
+          1
+        ],
+        [
+          "位置情報",
+          "a.html",
+          "idx-a-1",
+          1
+        ],
+        [
+          "位置情報",
+          "a.html",
+          "idx-a-2",
+          1
+        ],
+        [
+          "位置情報",
+          "b.html",
+          "idx-b-1",
+          3
+        ],
+        [
+          "API",
+          "b.html",
+          "idx-b-3",
+          3
+        ],
+        [
+          "テスト",
+          "a.html",
+          "idx-a-4",
+          2
+        ],
+        [
+          "テスト",
+          "b.html",
+          "idx-b-2",
+          3
+        ]
+      ],
+      "finalReferences": [
+        [
+          "Android",
+          "a.html",
+          "idx-a-3",
+          1
+        ],
+        [
+          "位置情報",
+          "a.html",
+          "idx-a-1",
+          1
+        ],
+        [
+          "位置情報",
+          "b.html",
+          "idx-b-1",
+          3
+        ],
+        [
+          "API",
+          "b.html",
+          "idx-b-3",
+          3
+        ],
+        [
+          "テスト",
+          "a.html",
+          "idx-a-4",
+          2
+        ],
+        [
+          "テスト",
+          "b.html",
+          "idx-b-2",
+          3
+        ]
+      ]
+    }
+  ]
+}
