@@ -1,0 +1,409 @@
+{
+  "status": "verified-prototype-only",
+  "startedAt": "2026-10-24T01:19:00.500627+00:00",
+  "protectedSha256": {
+    "results/pdf/step4b-B01-first.pdf": "18c5418c0950c7888302268c1f49e593b9d323f2deb4b94f816cf08522d2f547",
+    "results/pdf/step4b-B01-final.pdf": "d4f7d55cb5911a77f1acef15735f6e54971acb1e13c9141ee41b6dcf628888e7",
+    "results/step4b-results.json": "8a760561fd917fc2d1ca4bc80c7eb7c2369d4051c3e8e582015b89ae139a0a3f",
+    "results/step4b-stop.json": "18c2d881a245ad95da7bbc8286c1b6200f493757c2fe4c3b2c8d676ad5a7b318",
+    "results/logs/step4b-node-green.txt": "b96eb606bf9b3fa8f5705ce69a8dbe4a1ff02fbf68bf969359d17769dbebd366",
+    "results/logs/step4b-B01-first.txt": "de43643044b1dba94be2445daf0018bbad88f2b92d2e10466928ffbb6a05d377",
+    "results/logs/step4b-node-red.txt": "4341911b820901d7587444ed454510755783391220bb390fe0cd988346ac7bb1",
+    "results/logs/step4b-run.txt": "f5950a67ac0fe4cddd9164c5b746507a5023d20985a33cf77f8c0609f56cd169",
+    "results/logs/step4b-render.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/logs/step4b-sandbox-failure.txt": "a7d257f3914a25f4f81cd69d8fa6303a726744c51afcdd4b1cbbb9603601522d",
+    "results/logs/step4b-4a-regression.txt": "d96cfdf89f984fc4b3e88f5ce46e940456f8186007a08dd030997885313c5381",
+    "results/logs/step4b-python-green.txt": "7dba61e21896468fb6f288f1c43aea568acbe7754c091db239fb5fab7ba6d7a8",
+    "results/logs/step4b-B01-final.txt": "0f1affccb2b4836aa68990a9457a098c78571fc4e09070630165302a6a9bfe09",
+    "results/logs/step4b-python-red.txt": "c0957dde8fc90456b3629e39fc569d27395e1d9e69114e3f26227f52e4f0c997",
+    "results/logs/step4b-stop.txt": "4c36d0b98c9ac8368ada4c885521a4f78044f71f9a2a4f0bde8eeefdef751bae",
+    "results/generated/step4b/B01/b.html": "771a73d4ba603d613be983a8ff12b3570a018ecf62462f2a31b12d46b4e0e2c4",
+    "results/generated/step4b/B01/index.html": "da9ef470803df238c45950a9402924187f41026b8fbb4014f454b7304269e9b1",
+    "results/generated/step4b/B01/index-final.html": "da9ef470803df238c45950a9402924187f41026b8fbb4014f454b7304269e9b1",
+    "results/generated/step4b/B01/index-first.html": "7ccb9c39aadf55ec1fedecfedf98741d9d82fcb91eb1a8ca25de401edf07350b",
+    "results/generated/step4b/B01/a.html": "35c68b466c6a29a93b1a0c8def02c8e89d1b2676aff98e5cd774f497a6605075",
+    "results/generated/step4b/B01/book.css": "e4ef7f4e9ae3977f43836448282c620d251d050d2eebaa80363f3bd43ff35475"
+  },
+  "fixtureSha256": {
+    "fixtures/expected.json": "a6ebe59cab32253a12c5880277193ba4037e62a80eb652a47e3d8c5773fa515c",
+    "fixtures/two-pass-expected.json": "808b13d46c555673c3bf83e4230552baebf9a5d4c2df6853d2428fcd18d8d272"
+  },
+  "implementationSha256": {
+    "scripts/body_context.py": "728f957d4baf18e32aaafa4e89778cc9fbaf44948ea98fb6bf4d4a927d1007b5",
+    "scripts/body-context.test.py": "82f4da4ed25a5d85b561fa165d8a3247fecdeb19aefb296274b37d7b08b9e03b",
+    "scripts/probe-body-context.py": "9b8c975bf9a00aa051239ede376ec278abe100bc4a496d13b9187300d60d0eef"
+  },
+  "environment": {
+    "python": "3.12.14 (main, Aug 25 2026, 13:50:33) [Clang 22.1.3 ]",
+    "packages": {
+      "pypdf": "6.21.1",
+      "pdfplumber": "0.11.9"
+    },
+    "cli": "11.3.3",
+    "viewer": "2.45.1"
+  },
+  "stages": {
+    "first": {
+      "pdf": "results/pdf/step4b-B01-first.pdf",
+      "sha256": "18c5418c0950c7888302268c1f49e593b9d323f2deb4b94f816cf08522d2f547",
+      "creator": "Vivliostyle (Vivliostyle.js 2.45.1; Chrome/153.0.8010.36)",
+      "contexts": [
+        {
+          "source": "a.html",
+          "id": "idx-a-1",
+          "physicalPage": 1,
+          "context": "位置情報を調べる。",
+          "x0": 33.9374985859375,
+          "top": 122.95107716269536,
+          "x1": 123.92519083637204,
+          "bottom": 132.94951443359378
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-2",
+          "physicalPage": 1,
+          "context": "位置情報をもう一度確認する。",
+          "x0": 33.9374985859375,
+          "top": 149.95107603769532,
+          "x1": 173.51747158252692,
+          "bottom": 159.94951330859374
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-3",
+          "physicalPage": 1,
+          "context": "Androidで実行する。",
+          "x0": 33.9374985859375,
+          "top": 176.95107491269533,
+          "x1": 133.7440385522534,
+          "bottom": 186.94951218359375
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-4",
+          "physicalPage": 2,
+          "context": "テストを実施する。",
+          "x0": 33.9374985859375,
+          "top": 93.98232836972659,
+          "x1": 123.12392180725826,
+          "bottom": 103.98076564062501
+        },
+        {
+          "source": "b.html",
+          "id": "idx-b-1",
+          "physicalPage": 3,
+          "context": "位置情報とテストとAPIを確認する。",
+          "x0": 33.9374985859375,
+          "top": 122.48232718222658,
+          "x1": 202.69715786670662,
+          "bottom": 132.480764453125
+        },
+        {
+          "source": "b.html",
+          "id": "idx-b-2",
+          "physicalPage": 3,
+          "context": "テストとAPIを確認する。",
+          "x0": 83.93114931536863,
+          "top": 122.48232718222658,
+          "x1": 202.69715786670662,
+          "bottom": 132.480764453125
+        },
+        {
+          "source": "b.html",
+          "id": "idx-b-3",
+          "physicalPage": 3,
+          "context": "APIを確認する。",
+          "x0": 124.37694794262694,
+          "top": 122.48232718222658,
+          "x1": 202.69715786670662,
+          "bottom": 132.480764453125
+        }
+      ],
+      "namedStartChecks": [
+        {
+          "source": "a.html",
+          "id": "idx-a-1",
+          "anchorX": 33.75,
+          "anchorTop": 120.10577,
+          "glyphX": 33.9374985859375,
+          "glyphTop": 122.95107716269536,
+          "physicalPage": 1
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-2",
+          "anchorX": 33.75,
+          "anchorTop": 147.10577,
+          "glyphX": 33.9374985859375,
+          "glyphTop": 149.95107603769532,
+          "physicalPage": 1
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-3",
+          "anchorX": 33.75,
+          "anchorTop": 174.10577,
+          "glyphX": 33.9374985859375,
+          "glyphTop": 176.95107491269533,
+          "physicalPage": 1
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-4",
+          "anchorX": 33.75,
+          "anchorTop": 91.60577,
+          "glyphX": 33.9374985859375,
+          "glyphTop": 93.98232836972659,
+          "physicalPage": 2
+        },
+        {
+          "source": "b.html",
+          "id": "idx-b-3",
+          "anchorX": 123.75,
+          "anchorTop": 120.10577,
+          "glyphX": 124.37694794262694,
+          "glyphTop": 122.48232718222658,
+          "physicalPage": 3
+        },
+        {
+          "source": "b.html",
+          "id": "idx-b-2",
+          "anchorX": 83.25,
+          "anchorTop": 120.10577,
+          "glyphX": 83.93114931536863,
+          "glyphTop": 122.48232718222658,
+          "physicalPage": 3
+        },
+        {
+          "source": "b.html",
+          "id": "idx-b-1",
+          "anchorX": 33.75,
+          "anchorTop": 120.10577,
+          "glyphX": 33.9374985859375,
+          "glyphTop": 122.48232718222658,
+          "physicalPage": 3
+        }
+      ],
+      "elapsedMs": 46.319
+    },
+    "final": {
+      "pdf": "results/pdf/step4b-B01-final.pdf",
+      "sha256": "d4f7d55cb5911a77f1acef15735f6e54971acb1e13c9141ee41b6dcf628888e7",
+      "creator": "Vivliostyle (Vivliostyle.js 2.45.1; Chrome/153.0.8010.36)",
+      "contexts": [
+        {
+          "source": "a.html",
+          "id": "idx-a-1",
+          "physicalPage": 1,
+          "context": "位置情報を調べる。",
+          "x0": 33.9374985859375,
+          "top": 122.95107716269536,
+          "x1": 123.92519083637204,
+          "bottom": 132.94951443359378
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-2",
+          "physicalPage": 1,
+          "context": "位置情報をもう一度確認する。",
+          "x0": 33.9374985859375,
+          "top": 149.95107603769532,
+          "x1": 173.51747158252692,
+          "bottom": 159.94951330859374
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-3",
+          "physicalPage": 1,
+          "context": "Androidで実行する。",
+          "x0": 33.9374985859375,
+          "top": 176.95107491269533,
+          "x1": 133.7440385522534,
+          "bottom": 186.94951218359375
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-4",
+          "physicalPage": 2,
+          "context": "テストを実施する。",
+          "x0": 33.9374985859375,
+          "top": 93.98232836972659,
+          "x1": 123.12392180725826,
+          "bottom": 103.98076564062501
+        },
+        {
+          "source": "b.html",
+          "id": "idx-b-1",
+          "physicalPage": 3,
+          "context": "位置情報とテストとAPIを確認する。",
+          "x0": 33.9374985859375,
+          "top": 122.48232718222658,
+          "x1": 202.69715786670662,
+          "bottom": 132.480764453125
+        },
+        {
+          "source": "b.html",
+          "id": "idx-b-2",
+          "physicalPage": 3,
+          "context": "テストとAPIを確認する。",
+          "x0": 83.93114931536863,
+          "top": 122.48232718222658,
+          "x1": 202.69715786670662,
+          "bottom": 132.480764453125
+        },
+        {
+          "source": "b.html",
+          "id": "idx-b-3",
+          "physicalPage": 3,
+          "context": "APIを確認する。",
+          "x0": 124.37694794262694,
+          "top": 122.48232718222658,
+          "x1": 202.69715786670662,
+          "bottom": 132.480764453125
+        }
+      ],
+      "namedStartChecks": [
+        {
+          "source": "a.html",
+          "id": "idx-a-1",
+          "anchorX": 33.75,
+          "anchorTop": 120.10577,
+          "glyphX": 33.9374985859375,
+          "glyphTop": 122.95107716269536,
+          "physicalPage": 1
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-3",
+          "anchorX": 33.75,
+          "anchorTop": 174.10577,
+          "glyphX": 33.9374985859375,
+          "glyphTop": 176.95107491269533,
+          "physicalPage": 1
+        },
+        {
+          "source": "a.html",
+          "id": "idx-a-4",
+          "anchorX": 33.75,
+          "anchorTop": 91.60577,
+          "glyphX": 33.9374985859375,
+          "glyphTop": 93.98232836972659,
+          "physicalPage": 2
+        },
+        {
+          "source": "b.html",
+          "id": "idx-b-2",
+          "anchorX": 83.25,
+          "anchorTop": 120.10577,
+          "glyphX": 83.93114931536863,
+          "glyphTop": 122.48232718222658,
+          "physicalPage": 3
+        },
+        {
+          "source": "b.html",
+          "id": "idx-b-3",
+          "anchorX": 123.75,
+          "anchorTop": 120.10577,
+          "glyphX": 124.37694794262694,
+          "glyphTop": 122.48232718222658,
+          "physicalPage": 3
+        },
+        {
+          "source": "b.html",
+          "id": "idx-b-1",
+          "anchorX": 33.75,
+          "anchorTop": 120.10577,
+          "glyphX": 33.9374985859375,
+          "glyphTop": 122.48232718222658,
+          "physicalPage": 3
+        }
+      ],
+      "elapsedMs": 45.041
+    }
+  },
+  "sourceEvidence": [
+    {
+      "map": "node_modules/@vivliostyle/viewer/lib/js/vivliostyle-viewer.js.map",
+      "mapSha256": "a3a0799c2d2936fd56fcac6746fe63f2509b9168235b749a904e5d902e832c51",
+      "source": "../../../core/src/vivliostyle/vgen.ts",
+      "sourceSha256": "b7f05733201461868c585b6f9f450a6af84d23b2f9629563d032171f95b3353c",
+      "locations": [
+        {
+          "symbol": "// Keep original id value",
+          "line": 2054
+        },
+        {
+          "symbol": "// Create an anchor element with transformed id",
+          "line": 2058
+        }
+      ]
+    },
+    {
+      "map": "node_modules/@vivliostyle/viewer/lib/js/vivliostyle-viewer.js.map",
+      "mapSha256": "a3a0799c2d2936fd56fcac6746fe63f2509b9168235b749a904e5d902e832c51",
+      "source": "../../../core/src/vivliostyle/epub.ts",
+      "sourceSha256": "bcabbd68d7b4e115389fe19c8d7b6c2b0d0a0a6de88ca3a2ca02e8c8ca9442a0",
+      "locations": [
+        {
+          "symbol": "export const transformedIdPrefix",
+          "line": 843
+        },
+        {
+          "symbol": "transformFragment(fragment: string",
+          "line": 939
+        }
+      ]
+    },
+    {
+      "map": "node_modules/@vivliostyle/cli/dist/build-WR6Qei3b.js.map",
+      "mapSha256": "f51ce5683e4f836e97b391a797e742c3a425bd957e9716df99bd220152ca8850",
+      "source": "../src/output/pdf.ts",
+      "sourceSha256": "e8382c8e8c5bd05f88736b20d4f28227759e5dbd0a476c607b83b790e8d6f129",
+      "locations": [
+        {
+          "symbol": "const pdf = await page.pdf(",
+          "line": 283
+        },
+        {
+          "symbol": "const post = await PostProcess.load(browserResult.pdf)",
+          "line": 322
+        },
+        {
+          "symbol": "await post.save(target.path",
+          "line": 333
+        }
+      ]
+    },
+    {
+      "map": "node_modules/@vivliostyle/cli/dist/build-WR6Qei3b.js.map",
+      "mapSha256": "f51ce5683e4f836e97b391a797e742c3a425bd957e9716df99bd220152ca8850",
+      "source": "../src/output/pdf-postprocess.ts",
+      "sourceSha256": "953a95657f8005be112b599aef2239a8576a2e4468133f87e7b84dc9228eed41",
+      "locations": [
+        {
+          "symbol": "PDFDocument.load(pdf, { updateMetadata: false })",
+          "line": 105
+        },
+        {
+          "symbol": "async toc(",
+          "line": 289
+        },
+        {
+          "symbol": "let pdf = await this.document.save()",
+          "line": 125
+        }
+      ]
+    }
+  ],
+  "checks": {
+    "fourteenContexts": true,
+    "initialSevenNamedStarts": true,
+    "finalSixNamedStarts": true,
+    "independentPages": true,
+    "allSevenPagesUnchanged": true,
+    "stoppedEvidenceUnchanged": true,
+    "newPdfCount": 0
+  },
+  "elapsedMs": 120.545,
+  "finishedAt": "2026-10-24T01:19:00.621473+00:00"
+}
