@@ -8,7 +8,7 @@ from pypdf import PdfReader
 from page_aggregation import extract_page_map, aggregate_pages
 
 ROOT = Path(__file__).resolve().parents[1]
-BASELINE = json.loads((ROOT / 'fixtures/expected.json').read_text())
+BASELINE = json.loads((ROOT / 'fixtures/expected.json').read_text(encoding='utf-8'))
 
 
 def finish_pass(items, page_map, write_html, build_pdf):

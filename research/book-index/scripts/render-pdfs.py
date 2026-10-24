@@ -6,7 +6,7 @@ import json
 import subprocess
 from PIL import Image, ImageDraw
 root=Path(__file__).resolve().parents[1]
-for p in json.loads((root/'fixtures/expected.json').read_text())['profiles']:
+for p in json.loads((root/'fixtures/expected.json').read_text(encoding='utf-8'))['profiles']:
  name=p['name'];out=root/f'results/generated/{name}/images';out.mkdir(exist_ok=True)
  for old in out.glob('page-*.png'):old.unlink()
  subprocess.run(['pdftoppm','-png','-r','100',str(root/f'results/pdf/{name}.pdf'),str(out/'page')],check=True)

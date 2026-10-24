@@ -13,8 +13,8 @@ from body_context import read_pages, ContextError
 from rerun_inspection import inspect_rerun_pdf
 
 ROOT = Path(__file__).resolve().parents[1]
-PROFILE = json.loads((ROOT / 'fixtures/two-pass-expected.json').read_text())['profiles'][0]
-COLLECTED = json.loads((ROOT / 'results/step2-conversion.json').read_text())['profiles'][0]
+PROFILE = json.loads((ROOT / 'fixtures/two-pass-expected.json').read_text(encoding='utf-8'))['profiles'][0]
+COLLECTED = json.loads((ROOT / 'results/step2-conversion.json').read_text(encoding='utf-8'))['profiles'][0]
 FIRST = ROOT / 'results/pdf/step4b-B01-first.pdf'
 FINAL = ROOT / 'results/pdf/step4b-B01-final.pdf'
 

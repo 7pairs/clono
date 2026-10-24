@@ -8,7 +8,7 @@ import subprocess
 from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[1]
-report = json.loads((ROOT / 'results/step4b-rerun/result.json').read_text())
+report = json.loads((ROOT / 'results/step4b-rerun/result.json').read_text(encoding='utf-8'))
 assert report['status'] == 'verified-automatic' and report['buildCount'] == 12
 records = []
 for case in report['profiles']:
@@ -32,5 +32,5 @@ for case in report['profiles']:
     records.append({'id': case['id'], 'pdfSha256': build['sha256'], 'pages': [str(p.relative_to(ROOT)) for p in pages],
                     'contact': str((out / 'contact.png').relative_to(ROOT))})
 assert sum(len(r['pages']) for r in records) == 28
-(ROOT / 'results/step4b-rerun/render.json').write_text(json.dumps({'pageCount': 28, 'profiles': records}, indent=2) + '\n')
+(ROOT / 'results/step4b-rerun/render.json').write_text(json.dumps({'pageCount': 28, 'profiles': records}, indent=2) + '\n', encoding='utf-8')
 print('Rendered all 28 final pages; visual review pending')

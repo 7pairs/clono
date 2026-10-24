@@ -8,8 +8,8 @@ from page_aggregation import PageMappingError
 from two_pass import finish_pass, inspect_pdf, check_link_rows, assert_same_pages
 
 ROOT = Path(__file__).resolve().parents[1]
-PROFILE = json.loads((ROOT / 'fixtures/two-pass-expected.json').read_text())['profiles'][0]
-COLLECTED = json.loads((ROOT / 'results/step2-conversion.json').read_text())['profiles'][0]
+PROFILE = json.loads((ROOT / 'fixtures/two-pass-expected.json').read_text(encoding='utf-8'))['profiles'][0]
+COLLECTED = json.loads((ROOT / 'results/step2-conversion.json').read_text(encoding='utf-8'))['profiles'][0]
 
 
 class TwoPassTests(unittest.TestCase):

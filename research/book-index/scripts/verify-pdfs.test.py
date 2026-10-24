@@ -13,7 +13,7 @@ from pypdf.generic import NameObject
 
 ROOT=Path(__file__).resolve().parents[1]
 FIXTURE=ROOT/'fixtures/expected.json'
-EXPECTED=json.loads(FIXTURE.read_text())
+EXPECTED=json.loads(FIXTURE.read_text(encoding='utf-8'))
 READ_TEXT=Path.read_text
 NAMED=PdfReader.named_destinations.fget
 

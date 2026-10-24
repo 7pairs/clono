@@ -52,7 +52,7 @@ PDFは`results/pdf/`、再出力Markdown・HTML・収集結果・設定・PNGは
 手順2で用意したNode.js 24.22.0と固定済みの依存環境を使い、このディレクトリで実行する。追加依存やPython、組版処理は不要。
 
 ```sh
-node --test scripts/index.test.mjs scripts/collation.test.mjs
+node --test scripts/index.test.mjs scripts/collation.test.mjs scripts/compare-collation.test.mjs
 node scripts/compare-collation.mjs
 ```
 
@@ -124,6 +124,24 @@ node --test scripts/two-pass.test.mjs
 各構成の初回と追加組版は1回ずつで、正常系は計12回。本文文脈による全7箇所の検査と、残したリンクの名前付き参照先の検査を接続する。省いた名前付き参照先の欠落だけでは失敗にしない。表示番号・本文文脈・参照先・ノンブル・ページ数・列配置に不一致があれば停止し、組版を反復しない。
 
 画像化は自動検査成功とPDFのハッシュを確認してから行う。全28ページを目視し、確認結果を独立レビューの状態と区別して記録する。今回の目視記録はresults/step4b-rerun/visual-review.jsonに残したもので、再現実行で新しく作ったPDFの目視を代行しない。[再実行結果](results/step4b-rerun.md)から各記録を参照する。
+
+## PRレビュー対応後の検証
+
+[PR #11のレビュー](https://github.com/7pairs/clono/pull/11)を受け、再現手順のパス、Pythonの文字コード指定、比較実験の失敗時の状態保存を修正した。補助モジュールとテストも含め、テキストファイルの読み書きにはUTF-8を明示する。調査の結論と固定期待値は変更していない。対応と検証結果は[レビュー対応の記録](results/verification.md#27-prレビュー対応と関連箇所の検証)を参照する。
+
+保存済みの結果JSONに記録したコードのハッシュは、修正前の実装を示す。今回の修正に合わせて過去のハッシュや時間を更新しない。当時のコードは、修正前コミット`c00d607`のGit履歴から確認できる。現在のコードで実験を再実行する場合は、必要な入力・保存済み生成物をそろえた別の作業場所を使い、結果を当時の記録と区別する。`audit-collation.py`はコードのハッシュも照合するため、現在のコードと過去の比較結果を混在させると失敗する。
+
+以下はこのディレクトリから実行する。組版や保存済み結果の更新を伴わず、通常環境と非UTF-8環境でテストする。今回の検証環境はmacOS・Python 3.12.14・Node.js 24.22.0。Windows等の対応を確認したものではない。
+
+```sh
+node --test scripts/*.test.mjs
+for test_file in scripts/*.test.py; do
+  .venv/bin/python "$test_file" || exit 1
+  LC_ALL=C PYTHONUTF8=0 .venv/bin/python "$test_file" || exit 1
+done
+```
+
+非UTF-8環境の起動テストは、両方の組版スクリプトを補助モジュールの読込みから起動し、入力JSONの読取り、日本語の子プロセス出力、失敗診断の保存を確認する。組版開始前に意図的に停止するため、非UTF-8環境での新しいPDF生成まで検証したものではない。
 
 ## ファイルとライセンス表示
 

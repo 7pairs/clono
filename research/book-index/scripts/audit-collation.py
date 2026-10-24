@@ -5,9 +5,9 @@ from pathlib import Path
 import hashlib
 import json
 
-report = json.loads(Path('results/step3-comparisons.json').read_text())
-inputs = json.loads(Path('fixtures/collation-cases.json').read_text())
-expected = json.loads(Path('fixtures/collation-expected.json').read_text())['cases']
+report = json.loads(Path('results/step3-comparisons.json').read_text(encoding='utf-8'))
+inputs = json.loads(Path('fixtures/collation-cases.json').read_text(encoding='utf-8'))
+expected = json.loads(Path('fixtures/collation-expected.json').read_text(encoding='utf-8'))['cases']
 for path, digest in report['hashes'].items():
     assert hashlib.sha256(Path(path).read_bytes()).hexdigest() == digest, path
 assert report['status'] == 'measured'
@@ -55,8 +55,8 @@ for case in report['itemCases']:
 assert sum(counts.values()) == report['summary']['pairRecords'] == 318
 for key, summary_key in [('match', 'matches'), ('mismatch', 'mismatches'), ('observation', 'observations')]:
     assert counts[key] == report['summary'][summary_key]
-red = Path('results/logs/step3-red.txt').read_text()
-green = Path('results/logs/step3-green.txt').read_text()
+red = Path('results/logs/step3-red.txt').read_text(encoding='utf-8')
+green = Path('results/logs/step3-green.txt').read_text(encoding='utf-8')
 assert 'fail 6' in red and 'pass 1' in red
 assert 'pass 12' in green and 'fail 0' in green
 message = (
@@ -65,5 +65,5 @@ message = (
     f"{counts['mismatch']} mismatch, {counts['observation']} observation. "
     "Red: 6 missing-behavior failures, 1 existing diagnostic pass. Green: 12 passed.\n"
 )
-Path('results/logs/step3-audit.txt').write_text(message)
+Path('results/logs/step3-audit.txt').write_text(message, encoding='utf-8')
 print(message, end='')

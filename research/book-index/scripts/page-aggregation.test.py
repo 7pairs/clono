@@ -14,8 +14,8 @@ from pypdf import PdfReader
 from page_aggregation import PageMappingError, extract_page_map, aggregate_pages
 
 ROOT = Path(__file__).resolve().parents[1]
-COLLECTED = json.loads((ROOT / 'results/step2-conversion.json').read_text())['profiles']
-EXPECTED = json.loads((ROOT / 'fixtures/page-aggregation-expected.json').read_text())['profiles']
+COLLECTED = json.loads((ROOT / 'results/step2-conversion.json').read_text(encoding='utf-8'))['profiles']
+EXPECTED = json.loads((ROOT / 'fixtures/page-aggregation-expected.json').read_text(encoding='utf-8'))['profiles']
 
 
 def occurrence(source, id_):
@@ -118,22 +118,22 @@ class PageAggregationTests(unittest.TestCase):
                     target.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copyfile(ROOT / relative, target)
                 output = root / 'results/step4a-pages.json'
-                output.write_text(json.dumps({'status': 'verified', 'profiles': ['previous-success']}))
+                output.write_text(json.dumps({'status': 'verified', 'profiles': ['previous-success']}), encoding='utf-8')
                 if mutation == 'missing-original':
                     (root / 'fixtures/a.md').unlink()
                 elif mutation == 'missing-json':
                     (root / 'fixtures/page-aggregation-expected.json').unlink()
                 elif mutation == 'broken-conversion':
-                    (root / 'results/step2-conversion.json').write_text('{invalid')
+                    (root / 'results/step2-conversion.json').write_text('{invalid', encoding='utf-8')
                 else:
-                    (root / 'fixtures/page-aggregation-expected.json').write_text('{invalid')
+                    (root / 'fixtures/page-aggregation-expected.json').write_text('{invalid', encoding='utf-8')
                 result = subprocess.run([sys.executable, str(root / 'scripts/aggregate-pages.py')],
-                                        cwd=root, capture_output=True, text=True)
+                                        cwd=root, capture_output=True, text=True, encoding='utf-8')
                 self.assertNotEqual(result.returncode, 0)
-                saved = json.loads(output.read_text())
+                saved = json.loads(output.read_text(encoding='utf-8'))
                 self.assertEqual(saved['status'], 'running-not-final')
                 self.assertEqual(saved['profiles'], [])
-                self.assertNotIn('previous-success', output.read_text())
+                self.assertNotIn('previous-success', output.read_text(encoding='utf-8'))
 
 
 if __name__ == '__main__':

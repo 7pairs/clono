@@ -20,7 +20,7 @@ def digest(path):
 
 
 def save(value):
-    OUT.write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n')
+    OUT.write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
 
 def source_evidence():
@@ -37,7 +37,7 @@ def source_evidence():
     records = []
     for relative, source_name, markers in specs:
         path = ROOT / relative
-        mapped = json.loads(path.read_text())
+        mapped = json.loads(path.read_text(encoding='utf-8'))
         content = mapped['sourcesContent'][mapped['sources'].index(source_name)]
         positions = []
         for marker in markers:
@@ -55,9 +55,9 @@ def main():
     save(report)
     started = time.perf_counter()
     try:
-        fixed = json.loads((ROOT / 'fixtures/expected.json').read_text())
-        profile = json.loads((ROOT / 'fixtures/two-pass-expected.json').read_text())['profiles'][0]
-        stopped = json.loads((ROOT / 'results/step4b-results.json').read_text())
+        fixed = json.loads((ROOT / 'fixtures/expected.json').read_text(encoding='utf-8'))
+        profile = json.loads((ROOT / 'fixtures/two-pass-expected.json').read_text(encoding='utf-8'))['profiles'][0]
+        stopped = json.loads((ROOT / 'results/step4b-results.json').read_text(encoding='utf-8'))
         assert stopped['status'] == 'failed-not-final' and stopped['buildCount'] == 2
         paths = [ROOT / b['pdf'] for b in stopped['profiles'][0]['builds']]
         for path, build in zip(paths, stopped['profiles'][0]['builds']):
@@ -71,8 +71,8 @@ def main():
         report['fixtureSha256'] = {str(p): digest(ROOT / p) for p in ['fixtures/expected.json', 'fixtures/two-pass-expected.json']}
         report['implementationSha256'] = {str(p): digest(ROOT / p) for p in ['scripts/body_context.py', 'scripts/body-context.test.py', 'scripts/probe-body-context.py']}
         report['environment'] = {'python': sys.version, 'packages': {p: importlib.metadata.version(p) for p in ['pypdf', 'pdfplumber']},
-                                 'cli': json.loads((ROOT / 'node_modules/@vivliostyle/cli/package.json').read_text())['version'],
-                                 'viewer': json.loads((ROOT / 'node_modules/@vivliostyle/viewer/package.json').read_text())['version']}
+                                 'cli': json.loads((ROOT / 'node_modules/@vivliostyle/cli/package.json').read_text(encoding='utf-8'))['version'],
+                                 'viewer': json.loads((ROOT / 'node_modules/@vivliostyle/viewer/package.json').read_text(encoding='utf-8'))['version']}
         assert report['environment']['python'] == stopped['environment']['python']
         assert report['environment']['packages'] == {p: stopped['environment']['packages'][p] for p in ['pypdf', 'pdfplumber']}
         assert report['environment']['cli'] == '11.3.3' and report['environment']['viewer'] == '2.45.1'

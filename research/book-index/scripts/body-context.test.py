@@ -8,7 +8,7 @@ from pypdf import PdfReader
 from body_context import read_pages, locate_contexts, check_pages, check_named_starts, ContextError
 
 ROOT = Path(__file__).resolve().parents[1]
-FIXED = json.loads((ROOT / 'fixtures/expected.json').read_text())
+FIXED = json.loads((ROOT / 'fixtures/expected.json').read_text(encoding='utf-8'))
 OCCURRENCES = FIXED['occurrences']
 CONTEXTS = FIXED['destinationContexts']
 EXPECTED = {(o[0].replace('.md', '.html'), o[1]): o[4] for o in OCCURRENCES}

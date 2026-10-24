@@ -10,7 +10,7 @@ import pdfplumber
 
 ROOT = Path(__file__).resolve().parents[1]
 out = ROOT / 'results/generated/step4b/B01'
-report = json.loads((ROOT / 'results/step4b-results.json').read_text())
+report = json.loads((ROOT / 'results/step4b-results.json').read_text(encoding='utf-8'))
 case = report['profiles'][0]
 assert report['status'] == 'failed-not-final' and report['buildCount'] == 2
 occurrences = case['occurrences']
@@ -24,11 +24,11 @@ for stage in ['first', 'final']:
     evidence['stages'][stage] = {'pageCount': len(reader.pages), 'creator': str(reader.metadata.creator),
                                 'indexDestinationNames': names, 'linkCount': sum(len(p.get('/Annots', [])) for p in reader.pages),
                                 'pageText': text, 'retainedMappings': list(extract_page_map(reader, retained).values())}
-evidence['removedIdStillInBodyHtml'] = 'id="idx-a-2"' in (out / 'a.html').read_text()
-evidence['removedHrefInFirstIndex'] = 'a.html#idx-a-2' in (out / 'index-first.html').read_text()
-evidence['removedHrefInFinalIndex'] = 'a.html#idx-a-2' in (out / 'index-final.html').read_text()
+evidence['removedIdStillInBodyHtml'] = 'id="idx-a-2"' in (out / 'a.html').read_text(encoding='utf-8')
+evidence['removedHrefInFirstIndex'] = 'a.html#idx-a-2' in (out / 'index-first.html').read_text(encoding='utf-8')
+evidence['removedHrefInFinalIndex'] = 'a.html#idx-a-2' in (out / 'index-final.html').read_text(encoding='utf-8')
 evidence['bodyAndCssUnchanged'] = all(hashlib.sha256((out / name).read_bytes()).hexdigest() == value for name, value in case['bodyAndCssSha256'].items())
 assert evidence['removedIdStillInBodyHtml'] and evidence['bodyAndCssUnchanged']
 assert evidence['removedHrefInFirstIndex'] and not evidence['removedHrefInFinalIndex']
-(ROOT / 'results/step4b-stop.json').write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + '\n')
+(ROOT / 'results/step4b-stop.json').write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 print('B01: first 7 named targets, final 6; body ID retained; acceptance remains failed')
