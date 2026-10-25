@@ -249,7 +249,7 @@ Node.jsの更新理由は確認できた。ただし、更新後の動作は未�
 | プロジェクト指定 | `.node-version`は24.22.0。nodenvの全体既定値も24.22.0 |
 | JDKの指定 | `.sdkmanrc`は`java=21.0.12-tem`。指定先の直接実行でTemurin 21.0.12+8を確認 |
 | シェルのJDK | 通常の`java --version`はTemurin 25.0.4+7。プロジェクト指定はこのシェルに未適用 |
-| npmのNode.js要件 | 導入済みnpm 11.19.1のpackage.jsonは`^20.17.0 || >=22.9.0`。24.22.1は宣言上の範囲内だが、動作確認ではない |
+| npmのNode.js要件 | 導入済みnpm 11.19.1のpackage.jsonは`^20.17.0 \|\| >=22.9.0`。24.22.1は宣言上の範囲内だが、動作確認ではない |
 
 確認に使ったのは、`node --version`、`npm --version`、実行元の確認、`nodenv versions --bare`、導入先のpackage.json読取り、`java --version`、指定JDKの直接実行等。個人のホームディレクトリを含む実行パスは本記録へ収録していない。
 
