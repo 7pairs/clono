@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # 0007 セキュリティ対応としてNode.jsを24.22.1へ更新する
 
-- 状態：未着手。草稿の独立レビューと二人の内容確認を終え、開発者の依頼でファイルへ反映した。
+- 状態：手順1の事前調査結果とnpmの追加調査方針を整理済み。両者の独立レビュー、追加調査、npmの継続使用の判断と二人の確認は未実施。手順2～4は未着手。
 
 ## 1. 目的
 
@@ -74,6 +74,8 @@ Git操作とPR作成・マージは開発者が担当する。
 - [backlog](../backlog.md)の再評価条件と照合する。
 
 npmの確認では、利用中の版・利用条件に対して更新を必要とする既知の情報があるかを判断する。脆弱性が存在しないことの証明は求めず、確認日・参照先・判断根拠・残る不明点を記録する。
+
+事前調査でnpmの同梱依存に確認が必要な情報が見つかったため、第8節の[追加調査計画](#手順1内の追加調査計画npmの継続使用と更新候補の比較)に従い、更新候補との比較を先に行う。追加調査に着手する前に、事前調査結果と追加調査方針をまとめて独立レビューし、必要な指摘対応・再レビューと二人の確認を行う。
 
 **判断地点**
 
@@ -177,3 +179,170 @@ CIが失敗した場合は、原因に応じて必要な手順へ戻る。ロー
 2026-10-25、開発者と更新範囲・過去調査の扱い・検証方法・PRでの確認方針を合意し、チャット上に草稿を提示した。開発者の依頼で、作業中の会話履歴を引き継がないうみが計画を独立レビューした。必須修正はなく、任意改善として、関連仕様へのリンクと、実施記録を残す場所の明示が挙がった。
 
 開発者のファイル化依頼を受け、草稿にこの2点を補足して反映した。レビュー対象はチャット上の計画案であり、外部のセキュリティ情報の調査、npmの継続使用の判断、環境切替や動作検証は行っていない。手順1～4は未着手で、開発者のコミットと着手依頼を受けて進む。
+
+その後、開発者が任意改善2点の採用を明示し、同じレビュアーがファイル反映後の内容を再レビューした。2点の解消を確認し、新しい必須修正・任意改善はなかった。開発者から手順1への着手依頼を受け、以下の情報収集・整理を行った。
+
+### 手順1：更新内容と環境の事前確認
+
+確認日は2026-10-25。環境やバージョン指定は変更せず、公開一次資料、リポジトリの設定とコード、導入済みツールの情報を読み取った。成果物の独立レビューと二人の確認は未実施。
+
+#### Node.jsの更新理由
+
+公式の[24.22.1リリース情報](https://nodejs.org/en/blog/release/v24.22.1)は、2026-10-21のセキュリティリリースと明記している。[セキュリティ告知](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases)と照合し、次の修正を確認した。
+
+| 対象 | 確認した修正 |
+|---|---|
+| DNS | NULを含む名前が途中で切り詰められる問題（CVE-2026-105482、High） |
+| TLS | 非正規形・全角数字等のIPアドレスに関する証明書検証（CVE-2026-106069・106072・105483、High） |
+| Brotli | 不正な圧縮入力による領域外書込み（CVE-2026-111497、High） |
+| HTTP | Keep-Alive接続で送信前の応答を受理する問題（CVE-2026-105481、Medium） |
+| crypto・権限モデル | スナップショットの乱数キャッシュ（CVE-2026-106074、Medium）とrealpathSyncの権限確認（CVE-2026-106073、Low） |
+| 同梱依存等 | OpenSSL 3.5.9、c-ares 1.34.9、Undici 7.30.1、証明書等の更新 |
+
+Node.jsの更新理由は確認できた。ただし、更新後の動作は未検証。Node.js内蔵Undiciの更新と、npm CLIが独自に同梱するUndiciの更新は別であり、Node.jsだけを更新しても後者の修正は保証されない。
+
+#### 現在の環境と切替方法
+
+| 対象 | 確認結果 |
+|---|---|
+| OS・アーキテクチャ | macOS 27.0.1・arm64 |
+| Node.js | `node --version`は24.22.0。nodenvのshim経由で実行 |
+| npm | `npm --version`は11.19.1。現在選択中のnodenv環境に導入済み |
+| 更新先 | nodenv配下に24.22.1の実行ファイルとnpm 11.19.1のpackage.jsonが存在。更新先Node.jsの実行は未実施 |
+| プロジェクト指定 | `.node-version`は24.22.0。nodenvの全体既定値も24.22.0 |
+| JDKの指定 | `.sdkmanrc`は`java=21.0.12-tem`。指定先の直接実行でTemurin 21.0.12+8を確認 |
+| シェルのJDK | 通常の`java --version`はTemurin 25.0.4+7。プロジェクト指定はこのシェルに未適用 |
+| npmのNode.js要件 | 導入済みnpm 11.19.1のpackage.jsonは`^20.17.0 || >=22.9.0`。24.22.1は宣言上の範囲内だが、動作確認ではない |
+
+確認に使ったのは、`node --version`、`npm --version`、実行元の確認、`nodenv versions --bare`、導入先のpackage.json読取り、`java --version`、指定JDKの直接実行等。個人のホームディレクトリを含む実行パスは本記録へ収録していない。
+
+手順2では、`.node-version`の更新後にnodenv経由のNode.js・npmの実版を確認する。追加インストールが不要かは、その時点の起動結果で確定する。`nodenv global`は使用しない。JDKはSDKMANを初期化した作業シェルで`sdk env`を実行して既存の指定を適用し、実版を再確認する。`.sdkmanrc`や全体の既定JDKは変更しない。
+
+#### npm 11.19.1の継続使用の確認
+
+[npm 11.19.1のリリース情報](https://github.com/npm/cli/releases/tag/v11.19.1)、[npm CLIの公開アドバイザリ](https://github.com/npm/cli/security/advisories)、実際に導入された依存のバージョンを確認した。npm CLI自身のアドバイザリ一覧だけでは、同梱依存の問題を除外できない。
+
+導入済みnpm配下のnode_modulesを再帰的に読み取り、npm自身を含む142パッケージ名・144の名前とバージョンの組を抽出した。プロジェクトのpackage-lock.jsonの監査とは分け、この一覧を[公式のBulk Advisory Endpoint](https://docs.npmjs.com/cli/v11/commands/npm-audit/#bulk-advisory-endpoint)で照会した。送信した情報は公開パッケージ名とバージョンだけで、個人のパスや設定値は含めていない。依存導入や`npm audit fix`は行っていない。
+
+照会先は`https://registry.npmjs.org/-/npm/v1/security/advisories/bulk`。応答では次の5パッケージ・15件が対象バージョンに該当した。重大度の内訳はHigh 5件、Moderate 9件、Low 1件。件数は確認日時点のレジストリ応答であり、問題の全件性や、このプロジェクトでの発生を保証する数ではない。
+
+| npm同梱パッケージ | 実導入バージョン | 該当件数 |
+|---|---|---|
+| brace-expansion | 5.0.9 | 3 |
+| http-cache-semantics | 4.2.0 | 1 |
+| ip-address | 10.5.0 | 5 |
+| postcss-selector-parser | 7.1.4 | 1 |
+| undici | 6.28.0 | 5 |
+
+照会応答の識別子と影響範囲は次のとおり。以下の範囲と実導入版が一致したことを記録しており、発生条件の判定とは区別する。
+
+| パッケージ | アドバイザリ | 重大度 | 応答の対象範囲 |
+|---|---|---|---|
+| brace-expansion | [GHSA-qhr7-859c-m2p7](https://github.com/advisories/GHSA-qhr7-859c-m2p7) | High | `>=4.0.0 <5.0.11` |
+| brace-expansion | [GHSA-6j4f-fj2g-mc7p](https://github.com/advisories/GHSA-6j4f-fj2g-mc7p) | High | `>=4.0.0 <5.0.10` |
+| brace-expansion | [GHSA-q2hr-2g5m-vwhr](https://github.com/advisories/GHSA-q2hr-2g5m-vwhr) | Moderate | `>=4.0.0 <5.0.12` |
+| http-cache-semantics | [GHSA-ch52-4w7c-c8xp](https://github.com/advisories/GHSA-ch52-4w7c-c8xp) | High | `<=4.2.0` |
+| ip-address | [GHSA-rpw4-54j3-4h4q](https://github.com/advisories/GHSA-rpw4-54j3-4h4q) | Moderate | `<=10.5.0` |
+| ip-address | [GHSA-2vr4-cq9g-pvrc](https://github.com/advisories/GHSA-2vr4-cq9g-pvrc) | Moderate | `>=10.2.0 <=10.5.0` |
+| ip-address | [GHSA-j6r3-76f7-8jcv](https://github.com/advisories/GHSA-j6r3-76f7-8jcv) | Moderate | `<=10.7.0` |
+| ip-address | [GHSA-h3mg-xc3c-68pw](https://github.com/advisories/GHSA-h3mg-xc3c-68pw) | Moderate | `<=10.7.0` |
+| ip-address | [GHSA-rxp7-6hxx-x8q5](https://github.com/advisories/GHSA-rxp7-6hxx-x8q5) | Moderate | `<=10.7.3` |
+| postcss-selector-parser | [GHSA-rj75-hqrm-r3gf](https://github.com/advisories/GHSA-rj75-hqrm-r3gf) | Moderate | `<7.1.6` |
+| undici | [GHSA-3wwx-pv8p-q78v](https://github.com/advisories/GHSA-3wwx-pv8p-q78v) | Moderate | `>=6.25.0 <6.28.1` |
+| undici | [GHSA-r53p-7pc4-xj5r](https://github.com/advisories/GHSA-r53p-7pc4-xj5r) | Low | `<6.28.1` |
+| undici | [GHSA-rfgv-xxqx-mfg5](https://github.com/advisories/GHSA-rfgv-xxqx-mfg5) | High | `>=6.7.0 <6.28.1` |
+| undici | [GHSA-4qv8-2p9j-2685](https://github.com/advisories/GHSA-4qv8-2p9j-2685) | Moderate | `>=6.5.0 <6.29.1` |
+| undici | [GHSA-xjj6-f33q-929c](https://github.com/advisories/GHSA-xjj6-f33q-929c) | High | `>=6.23.0 <6.29.1` |
+
+代表例は、[Undiciのfetchで過剰なcontent-encodingを扱う際のDoS](https://github.com/nodejs/undici/security/advisories/GHSA-xjj6-f33q-929c)。公開された影響範囲`>=6.23.0 <6.29.1`に、npmの同梱版6.28.0が含まれる。ただし、このfetch経路が通常の`npm ci`等から呼ばれることまでは確認していない。
+
+ほかにも、[brace-expansionの入れ子によるDoS](https://github.com/advisories/GHSA-qhr7-859c-m2p7)、[http-cache-semanticsのキャッシュ応答漏えい](https://github.com/advisories/GHSA-ch52-4w7c-c8xp)、[ip-addressのアドレス分類](https://github.com/advisories/GHSA-rpw4-54j3-4h4q)、[PostCSSセレクター解析の計算量](https://github.com/advisories/GHSA-rj75-hqrm-r3gf)の公開された影響範囲と導入版を照合した。入力・API・設定等の発生条件は異なるため、パッケージの存在だけでnpm利用時にすべて発生すると判断しない。
+
+確認したローカルの依存宣言では、npmの通信処理に使うmake-fetch-happen 15.0.6がhttp-cache-semanticsを参照し、minipass-fetch 5.0.2はUndiciを直接依存に持たない。これは各問題の到達性の結論ではない。全15件の呼出し経路と利用条件、更新候補npmでの修正状況は未確認であり、npm 11.19.1の継続使用は未確定とする。
+
+#### 手順2の更新対象候補
+
+| 対象 | 変更内容・扱い |
+|---|---|
+| [`.node-version`](../../.node-version) | 開発用固定版を24.22.1へ変更 |
+| [`package.json`](../../package.json) | engines.nodeを`>=24.22.1 <25`へ変更。製品バージョンと依存の採用版は維持 |
+| [`package-lock.json`](../../package-lock.json) | packagesのルート項目にあるengines.nodeを同期。依存の解決結果は維持 |
+| [README](../../README.md) | 現在のセットアップ環境を更新 |
+| [実装環境の仕様](../specs/implementation-environment.md) | 現在の最低対応版・開発用固定版を更新し、更新後の確認範囲を記録 |
+| [開発環境の仕様](../specs/development-environment.md) | 使用するNode.jsを更新 |
+| 本手順書 | 判断・実施・検証結果を追記 |
+| [CI](../../.github/workflows/ci.yml) | 既存設定は.node-version参照なのでNode.jsだけの更新では変更不要。npmの判断で変更が必要なら別途合意 |
+| [過去の環境検証仕様](../specs/implementation-environment-verification.md)、[環境調査README](../../research/implementation-environment/README.md)、[採番調査README](../../research/numbering-and-references/README.md)、[索引調査README](../../research/book-index/README.md) | 必要な再現案内へ現在の環境との差異を追記。当時の指定・実測は維持 |
+
+索引の`build.mjs`、`compare-collation.mjs`、`build-two-pass.py`、`build-two-pass-rerun.py`には24.22.0の厳密な版確認がある。これらは変更対象にせず、現在の環境でそのまま再実験できるとは案内しない。過去の手順書・結果JSON・ログのバージョン記録、`.sdkmanrc`、製品コード、固定期待値は更新対象にしない。
+
+#### 検証項目とbacklogの照合
+
+手順3では新しい環境の実版を確認し、`npm ci`と`npm run verify`を行う。後者にはバージョン生成ツールの検査、CLJS単体テスト、開発用・配布用ビルド、CLI結合テストが含まれる。重複実行せず、[CLI仕様](../specs/cli.md)の配布用出力の分離実行と、REPLの起動・評価・終了を補う。
+
+CIはmacOS（macos-15・arm64）、Windows（windows-2025・x64）、Linux（ubuntu-24.04・x64）の3ジョブ。各ジョブは.node-versionを読み、npm 11.19.1を設定し、`npm ci`と`npm run verify`を実行する。手順1では設定の読取りだけで、PR上の実行結果は未確認。
+
+既存backlogはVFM配下のtrim等の依存リスクを扱う。今回はVFM・製品のnpm依存を更新せず、原稿・設定・拡張の信頼条件も変更しない。その課題全体の再調査・解消は行わない。一方、npm CLIの同梱依存で新しい確認事項が見つかったため、既存の許容判断をそのまま適用せず、今回の判断地点で別に扱う。Node.js更新によって既存backlogが解消したとは扱わない。
+
+#### 現時点の判断と未実施事項
+
+Node.js 24.22.1への更新理由、環境管理方法、更新対象と検証方法は整理できた。ただし、npmの同梱依存に対象バージョンが含まれる15件が見つかり、利用への影響は未確定。手順1の判断地点に従い、手順2へは進まない。
+
+この事前調査の報告時点では、npmの該当API・入力・設定への到達性と、更新候補npmの同梱依存を追加確認する範囲を、次の相談事項とした。その後の合意は、以下の追加調査計画に記録する。対象バージョンへの該当だけでnpm更新を確定せず、未確認のまま安全とも判断しない。
+
+環境切替、`.node-version`・package.json・lockfile・CI・既存仕様の変更、依存導入、ビルド・テスト・REPL・CI実行は行っていない。成果物の独立レビューと二人の判断確認も未実施。
+
+### 手順1内の追加調査計画：npmの継続使用と更新候補の比較
+
+2026-10-25、開発者と、先にnpmの更新候補を比較し、その後に残る問題の利用経路を確認する方針で合意した。追加調査は手順1の中で扱い、npmの採用バージョンや手順2以降の変更範囲は、調査結果を確認してから別に合意する。
+
+#### 着手までの順序
+
+1. 本手順書へ追加調査方針を反映する。
+2. 事前調査結果と追加調査方針をまとめて独立レビューする。
+3. 指摘の採否を二人で判断し、必要な修正・再レビューと内容確認を行う。
+4. 開発者の着手依頼を受け、以下の追加調査を行う。
+
+本節への反映時点では1だけを実施した。独立レビュー、指摘対応、追加調査は未実施。
+
+#### 追加調査の順序と範囲
+
+**1. 更新候補と現在版を比較する**
+
+Node.js 24.22.1に対応するnpm 11系の更新候補を、公式のリリース情報とNode.js要件から選ぶ。候補のバージョン、選定理由、主な動作変更を記録する。
+
+公式の配布物を一時ディレクトリへ取得・展開し、配布元と識別情報、同梱依存の実バージョンを確認する。現在版と同じ方法でアドバイザリを照合し、事前調査の15件について解消するもの・残るものを整理する。候補側で別の該当情報が見つかった場合も区別して記録する。
+
+インストール済みのnpm・Node.jsやプロジェクトの設定は変更しない。候補を採用した場合に、ローカルとCIの設定や検証項目へ及ぶ影響も整理する。
+
+**2. 残る問題の利用経路を確認する**
+
+比較後に残る問題について、公開アドバイザリの発生条件と、対象バージョンのnpm・同梱依存のコードを照合する。まず次の利用に絞る。
+
+- ローカルとCIの`npm ci`。
+- CIでのnpm自身のインストール。
+- `npm run`による既存コマンドの実行。
+
+特定のサブコマンドや機能に限定された問題は、その機能を利用しているか確認する。通常の通信・キャッシュ・パッケージ展開に関係する問題は優先して確認する。
+
+該当API・入力・設定への到達性を、確認できたもの・利用しない根拠があるもの・未確認のものに分ける。バージョンの該当だけで発生を断定せず、呼出し経路を確認できなかっただけで未使用とも判断しない。
+
+npmは外部からパッケージや応答を受け取るため、自分たちで用意した原稿を扱うVFM側の許容理由を、そのまま適用しない。比較によって判断に必要な情報が得られた場合は、全15件の詳細なコード追跡を一律には行わない。
+
+**3. 採用方針を相談する**
+
+調査結果に応じ、次を判断案として二人で相談する。
+
+| 結果 | 判断案 |
+|---|---|
+| 更新候補で利用に関係する問題を解消できる | npmの更新も今回の範囲へ加える案を検討する |
+| 現在版でも該当経路を使わない根拠が得られる | 利用条件と見直す時点を記録し、継続使用を検討する |
+| 更新しても問題が残る、または利用への影響を判断できない | 不明点を明示し、追加調査・利用条件・別途対応を相談する |
+
+警告件数をゼロにすることや、脆弱性の不存在を証明することを完了条件にはしない。採用するバージョンと利用条件、判断根拠、残るリスクを説明できる状態を目指す。
+
+#### 成果物と次の判断地点
+
+本手順書の実施記録へ、現在版と候補の比較、残る問題の利用経路、参照資料・確認日・配布物の識別情報、推奨案と不明点を残す。
+
+追加調査結果も独立レビューし、必要な指摘対応・再レビューと二人の確認を行う。npmの採用方針と変更範囲を合意し、必要なら手順2以降を修正してから、手順2へ進む。更新候補の調査だけでnpmの採用やインストールを許可したものとは扱わない。
