@@ -8,6 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 - 状態：合意済み。開発基盤と製品CLIは実装・ローカル検証・独立レビュー・二人の確認完了。CI設定も実装・ローカル検証・独立レビュー・二人の確認完了。GitHub Actions上での実行確認は未実施。
 - 関連する手順書：[0003 最小限の開発基盤とバージョン表示を実装する](../plans/0003-set-up-development-foundation.md)
 - 関連する仕様：[実装環境](implementation-environment.md)、[CLI](cli.md)
+- 環境更新：Node.js 24.22.1・npm 11.21.1への切替と指定更新を実施。更新後の依存導入・ビルド・テスト・REPLと3OSのCI実行は未確認。[手順書0007](../plans/0007-update-nodejs-for-security.md)に従い確認する。上記のローカル検証実績は更新前の環境によるもの。
 
 ## 1. 目的と範囲
 
@@ -19,8 +20,8 @@ ClojureScriptで製品コードを書き、ローカルでビルド・テスト�
 
 | 項目 | 使用する構成 |
 |---|---|
-| Node.js | 24.22.0 |
-| npm | 11.19.1を基準とし、検証時の版を記録する |
+| Node.js | 24.22.1 |
+| npm | 11.21.1に固定し、検証時の版を記録する |
 | ローカルのJDK | SDKMANで管理するTemurin 21.0.12 |
 | CIのJDK | 実行時点で取得できるTemurin 21の最新更新版 |
 | ビルド | shadow-cljs 3.5.7 |
@@ -31,6 +32,14 @@ ClojureScriptで製品コードを書き、ローカルでビルド・テスト�
 npmの依存は`package-lock.json`を管理し、CIでは`npm ci`で導入する。JDKの更新版やランナーのイメージは変わり得るため、CIログに実際の環境を残す。
 
 ローカルのJDKは、SDKMANで更新版を利用できる時点で更新を検討する。手動で別経路のJDKを導入することは前提にしない。
+
+### npmの採用条件と残る問題
+
+npm 11.21.1は、[手順書0007の追加調査](../plans/0007-update-nodejs-for-security.md#手順1内の追加調査結果npmの更新候補と残る利用条件)で確認した現在の依存構成と既存コマンドの範囲で採用する。同梱依存には、ip-addressのGHSA-rxp7-6hxx-x8q5、UndiciのGHSA-4qv8-2p9j-2685・GHSA-xjj6-f33q-929cが残る。現在の利用範囲では発生条件を満たさないと判断した根拠と、静的調査の限界を踏まえて許容する。対象範囲・呼出し経路・入力制限の詳細は、追加調査結果を参照する。
+
+ネイティブ依存の追加、node-gypの利用、SOCKS等の関連する呼出し経路の変更、新しいnpmリリースやアドバイザリの公開があった場合は、この判断を再評価する。
+
+npmの更新には、更新前のnpmを使い、公式レジストリから11.21.1を固定指定して導入する。CIで環境を構築するたびに行う更新操作も含め、旧npmの全呼出し経路について安全性を確認していないリスクを許容する。旧npmによる他の作業全般を許容する判断ではない。通常の動作検証の成功を、脆弱性の不存在や未確認の全経路の安全性の証明として扱わない。
 
 ## 3. ファイル配置と責務
 
@@ -170,7 +179,7 @@ GitHub Actionsで次のマトリクスを使う。
 - Draft PRも実行対象とする。
 - パスによる実行除外は、今回は設けない。
 
-各ジョブでは、チェックアウト、Node.js・JDKの準備、`npm ci`、`npm run verify`を行う。CIではnpmも11.19.1にそろえる。
+各ジョブでは、チェックアウト、Node.js・JDKの準備、`npm ci`、`npm run verify`を行う。CIでは、依存導入前に`npm install --global npm@11.21.1 --registry=https://registry.npmjs.org/`を実行してnpmをそろえる。
 
 JDKは`distribution: temurin`、`java-version: '21'`、`check-latest: true`で選び、実際の版をログに残す。ローカルとCIのJDK更新版が一致することは要求しない。[setup-javaの更新版取得](https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md)
 
