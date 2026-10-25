@@ -17,7 +17,7 @@ clonoは、Vivliostyleで技術同人誌を制作するために、不足する�
 
 Node.js 24.22.1、npm 11.21.1、SDKMANで管理するTemurin 21.0.12を用意する。Node.jsの指定は`.node-version`、JDKの指定は`.sdkmanrc`に記載している。以下はリポジトリルートで実行する。
 
-Node.js・npmはセキュリティ対応として更新した。更新後の依存導入・ビルド・テスト・REPLは未検証であり、[更新の手順書](docs/plans/0007-update-nodejs-for-security.md)の手順3で確認する。npmの採用条件と残る問題は[開発環境の仕様](docs/specs/development-environment.md#npmの採用条件と残る問題)を参照する。
+Node.js・npmはセキュリティ対応として更新した。更新後の依存導入・ビルド・テスト・CLI分離実行・REPLは、ローカルのmacOS環境で確認した。実行環境・結果・レビュー状況は[更新の手順書](docs/plans/0007-update-nodejs-for-security.md)の手順3を参照する。npmの採用条件と残る問題は[開発環境の仕様](docs/specs/development-environment.md#npmの採用条件と残る問題)を参照する。
 
 ```sh
 sdk env
@@ -28,11 +28,11 @@ npm ci
 npm run verify
 ```
 
-`sdk env`は、SDKMANと指定のJDKが導入済みのシェルで実行する。既定のJDKは変更しない。従来の環境では、このセットアップ手順をローカルのmacOS環境で確認した。CIはセットアップActionsで各OSの環境を準備する。
+`sdk env`は、SDKMANと指定のJDKが導入済みのシェルで実行する。既定のJDKは変更しない。このセットアップ手順はローカルのmacOS環境で確認した。CIはセットアップActionsで各OSの環境を準備する。
 
 `verify`は、生成処理のテスト、CLJSの単体テスト、開発用・配布用のビルドとCLIの結合テストを順に実行する。失敗すると非0で終了する。
 
-個別のビルド・テスト、REPLとテストの監視、デバッグの補助は[開発環境の仕様](docs/specs/development-environment.md#5-開発コマンドとrepl)を参照する。従来の環境ではmacOSでローカル検証済みであり、3OSのCI設定も用意した。更新後のGitHub Actions上のmacOS・Windows・Linuxでの実行結果は、更新の手順書に対応するPRで確認する。
+個別のビルド・テスト、REPLとテストの監視、デバッグの補助は[開発環境の仕様](docs/specs/development-environment.md#5-開発コマンドとrepl)を参照する。macOSでローカル検証済みであり、3OSのCI設定も用意した。更新後のGitHub Actions上のmacOS・Windows・Linuxでの実行結果は、更新の手順書に対応するPRで確認する。
 
 ### 現在のCLI
 
