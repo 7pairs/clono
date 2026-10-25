@@ -23,7 +23,7 @@ Node.jsの対応範囲は`>=24.22.1 <25`とする。最低対応バージョン�
 
 利用者にはビルド済みのJavaScriptを提供し、JDK・shadow-cljs・ClojureScriptのトランスパイル環境を要求しない。JavaScript拡張も.mjsファイルを用意すれば利用できる構成とする。実行に必要なnpm依存の具体的な配布・インストール方法は後続で決める。
 
-macOSを最初の動作確認対象とする。Windows・Linuxへの対応を目指すが、今回の実行確認には含めていない。3OSのCI設定は実装済みであり、GitHub Actions上での実行結果は[手順書0003](../plans/0003-set-up-development-foundation.md)に対応するPRで確認する。CIの成功を、将来追加するファイル操作などのOS差まで検証済みという意味にはしない。
+macOSを最初の動作確認対象とする。Windows・Linuxへの対応を目指すが、今回の実行確認には含めていない。3OSのCI設定は実装済みであり、GitHub Actions上での実行結果は[手順書0007](../plans/0007-update-nodejs-for-security.md)に対応するPRで確認する。CIの成功を、将来追加するファイル操作などのOS差まで検証済みという意味にはしない。
 
 ### 2.2 開発者
 
