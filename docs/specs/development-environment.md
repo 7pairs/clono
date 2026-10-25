@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 - 状態：合意済み。開発基盤と製品CLIは実装・ローカル検証・独立レビュー・二人の確認完了。CI設定も実装・ローカル検証・独立レビュー・二人の確認完了。GitHub Actions上での実行確認は未実施。
 - 関連する手順書：[0003 最小限の開発基盤とバージョン表示を実装する](../plans/0003-set-up-development-foundation.md)
 - 関連する仕様：[実装環境](implementation-environment.md)、[CLI](cli.md)
-- 環境更新：Node.js 24.22.1・npm 11.21.1への切替と指定更新の独立レビュー・内容確認を完了。更新後の依存導入・ビルド・テスト・CLI分離実行・REPLはmacOSで確認済み。動作検証の成果物の独立レビューと二人の内容確認、3OSのCI実行は未実施。[手順書0007](../plans/0007-update-nodejs-for-security.md)に結果を記録する。
+- 環境更新：Node.js 24.22.1・npm 11.21.1への切替と指定更新、更新後のmacOSでの依存導入・ビルド・テスト・CLI分離実行・REPL確認は、独立レビューと二人の内容確認を完了。3OSのCI実行は未確認であり、[手順書0007](../plans/0007-update-nodejs-for-security.md)に対応するPRで確認する。環境更新全体の構造の見直し・最終整理の結果とレビュー状況も同手順書を参照する。
 
 ## 1. 目的と範囲
 
