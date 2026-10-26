@@ -13,3 +13,13 @@ SPDX-License-Identifier: Apache-2.0
 - 影響：trimの問題を解消したわけではなく、特定の原稿で変換が極端に遅くなる可能性は残る。ほかの8件も、利用条件を変えた場合は再評価が必要になる。
 - 見直す時点：VFMの更新時、第三者入力を扱う用途へ広げる時、実際に変換が極端に遅くなった時、一般向け配布の準備時。ほかの8件は、対象API・設定・実行場所を変える時や依存更新時にも再評価する。
 - 関連資料：[選定の手順書](plans/0002-choose-implementation-environment.md)、[調査・検証と合意した方針](../research/implementation-environment/results/verification.md#15-手順4の合意した方針と依存の復元)。
+
+## 調査用REPLスクリプトの個人環境への依存を解消する
+
+- 状態：未対応。
+- 優先度：高。
+- 内容：調査用の[observe-repl.mjs](../research/implementation-environment/scripts/observe-repl.mjs)にある、個人のホームディレクトリを含むJAVA_HOMEの固定指定を見直す。実行環境からの取得方法と、必要なJDKを選ぶ方法を検討する。
+- 後回しにした理由：運用文書と保存記録を整える作業から、コード変更と動作検証を分離するため。
+- 影響：現在のコードには個人環境のパスが残り、他の環境でそのまま再実行できない。今回の文書・ログの一般化では解消していない。
+- 見直す時点：次の作業計画を相談する際に優先して検討する。着手前に修正範囲と検証方法を合意する。
+- 関連資料：[運用文書整理の手順書](plans/0008-rename-sdd-and-refine-development-workflow.md)、[実装環境の調査資料](../research/implementation-environment/README.md)。
