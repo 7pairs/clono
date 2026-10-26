@@ -14,9 +14,9 @@ ERROR: test_any_body_page_change_is_rejected (__main__.TwoPassTests.test_any_bod
 When even a removed occurrence changes page, then the second pass cannot be accepted
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/two-pass.test.py", line 55, in test_any_body_page_change_is_rejected
+  File "<HOME>/GitHub/clono/research/book-index/scripts/two-pass.test.py", line 55, in test_any_body_page_change_is_rejected
     assert_same_pages(page_map, copy.deepcopy(page_map))
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/two_pass.py", line 16, in assert_same_pages
+  File "<HOME>/GitHub/clono/research/book-index/scripts/two_pass.py", line 16, in assert_same_pages
     raise NotImplementedError('Body page invariance check not implemented')
 NotImplementedError: Body page invariance check not implemented
 
@@ -25,9 +25,9 @@ ERROR: test_link_corruption_is_rejected (__main__.TwoPassTests.test_link_corrupt
 When a link is lost or its number source or page changes, then fixed reference validation fails
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/two-pass.test.py", line 43, in test_link_corruption_is_rejected
+  File "<HOME>/GitHub/clono/research/book-index/scripts/two-pass.test.py", line 43, in test_link_corruption_is_rejected
     check_link_rows(rows, PROFILE, 'first')
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/two_pass.py", line 12, in check_link_rows
+  File "<HOME>/GitHub/clono/research/book-index/scripts/two_pass.py", line 12, in check_link_rows
     raise NotImplementedError('Two-pass link inspection not implemented')
 NotImplementedError: Two-pass link inspection not implemented
 
@@ -36,9 +36,9 @@ ERROR: test_missing_mapping_prevents_html_and_pdf_output (__main__.TwoPassTests.
 When one page mapping is missing, then neither final HTML nor another PDF is generated
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/two-pass.test.py", line 22, in test_missing_mapping_prevents_html_and_pdf_output
+  File "<HOME>/GitHub/clono/research/book-index/scripts/two-pass.test.py", line 22, in test_missing_mapping_prevents_html_and_pdf_output
     finish_pass(COLLECTED['items'], page_map, lambda a: calls.append('html'), lambda: calls.append('pdf'))
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/two_pass.py", line 4, in finish_pass
+  File "<HOME>/GitHub/clono/research/book-index/scripts/two_pass.py", line 4, in finish_pass
     raise NotImplementedError('Second-pass connection not implemented')
 NotImplementedError: Second-pass connection not implemented
 
@@ -47,10 +47,10 @@ ERROR: test_pdf_inspection_reads_all_original_destinations (__main__.TwoPassTest
 When an initial PDF is inspected, then seven original contexts and links match fixed expectations
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/two-pass.test.py", line 36, in test_pdf_inspection_reads_all_original_destinations
+  File "<HOME>/GitHub/clono/research/book-index/scripts/two-pass.test.py", line 36, in test_pdf_inspection_reads_all_original_destinations
     result = inspect_pdf(ROOT / 'results/pdf/base-2.pdf', PROFILE, COLLECTED['occurrences'], 'first')
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/two_pass.py", line 8, in inspect_pdf
+  File "<HOME>/GitHub/clono/research/book-index/scripts/two_pass.py", line 8, in inspect_pdf
     raise NotImplementedError('Two-pass PDF inspection not implemented')
 NotImplementedError: Two-pass PDF inspection not implemented
 
@@ -59,10 +59,10 @@ ERROR: test_second_pass_runs_once_after_aggregation (__main__.TwoPassTests.test_
 When all mappings exist, then HTML is written before exactly one additional PDF build
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/two-pass.test.py", line 30, in test_second_pass_runs_once_after_aggregation
+  File "<HOME>/GitHub/clono/research/book-index/scripts/two-pass.test.py", line 30, in test_second_pass_runs_once_after_aggregation
     result = finish_pass(COLLECTED['items'], page_map, lambda a: calls.append(('html', a['afterCount'])), lambda: calls.append(('pdf', 1)))
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/two_pass.py", line 4, in finish_pass
+  File "<HOME>/GitHub/clono/research/book-index/scripts/two_pass.py", line 4, in finish_pass
     raise NotImplementedError('Second-pass connection not implemented')
 NotImplementedError: Second-pass connection not implemented
 

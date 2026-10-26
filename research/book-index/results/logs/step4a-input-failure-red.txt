@@ -28,7 +28,7 @@ FAIL: test_input_failure_replaces_previous_success_with_unfinished_attempt (__ma
 When an input is missing or malformed, then a failed CLI attempt replaces prior success
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page-aggregation.test.py", line 134, in test_input_failure_replaces_previous_success_with_unfinished_attempt
+  File "<HOME>/GitHub/clono/research/book-index/scripts/page-aggregation.test.py", line 134, in test_input_failure_replaces_previous_success_with_unfinished_attempt
     self.assertEqual(saved['status'], 'running-not-final')
 AssertionError: 'verified' != 'running-not-final'
 - verified
@@ -40,7 +40,7 @@ FAIL: test_input_failure_replaces_previous_success_with_unfinished_attempt (__ma
 When an input is missing or malformed, then a failed CLI attempt replaces prior success
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page-aggregation.test.py", line 134, in test_input_failure_replaces_previous_success_with_unfinished_attempt
+  File "<HOME>/GitHub/clono/research/book-index/scripts/page-aggregation.test.py", line 134, in test_input_failure_replaces_previous_success_with_unfinished_attempt
     self.assertEqual(saved['status'], 'running-not-final')
 AssertionError: 'verified' != 'running-not-final'
 - verified
@@ -52,7 +52,7 @@ FAIL: test_input_failure_replaces_previous_success_with_unfinished_attempt (__ma
 When an input is missing or malformed, then a failed CLI attempt replaces prior success
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page-aggregation.test.py", line 134, in test_input_failure_replaces_previous_success_with_unfinished_attempt
+  File "<HOME>/GitHub/clono/research/book-index/scripts/page-aggregation.test.py", line 134, in test_input_failure_replaces_previous_success_with_unfinished_attempt
     self.assertEqual(saved['status'], 'running-not-final')
 AssertionError: 'verified' != 'running-not-final'
 - verified
@@ -64,7 +64,7 @@ FAIL: test_input_failure_replaces_previous_success_with_unfinished_attempt (__ma
 When an input is missing or malformed, then a failed CLI attempt replaces prior success
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/page-aggregation.test.py", line 134, in test_input_failure_replaces_previous_success_with_unfinished_attempt
+  File "<HOME>/GitHub/clono/research/book-index/scripts/page-aggregation.test.py", line 134, in test_input_failure_replaces_previous_success_with_unfinished_attempt
     self.assertEqual(saved['status'], 'running-not-final')
 AssertionError: 'verified' != 'running-not-final'
 - verified

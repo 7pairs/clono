@@ -32,9 +32,9 @@ ERROR: test_input_failure_invalidates_previous_success (__main__.RerunStateTests
 When input reading fails, then no earlier successful state survives
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun-state.test.py", line 26, in test_input_failure_invalidates_previous_success
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun-state.test.py", line 26, in test_input_failure_invalidates_previous_success
     runner.run_attempt(path, lambda report: (Path(tmp) / 'missing.json').read_text())
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/build-two-pass-rerun.py", line 7, in run_attempt
+  File "<HOME>/GitHub/clono/research/book-index/scripts/build-two-pass-rerun.py", line 7, in run_attempt
     raise NotImplementedError('Rerun failure-safe reporting is not implemented')
 NotImplementedError: Rerun failure-safe reporting is not implemented
 
@@ -43,10 +43,10 @@ ERROR: test_inspection_failure_is_saved_as_incomplete (__main__.RerunStateTests.
 When a body occurrence disappears during inspection, then the attempt records failure
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun-state.test.py", line 45, in test_inspection_failure_is_saved_as_incomplete
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun-state.test.py", line 45, in test_inspection_failure_is_saved_as_incomplete
     with self.assertRaises(ContextError): runner.run_attempt(path, work)
                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/build-two-pass-rerun.py", line 7, in run_attempt
+  File "<HOME>/GitHub/clono/research/book-index/scripts/build-two-pass-rerun.py", line 7, in run_attempt
     raise NotImplementedError('Rerun failure-safe reporting is not implemented')
 NotImplementedError: Rerun failure-safe reporting is not implemented
 

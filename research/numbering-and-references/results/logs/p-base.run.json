@@ -3,7 +3,7 @@
     "vivliostyle",
     "build",
     "-c",
-    "/Users/jun-haseba/GitHub/clono/research/numbering-and-references/results/generated/p-base/config.json"
+    "<HOME>/GitHub/clono/research/numbering-and-references/results/generated/p-base/config.json"
   ],
   "status": 0,
   "signal": null,
