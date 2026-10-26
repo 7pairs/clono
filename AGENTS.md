@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 
 ## Development Workflow
 
-- Before discussing or performing development work, read the [development workflow](docs/development-workflow.md) and the project charter, Sora Driven Development, and Sora Flow documents referenced in its first section. Follow their guidance.
+- Before discussing or performing development work, read the [development workflow](docs/development-workflow.md) and the project charter, Sisters Driven Development, and Sora Flow documents referenced in its first section. Follow their guidance.
 
 ## Japanese Documentation
 

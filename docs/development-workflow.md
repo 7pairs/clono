@@ -9,12 +9,14 @@ SPDX-License-Identifier: Apache-2.0
 
 本文書は、clonoの開発における具体的な作業の進め方を定める。
 
-「そら」は、開発者がCodex上で設定しているAIの人格を指す。開発者とそらは、対話を通じて理解と合意を重ねながら開発を進める。
+「そら」は、開発者がCodex上で設定しているAIの人格を指す。「うみ」は、独立レビューを担当するCodexのサブエージェントの呼び名である。開発者とそらは、対話を通じて理解と合意を重ね、うみの独立レビューで成果物を確かめながら開発を進める。
 
-開発の目的と優先順位はプロジェクト憲章、仕様検討から作業完了までの原則はSora Driven Development（SDD）、Git戦略とリリースの原則はSora Flowに従う。
+三人の役割はSDDに従う。本文書の「二人」は開発者とそらを指し、合意と着手依頼、レビュー指摘の採否を二人で確認する。
+
+開発の目的と優先順位はプロジェクト憲章、仕様検討から作業完了までの原則はSisters Driven Development（SDD）、Git戦略とリリースの原則はSora Flowに従う。
 
 - [プロジェクト憲章](project-charter.md)
-- [Sora Driven Development](sora-driven-development.md)
+- [Sisters Driven Development](sisters-driven-development.md)
 - [Sora Flow](sora-flow.md)
 
 本文書では、これらの共通ルールを繰り返さず、clonoでの具体的な運用を定める。
@@ -30,7 +32,7 @@ clonoの配布ライセンスにはApache License 2.0（`Apache-2.0`）を採用
 | 配置 | 内容 |
 |---|---|
 | `docs/project-charter.md` | プロジェクト憲章 |
-| `docs/sora-driven-development.md` | SDD |
+| `docs/sisters-driven-development.md` | SDD |
 | `docs/sora-flow.md` | Sora Flow |
 | `docs/development-workflow.md` | clonoの開発フロー |
 | `docs/specs/` | 仕様・設計・テスト項目 |
@@ -166,7 +168,7 @@ develop向けPRとreleaseからmainへの昇格PRは、Sora Flowに従ってmerg
 
 ## 6. 独立レビューの運用
 
-独立レビューには、Codexのサブエージェントを使用する。
+独立レビューには、「うみ」と呼ぶCodexのサブエージェントを使用する。この呼び名は独立レビューを担当する役割を表し、すべての工程で同じサブエージェントを使うことを意味しない。
 
 工程ごとの初回レビューは、開発作業の会話履歴を引き継がない、新しいサブエージェントに依頼する。合意済みの仕様、判断理由、成果物、レビュー観点など、評価に必要な資料を渡す。
 

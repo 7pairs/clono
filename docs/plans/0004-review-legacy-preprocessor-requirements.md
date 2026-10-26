@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
 
 ## 2. 前提と対象範囲
 
-[プロジェクト憲章](../project-charter.md)、[SDD](../sora-driven-development.md)、[開発フロー](../development-workflow.md)に従う。
+[プロジェクト憲章](../project-charter.md)、[SDD](../sisters-driven-development.md)、[開発フロー](../development-workflow.md)に従う。
 
 ### 今回扱うもの
 
