@@ -16,3 +16,10 @@ SPDX-License-Identifier: Apache-2.0
 - The following are exempt from this requirement:
   - Ordinary conversation, discussion, and explanations in chat that are not document drafts or proposed document revisions.
   - Handoff documents created or updated using the `session-handoff` skill.
+
+## Information Intended for Publication
+
+- Follow [the publication checks in the development workflow](docs/development-workflow.md#82-公開する情報の確認). Before saving or sharing deliverables, inspect added or changed content, including documentation, code, configuration, PR descriptions, review replies, logs, and images, using searches and visual inspection as appropriate.
+- Remove, redact, or generalize unnecessary personal environment paths, machine names, private identifiers, and credentials. Preserve intentionally public information, such as copyright notices, public account names, and third-party metadata. If uncertain, discuss the information's location and purpose without copying its value into another deliverable or reply.
+- For agreed edits to saved records, identify the published copy as processed, preserve technical meaning, and check the diff, structured data, hashes, and verification references as applicable. Do not regenerate experiments or rewrite historical conclusions merely to sanitize a record.
+- Changes to Git history or external services require a separate explicit agreement on scope and an execution request. Updating current files does not remove previously published copies. Do not add a dedicated automated checker or CI job for these checks.
