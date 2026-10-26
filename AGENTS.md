@@ -23,3 +23,10 @@ SPDX-License-Identifier: Apache-2.0
 - Remove, redact, or generalize unnecessary personal environment paths, machine names, private identifiers, and credentials. Preserve intentionally public information, such as copyright notices, public account names, and third-party metadata. If uncertain, discuss the information's location and purpose without copying its value into another deliverable or reply.
 - For agreed edits to saved records, identify the published copy as processed, preserve technical meaning, and check the diff, structured data, hashes, and verification references as applicable. Do not regenerate experiments or rewrite historical conclusions merely to sanitize a record.
 - Changes to Git history or external services require a separate explicit agreement on scope and an execution request. Updating current files does not remove previously published copies. Do not add a dedicated automated checker or CI job for these checks.
+
+## Names and Forms of Address
+
+- Follow [the naming rules in the development workflow](docs/development-workflow.md#83-名前と呼称の使用). Sora and Umi may be named in definitions, explanations of roles and relationships, work records, and rules that identify who is responsible for an action.
+- Express status fields and completion criteria through roles, stages, and their states, without personal names. Work records may identify reviewers by name.
+- Do not use private sibling forms of address for the developer in project documents, including work records, or in public text such as PR descriptions and review replies. This does not prohibit describing the defined sibling relationships. Ordinary chat forms of address remain unchanged.
+- Preserve names used in historical records, including former names. Check context and follow the agreed scope when correcting wording; do not rename people throughout past records or rewrite past decisions and events. Check naming and forms of address together with the publication checks before saving or sharing deliverables.
