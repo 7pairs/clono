@@ -100,13 +100,13 @@ ERROR: test_body_corruption_is_rejected_through_connected_entry (__main__.RerunI
 When extracted body text is missing duplicated or moved, then connected inspection fails
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 68, in test_body_corruption_is_rejected_through_connected_entry
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 68, in test_body_corruption_is_rejected_through_connected_entry
     with self.assertRaisesRegex(ContextError, 'idx-a-2'): self.inspect()
                                                           ^^^^^^^^^^^^^^
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 34, in inspect
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 34, in inspect
     return inspect_rerun_pdf(path, PROFILE, COLLECTED['occurrences'], stage)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun_inspection.py", line 9, in inspect_rerun_pdf
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun_inspection.py", line 9, in inspect_rerun_pdf
     raise NotImplementedError('Retained-link and all-context inspection is not connected')
 NotImplementedError: Retained-link and all-context inspection is not connected
 
@@ -115,13 +115,13 @@ ERROR: test_body_corruption_is_rejected_through_connected_entry (__main__.RerunI
 When extracted body text is missing duplicated or moved, then connected inspection fails
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 68, in test_body_corruption_is_rejected_through_connected_entry
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 68, in test_body_corruption_is_rejected_through_connected_entry
     with self.assertRaisesRegex(ContextError, 'idx-a-2'): self.inspect()
                                                           ^^^^^^^^^^^^^^
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 34, in inspect
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 34, in inspect
     return inspect_rerun_pdf(path, PROFILE, COLLECTED['occurrences'], stage)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun_inspection.py", line 9, in inspect_rerun_pdf
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun_inspection.py", line 9, in inspect_rerun_pdf
     raise NotImplementedError('Retained-link and all-context inspection is not connected')
 NotImplementedError: Retained-link and all-context inspection is not connected
 
@@ -130,13 +130,13 @@ ERROR: test_body_corruption_is_rejected_through_connected_entry (__main__.RerunI
 When extracted body text is missing duplicated or moved, then connected inspection fails
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 68, in test_body_corruption_is_rejected_through_connected_entry
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 68, in test_body_corruption_is_rejected_through_connected_entry
     with self.assertRaisesRegex(ContextError, 'idx-a-2'): self.inspect()
                                                           ^^^^^^^^^^^^^^
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 34, in inspect
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 34, in inspect
     return inspect_rerun_pdf(path, PROFILE, COLLECTED['occurrences'], stage)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun_inspection.py", line 9, in inspect_rerun_pdf
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun_inspection.py", line 9, in inspect_rerun_pdf
     raise NotImplementedError('Retained-link and all-context inspection is not connected')
 NotImplementedError: Retained-link and all-context inspection is not connected
 
@@ -145,13 +145,13 @@ ERROR: test_final_six_links_and_seven_contexts (__main__.RerunInspectionTests.te
 When a removed name is absent, then retained links and every original context still pass
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 44, in test_final_six_links_and_seven_contexts
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 44, in test_final_six_links_and_seven_contexts
     result = self.inspect()
              ^^^^^^^^^^^^^^
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 34, in inspect
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 34, in inspect
     return inspect_rerun_pdf(path, PROFILE, COLLECTED['occurrences'], stage)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun_inspection.py", line 9, in inspect_rerun_pdf
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun_inspection.py", line 9, in inspect_rerun_pdf
     raise NotImplementedError('Retained-link and all-context inspection is not connected')
 NotImplementedError: Retained-link and all-context inspection is not connected
 
@@ -160,13 +160,13 @@ ERROR: test_initial_seven_links_and_contexts (__main__.RerunInspectionTests.test
 When the saved initial PDF is inspected, then all seven links and contexts pass
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 38, in test_initial_seven_links_and_contexts
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 38, in test_initial_seven_links_and_contexts
     result = self.inspect(FIRST, 'first')
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 34, in inspect
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 34, in inspect
     return inspect_rerun_pdf(path, PROFILE, COLLECTED['occurrences'], stage)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun_inspection.py", line 9, in inspect_rerun_pdf
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun_inspection.py", line 9, in inspect_rerun_pdf
     raise NotImplementedError('Retained-link and all-context inspection is not connected')
 NotImplementedError: Retained-link and all-context inspection is not connected
 
@@ -175,13 +175,13 @@ ERROR: test_lost_index_link_fails (__main__.RerunInspectionTests.test_lost_index
 When an annotation disappears, then the complete reference check fails
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 75, in test_lost_index_link_fails
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 75, in test_lost_index_link_fails
     with self.assertRaises(AssertionError): self.inspect()
                                             ^^^^^^^^^^^^^^
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 34, in inspect
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 34, in inspect
     return inspect_rerun_pdf(path, PROFILE, COLLECTED['occurrences'], stage)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun_inspection.py", line 9, in inspect_rerun_pdf
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun_inspection.py", line 9, in inspect_rerun_pdf
     raise NotImplementedError('Retained-link and all-context inspection is not connected')
 NotImplementedError: Retained-link and all-context inspection is not connected
 
@@ -190,13 +190,13 @@ ERROR: test_required_named_target_loss_fails_in_both_stages (__main__.RerunInspe
 When a required name is lost, then initial and retained-final checks reject it
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 57, in test_required_named_target_loss_fails_in_both_stages
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 57, in test_required_named_target_loss_fails_in_both_stages
     with self.assertRaisesRegex(PageMappingError, ident): self.inspect(path, stage)
                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 34, in inspect
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 34, in inspect
     return inspect_rerun_pdf(path, PROFILE, COLLECTED['occurrences'], stage)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun_inspection.py", line 9, in inspect_rerun_pdf
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun_inspection.py", line 9, in inspect_rerun_pdf
     raise NotImplementedError('Retained-link and all-context inspection is not connected')
 NotImplementedError: Retained-link and all-context inspection is not connected
 
@@ -205,13 +205,13 @@ ERROR: test_required_named_target_loss_fails_in_both_stages (__main__.RerunInspe
 When a required name is lost, then initial and retained-final checks reject it
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 57, in test_required_named_target_loss_fails_in_both_stages
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 57, in test_required_named_target_loss_fails_in_both_stages
     with self.assertRaisesRegex(PageMappingError, ident): self.inspect(path, stage)
                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 34, in inspect
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 34, in inspect
     return inspect_rerun_pdf(path, PROFILE, COLLECTED['occurrences'], stage)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun_inspection.py", line 9, in inspect_rerun_pdf
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun_inspection.py", line 9, in inspect_rerun_pdf
     raise NotImplementedError('Retained-link and all-context inspection is not connected')
 NotImplementedError: Retained-link and all-context inspection is not connected
 
@@ -220,13 +220,13 @@ ERROR: test_same_page_target_swap_fails (__main__.RerunInspectionTests.test_same
 When two same-page destinations exchange coordinates, then start identity is rejected
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 94, in test_same_page_target_swap_fails
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 94, in test_same_page_target_swap_fails
     with self.assertRaises((ContextError, AssertionError)): self.inspect(FIRST, 'first')
                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 34, in inspect
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 34, in inspect
     return inspect_rerun_pdf(path, PROFILE, COLLECTED['occurrences'], stage)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun_inspection.py", line 9, in inspect_rerun_pdf
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun_inspection.py", line 9, in inspect_rerun_pdf
     raise NotImplementedError('Retained-link and all-context inspection is not connected')
 NotImplementedError: Retained-link and all-context inspection is not connected
 
@@ -235,13 +235,13 @@ ERROR: test_wrong_printed_number_fails (__main__.RerunInspectionTests.test_wrong
 When a link rectangle covers the wrong displayed number, then its source-number check fails
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 83, in test_wrong_printed_number_fails
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 83, in test_wrong_printed_number_fails
     with self.assertRaises(AssertionError): self.inspect()
                                             ^^^^^^^^^^^^^^
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 34, in inspect
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun-inspection.test.py", line 34, in inspect
     return inspect_rerun_pdf(path, PROFILE, COLLECTED['occurrences'], stage)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/rerun_inspection.py", line 9, in inspect_rerun_pdf
+  File "<HOME>/GitHub/clono/research/book-index/scripts/rerun_inspection.py", line 9, in inspect_rerun_pdf
     raise NotImplementedError('Retained-link and all-context inspection is not connected')
 NotImplementedError: Retained-link and all-context inspection is not connected
 

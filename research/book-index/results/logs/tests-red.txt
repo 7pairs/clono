@@ -27,7 +27,7 @@ test at scripts/index.test.mjs:12:1
   -   'テスト'
   - ]
   
-      at TestContext.<anonymous> (file:///Users/jun-haseba/GitHub/clono/research/book-index/scripts/index.test.mjs:14:9)
+      at TestContext.<anonymous> (file://<HOME>/GitHub/clono/research/book-index/scripts/index.test.mjs:14:9)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.start (node:internal/test_runner/test:1262:17)
@@ -57,7 +57,7 @@ test at scripts/index.test.mjs:19:1
   -   ]
   - ]
   
-      at TestContext.<anonymous> (file:///Users/jun-haseba/GitHub/clono/research/book-index/scripts/index.test.mjs:20:56)
+      at TestContext.<anonymous> (file://<HOME>/GitHub/clono/research/book-index/scripts/index.test.mjs:20:56)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -75,7 +75,7 @@ test at scripts/index.test.mjs:19:1
 test at scripts/index.test.mjs:24:1
 ✖ When one term has conflicting readings, then both source locations and readings are reported (0.129ms)
   AssertionError [ERR_ASSERTION]: Missing expected exception.
-      at TestContext.<anonymous> (file:///Users/jun-haseba/GitHub/clono/research/book-index/scripts/index.test.mjs:25:9)
+      at TestContext.<anonymous> (file://<HOME>/GitHub/clono/research/book-index/scripts/index.test.mjs:25:9)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -92,7 +92,7 @@ test at scripts/index.test.mjs:24:1
 test at scripts/index.test.mjs:27:1
 ✖ When an English term has no reading, then its location is reported (0.081334ms)
   AssertionError [ERR_ASSERTION]: Missing expected exception.
-      at TestContext.<anonymous> (file:///Users/jun-haseba/GitHub/clono/research/book-index/scripts/index.test.mjs:28:9)
+      at TestContext.<anonymous> (file://<HOME>/GitHub/clono/research/book-index/scripts/index.test.mjs:28:9)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -113,7 +113,7 @@ test at scripts/index.test.mjs:30:1
   
   0 !== 2
   
-      at TestContext.<anonymous> (file:///Users/jun-haseba/GitHub/clono/research/book-index/scripts/index.test.mjs:31:57)
+      at TestContext.<anonymous> (file://<HOME>/GitHub/clono/research/book-index/scripts/index.test.mjs:31:57)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)

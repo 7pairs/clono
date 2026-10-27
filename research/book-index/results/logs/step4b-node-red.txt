@@ -15,8 +15,8 @@
 test at scripts/two-pass.test.mjs:12:1
 ✖ When each profile is prepared, then all seven occurrences retain exact terms readings and IDs (0.279792ms)
   Error: Two-pass input preparation not implemented
-      at createInputs (file:///Users/jun-haseba/GitHub/clono/research/book-index/scripts/two-pass.mjs:3:40)
-      at TestContext.<anonymous> (file:///Users/jun-haseba/GitHub/clono/research/book-index/scripts/two-pass.test.mjs:14:28)
+      at createInputs (file://<HOME>/GitHub/clono/research/book-index/scripts/two-pass.mjs:3:40)
+      at TestContext.<anonymous> (file://<HOME>/GitHub/clono/research/book-index/scripts/two-pass.test.mjs:14:28)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.start (node:internal/test_runner/test:1262:17)
@@ -25,8 +25,8 @@ test at scripts/two-pass.test.mjs:12:1
 test at scripts/two-pass.test.mjs:23:1
 ✖ When an index spans two explicit pages, then each group retains its terms readings and links (0.054125ms)
   Error: Two-pass input preparation not implemented
-      at createInputs (file:///Users/jun-haseba/GitHub/clono/research/book-index/scripts/two-pass.mjs:3:40)
-      at TestContext.<anonymous> (file:///Users/jun-haseba/GitHub/clono/research/book-index/scripts/two-pass.test.mjs:24:29)
+      at createInputs (file://<HOME>/GitHub/clono/research/book-index/scripts/two-pass.mjs:3:40)
+      at TestContext.<anonymous> (file://<HOME>/GitHub/clono/research/book-index/scripts/two-pass.test.mjs:24:29)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -37,8 +37,8 @@ test at scripts/two-pass.test.mjs:23:1
 test at scripts/two-pass.test.mjs:32:1
 ✖ When retained references are selected, then removed references can return from a fresh collection (0.058625ms)
   Error: Two-pass input preparation not implemented
-      at createInputs (file:///Users/jun-haseba/GitHub/clono/research/book-index/scripts/two-pass.mjs:3:40)
-      at TestContext.<anonymous> (file:///Users/jun-haseba/GitHub/clono/research/book-index/scripts/two-pass.test.mjs:34:31)
+      at createInputs (file://<HOME>/GitHub/clono/research/book-index/scripts/two-pass.mjs:3:40)
+      at TestContext.<anonymous> (file://<HOME>/GitHub/clono/research/book-index/scripts/two-pass.test.mjs:34:31)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)

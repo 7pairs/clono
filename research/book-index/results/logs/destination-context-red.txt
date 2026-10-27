@@ -292,7 +292,7 @@ FAIL: test_same_page_destination_corruption_is_rejected (__main__.DestinationCon
 When same-page occurrences are replaced or swapped, then inspection rejects the wrong context
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
+  File "<HOME>/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
     with self.assertRaisesRegex(AssertionError,'destination context'):
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: AssertionError not raised
@@ -302,7 +302,7 @@ FAIL: test_same_page_destination_corruption_is_rejected (__main__.DestinationCon
 When same-page occurrences are replaced or swapped, then inspection rejects the wrong context
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
+  File "<HOME>/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
     with self.assertRaisesRegex(AssertionError,'destination context'):
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: AssertionError not raised
@@ -312,7 +312,7 @@ FAIL: test_same_page_destination_corruption_is_rejected (__main__.DestinationCon
 When same-page occurrences are replaced or swapped, then inspection rejects the wrong context
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
+  File "<HOME>/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
     with self.assertRaisesRegex(AssertionError,'destination context'):
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: AssertionError not raised
@@ -322,7 +322,7 @@ FAIL: test_same_page_destination_corruption_is_rejected (__main__.DestinationCon
 When same-page occurrences are replaced or swapped, then inspection rejects the wrong context
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
+  File "<HOME>/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
     with self.assertRaisesRegex(AssertionError,'destination context'):
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: AssertionError not raised
@@ -332,7 +332,7 @@ FAIL: test_same_page_destination_corruption_is_rejected (__main__.DestinationCon
 When same-page occurrences are replaced or swapped, then inspection rejects the wrong context
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
+  File "<HOME>/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
     with self.assertRaisesRegex(AssertionError,'destination context'):
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: AssertionError not raised
@@ -342,7 +342,7 @@ FAIL: test_same_page_destination_corruption_is_rejected (__main__.DestinationCon
 When same-page occurrences are replaced or swapped, then inspection rejects the wrong context
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
+  File "<HOME>/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
     with self.assertRaisesRegex(AssertionError,'destination context'):
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: AssertionError not raised
@@ -352,7 +352,7 @@ FAIL: test_same_page_destination_corruption_is_rejected (__main__.DestinationCon
 When same-page occurrences are replaced or swapped, then inspection rejects the wrong context
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
+  File "<HOME>/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
     with self.assertRaisesRegex(AssertionError,'destination context'):
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: AssertionError not raised
@@ -362,7 +362,7 @@ FAIL: test_same_page_destination_corruption_is_rejected (__main__.DestinationCon
 When same-page occurrences are replaced or swapped, then inspection rejects the wrong context
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
+  File "<HOME>/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
     with self.assertRaisesRegex(AssertionError,'destination context'):
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: AssertionError not raised
@@ -372,7 +372,7 @@ FAIL: test_same_page_destination_corruption_is_rejected (__main__.DestinationCon
 When same-page occurrences are replaced or swapped, then inspection rejects the wrong context
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
+  File "<HOME>/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
     with self.assertRaisesRegex(AssertionError,'destination context'):
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: AssertionError not raised
@@ -382,7 +382,7 @@ FAIL: test_same_page_destination_corruption_is_rejected (__main__.DestinationCon
 When same-page occurrences are replaced or swapped, then inspection rejects the wrong context
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
+  File "<HOME>/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
     with self.assertRaisesRegex(AssertionError,'destination context'):
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: AssertionError not raised
@@ -392,7 +392,7 @@ FAIL: test_same_page_destination_corruption_is_rejected (__main__.DestinationCon
 When same-page occurrences are replaced or swapped, then inspection rejects the wrong context
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
+  File "<HOME>/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
     with self.assertRaisesRegex(AssertionError,'destination context'):
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: AssertionError not raised
@@ -402,7 +402,7 @@ FAIL: test_same_page_destination_corruption_is_rejected (__main__.DestinationCon
 When same-page occurrences are replaced or swapped, then inspection rejects the wrong context
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/jun-haseba/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
+  File "<HOME>/GitHub/clono/research/book-index/scripts/verify-pdfs.test.py", line 42, in test_same_page_destination_corruption_is_rejected
     with self.assertRaisesRegex(AssertionError,'destination context'):
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: AssertionError not raised

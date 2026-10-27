@@ -16,14 +16,16 @@ SPDX-License-Identifier: Apache-2.0
 
 ## 対象資料
 
+2026-10-26、公開用の記録として、提供時のローカルパスのホームディレクトリ部分を`~`へ一般化した。ファイル名、バイト数、行数、原資料のSHA-256は変更していない。
+
 2026-10-19（日本時間）に、開発者からスクリプトと設定ファイルが提供され、追加でCSSとVivliostyleの設定ファイルが提供された。
 
 | 資料 | 提供時のローカルパス | バイト数 | 行数 |
 |---|---|---:|---:|
-| `prebuild.js` | `/Users/jun-haseba/Downloads/prebuild.js` | 36,169 | 1,068 |
-| `catalog.js` | `/Users/jun-haseba/Downloads/catalog.js` | 1,588 | 72 |
-| `theme.css` | `/Users/jun-haseba/Downloads/theme.css` | 37,885 | 1,798 |
-| `vivliostyle.config.js` | `/Users/jun-haseba/Downloads/vivliostyle.config.js` | 573 | 22 |
+| `prebuild.js` | `~/Downloads/prebuild.js` | 36,169 | 1,068 |
+| `catalog.js` | `~/Downloads/catalog.js` | 1,588 | 72 |
+| `theme.css` | `~/Downloads/theme.css` | 37,885 | 1,798 |
+| `vivliostyle.config.js` | `~/Downloads/vivliostyle.config.js` | 573 | 22 |
 
 確認した版のSHA-256は次のとおり。読解結果の行番号はこの版に対するものである。
 

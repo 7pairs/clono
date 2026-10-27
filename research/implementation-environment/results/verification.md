@@ -141,12 +141,14 @@ npm auditの確認時点では全体で15件（critical 2、high 3、moderate 9�
 
 ## 8. 再現方法と保存するもの
 
+2026-10-26、公開用の記録として、本節と第10.4節の実行例に含まれる個人のホームディレクトリを`$HOME`へ一般化した。JDKのバージョンと実行内容、当時の検証結果は変更していない。
+
 作業場所はresearch/implementation-environment/。package.json・lockfile・設定・入力・検証コードは保存する。大量の生成HTML・Markdown・PDF・画像・ビルドキャッシュ・分離先はGit管理から外す。
 
 ```sh
 npm ci
-env JAVA_HOME=/Users/jun-haseba/.sdkman/candidates/java/21.0.12-tem PATH=/Users/jun-haseba/.sdkman/candidates/java/21.0.12-tem/bin:$PATH ./node_modules/.bin/shadow-cljs compile probe-esm probe-cjs
-env JAVA_HOME=/Users/jun-haseba/.sdkman/candidates/java/21.0.12-tem PATH=/Users/jun-haseba/.sdkman/candidates/java/21.0.12-tem/bin:$PATH ./node_modules/.bin/shadow-cljs release probe-esm probe-cjs
+env JAVA_HOME="$HOME/.sdkman/candidates/java/21.0.12-tem" PATH="$HOME/.sdkman/candidates/java/21.0.12-tem/bin:$PATH" ./node_modules/.bin/shadow-cljs compile probe-esm probe-cjs
+env JAVA_HOME="$HOME/.sdkman/candidates/java/21.0.12-tem" PATH="$HOME/.sdkman/candidates/java/21.0.12-tem/bin:$PATH" ./node_modules/.bin/shadow-cljs release probe-esm probe-cjs
 node scripts/prepare-isolation.mjs
 ```
 
@@ -216,7 +218,7 @@ prepare-columnsを入力を返すだけのスタブにした状態で、期待�
 作業場所はresearch/implementation-environment/。手順3の依存とビルド環境を準備し、配布用ビルドを更新してから実行する。
 
 ```sh
-env JAVA_HOME=/Users/jun-haseba/.sdkman/candidates/java/21.0.12-tem PATH=/Users/jun-haseba/.sdkman/candidates/java/21.0.12-tem/bin:$PATH ./node_modules/.bin/shadow-cljs release probe-esm probe-cjs
+env JAVA_HOME="$HOME/.sdkman/candidates/java/21.0.12-tem" PATH="$HOME/.sdkman/candidates/java/21.0.12-tem/bin:$PATH" ./node_modules/.bin/shadow-cljs release probe-esm probe-cjs
 node --test scripts/column-followup.test.mjs
 node --test scripts/verification.test.mjs
 node scripts/column-followup.mjs

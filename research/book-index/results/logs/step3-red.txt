@@ -19,8 +19,8 @@
 test at scripts/collation.test.mjs:11:1
 ✖ When readings differ, then both modes use their sign without comparing forms (0.332458ms)
   Error: Research comparator not implemented
-      at compareItems (file:///Users/jun-haseba/GitHub/clono/research/book-index/scripts/collation.mjs:3:40)
-      at TestContext.<anonymous> (file:///Users/jun-haseba/GitHub/clono/research/book-index/scripts/collation.test.mjs:15:22)
+      at compareItems (file://<HOME>/GitHub/clono/research/book-index/scripts/collation.mjs:3:40)
+      at TestContext.<anonymous> (file://<HOME>/GitHub/clono/research/book-index/scripts/collation.test.mjs:15:22)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.start (node:internal/test_runner/test:1262:17)
@@ -29,8 +29,8 @@ test at scripts/collation.test.mjs:11:1
 test at scripts/collation.test.mjs:25:1
 ✖ When readings tie, then only reading-form mode compares the original forms (0.060333ms)
   Error: Research comparator not implemented
-      at compareItems (file:///Users/jun-haseba/GitHub/clono/research/book-index/scripts/collation.mjs:3:40)
-      at TestContext.<anonymous> (file:///Users/jun-haseba/GitHub/clono/research/book-index/scripts/collation.test.mjs:28:20)
+      at compareItems (file://<HOME>/GitHub/clono/research/book-index/scripts/collation.mjs:3:40)
+      at TestContext.<anonymous> (file://<HOME>/GitHub/clono/research/book-index/scripts/collation.test.mjs:28:20)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -41,8 +41,8 @@ test at scripts/collation.test.mjs:25:1
 test at scripts/collation.test.mjs:37:1
 ✖ When both keys tie, then ordering restores first occurrences before applying either mode (5.850625ms)
   Error: Research ordering not implemented
-      at sortCollected (file:///Users/jun-haseba/GitHub/clono/research/book-index/scripts/collation.mjs:4:41)
-      at TestContext.<anonymous> (file:///Users/jun-haseba/GitHub/clono/research/book-index/scripts/collation.test.mjs:41:22)
+      at sortCollected (file://<HOME>/GitHub/clono/research/book-index/scripts/collation.mjs:4:41)
+      at TestContext.<anonymous> (file://<HOME>/GitHub/clono/research/book-index/scripts/collation.test.mjs:41:22)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -53,8 +53,8 @@ test at scripts/collation.test.mjs:37:1
 test at scripts/collation.test.mjs:52:1
 ✖ When exact terms and readings repeat, then one item retains every located occurrence (0.71325ms)
   Error: Research ordering not implemented
-      at sortCollected (file:///Users/jun-haseba/GitHub/clono/research/book-index/scripts/collation.mjs:4:41)
-      at TestContext.<anonymous> (file:///Users/jun-haseba/GitHub/clono/research/book-index/scripts/collation.test.mjs:55:20)
+      at sortCollected (file://<HOME>/GitHub/clono/research/book-index/scripts/collation.mjs:4:41)
+      at TestContext.<anonymous> (file://<HOME>/GitHub/clono/research/book-index/scripts/collation.test.mjs:55:20)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -65,8 +65,8 @@ test at scripts/collation.test.mjs:52:1
 test at scripts/collation.test.mjs:63:1
 ✖ When different forms are canonically equivalent, then both items survive an equal comparison (0.36725ms)
   Error: Research comparator not implemented
-      at compareItems (file:///Users/jun-haseba/GitHub/clono/research/book-index/scripts/collation.mjs:3:40)
-      at TestContext.<anonymous> (file:///Users/jun-haseba/GitHub/clono/research/book-index/scripts/collation.test.mjs:65:20)
+      at compareItems (file://<HOME>/GitHub/clono/research/book-index/scripts/collation.mjs:3:40)
+      at TestContext.<anonymous> (file://<HOME>/GitHub/clono/research/book-index/scripts/collation.test.mjs:65:20)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -77,8 +77,8 @@ test at scripts/collation.test.mjs:63:1
 test at scripts/collation.test.mjs:78:1
 ✖ When items are sorted in either mode, then original manuscripts and all occurrence data remain unchanged (0.594542ms)
   Error: Research ordering not implemented
-      at sortCollected (file:///Users/jun-haseba/GitHub/clono/research/book-index/scripts/collation.mjs:4:41)
-      at TestContext.<anonymous> (file:///Users/jun-haseba/GitHub/clono/research/book-index/scripts/collation.test.mjs:84:20)
+      at sortCollected (file://<HOME>/GitHub/clono/research/book-index/scripts/collation.mjs:4:41)
+      at TestContext.<anonymous> (file://<HOME>/GitHub/clono/research/book-index/scripts/collation.test.mjs:84:20)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)

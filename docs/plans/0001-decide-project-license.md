@@ -26,7 +26,7 @@ clonoの配布ライセンス、適用範囲、著作権・ライセンス表示
 | 継続して参照するライセンス方針 | `docs/specs/licensing.md` |
 | 調査資料 | [配布ライセンスの比較調査](../../research/project-license/README.md) |
 
-実施方法は、[プロジェクト憲章](../project-charter.md)・[SDD](../sora-driven-development.md)・[Sora Flow](../sora-flow.md)・[開発フロー](../development-workflow.md)に従う。
+実施方法は、[プロジェクト憲章](../project-charter.md)・[SDD](../sisters-driven-development.md)・[Sora Flow](../sora-flow.md)・[開発フロー](../development-workflow.md)に従う。
 
 調査資料は番号なしの内容名で配置し、本手順書から調査資料へ、調査側の`README.md`から本手順書へリンクして対応関係を保つ。
 

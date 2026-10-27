@@ -167,3 +167,30 @@ done
 | results/python-freeze.txt、results/logs/*.txt | 上記の著作権・ライセンスを適用。ツールが生成する環境・検証記録 |
 
 生成PDFと中間ファイルもこの調査の自作入力・処理から生成するが、リポジトリには収録しない。利用者の原稿や生成した本一般へのライセンス適用を意味しない。
+
+## 公開用記録の加工
+
+2026-10-26、[手順書0008](../../docs/plans/0008-rename-sdd-and-refine-development-workflow.md)に基づき、次の保存ログ11件に含まれる個人のホームディレクトリ部分だけを`<HOME>`へ一般化した。これらは加工済みの公開用記録であり、`<HOME>`は説明用のプレースホルダーである。ログの行構成・エラー内容・測定値は保持し、実験・組版・テストは再実行していない。
+
+- [results/logs/destination-context-red.txt](results/logs/destination-context-red.txt)
+- [results/logs/step3-red.txt](results/logs/step3-red.txt)
+- [results/logs/step4a-input-failure-red.txt](results/logs/step4a-input-failure-red.txt)
+- [results/logs/step4a-red.txt](results/logs/step4a-red.txt)
+- [results/logs/step4b-node-red.txt](results/logs/step4b-node-red.txt)
+- [results/logs/step4b-python-red.txt](results/logs/step4b-python-red.txt)
+- [results/logs/step4b-run.txt](results/logs/step4b-run.txt)
+- [results/logs/tests-red.txt](results/logs/tests-red.txt)
+- [results/step4b-followup/test-red.txt](results/step4b-followup/test-red.txt)
+- [results/step4b-rerun/inspection-red.txt](results/step4b-rerun/inspection-red.txt)
+- [results/step4b-rerun/state-red.txt](results/step4b-rerun/state-red.txt)
+
+保存済みの[追加調査結果](results/step4b-followup/body-context.json)の`protectedSha256`と、[6構成再実行結果](results/step4b-rerun/result.json)の`inputSha256`には、加工前のログのSHA-256が記録されている。当時の入力不変の検査記録として値は保持し、現在の加工済みファイルのハッシュとは区別する。該当する4ログの対応は次のとおり。
+
+| ログ | 加工前のSHA-256 | 加工後のSHA-256 |
+|---|---|---|
+| `results/logs/step4b-node-red.txt` | `4341911b820901d7587444ed454510755783391220bb390fe0cd988346ac7bb1` | `fa08c66cf049467be86c4bb4922a03304d1eebdc1ed087b1483262104be49961` |
+| `results/logs/step4b-python-red.txt` | `c0957dde8fc90456b3629e39fc569d27395e1d9e69114e3f26227f52e4f0c997` | `d8c75dd4459cada70ba7dd82ae3f6ba8a55128dea68aed6b1bd2106b2a655637` |
+| `results/logs/step4b-run.txt` | `f5950a67ac0fe4cddd9164c5b746507a5023d20985a33cf77f8c0609f56cd169` | `88f38adc9d47d88561d6ebd3514078e07d1acced775ff81bcf218cf7b8c2bbfa` |
+| `results/step4b-followup/test-red.txt` | `2eddf8bd001ff05c3647805f0c536f070dc9f57c86f061299e34e975fbe62ea5` | `49d014ce4b6135a3c42dccf16d304bda86a1b4b834051b812d88f6de294f89a6` |
+
+保存済みの結果JSON、PDF、原稿、実装・依存のハッシュ対象は変更していない。既存の検査コードは、これらの過去のログハッシュとの一致を再要求するのではなく、各実行の開始時と終了時の入力不変を比較する。過去のハッシュを使って現在の保存ログを照合する場合は、上表の加工前後の区別が必要になる。
